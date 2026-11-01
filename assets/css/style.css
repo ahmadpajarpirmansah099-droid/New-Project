@@ -368,3 +368,30 @@ button.history-date{
 .metric-top .eyebrow{flex:0 1 auto;min-width:0;margin:0;line-height:1.25;white-space:nowrap}
 .metric-top .metric-icon{flex:0 0 32px;width:32px;height:32px;margin:0}
 .metric-icon svg{width:16px;height:16px}
+
+
+/* SUBTLE DEPTH FOR ADD-GUEST SHEET */
+#sheet .field input,
+#sheet .field select,
+#sheet .field textarea,
+#sheet .pack-control{
+  box-shadow:0 2px 5px rgba(17,18,37,.045),0 1px 2px rgba(17,18,37,.035);
+}
+#sheet .pack-control button{
+  box-shadow:0 1px 3px rgba(17,18,37,.07);
+}
+#sheet .seg button{
+  box-shadow:0 2px 5px rgba(17,18,37,.045);
+}
+#sheet .seg button.selected{
+  box-shadow:0 3px 8px rgba(91,81,142,.11),inset 0 0 0 1px rgba(91,81,142,.035);
+}
+#sheet .sheet-actions .secondary{
+  box-shadow:0 2px 6px rgba(17,18,37,.07);
+}
+#sheet .sheet-actions .primary{
+  box-shadow:0 5px 12px rgba(17,18,37,.16),0 1px 3px rgba(17,18,37,.08);
+}
+#sheet .close{
+  box-shadow:0 2px 6px rgba(17,18,37,.07);
+}
