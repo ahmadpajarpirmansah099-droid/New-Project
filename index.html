@@ -35,7 +35,12 @@
   </section>
   <section class="page" id="page-history">
     <div class="page-title">Riwayat</div><p class="page-sub">Semua antrean berdasarkan tanggal pendaftaran.</p>
-    <input class="history-date" id="historyDate" type="date" onchange="renderHistory()">
+    <button class="history-date" id="historyDateDisplay" type="button" onclick="openHistoryDatePicker()" aria-label="Pilih tanggal riwayat">
+      <span class="history-date-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span>
+      <span class="history-date-copy"><small>Tanggal riwayat</small><strong id="historyDateLabel">Pilih tanggal</strong></span>
+      <svg class="history-date-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 10 5 5 5-5"/></svg>
+    </button>
+    <input id="historyDate" type="hidden">
     <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input id="historySearch" placeholder="Cari nama tamu..." oninput="renderHistory()"></div>
     <div class="queue-list" id="historyList"></div>
   </section>
@@ -63,6 +68,29 @@
 </div>
 <div class="sheet-backdrop" id="backdrop" onclick="closeSheet()"></div>
 <div class="sheet" id="sheet"><div class="handle"></div><div id="sheetContent"></div></div>
+<div class="calendar-backdrop" id="calendarBackdrop" onclick="closeHistoryDatePicker()"></div>
+<section class="calendar-dialog" id="historyCalendarDialog" role="dialog" aria-modal="true" aria-labelledby="calendarTitle">
+  <div class="calendar-dialog-head">
+    <div><span class="calendar-eyebrow">FILTER RIWAYAT</span><h2 id="calendarTitle">Pilih tanggal</h2></div>
+    <button class="calendar-close" type="button" onclick="closeHistoryDatePicker()" aria-label="Tutup kalender">×</button>
+  </div>
+  <div class="calendar-selected">
+    <small>Tanggal dipilih</small>
+    <strong id="calendarSelectedLabel">1 November 2026</strong>
+  </div>
+  <div class="calendar-monthbar">
+    <button type="button" onclick="changeHistoryCalendarMonth(-1)" aria-label="Bulan sebelumnya"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+    <strong id="calendarMonthLabel">November 2026</strong>
+    <button type="button" onclick="changeHistoryCalendarMonth(1)" aria-label="Bulan berikutnya"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+  </div>
+  <div class="calendar-weekdays"><span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span></div>
+  <div class="calendar-days" id="historyCalendarDays"></div>
+  <div class="calendar-dialog-actions">
+    <button class="calendar-today" type="button" onclick="selectTodayInHistoryCalendar()">Hari ini</button>
+    <button class="calendar-apply" type="button" onclick="applyHistoryCalendarDate()">Terapkan tanggal</button>
+  </div>
+</section>
+
 <div class="toast" id="toast"></div>
 <script src="assets/js/app.js" defer></script>
 </body>
