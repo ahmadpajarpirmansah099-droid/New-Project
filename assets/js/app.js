@@ -31,6 +31,79 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
 function renderAll(){let d=todayKey(),today=state.guests.filter(g=>g.day===d),waiting=today.filter(g=>g.status==='waiting'||g.status==='called'),done=today.filter(g=>g.status==='done'),cancel=today.filter(g=>g.status==='cancelled');$('dateLabel').textContent=new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'numeric',month:'short'}).format(new Date());$('totalCount').textContent=today.length;$('packCount').textContent=today.reduce((a,g)=>a+g.pack,0);$('waitingCount').textContent=waiting.length;$('doneCount').textContent=done.length;$('cancelCount').textContent=cancel.length;let resolved=today.filter(g=>g.resolved);$('avgWait').textContent=resolved.length?fmtElapsed(resolved.reduce((a,g)=>a+g.resolved-g.created,0)/resolved.length):'—';let pending=state.guests.filter(g=>g.day!==d&&(g.status==='waiting'||g.status==='called'));$('pendingWrap').innerHTML=pending.length?`<div class="pending"><h3>⚠ ${pending.length} tugas tertunda dari hari sebelumnya</h3><p>Periksa tamu yang belum diselesaikan. Data tidak dihapus otomatis.</p>${pending.map(g=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #f3e5d0;font-size:11px"><span><b>${g.ticket}</b> · ${esc(g.name)}</span><button class="mini green" onclick="openDetail('${g.id}')">Periksa</button></div>`).join('')}</div>`:'';$('dashboardList').innerHTML=waiting.length?waiting.sort((a,b)=>a.created-b.created).map(guestCard).join(''):`<div class="empty"><div class="empty-icon">✓</div><h3>Belum ada antrean aktif</h3><p>Tambahkan tamu baru untuk mulai mengelola antrean.</p></div>`;renderQueue();renderHistory()}
 function setFilter(f){activeFilter=f;document.querySelectorAll('#queueFilters .filter').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));renderQueue()}
 function renderQueue(){if(!$('queueList'))return;let q=($('queueSearch')?.value||'').toLowerCase(),d=todayKey();let list=state.guests.filter(g=>g.day===d&&(activeFilter==='all'||g.status===activeFilter)&&(g.name+' '+g.ticket).toLowerCase().includes(q)).sort((a,b)=>a.created-b.created);$('queueList').innerHTML=list.length?list.map((g,i)=>guestCard(g,i)).join(''):`<div class="empty"><div class="empty-icon">⌕</div><h3>Tidak ada antrean</h3><p>Coba ubah filter atau kata pencarian.</p></div>`}
+
+let historyCalendarMonth = null;
+let historyCalendarDraft = '';
+
+function parseHistoryDate(value) {
+  const parts = String(value || todayKey()).split('-').map(Number);
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+function historyDateKey(date) {
+  return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+}
+function historyDateLabel(value, options = { day: 'numeric', month: 'long', year: 'numeric' }) {
+  return new Intl.DateTimeFormat('id-ID', options).format(parseHistoryDate(value));
+}
+function updateHistoryDateLabel() {
+  const label = $('historyDateLabel');
+  if (label && $('historyDate').value) label.textContent = historyDateLabel($('historyDate').value);
+}
+function openHistoryDatePicker() {
+  const current = $('historyDate').value || todayKey();
+  historyCalendarDraft = current;
+  const date = parseHistoryDate(current);
+  historyCalendarMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+  renderHistoryCalendar();
+  $('calendarBackdrop').classList.add('show');
+  $('historyCalendarDialog').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeHistoryDatePicker() {
+  $('calendarBackdrop').classList.remove('show');
+  $('historyCalendarDialog').classList.remove('show');
+  document.body.style.overflow = '';
+}
+function changeHistoryCalendarMonth(delta) {
+  historyCalendarMonth = new Date(historyCalendarMonth.getFullYear(), historyCalendarMonth.getMonth() + delta, 1);
+  renderHistoryCalendar();
+}
+function selectHistoryCalendarDate(value) {
+  historyCalendarDraft = value;
+  renderHistoryCalendar();
+}
+function selectTodayInHistoryCalendar() {
+  historyCalendarDraft = todayKey();
+  const date = parseHistoryDate(historyCalendarDraft);
+  historyCalendarMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+  renderHistoryCalendar();
+}
+function applyHistoryCalendarDate() {
+  $('historyDate').value = historyCalendarDraft;
+  updateHistoryDateLabel();
+  renderHistory();
+  closeHistoryDatePicker();
+}
+function renderHistoryCalendar() {
+  const year = historyCalendarMonth.getFullYear();
+  const month = historyCalendarMonth.getMonth();
+  $('calendarMonthLabel').textContent = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(historyCalendarMonth);
+  $('calendarSelectedLabel').textContent = historyDateLabel(historyCalendarDraft);
+  const firstDayOffset = new Date(year, month, 1).getDay();
+  const today = todayKey();
+  let days = '';
+  for (let i = 0; i < 42; i++) {
+    const date = new Date(year, month, 1 - firstDayOffset + i);
+    const key = historyDateKey(date);
+    const classes = ['calendar-day'];
+    if (date.getMonth() !== month) classes.push('outside');
+    if (key === today) classes.push('today');
+    if (key === historyCalendarDraft) classes.push('selected');
+    days += '<button type="button" class="' + classes.join(' ') + '" onclick="selectHistoryCalendarDate(\'' + key + '\')" aria-label="' + historyDateLabel(key) + '" aria-pressed="' + (key === historyCalendarDraft) + '">' + date.getDate() + '</button>';
+  }
+  $('historyCalendarDays').innerHTML = days;
+}
+
 function renderHistory(){if(!$('historyList'))return;let d=$('historyDate').value||todayKey(),q=($('historySearch')?.value||'').toLowerCase(),list=state.guests.filter(g=>g.day===d&&g.name.toLowerCase().includes(q)).sort((a,b)=>b.created-a.created);$('historyList').innerHTML=list.length?list.map((g,i)=>guestCard(g,i,true)).join(''):`<div class="empty"><div class="empty-icon">◷</div><h3>Belum ada riwayat</h3><p>Tidak ada tamu pada tanggal yang dipilih.</p></div>`}
 function setGuestStatus(id,status){let g=state.guests.find(x=>x.id===id);if(!g||['done','cancelled'].includes(g.status))return;let now=Date.now();g.status=status;if(status==='done'||status==='cancelled')g.resolved=now;g.audit.push({at:now,label:status==='called'?'Dipanggil':status==='done'?'Selesai / Sudah Duduk':'Dibatalkan'});save();renderAll();if($('sheet').classList.contains('show'))openDetail(id);toast(status==='called'?'Tamu dipanggil':status==='done'?'Tamu ditandai sudah duduk':'Antrean dibatalkan')}
 function openDetail(id){let g=state.guests.find(x=>x.id===id);if(!g)return;sheetGuest=id;let canChange=!['done','cancelled'].includes(g.status);openSheet(`<div class="sheet-head"><h2>Detail tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><div class="detail-ticket"><small>NOMOR ANTREAN</small><strong>${g.ticket}</strong><small>${fmtDate(g.day)}</small></div><div style="font:800 18px Manrope">${esc(g.name)}</div><div class="detail-grid"><div class="detail-cell"><small>Jumlah pack</small><b>${g.pack} orang</b></div><div class="detail-cell"><small>Status</small><b>${statusLabel(g.status)}</b></div><div class="detail-cell"><small>Waktu daftar</small><b>${fmtTime(g.created)}</b></div><div class="detail-cell"><small>Waiting time</small><b>${duration(g)}</b></div><div class="detail-cell" style="grid-column:1/-1"><small>WhatsApp</small><b>${esc(g.phone||'Tidak diisi')}</b></div></div><div class="sheet-actions"><button class="secondary" onclick="editGuest('${g.id}')">Koreksi data</button>${g.phone?`<button class="primary" onclick="toast('Aksi WhatsApp demo')">WhatsApp</button>`:''}</div>${canChange?`<div class="sheet-actions"><button class="secondary" onclick="setGuestStatus('${g.id}','cancelled')">Batalkan</button><button class="primary" onclick="setGuestStatus('${g.id}','done')">Sudah duduk</button></div>`:''}<div style="margin-top:20px;font:800 13px Manrope">Riwayat perubahan</div><div class="timeline">${g.audit.slice().reverse().map(a=>`<div class="timeline-item"><b>${esc(a.label)}</b><small>${new Date(a.at).toLocaleString('id-ID',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})}${a.detail?' · '+esc(a.detail):''}${a.reason?' · Alasan: '+esc(a.reason):''}</small></div>`).join('')}</div>`)}
@@ -38,4 +111,4 @@ function editGuest(id){let g=state.guests.find(x=>x.id===id);if(!g)return;sheetG
 function saveEdit(e,id){e.preventDefault();let g=state.guests.find(x=>x.id===id),now=Date.now();g.audit.push({at:now,label:'Dikoreksi',detail:`Nama: ${g.name} → ${$('editName').value}; Pack: ${g.pack} → ${$('editPack').value}`,reason:$('editReason').value.trim()});g.name=$('editName').value.trim();g.pack=Number($('editPack').value);g.phone=$('editPhone').value.trim();save();renderAll();openDetail(id);toast('Koreksi berhasil disimpan')}
 function exportCSV(){let rows=[['Tanggal','Nomor antrean','Nama','Pack','WhatsApp','Status','Waktu daftar','Waiting time'],...state.guests.filter(g=>g.day===todayKey()).map(g=>[g.day,g.ticket,g.name,g.pack,g.phone,statusLabel(g.status),fmtTime(g.created),duration(g)])];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');let blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='waiting-list-'+todayKey()+'.csv';a.click();URL.revokeObjectURL(a.href);toast('File CSV berhasil dibuat')}
 function resetDemo(){if(!confirm('Reset seluruh data demo di browser ini?'))return;state=seed();save();renderAll();toast('Data demo dikembalikan')}
-$('historyDate').value=todayKey();renderAll();setInterval(()=>{renderAll()},30000);
+$('historyDate').value=todayKey();updateHistoryDateLabel();renderAll();setInterval(()=>{renderAll()},30000);
