@@ -536,3 +536,13 @@ button.history-date{
  filter:brightness(.96);
  box-shadow:0 1px 3px rgba(17,18,37,.10);
 }
+
+
+/* BOTTOM SHEET — NATIVE CONTENT SCROLL */
+#sheet{
+ overflow-x:hidden;
+ overflow-y:auto;
+ -webkit-overflow-scrolling:touch;
+ overscroll-behavior-y:contain;
+ touch-action:pan-y;
+}
