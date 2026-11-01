@@ -22,30 +22,43 @@ function closeMenu(){$('menuDrawer').classList.remove('show');$('menuBackdrop').
 function navigateFromMenu(page){closeMenu();go(page)}
 function openSheet(content){$('sheetContent').innerHTML=content;$('sheet').style.transform='';$('backdrop').classList.add('show');$('sheet').classList.add('show');document.body.style.overflow='hidden';initSheetDrag()}
 function closeSheet(){$('backdrop').classList.remove('show');$('sheet').classList.remove('show');document.body.style.overflow='';sheetGuest=null}
-let sheetDragStartY=0,sheetDragCurrentY=0,sheetDragging=false;
+let sheetDragStartY=0,sheetDragCurrentY=0,sheetDragging=false,sheetDragPointerId=null;
 function initSheetDrag(){
  const handle=$('sheetHandle'),sheet=$('sheet');
  if(!handle||handle.dataset.dragReady)return;
  handle.dataset.dragReady='1';
- handle.addEventListener('pointerdown',e=>{
-  if(!sheet.classList.contains('show'))return;
-  sheetDragStartY=e.clientY;sheetDragCurrentY=0;sheetDragging=true;
-  sheet.style.transition='none';handle.setPointerCapture(e.pointerId);
- });
- handle.addEventListener('pointermove',e=>{
+ const move=y=>{
   if(!sheetDragging)return;
-  sheetDragCurrentY=Math.max(0,e.clientY-sheetDragStartY);
-  sheet.style.transform='translate(-50%, '+sheetDragCurrentY+'px)';
- });
+  sheetDragCurrentY=Math.max(0,y-sheetDragStartY);
+  sheet.style.transform='translate3d(-50%, '+sheetDragCurrentY+'px, 0)';
+ };
  const finish=()=>{
   if(!sheetDragging)return;
-  sheetDragging=false;sheet.style.transition='';
-  if(sheetDragCurrentY>115){closeSheet();}
-  else{sheet.style.transform='';}
+  const shouldClose=sheetDragCurrentY>90;
+  sheetDragging=false;sheetDragPointerId=null;
+  sheet.style.transition='';
+  sheet.style.transform='';
+  if(shouldClose)closeSheet();
   sheetDragStartY=0;sheetDragCurrentY=0;
  };
- handle.addEventListener('pointerup',finish);
- handle.addEventListener('pointercancel',finish);
+ handle.addEventListener('pointerdown',e=>{
+  if(!sheet.classList.contains('show')||e.button!==0)return;
+  sheetDragging=true;sheetDragPointerId=e.pointerId;
+  sheetDragStartY=e.clientY;sheetDragCurrentY=0;
+  sheet.style.transition='none';
+  try{handle.setPointerCapture(e.pointerId)}catch(err){}
+  e.preventDefault();
+ });
+ window.addEventListener('pointermove',e=>{
+  if(!sheetDragging||e.pointerId!==sheetDragPointerId)return;
+  e.preventDefault();move(e.clientY);
+ },{passive:false});
+ window.addEventListener('pointerup',e=>{
+  if(sheetDragging&&e.pointerId===sheetDragPointerId)finish();
+ });
+ window.addEventListener('pointercancel',e=>{
+  if(sheetDragging&&e.pointerId===sheetDragPointerId)finish();
+ });
 }
 
 function openAdd(){sheetGuest=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><form onsubmit="saveGuest(event)"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" onclick="changePack(-1)">−</button><strong id="packValue">2</strong><button type="button" onclick="changePack(1)">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span style="color:#9aa5b8;font-weight:500">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg"><button type="button" class="selected" id="segWait" onclick="chooseInitial('waiting')">Menunggu</button><button type="button" id="segDone" onclick="chooseInitial('done')">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`);setTimeout(()=>$('guestName')?.focus(),250)}
