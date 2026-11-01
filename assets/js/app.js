@@ -57,13 +57,17 @@ function go(page) {
   currentPage.classList.add('is-leaving');
   nextPage.classList.add('active');
 
-  renderAll();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Render only the page being opened; avoid rebuilding hidden lists.
+  if (page === 'dashboard') renderDashboard();
+  else if (page === 'queue') renderQueue();
+  else if (page === 'history') renderHistory();
+
+  window.scrollTo({ top: 0, behavior: 'auto' });
 
   pageTimer = window.setTimeout(() => {
     if (token !== pageMotionToken) return;
     currentPage.classList.remove('is-leaving');
-  }, 320);
+  }, 220);
 }
 function openSheet(content) {
   $('sheetContent').innerHTML = content;
@@ -253,11 +257,12 @@ function setCount(elementId, value) {
   requestAnimationFrame(animate);
 }
 
-function renderAll(){let d=todayKey(),today=state.guests.filter(g=>g.day===d),waiting=today.filter(g=>g.status==='waiting'||g.status==='called'),done=today.filter(g=>g.status==='done'),cancel=today.filter(g=>g.status==='cancelled');$('dateLabel').textContent=new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'numeric',month:'short'}).format(new Date());setCount('totalCount', today.length);
+function renderDashboard(){let d=todayKey(),today=state.guests.filter(g=>g.day===d),waiting=today.filter(g=>g.status==='waiting'||g.status==='called'),done=today.filter(g=>g.status==='done'),cancel=today.filter(g=>g.status==='cancelled');$('dateLabel').textContent=new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'numeric',month:'short'}).format(new Date());setCount('totalCount', today.length);
 setCount('packCount', today.reduce((total, guest) => total + guest.pack, 0));
 setCount('waitingCount', waiting.length);
 setCount('doneCount', done.length);
-setCount('cancelCount', cancel.length);let resolved=today.filter(g=>g.resolved);$('avgWait').textContent=resolved.length?fmtElapsed(resolved.reduce((a,g)=>a+g.resolved-g.created,0)/resolved.length):'—';let pending=state.guests.filter(g=>g.day!==d&&(g.status==='waiting'||g.status==='called'));$('pendingWrap').innerHTML=pending.length?`<div class="pending"><h3>⚠ ${pending.length} tugas tertunda dari hari sebelumnya</h3><p>Periksa tamu yang belum diselesaikan. Data tidak dihapus otomatis.</p>${pending.map(g=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #f3e5d0;font-size:11px"><span><b>${g.ticket}</b> · ${esc(g.name)}</span><button class="mini green" onclick="openDetail('${g.id}')">Periksa</button></div>`).join('')}</div>`:'';$('dashboardList').innerHTML=waiting.length?waiting.sort((a,b)=>a.created-b.created).map(guestCard).join(''):`<div class="empty"><div class="empty-icon">✓</div><h3>Belum ada antrean aktif</h3><p>Tambahkan tamu baru untuk mulai mengelola antrean.</p></div>`;renderQueue();renderHistory()}
+setCount('cancelCount', cancel.length);let resolved=today.filter(g=>g.resolved);$('avgWait').textContent=resolved.length?fmtElapsed(resolved.reduce((a,g)=>a+g.resolved-g.created,0)/resolved.length):'—';let pending=state.guests.filter(g=>g.day!==d&&(g.status==='waiting'||g.status==='called'));$('pendingWrap').innerHTML=pending.length?`<div class="pending"><h3>⚠ ${pending.length} tugas tertunda dari hari sebelumnya</h3><p>Periksa tamu yang belum diselesaikan. Data tidak dihapus otomatis.</p>${pending.map(g=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #f3e5d0;font-size:11px"><span><b>${g.ticket}</b> · ${esc(g.name)}</span><button class="mini green" onclick="openDetail('${g.id}')">Periksa</button></div>`).join('')}</div>`:'';$('dashboardList').innerHTML=waiting.length?waiting.sort((a,b)=>a.created-b.created).map(guestCard).join(''):`<div class="empty"><div class="empty-icon">✓</div><h3>Belum ada antrean aktif</h3><p>Tambahkan tamu baru untuk mulai mengelola antrean.</p></div>`}
+function renderAll(){renderDashboard();renderQueue();renderHistory()}
 function setFilter(f){activeFilter=f;document.querySelectorAll('#queueFilters .filter').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));renderQueue()}
 function renderQueue(){if(!$('queueList'))return;let q=($('queueSearch')?.value||'').toLowerCase(),d=todayKey();let list=state.guests.filter(g=>g.day===d&&(activeFilter==='all'||g.status===activeFilter)&&(g.name+' '+g.ticket).toLowerCase().includes(q)).sort((a,b)=>a.created-b.created);$('queueList').innerHTML=list.length?list.map((g,i)=>guestCard(g,i)).join(''):`<div class="empty"><div class="empty-icon">⌕</div><h3>Tidak ada antrean</h3><p>Coba ubah filter atau kata pencarian.</p></div>`}
 function renderHistory(){if(!$('historyList'))return;let d=$('historyDate').value||todayKey(),q=($('historySearch')?.value||'').toLowerCase(),list=state.guests.filter(g=>g.day===d&&g.name.toLowerCase().includes(q)).sort((a,b)=>b.created-a.created);$('historyList').innerHTML=list.length?list.map((g,i)=>guestCard(g,i,true)).join(''):`<div class="empty"><div class="empty-icon">◷</div><h3>Belum ada riwayat</h3><p>Tidak ada tamu pada tanggal yang dipilih.</p></div>`}
