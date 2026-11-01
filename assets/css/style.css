@@ -512,3 +512,16 @@ button.history-date{
 #sheet .sheet-actions .primary{
  box-shadow:0 4px 10px rgba(17,18,37,.12),0 1px 3px rgba(17,18,37,.055);
 }
+
+
+/* QUEUE ACTION BUTTON — TACTILE PRESS FEEDBACK */
+.guest .actions .mini{
+ transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;
+ -webkit-tap-highlight-color:transparent;
+ touch-action:manipulation;
+}
+.guest .actions .mini:active{
+ transform:scale(.94);
+ filter:brightness(.96);
+ box-shadow:0 1px 3px rgba(17,18,37,.10);
+}
