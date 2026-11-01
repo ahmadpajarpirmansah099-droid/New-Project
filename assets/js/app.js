@@ -33,6 +33,10 @@ function go(page) {
   const token = pageMotionToken;
   clearTimeout(pageTimer);
 
+  document.querySelectorAll('.page.is-leaving').forEach(item => {
+    item.classList.remove('is-leaving');
+  });
+
   document.querySelectorAll('.navitem').forEach(item => {
     item.classList.toggle('active', item.dataset.page === page);
   });
