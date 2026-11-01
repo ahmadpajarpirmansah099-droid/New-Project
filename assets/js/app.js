@@ -85,39 +85,82 @@ function closeSheet() {
   document.body.style.overflow = '';
   sheetGuest = null;
 }
-function openAdd(){sheetGuest=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><form onsubmit="saveGuest(event)"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" onclick="changePack(-1)">−</button><strong id="packValue">2</strong><button type="button" onclick="changePack(1)">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span style="color:#9aa5b8;font-weight:500">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg"><button type="button" class="selected" id="segWait" onclick="chooseInitial('waiting')">Menunggu</button><button type="button" id="segDone" onclick="chooseInitial('done')">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`);setTimeout(()=>$('guestName')?.focus(),250)}
-function changePack(d){let v=Math.max(1,Math.min(30,Number($('guestPack').value)+d));$('guestPack').value=v;$('packValue').textContent=v}
-function chooseInitial(v){$('initialStatus').value=v;$('segWait').classList.toggle('selected',v==='waiting');$('segDone').classList.toggle('selected',v==='done')}
+function openAdd() {
+  sheetGuest = null;
+  openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" onclick="closeSheet()">✕</button></div>
+  <form id="addGuestForm" onsubmit="saveGuest(event)">
+    <div class="field"><label for="guestName">Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div>
+    <div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" aria-label="Kurangi pack" onclick="changePack(-1)">−</button><strong id="packValue" aria-live="polite">2</strong><button type="button" aria-label="Tambah pack" onclick="changePack(1)">+</button></div><input type="hidden" id="guestPack" value="2"></div>
+    <div class="field"><label for="guestPhone">Nomor WhatsApp <span style="color:#9aa5b8;font-weight:500">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div>
+    <div class="field"><label>Status awal</label><div class="seg"><button type="button" class="selected" id="segWait" onclick="chooseInitial('waiting')">Menunggu</button><button type="button" id="segDone" onclick="chooseInitial('done')">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div>
+    <div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button type="submit" id="saveGuestButton" class="primary">Simpan tamu</button></div>
+  </form>`);
+  window.setTimeout(() => $('guestName')?.focus({ preventScroll: true }), prefersReducedMotion() ? 0 : 420);
+}
+function changePack(delta) {
+  const value = Math.max(1, Math.min(30, Number($('guestPack').value) + delta));
+  $('guestPack').value = value;
+  const display = $('packValue');
+  display.textContent = value;
+  display.classList.remove('pack-bump');
+  if (!prefersReducedMotion()) {
+    void display.offsetWidth;
+    display.classList.add('pack-bump');
+  }
+}
+function chooseInitial(value) {
+  $('initialStatus').value = value;
+  $('segWait').classList.toggle('selected', value === 'waiting');
+  $('segDone').classList.toggle('selected', value === 'done');
+}
 function saveGuest(event) {
   event.preventDefault();
 
-  const day = todayKey();
-  const now = Date.now();
-  const status = $('initialStatus').value;
-  const pack = Number($('guestPack').value);
+  const form = $('addGuestForm');
+  if (!form || form.dataset.saving === 'true') return;
 
-  const guest = {
-    id: uid(),
-    ticket: nextTicket(day),
-    day,
-    name: $('guestName').value.trim(),
-    pack,
-    phone: $('guestPhone').value.trim(),
-    status,
-    created: now,
-    resolved: status === 'done' ? now : null,
-    audit: [{ at: now, label: 'Terdaftar', detail: pack + ' pack' }]
+  const button = $('saveGuestButton');
+  const originalLabel = button.textContent;
+  form.dataset.saving = 'true';
+  button.disabled = true;
+  button.classList.add('is-saving');
+  button.textContent = 'Menyimpan...';
+
+  const finishSave = () => {
+    const day = todayKey();
+    const now = Date.now();
+    const status = $('initialStatus').value;
+    const pack = Number($('guestPack').value);
+
+    const guest = {
+      id: uid(),
+      ticket: nextTicket(day),
+      day,
+      name: $('guestName').value.trim(),
+      pack,
+      phone: $('guestPhone').value.trim(),
+      status,
+      created: now,
+      resolved: status === 'done' ? now : null,
+      audit: [{ at: now, label: 'Terdaftar', detail: pack + ' pack' }]
+    };
+
+    if (status === 'done') {
+      guest.audit.push({ at: now, label: 'Langsung Duduk' });
+    }
+
+    state.guests.push(guest);
+    save();
+    closeSheet();
+    renderAll();
+    showTicketReveal(guest);
   };
 
-  if (status === 'done') {
-    guest.audit.push({ at: now, label: 'Langsung Duduk' });
+  if (prefersReducedMotion()) {
+    finishSave();
+  } else {
+    window.setTimeout(finishSave, 420);
   }
-
-  state.guests.push(guest);
-  save();
-  closeSheet();
-  renderAll();
-  showTicketReveal(guest);
 }
 function statusLabel(s){return{waiting:'Menunggu',called:'Dipanggil',done:'Selesai',cancelled:'Dibatalkan'}[s]||s}
 function statusClass(s){return's-'+s}
