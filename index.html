@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6f6f1">
 <title>Guest Operations — Admin</title>
-<link rel="stylesheet" href="assets/css/style.css?v=20261101-cleanup1">
+<link rel="stylesheet" href="assets/css/style.css?v=20261101-waiting-status1">
 </head>
 <body>
 <div class="app">
@@ -19,7 +19,7 @@
     <div class="hero"><div class="hero-head"><span class="hero-label">Total tamu terdaftar hari ini</span><span class="live"><i class="dot"></i> LIVE DEMO</span></div><div class="hero-total" id="totalCount">0</div><div class="hero-foot"><span><b id="packCount">0</b> total pack</span><span><b id="avgWait">—</b> rata-rata tunggu</span></div></div>
     <div class="metrics">
       <div class="metric"><div class="metric-top"><span class="eyebrow">Menunggu</span><span class="metric-icon i-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div><strong id="waitingCount">0</strong><small>Antrean aktif</small></div>
-      <div class="metric"><div class="metric-top"><span class="eyebrow">Selesai</span><span class="metric-icon i-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg></span></div><strong id="doneCount">0</strong><small>Sudah duduk</small></div>
+      <div class="metric"><div class="metric-top"><span class="eyebrow">Selesai</span><span class="metric-icon i-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg></span></div><strong id="doneCount">0</strong><small>Kunjungan selesai</small></div>
       <div class="metric"><div class="metric-top"><span class="eyebrow">Batal</span><span class="metric-icon i-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 7 10 10M17 7 7 17"/></svg></span></div><strong id="cancelCount">0</strong><small>Dibatalkan</small></div>
     </div>
     
@@ -30,7 +30,7 @@
   <section class="page" id="page-waiting">
     <div class="page-title">Waiting List</div><p class="page-sub">Kelola tamu dan status antrean hari ini.</p>
     <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input id="queueSearch" placeholder="Cari nama atau nomor antrean..." oninput="renderQueue()"></div>
-    <div class="filters" id="queueFilters"><button class="filter active" data-filter="all" onclick="setFilter('all')">Semua</button><button class="filter" data-filter="waiting" onclick="setFilter('waiting')">Menunggu</button><button class="filter" data-filter="called" onclick="setFilter('called')">Dipanggil</button><button class="filter" data-filter="done" onclick="setFilter('done')">Selesai</button><button class="filter" data-filter="cancelled" onclick="setFilter('cancelled')">Batal</button></div>
+    <div class="filters" id="queueFilters"><button class="filter active" data-filter="waiting" onclick="setFilter('waiting')">Menunggu</button><button class="filter" data-filter="seated" onclick="setFilter('seated')">Duduk</button><button class="filter" data-filter="done" onclick="setFilter('done')">Selesai</button><button class="filter" data-filter="cancelled" onclick="setFilter('cancelled')">Batal</button></div>
     <div class="queue-list" id="queueList"></div>
   </section>
   <section class="page" id="page-history">
@@ -107,6 +107,6 @@
 <button class="drawer-item" data-page="history" onclick="navigateFromMenu('history')">◷ <span>Riwayat</span></button>
 <button class="drawer-item" data-page="settings" onclick="navigateFromMenu('settings')">⚙ <span>Pengaturan</span></button>
 </nav><div class="drawer-foot">ADMIN WORKSPACE</div></aside><div class="toast" id="toast"></div>
-<script src="assets/js/app.js?v=20261101-cleanup1" defer></script>
+<script src="assets/js/app.js?v=20261101-waiting-status1" defer></script>
 </body>
 </html>
