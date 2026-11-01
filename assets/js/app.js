@@ -1,9 +1,13 @@
+/* =========================================================
+   1. UTILITIES, DATE/TIME, AND LOCAL DEMO STORAGE
+   ========================================================= */
 const $=id=>document.getElementById(id);
 const todayKey=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const fmtTime=t=>new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit'}).format(new Date(t));
 const fmtDate=d=>new Intl.DateTimeFormat('id-ID',{timeZone:'UTC',weekday:'long',day:'numeric',month:'long'}).format(new Date(d+'T00:00:00Z'));
 const fmtElapsed=ms=>{let m=Math.max(0,Math.floor(ms/60000));return m<60?m+' menit':Math.floor(m/60)+'j '+m%60+'m'};
 const uid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
+// Keep this key stable so existing demo data in the browser is preserved.
 const key='waitlist_frontend_demo_v1';
 let state=loadState(),activeFilter='all',sheetGuest=null,toastTimer;
 function loadState(){try{let s=JSON.parse(localStorage.getItem(key));if(s&&Array.isArray(s.guests)&&s.counters){if(!Array.isArray(s.reservations))s.reservations=[];if(!s.reservationCounters)s.reservationCounters={};return s}}catch(e){}return seed()}
@@ -16,6 +20,9 @@ return{guests:[...prev,...gs],counters:{[d]:11,[yd]:5},reservations:[],reservati
 function save(){localStorage.setItem(key,JSON.stringify(state))}
 function nextTicket(day){let n=(state.counters[day]||0)+1;state.counters[day]=n;return'WL-'+String(n).padStart(3,'0')}
 function toast(msg){let t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2300)}
+/* =========================================================
+   2. APP NAVIGATION AND SHARED POPUP / SHEET CONTROLS
+   ========================================================= */
 function go(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$('page-'+page).classList.add('active');document.querySelectorAll('.drawer-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page));$('fab').style.display=['settings','reservations'].includes(page)?'none':'grid';renderAll();window.scrollTo({top:0,behavior:'auto'})}
 function toggleMenu(){const open=!$('menuDrawer').classList.contains('show');$('menuDrawer').classList.toggle('show',open);$('menuBackdrop').classList.toggle('show',open);$('menuDrawer').setAttribute('aria-hidden',String(!open));$('menuToggle').setAttribute('aria-expanded',String(open));document.body.style.overflow=open?'hidden':''}
 function closeMenu(){$('menuDrawer').classList.remove('show');$('menuBackdrop').classList.remove('show');$('menuDrawer').setAttribute('aria-hidden','true');$('menuToggle').setAttribute('aria-expanded','false');document.body.style.overflow=''}
@@ -61,6 +68,9 @@ function initSheetDrag(){
  });
 }
 
+/* =========================================================
+   3. WAITING LIST: ADD GUEST AND QUEUE NUMBER
+   ========================================================= */
 function openAdd(){sheetGuest=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><form onsubmit="saveGuest(event)"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" onclick="changePack(-1)">−</button><strong id="packValue">2</strong><button type="button" onclick="changePack(1)">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span style="color:#9aa5b8;font-weight:500">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg" data-selected="waiting"><button type="button" class="selected" id="segWait" onclick="chooseInitial('waiting')">Menunggu</button><button type="button" id="segDone" onclick="chooseInitial('done')">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`)}
 function changePack(d){
  let v=Math.max(1,Math.min(30,Number($('guestPack').value)+d));
@@ -79,6 +89,9 @@ function chooseInitial(v){
  $('segDone').classList.toggle('selected',v==='done');
 }
 function saveGuest(e){e.preventDefault();let day=todayKey(),now=Date.now(),status=$('initialStatus').value;let g={id:uid(),ticket:nextTicket(day),day,name:$('guestName').value.trim(),pack:Number($('guestPack').value),phone:$('guestPhone').value.trim(),status,created:now,resolved:status==='done'?now:null,audit:[{at:now,label:'Terdaftar',detail:$('guestPack').value+' pack'}]};if(status==='done')g.audit.push({at:now,label:'Langsung Duduk'});state.guests.push(g);save();closeSheet();renderAll();toast('Tamu berhasil ditambahkan · '+g.ticket)}
+/* =========================================================
+   4. WAITING LIST: STATUS, CARDS, AND DASHBOARD RENDERING
+   ========================================================= */
 function statusLabel(s){return{waiting:'Menunggu',called:'Dipanggil',done:'Selesai',cancelled:'Dibatalkan'}[s]||s}
 function statusClass(s){return's-'+s}
 function duration(g){return fmtElapsed((g.resolved||Date.now())-g.created)}
@@ -88,6 +101,9 @@ function renderAll(){let d=todayKey(),today=state.guests.filter(g=>g.day===d),wa
 function setFilter(f){activeFilter=f;document.querySelectorAll('#queueFilters .filter').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));renderQueue()}
 function renderQueue(){if(!$('queueList'))return;let q=($('queueSearch')?.value||'').toLowerCase(),d=todayKey();let list=state.guests.filter(g=>g.day===d&&(activeFilter==='all'||g.status===activeFilter)&&(g.name+' '+g.ticket).toLowerCase().includes(q)).sort((a,b)=>a.created-b.created);$('queueList').innerHTML=list.length?list.map((g,i)=>guestCard(g,i)).join(''):`<div class="empty"><div class="empty-icon">⌕</div><h3>Tidak ada antrean</h3><p>Coba ubah filter atau kata pencarian.</p></div>`}
 
+/* =========================================================
+   5. HISTORY DATE FILTER AND HISTORY LIST
+   ========================================================= */
 let historyCalendarMonth = null;
 let historyCalendarDraft = '';
 
@@ -162,6 +178,9 @@ function renderHistoryCalendar() {
 
 function renderHistory(){if(!$('historyList'))return;let d=$('historyDate').value||todayKey(),q=($('historySearch')?.value||'').toLowerCase(),list=state.guests.filter(g=>g.day===d&&g.name.toLowerCase().includes(q)).sort((a,b)=>b.created-a.created);$('historyList').innerHTML=list.length?list.map((g,i)=>guestCard(g,i,true)).join(''):`<div class="empty"><div class="empty-icon">◷</div><h3>Belum ada riwayat</h3><p>Tidak ada tamu pada tanggal yang dipilih.</p></div>`}
 
+/* =========================================================
+   6. RESERVATIONS: CALENDAR, FORM, AND GUEST SEATING
+   ========================================================= */
 let reservationMonth=todayKey().slice(0,7),reservationDate=todayKey();
 const reservationStatusLabel=s=>({pending:'Menunggu Reservasi',seated:'Duduk',cancelled:'Dibatalkan'}[s]||s);
 function reservationDateKey(y,m,d){return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
@@ -201,6 +220,9 @@ function cancelReservation(id){const r=state.reservations.find(x=>x.id===id);if(
 function seatReservation(id){const r=state.reservations.find(x=>x.id===id);if(!r||r.status!=='pending')return;if(r.date!==todayKey()){toast('Tamu hanya bisa didudukkan pada tanggal reservasinya');return}openSheet('<div class="sheet-head"><h2>Dudukkan tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><p class="page-sub">'+esc(r.code)+' · '+esc(r.name)+'</p><form onsubmit="confirmSeatReservation(event,\''+id+'\')"><div class="field"><label>Nomor / nama meja *</label><input id="rTable" required maxlength="80" placeholder="Contoh: Meja 05, VIP 2"></div><div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button class="primary">Konfirmasi duduk</button></div></form>')}
 function confirmSeatReservation(e,id){e.preventDefault();const r=state.reservations.find(x=>x.id===id),table=$('rTable').value.trim();if(!r||!table)return;const now=Date.now(),g={id:uid(),ticket:nextTicket(todayKey()),day:todayKey(),name:r.name,pack:r.pack,phone:r.phone,status:'done',created:now,resolved:now,audit:[{at:now,label:'Reservasi '+r.code+' · Duduk',detail:'Meja '+table}]};state.guests.push(g);r.status='seated';r.guestId=g.id;r.table=table;r.seatedAt=now;save();closeSheet();renderAll();toast('Tamu masuk ke catatan operasional · '+g.ticket)}
 
+/* =========================================================
+   7. GUEST DETAIL, EDITING, EXPORT, AND DEMO RESET
+   ========================================================= */
 function setGuestStatus(id,status){let g=state.guests.find(x=>x.id===id);if(!g||['done','cancelled'].includes(g.status))return;let now=Date.now();g.status=status;if(status==='done'||status==='cancelled')g.resolved=now;g.audit.push({at:now,label:status==='called'?'Dipanggil':status==='done'?'Selesai / Sudah Duduk':'Dibatalkan'});save();renderAll();if($('sheet').classList.contains('show'))openDetail(id);toast(status==='called'?'Tamu dipanggil':status==='done'?'Tamu ditandai sudah duduk':'Antrean dibatalkan')}
 function openDetail(id){let g=state.guests.find(x=>x.id===id);if(!g)return;sheetGuest=id;let canChange=!['done','cancelled'].includes(g.status);openSheet(`<div class="sheet-head"><h2>Detail tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><div class="detail-ticket"><small>NOMOR ANTREAN</small><strong>${g.ticket}</strong><small>${fmtDate(g.day)}</small></div><div style="font:800 18px Manrope">${esc(g.name)}</div><div class="detail-grid"><div class="detail-cell"><small>Jumlah pack</small><b>${g.pack} orang</b></div><div class="detail-cell"><small>Status</small><b>${statusLabel(g.status)}</b></div><div class="detail-cell"><small>Waktu daftar</small><b>${fmtTime(g.created)}</b></div><div class="detail-cell"><small>Waiting time</small><b>${duration(g)}</b></div><div class="detail-cell" style="grid-column:1/-1"><small>WhatsApp</small><b>${esc(g.phone||'Tidak diisi')}</b></div></div><div class="sheet-actions"><button class="secondary" onclick="editGuest('${g.id}')">Koreksi data</button>${g.phone?`<button class="primary" onclick="toast('Aksi WhatsApp demo')">WhatsApp</button>`:''}</div>${canChange?`<div class="sheet-actions"><button class="secondary" onclick="setGuestStatus('${g.id}','cancelled')">Batalkan</button><button class="primary" onclick="setGuestStatus('${g.id}','done')">Sudah duduk</button></div>`:''}<div style="margin-top:20px;font:800 13px Manrope">Riwayat perubahan</div><div class="timeline">${g.audit.slice().reverse().map(a=>`<div class="timeline-item"><b>${esc(a.label)}</b><small>${new Date(a.at).toLocaleString('id-ID',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})}${a.detail?' · '+esc(a.detail):''}${a.reason?' · Alasan: '+esc(a.reason):''}</small></div>`).join('')}</div>`)}
 function editGuest(id){let g=state.guests.find(x=>x.id===id);if(!g)return;sheetGuest=id;openSheet(`<div class="sheet-head"><h2>Koreksi data tamu</h2><button class="close" onclick="openDetail('${id}')">✕</button></div><form onsubmit="saveEdit(event,'${id}')"><div class="field"><label>Nama tamu *</label><input id="editName" required value="${esc(g.name)}"></div><div class="field"><label>Jumlah pack *</label><input id="editPack" type="number" min="1" max="30" required value="${g.pack}"></div><div class="field"><label>WhatsApp</label><input id="editPhone" value="${esc(g.phone)}"></div><div class="field"><label>Alasan koreksi *</label><textarea id="editReason" required placeholder="Tuliskan alasan perubahan data..."></textarea></div><div class="sheet-actions"><button type="button" class="secondary" onclick="openDetail('${id}')">Kembali</button><button class="primary">Simpan koreksi</button></div></form>`)}
