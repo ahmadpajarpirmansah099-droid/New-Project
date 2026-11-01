@@ -156,11 +156,8 @@ function saveGuest(event) {
     showTicketReveal(guest);
   };
 
-  if (prefersReducedMotion()) {
-    finishSave();
-  } else {
-    window.setTimeout(finishSave, 420);
-  }
+  // Save immediately; do not make the user wait for a decorative animation.
+  finishSave();
 }
 function statusLabel(s){return{waiting:'Menunggu',called:'Dipanggil',done:'Selesai',cancelled:'Dibatalkan'}[s]||s}
 function statusClass(s){return's-'+s}
