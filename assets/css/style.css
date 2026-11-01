@@ -1,3 +1,7 @@
+/* =========================================================
+   GUEST OPERATIONS — GLOBAL DESIGN SYSTEM AND COMPONENT STYLES
+   Keep later feature overrides grouped under their section headings.
+   ========================================================= */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap');
 :root{--bg:#f4f6fa;--surface:#fff;--ink:#14233f;--muted:#8490a5;--line:#e8edf4;--blue:#356df3;--blue2:#2457d7;--navy:#142747;--green:#15966a;--amber:#c78525;--red:#d65c67;--shadow:0 8px 28px rgba(28,48,83,.055);--r:20px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;-webkit-tap-highlight-color:transparent}button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #356df344;outline-offset:2px}
