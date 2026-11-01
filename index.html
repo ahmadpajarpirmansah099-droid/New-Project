@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6f6f1">
-<title>WAITLIST — Admin</title>
+<title>Guest Operations — Admin</title>
 <link rel="stylesheet" href="assets/css/style.css?v=20261101-calendar2">
 </head>
 <body>
 <div class="app">
 <header class="top">
-  <div class="brand"><div class="brandmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 6h14M5 12h9M5 18h6"/><circle cx="18" cy="16" r="3"/></svg></div><div><div class="brandname">WAITLIST</div><div class="brandmeta">GUEST OPERATIONS</div></div></div>
+  <div class="brand"><div class="brandmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 6h14M5 12h9M5 18h6"/><circle cx="18" cy="16" r="3"/></svg></div><div><div class="brandname">GUEST OPERATIONS</div><div class="brandmeta">ADMIN WORKSPACE</div></div></div>
   <button class="profile" onclick="toast('Profil admin demo')" aria-label="Profil admin">AD</button>
 </header>
 <main class="content">
@@ -44,6 +44,17 @@
     <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input id="historySearch" placeholder="Cari nama tamu..." oninput="renderHistory()"></div>
     <div class="queue-list" id="historyList"></div>
   </section>
+  <section class="page" id="page-reservations">
+    <div class="page-title">Reservasi</div><p class="page-sub">Kelola jadwal kedatangan dan tamu yang sudah memesan.</p>
+    <div class="reservation-toolbar">
+      <div><span class="eyebrow">KALENDER RESERVASI</span><strong id="reservationMonthLabel"></strong></div>
+      <div class="reservation-month-nav"><button type="button" onclick="changeReservationMonth(-1)" aria-label="Bulan sebelumnya">‹</button><button type="button" onclick="goReservationToday()">Hari ini</button><button type="button" onclick="changeReservationMonth(1)" aria-label="Bulan berikutnya">›</button></div>
+    </div>
+    <div class="reservation-legend"><span><i class="r-dot waiting"></i> Menunggu</span><span><i class="r-dot seated"></i> Duduk</span><span><i class="r-dot cancelled"></i> Batal</span></div>
+    <div class="reservation-calendar" id="reservationCalendar"></div>
+    <div class="reservation-day-head"><div><h2 id="reservationDateLabel"></h2><p id="reservationCount"></p></div><button class="primary" onclick="openReservationForm()">+ Reservasi</button></div>
+    <div class="reservation-list" id="reservationList"></div>
+  </section>
   <section class="page" id="page-settings">
     <div class="page-title">Pengaturan</div><p class="page-sub">Informasi outlet dan preferensi operasional.</p>
     <div class="settings-card">
@@ -62,6 +73,7 @@
 <nav class="bottomnav">
   <button class="navitem active" data-page="dashboard" onclick="go('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>Dashboard</button>
   <button class="navitem" data-page="waiting" onclick="go('waiting')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Antrean</button>
+  <button class="navitem" data-page="reservations" onclick="go('reservations')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Reservasi</button>
   <button class="navitem" data-page="history" onclick="go('history')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Riwayat</button>
   <button class="navitem" data-page="settings" onclick="go('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 2.9-.2-.1a1.7 1.7 0 0 0-1.8 0l-.2.1h-3.4l-.1-.2a1.7 1.7 0 0 0-1.5-1l-.2.1-2.9-1.7.1-.2a1.7 1.7 0 0 0 0-1.8l-.1-.2v-3.4l.2-.1a1.7 1.7 0 0 0 1-1.5l-.1-.2 1.7-2.9.2.1a1.7 1.7 0 0 0 1.8 0l.2-.1h3.4l.1.2a1.7 1.7 0 0 0 1.5 1l.2-.1 2.9 1.7-.1.2a1.7 1.7 0 0 0 0 1.8l.1.2z"/></svg>Pengaturan</button>
 </nav>
