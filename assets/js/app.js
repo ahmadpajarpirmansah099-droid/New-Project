@@ -272,11 +272,11 @@ function setGuestStatus(id,status){
 function callGuestWhatsApp(id){
  const guest=state.guests.find(item=>item.id===id);
  if(!guest)return;
- const digits=String(guest.phone||'').replace(/\\D/g,'');
+ const digits=String(guest.phone||'').replace(/[^0-9]/g,'');
  let phone=digits;
  if(phone.startsWith('0'))phone='62'+phone.slice(1);
  else if(phone.startsWith('8'))phone='62'+phone;
- if(!/^\\d{8,15}$/.test(phone)){
+ if(!/^[0-9]{8,15}$/.test(phone)){
   toast('Nomor WhatsApp belum diisi atau formatnya belum valid');
   return;
  }
