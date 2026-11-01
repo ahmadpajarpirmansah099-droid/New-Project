@@ -33,3 +33,545 @@
 @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes drop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}@keyframes pageIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{50%{box-shadow:0 0 0 7px #56d6a200}}@keyframes navIn{from{transform:scaleX(.2);opacity:0}to{transform:scaleX(1);opacity:1}}
 @media(min-width:600px){body{padding:18px 0}.app{border:1px solid #e5eaf2;border-radius:28px;overflow:hidden;min-height:calc(100dvh - 36px);box-shadow:0 20px 70px #172c4a14}.bottomnav{bottom:18px;border-radius:0 0 28px 28px}.fab{bottom:108px}.sheet{bottom:18px;border-radius:25px;max-height:85dvh}.sheet-backdrop{bottom:18px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+
+/* ==========================================================================
+   CINEMATIC MOTION SYSTEM
+   One timing scale for page, sheet, queue and feedback animations.
+   ========================================================================== */
+:root {
+  --motion-fast: 180ms;
+  --motion-ui: 360ms;
+  --motion-page: 620ms;
+  --motion-cinematic: 820ms;
+  --ease-standard: cubic-bezier(.22, .72, .2, 1);
+  --ease-cinematic: cubic-bezier(.16, 1, .3, 1);
+  --ease-exit: cubic-bezier(.4, 0, 1, 1);
+  --motion-glow: rgba(89, 145, 255, .18);
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}
+
+body {
+  overscroll-behavior-y: contain;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  transition:
+    transform var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-ui) var(--ease-standard),
+    background-color var(--motion-ui) var(--ease-standard),
+    border-color var(--motion-ui) var(--ease-standard),
+    color var(--motion-ui) var(--ease-standard);
+}
+
+button:active {
+  transform: scale(.975);
+}
+
+.page.active {
+  animation: cinematicPageEnter var(--motion-page) var(--ease-cinematic) both;
+  transform-origin: 50% 35%;
+  will-change: transform, opacity, filter;
+}
+
+.page.is-leaving {
+  display: block;
+  pointer-events: none;
+  animation: cinematicPageExit 300ms var(--ease-exit) both;
+  position: absolute;
+  inset: 0 18px auto;
+  width: auto;
+}
+
+.content {
+  position: relative;
+}
+
+.hero {
+  isolation: isolate;
+  box-shadow:
+    0 18px 42px rgba(20, 39, 71, .16),
+    0 3px 10px rgba(20, 39, 71, .08);
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -55% -35%;
+  background: linear-gradient(
+    112deg,
+    transparent 38%,
+    rgba(255, 255, 255, .075) 48%,
+    transparent 58%
+  );
+  transform: translateX(-42%) rotate(8deg);
+  animation: heroLightSweep 8s var(--ease-standard) 1.2s infinite;
+  pointer-events: none;
+}
+
+.metric,
+.guest,
+.settings-card {
+  transform: translateZ(0);
+  transition:
+    transform 420ms var(--ease-cinematic),
+    box-shadow 420ms var(--ease-cinematic),
+    border-color 360ms var(--ease-standard);
+}
+
+.metric {
+  animation: cinematicCardEnter 680ms var(--ease-cinematic) both;
+}
+
+.metric:nth-child(1) { animation-delay: 90ms; }
+.metric:nth-child(2) { animation-delay: 165ms; }
+.metric:nth-child(3) { animation-delay: 240ms; }
+
+@media (hover: hover) and (pointer: fine) {
+  .metric:hover,
+  .guest:hover,
+  .settings-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 34px rgba(28, 48, 83, .09);
+    border-color: #dbe5f5;
+  }
+
+  .primary:hover,
+  .fab:hover {
+    box-shadow: 0 12px 26px rgba(53, 109, 243, .32);
+    transform: translateY(-2px);
+  }
+
+  .secondary:hover,
+  .mini:hover {
+    border-color: #cbd9f3;
+    background-color: #f8faff;
+  }
+}
+
+.primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 28%,
+    rgba(255, 255, 255, .17) 48%,
+    transparent 68%
+  );
+  transform: translateX(-120%);
+  transition: transform 760ms var(--ease-cinematic);
+  pointer-events: none;
+}
+
+.primary:hover::after {
+  transform: translateX(120%);
+}
+
+.sheet-backdrop {
+  backdrop-filter: blur(9px) saturate(115%);
+  -webkit-backdrop-filter: blur(9px) saturate(115%);
+  transition: opacity 380ms var(--ease-standard);
+}
+
+.sheet {
+  transition:
+    transform 680ms var(--ease-cinematic),
+    box-shadow 500ms var(--ease-standard);
+  will-change: transform;
+}
+
+.sheet.show {
+  box-shadow: 0 -24px 70px rgba(9, 22, 43, .28);
+}
+
+.sheet.show .sheet-head,
+.sheet.show .detail-ticket,
+.sheet.show .field,
+.sheet.show .detail-grid,
+.sheet.show .sheet-actions,
+.sheet.show .timeline {
+  animation: sheetContentEnter 580ms var(--ease-cinematic) both;
+}
+
+.sheet.show .sheet-head { animation-delay: 100ms; }
+.sheet.show .detail-ticket { animation-delay: 145ms; }
+.sheet.show .field:nth-of-type(1) { animation-delay: 135ms; }
+.sheet.show .field:nth-of-type(2) { animation-delay: 205ms; }
+.sheet.show .field:nth-of-type(3) { animation-delay: 275ms; }
+.sheet.show .field:nth-of-type(4) { animation-delay: 345ms; }
+.sheet.show .detail-grid { animation-delay: 190ms; }
+.sheet.show .sheet-actions { animation-delay: 260ms; }
+.sheet.show .timeline { animation-delay: 320ms; }
+
+.handle {
+  transition: width 400ms var(--ease-cinematic), background-color 300ms ease;
+}
+
+.sheet.show .handle {
+  width: 48px;
+  background: #c8d3e3;
+}
+
+.bottomnav {
+  transition:
+    box-shadow 400ms var(--ease-standard),
+    background-color 400ms var(--ease-standard);
+}
+
+.navitem {
+  transition: color 300ms var(--ease-standard), transform 300ms var(--ease-cinematic);
+}
+
+.navitem.active {
+  animation: navSettle 420ms var(--ease-cinematic) both;
+}
+
+.fab {
+  transition:
+    transform 420ms var(--ease-cinematic),
+    box-shadow 420ms var(--ease-standard),
+    opacity 250ms ease;
+}
+
+.fab:active {
+  transform: scale(.9) rotate(8deg);
+}
+
+.guest {
+  animation: queueCardEnter 620ms var(--ease-cinematic) both;
+}
+
+.guest .ticket {
+  transition:
+    transform 360ms var(--ease-cinematic),
+    background-color 360ms var(--ease-standard);
+}
+
+.guest:active .ticket {
+  transform: scale(.94) rotate(-3deg);
+}
+
+.status {
+  transition:
+    color 320ms var(--ease-standard),
+    background-color 320ms var(--ease-standard),
+    transform 420ms var(--ease-cinematic);
+}
+
+.toast {
+  transition:
+    opacity 360ms var(--ease-standard),
+    transform 480ms var(--ease-cinematic),
+    filter 360ms var(--ease-standard);
+  filter: blur(3px);
+}
+
+.toast.show {
+  filter: blur(0);
+}
+
+.profile {
+  transition:
+    transform 360ms var(--ease-cinematic),
+    box-shadow 360ms var(--ease-standard);
+}
+
+.profile:active {
+  transform: scale(.92);
+}
+
+/* New ticket reveal */
+.ticket-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(63, 112, 190, .28), transparent 42%),
+    rgba(7, 16, 32, .88);
+  backdrop-filter: blur(0);
+  -webkit-backdrop-filter: blur(0);
+  opacity: 0;
+  transition:
+    opacity 420ms var(--ease-standard),
+    backdrop-filter 520ms var(--ease-standard);
+}
+
+.ticket-reveal.show {
+  opacity: 1;
+  backdrop-filter: blur(13px);
+  -webkit-backdrop-filter: blur(13px);
+}
+
+.ticket-reveal-card {
+  width: min(100%, 360px);
+  position: relative;
+  overflow: hidden;
+  padding: 27px 23px 22px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 27px;
+  color: #fff;
+  text-align: center;
+  background:
+    radial-gradient(circle at 85% 8%, rgba(102, 157, 255, .27), transparent 35%),
+    linear-gradient(145deg, #172d50, #0e1d35 72%);
+  box-shadow:
+    0 35px 100px rgba(0, 0, 0, .42),
+    inset 0 1px 0 rgba(255, 255, 255, .12);
+  opacity: 0;
+  transform: perspective(1000px) translateY(36px) scale(.82) rotateX(9deg);
+  filter: blur(12px);
+  transition:
+    opacity 760ms var(--ease-cinematic),
+    transform 920ms var(--ease-cinematic),
+    filter 760ms var(--ease-cinematic);
+}
+
+.ticket-reveal.show .ticket-reveal-card {
+  opacity: 1;
+  transform: perspective(1000px) translateY(0) scale(1) rotateX(0);
+  filter: blur(0);
+}
+
+.ticket-reveal-card::before,
+.ticket-reveal-card::after {
+  content: "";
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.ticket-reveal-card::before {
+  top: -105px;
+  right: -75px;
+  box-shadow: 0 0 0 19px rgba(255, 255, 255, .035), 0 0 0 40px rgba(255, 255, 255, .025);
+}
+
+.ticket-reveal-card::after {
+  bottom: -135px;
+  left: -110px;
+}
+
+.ticket-reveal-kicker {
+  position: relative;
+  color: #b8cbe8;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+.ticket-reveal-number {
+  position: relative;
+  margin: 15px 0 8px;
+  color: #fff;
+  font: 800 clamp(42px, 13vw, 58px)/1 Manrope, sans-serif;
+  letter-spacing: -.065em;
+  text-shadow: 0 8px 35px rgba(104, 158, 255, .24);
+  animation: ticketNumberFocus 1050ms var(--ease-cinematic) 180ms both;
+}
+
+.ticket-reveal-name {
+  position: relative;
+  margin: 0;
+  font: 700 18px Manrope, sans-serif;
+  letter-spacing: -.025em;
+}
+
+.ticket-reveal-meta {
+  position: relative;
+  margin-top: 8px;
+  color: #bbcae0;
+  font-size: 11px;
+}
+
+.ticket-reveal-divider {
+  position: relative;
+  height: 1px;
+  margin: 23px 0 17px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);
+}
+
+.ticket-reveal-note {
+  position: relative;
+  color: #c5d4e9;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.ticket-reveal .primary {
+  margin-top: 21px;
+  color: #142747;
+  background: linear-gradient(135deg, #fff, #dce9ff);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, .15);
+}
+
+.ticket-reveal .primary::after {
+  display: none;
+}
+
+.ticket-reveal.closing {
+  opacity: 0;
+  pointer-events: none;
+  transition-duration: 260ms;
+}
+
+.ticket-reveal.closing .ticket-reveal-card {
+  opacity: 0;
+  transform: translateY(12px) scale(.96);
+  filter: blur(5px);
+  transition-duration: 240ms;
+}
+
+@keyframes cinematicPageEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(22px, 13px, 0) scale(.985);
+    filter: blur(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes cinematicPageExit {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-12px, 4px, 0) scale(.992);
+    filter: blur(4px);
+  }
+}
+
+@keyframes cinematicCardEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0) scale(.97);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes queueCardEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(.985);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes sheetContentEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 13px, 0);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
+@keyframes ticketNumberFocus {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(.84);
+    filter: blur(12px);
+  }
+  68% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.025);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes heroLightSweep {
+  0%, 68% { transform: translateX(-42%) rotate(8deg); }
+  100% { transform: translateX(42%) rotate(8deg); }
+}
+
+@keyframes navSettle {
+  from { transform: translateY(4px); }
+  to { transform: translateY(0); }
+}
+
+@media (max-width: 380px) {
+  .ticket-reveal-card {
+    padding: 24px 18px 19px;
+  }
+
+  .ticket-reveal-number {
+    font-size: 43px;
+  }
+
+  .metric {
+    padding: 11px 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 1ms;
+    --motion-ui: 1ms;
+    --motion-page: 1ms;
+    --motion-cinematic: 1ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+
+  .hero::after {
+    display: none;
+  }
+
+  .ticket-reveal-card {
+    filter: none;
+    transform: none;
+  }
+}
