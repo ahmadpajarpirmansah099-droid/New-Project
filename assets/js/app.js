@@ -27,7 +27,7 @@ function go(page){document.querySelectorAll('.page').forEach(p=>p.classList.remo
 function toggleMenu(){const open=!$('menuDrawer').classList.contains('show');$('menuDrawer').classList.toggle('show',open);$('menuBackdrop').classList.toggle('show',open);$('menuDrawer').setAttribute('aria-hidden',String(!open));$('menuToggle').setAttribute('aria-expanded',String(open));document.body.style.overflow=open?'hidden':''}
 function closeMenu(){$('menuDrawer').classList.remove('show');$('menuBackdrop').classList.remove('show');$('menuDrawer').setAttribute('aria-hidden','true');$('menuToggle').setAttribute('aria-expanded','false');document.body.style.overflow=''}
 function navigateFromMenu(page){closeMenu();go(page)}
-function openSheet(content){$('sheetContent').innerHTML=content;$('sheet').style.transform='';$('backdrop').classList.add('show');$('sheet').classList.add('show');document.body.style.overflow='hidden';initSheetDrag()}
+function openSheet(content){$('sheetContent').innerHTML=content;$('sheet').style.transform='';$('backdrop').classList.add('show');$('sheet').classList.add('show');document.body.style.overflow='hidden';initSheetDrag();initSheetBodySwipe()}
 function closeSheet(){$('backdrop').classList.remove('show');$('sheet').classList.remove('show');document.body.style.overflow='';sheetGuest=null}
 let sheetDragStartY=0,sheetDragCurrentY=0,sheetDragging=false,sheetDragPointerId=null;
 function initSheetDrag(){
@@ -69,6 +69,43 @@ function initSheetDrag(){
 
 
 }
+
+function initSheetBodySwipe(){
+ const sheet=$('sheet');
+ if(!sheet||sheet.dataset.bodySwipeReady)return;
+ sheet.dataset.bodySwipeReady='1';
+ let startY=0,dragDistance=0,dragActive=false;
+ sheet.addEventListener('touchstart',e=>{
+  if(!sheet.classList.contains('show')||!sheet.querySelector('.detail-ticket')||e.touches.length!==1){dragActive=false;return;}
+  const target=e.target;
+  if(target.closest('button,input,select,textarea,a,[contenteditable="true"],#sheetHandle')){dragActive=false;return;}
+  startY=e.touches[0].clientY;
+  dragDistance=0;
+  dragActive=sheet.scrollTop<=1;
+ },{passive:true});
+ sheet.addEventListener('touchmove',e=>{
+  if(!dragActive||e.touches.length!==1)return;
+  const delta=e.touches[0].clientY-startY;
+  if(delta<8){if(delta<-8)dragActive=false;return;}
+  if(sheet.scrollTop>1){dragActive=false;return;}
+  e.preventDefault();
+  dragDistance=delta;
+  sheet.style.transition='none';
+  sheet.style.transform='translate3d(-50%, '+delta+'px, 0)';
+ },{passive:false});
+ const finishBodySwipe=()=>{
+  if(!dragActive)return;
+  const shouldClose=dragDistance>90;
+  dragActive=false;
+  dragDistance=0;
+  sheet.style.transition='';
+  sheet.style.transform='';
+  if(shouldClose)closeSheet();
+ };
+ sheet.addEventListener('touchend',finishBodySwipe,{passive:true});
+ sheet.addEventListener('touchcancel',finishBodySwipe,{passive:true});
+}
+
 
 /* =========================================================
    3. WAITING LIST: ADD GUEST AND QUEUE NUMBER
