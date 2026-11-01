@@ -725,3 +725,87 @@ button:active {
     animation: none;
   }
 }
+
+
+/* MOBILE PERFORMANCE — keep the premium feel without heavy compositing */
+@media (max-width: 600px) {
+  html { scroll-behavior: auto; }
+  .hero::after { display: none; }
+  .dot { animation: none; }
+  .sheet-backdrop {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    transition: opacity 220ms ease;
+  }
+  .sheet {
+    will-change: auto;
+    transition: transform 360ms cubic-bezier(.2,.8,.2,1);
+    box-shadow: 0 -10px 28px rgba(9,22,43,.18);
+  }
+  .sheet.show { box-shadow: 0 -10px 28px rgba(9,22,43,.18); }
+  .sheet.show .sheet-head,
+  .sheet.show .detail-ticket,
+  .sheet.show .field,
+  .sheet.show .detail-grid,
+  .sheet.show .sheet-actions,
+  .sheet.show .timeline {
+    animation: none;
+    filter: none;
+  }
+  .sheet form .field,
+  .field input,
+  .field select,
+  .field textarea,
+  .pack-control,
+  .seg button {
+    transition-duration: 180ms;
+  }
+  .sheet form .field:focus-within { transform: none; }
+  .pack-control:has(button:active) { box-shadow: none; }
+  .seg button.selected { box-shadow: none; transform: none; }
+  .seg button.selected::after { display: none; }
+  .ticket-reveal {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transition: opacity 240ms ease;
+  }
+  .ticket-reveal-card {
+    filter: none;
+    transform: translateY(14px) scale(.97);
+    transition: opacity 280ms ease, transform 320ms cubic-bezier(.2,.8,.2,1);
+    box-shadow: 0 18px 42px rgba(0,0,0,.25);
+  }
+  .ticket-reveal.show .ticket-reveal-card {
+    filter: none;
+    transform: translateY(0) scale(1);
+  }
+  .ticket-reveal-number { animation: none; }
+  .page.active {
+    animation: mobilePageEnter 220ms ease both;
+    filter: none;
+    will-change: auto;
+  }
+  .page.is-leaving { animation: none; }
+  .metric,
+  .guest,
+  .settings-card {
+    transform: none;
+    filter: none;
+    animation: none;
+    transition: border-color 160ms ease;
+    box-shadow: var(--shadow);
+  }
+  .metric:nth-child(n),
+  .guest:nth-child(n) { animation-delay: 0ms; }
+  .bottomnav {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: #fff;
+  }
+  .primary::after { display: none; }
+  .sheet form .primary.is-saving::before { animation-duration: 900ms; }
+}
+@keyframes mobilePageEnter {
+  from { opacity: .75; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
