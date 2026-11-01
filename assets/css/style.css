@@ -575,3 +575,153 @@ button:active {
     transform: none;
   }
 }
+
+
+/* ADD GUEST FORM — cinematic micro-interactions */
+.sheet form .field {
+  transition: transform 420ms var(--ease-cinematic), opacity 360ms var(--ease-standard);
+}
+
+.sheet form .field:focus-within {
+  transform: translateY(-2px);
+}
+
+.field input,
+.field select,
+.field textarea {
+  transition:
+    border-color 320ms var(--ease-standard),
+    background-color 320ms var(--ease-standard),
+    box-shadow 420ms var(--ease-cinematic),
+    transform 320ms var(--ease-cinematic);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: #8eafff;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(53, 109, 243, .09), 0 7px 18px rgba(35, 76, 151, .06);
+  transform: translateY(-1px);
+}
+
+.field label {
+  transition: color 280ms var(--ease-standard), transform 280ms var(--ease-cinematic);
+}
+
+.field:focus-within label {
+  color: var(--blue);
+  transform: translateX(2px);
+}
+
+.pack-control {
+  transition:
+    border-color 320ms var(--ease-standard),
+    box-shadow 360ms var(--ease-standard),
+    background-color 320ms var(--ease-standard);
+}
+
+.pack-control:focus-within,
+.pack-control:has(button:active) {
+  border-color: #a8bfff;
+  box-shadow: 0 0 0 4px rgba(53, 109, 243, .07);
+  background: #fff;
+}
+
+.pack-control button {
+  transition: transform 220ms var(--ease-cinematic), background-color 260ms ease, box-shadow 260ms ease;
+}
+
+.pack-control button:active {
+  transform: scale(.86);
+  box-shadow: 0 3px 9px rgba(53, 109, 243, .18);
+}
+
+.pack-control strong.pack-bump {
+  animation: packBump 300ms var(--ease-cinematic);
+}
+
+.seg button {
+  position: relative;
+  overflow: hidden;
+  transition:
+    color 300ms var(--ease-standard),
+    background-color 360ms var(--ease-standard),
+    border-color 360ms var(--ease-standard),
+    box-shadow 420ms var(--ease-cinematic),
+    transform 300ms var(--ease-cinematic);
+}
+
+.seg button.selected {
+  box-shadow: 0 5px 14px rgba(53, 109, 243, .11), inset 0 0 0 1px rgba(53, 109, 243, .035);
+  transform: translateY(-1px);
+}
+
+.seg button.selected::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent, rgba(255,255,255,.48), transparent);
+  transform: translateX(-120%);
+  animation: segmentShimmer 650ms var(--ease-cinematic) both;
+  pointer-events: none;
+}
+
+.sheet form .sheet-actions {
+  padding-top: 3px;
+}
+
+.sheet form .primary {
+  min-height: 46px;
+  transition:
+    transform 260ms var(--ease-cinematic),
+    box-shadow 360ms var(--ease-standard),
+    filter 300ms ease,
+    opacity 300ms ease;
+}
+
+.sheet form .primary.is-saving {
+  pointer-events: none;
+  filter: saturate(.88);
+  box-shadow: 0 5px 16px rgba(53, 109, 243, .2);
+}
+
+.sheet form .primary.is-saving::before {
+  content: "";
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255,255,255,.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: saveSpinner 700ms linear infinite;
+}
+
+.sheet form .primary.is-saving::after {
+  display: none;
+}
+
+@keyframes packBump {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  42% { transform: translateY(-5px) scale(1.14); opacity: .72; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes segmentShimmer {
+  to { transform: translateX(120%); }
+}
+
+@keyframes saveSpinner {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet form .field:focus-within,
+  .seg button.selected {
+    transform: none;
+  }
+
+  .sheet form .primary.is-saving::before {
+    animation: none;
+  }
+}
