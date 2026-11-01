@@ -66,6 +66,39 @@ function initSheetDrag(){
  window.addEventListener('pointercancel',e=>{
   if(sheetDragging&&e.pointerId===sheetDragPointerId)finish();
  });
+
+ // Allow a downward swipe from the sheet body on mobile.
+ // Keep normal content scrolling and form controls unaffected.
+ let touchStartY=0,touchDragActive=false,touchDragDistance=0;
+ sheet.addEventListener('touchstart',e=>{
+  if(!sheet.classList.contains('show')||e.touches.length!==1)return;
+  const target=e.target;
+  if(target.closest('button,input,select,textarea,a,[contenteditable="true"]')||target.closest('#sheetHandle'))return;
+  touchStartY=e.touches[0].clientY;
+  touchDragActive=sheet.scrollTop<=0;
+  touchDragDistance=0;
+ },{passive:true});
+ sheet.addEventListener('touchmove',e=>{
+  if(!touchDragActive||e.touches.length!==1)return;
+  const delta=e.touches[0].clientY-touchStartY;
+  if(delta<=0)return;
+  if(sheet.scrollTop>0){touchDragActive=false;return;}
+  e.preventDefault();
+  touchDragDistance=delta;
+  sheet.style.transition='none';
+  sheet.style.transform='translate3d(-50%, '+delta+'px, 0)';
+ },{passive:false});
+ const finishTouchDrag=()=>{
+  if(!touchDragActive)return;
+  const shouldClose=touchDragDistance>90;
+  touchDragActive=false;
+  touchDragDistance=0;
+  sheet.style.transition='';
+  sheet.style.transform='';
+  if(shouldClose)closeSheet();
+ };
+ sheet.addEventListener('touchend',finishTouchDrag,{passive:true});
+ sheet.addEventListener('touchcancel',finishTouchDrag,{passive:true});
 }
 
 /* =========================================================
