@@ -229,7 +229,7 @@ function setCount(elementId, value) {
   const target = Number(value) || 0;
   const previous = Number(element.dataset.value ?? element.textContent) || 0;
 
-  if (previous === target || prefersReducedMotion()) {
+  if (previous === target || prefersReducedMotion() || window.matchMedia('(max-width: 600px)').matches) {
     element.textContent = String(target);
     element.dataset.value = String(target);
     return;
