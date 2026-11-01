@@ -336,3 +336,28 @@ button.history-date{
 .handle:active{cursor:grabbing}
 .handle:active:after{width:48px;background:#c9c7d3}
 @media(prefers-reduced-motion:reduce){.handle:after{transition:none}}
+
+
+/* FIX: centered, full touch target and reliable swipe-to-dismiss */
+.sheet-handle-row{
+  width:100%!important;min-height:38px!important;margin:0 0 7px!important;
+  display:flex!important;justify-content:center!important;align-items:center!important;
+  text-align:center!important;
+}
+.sheet-handle-row .handle{
+  appearance:none!important;-webkit-appearance:none!important;
+  display:block!important;position:relative!important;left:auto!important;top:auto!important;
+  flex:0 0 72px!important;width:72px!important;min-width:72px!important;max-width:72px!important;
+  height:34px!important;margin:0!important;padding:0!important;border:0!important;
+  border-radius:20px!important;background:transparent!important;
+  touch-action:none!important;user-select:none!important;-webkit-user-select:none!important;
+}
+.sheet-handle-row .handle:after{
+  content:""!important;position:absolute!important;left:50%!important;top:50%!important;
+  display:block!important;width:42px!important;height:5px!important;
+  border-radius:99px!important;background:#d5d3dd!important;
+  transform:translate(-50%,-50%)!important;
+}
+.sheet-handle-row .handle:active:after{width:50px!important;background:#bcb9c9!important}
+.sheet{touch-action:pan-y}
+@media(prefers-reduced-motion:reduce){.sheet-handle-row .handle:after{transition:none!important}}
