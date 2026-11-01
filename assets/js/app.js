@@ -61,9 +61,23 @@ function initSheetDrag(){
  });
 }
 
-function openAdd(){sheetGuest=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><form onsubmit="saveGuest(event)"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" onclick="changePack(-1)">−</button><strong id="packValue">2</strong><button type="button" onclick="changePack(1)">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span style="color:#9aa5b8;font-weight:500">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg"><button type="button" class="selected" id="segWait" onclick="chooseInitial('waiting')">Menunggu</button><button type="button" id="segDone" onclick="chooseInitial('done')">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`)}
-function changePack(d){let v=Math.max(1,Math.min(30,Number($('guestPack').value)+d));$('guestPack').value=v;$('packValue').textContent=v}
-function chooseInitial(v){$('initialStatus').value=v;$('segWait').classList.toggle('selected',v==='waiting');$('segDone').classList.toggle('selected',v==='done')}
+function openAdd(){sheetGuest=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><form onsubmit="saveGuest(event)"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" onclick="changePack(-1)">−</button><strong id="packValue">2</strong><button type="button" onclick="changePack(1)">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span style="color:#9aa5b8;font-weight:500">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg" data-selected="waiting"><button type="button" class="selected" id="segWait" onclick="chooseInitial('waiting')">Menunggu</button><button type="button" id="segDone" onclick="chooseInitial('done')">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`)}
+function changePack(d){
+ let v=Math.max(1,Math.min(30,Number($('guestPack').value)+d));
+ $('guestPack').value=v;
+ const value=$('packValue');
+ value.textContent=v;
+ value.classList.remove('pack-number-animate');
+ void value.offsetWidth;
+ value.classList.add('pack-number-animate');
+}
+function chooseInitial(v){
+ $('initialStatus').value=v;
+ const group=$('segWait').parentElement;
+ group.dataset.selected=v;
+ $('segWait').classList.toggle('selected',v==='waiting');
+ $('segDone').classList.toggle('selected',v==='done');
+}
 function saveGuest(e){e.preventDefault();let day=todayKey(),now=Date.now(),status=$('initialStatus').value;let g={id:uid(),ticket:nextTicket(day),day,name:$('guestName').value.trim(),pack:Number($('guestPack').value),phone:$('guestPhone').value.trim(),status,created:now,resolved:status==='done'?now:null,audit:[{at:now,label:'Terdaftar',detail:$('guestPack').value+' pack'}]};if(status==='done')g.audit.push({at:now,label:'Langsung Duduk'});state.guests.push(g);save();closeSheet();renderAll();toast('Tamu berhasil ditambahkan · '+g.ticket)}
 function statusLabel(s){return{waiting:'Menunggu',called:'Dipanggil',done:'Selesai',cancelled:'Dibatalkan'}[s]||s}
 function statusClass(s){return's-'+s}
