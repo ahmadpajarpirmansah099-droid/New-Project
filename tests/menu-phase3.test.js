@@ -174,3 +174,19 @@ test('Menu and recipe lines persist without touching Guest Operational data', ()
   assert.equal(second.runtime.MenuService.findMenu(menu.id).nama_menu, 'Iced Latte');
   assert.equal(second.runtime.MenuService.getLines(menu.id).length, 1);
 });
+
+
+test('WIP yield unit cannot change while a Menu recipe still uses the previous unit', () => {
+  const { runtime } = createRuntime();
+  const milk = addMilk(runtime);
+  const syrup = addSyrup(runtime, milk);
+  saveMenu(runtime, [{
+    component_type: 'wip', component_wip_id: syrup.id, qty_input: 10, unit_input: 'ML'
+  }]);
+
+  assert.throws(() => runtime.WipService.saveWip({
+    id: syrup.id, nama_wip: 'Syrup Base', hasil_per_batch: 500, satuan_hasil: 'GR'
+  }, [{
+    component_type: 'material', item_id: milk.id, qty_input: 1, unit_input: 'L'
+  }]), /resep WIP atau Menu/);
+});
