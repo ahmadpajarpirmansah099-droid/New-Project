@@ -50,8 +50,17 @@
     <button class="page-back" type="button" onclick="returnToGuestOperational()" aria-label="Kembali ke Guest Operational"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>
     <div class="page-title">Reservasi</div><p class="page-sub">Kelola jadwal kedatangan dan tamu yang sudah memesan.</p>
     <div class="reservation-toolbar">
-      <div><span class="eyebrow">KALENDER RESERVASI</span><strong id="reservationMonthLabel"></strong></div>
-      <div class="reservation-month-nav"><button type="button" onclick="changeReservationMonth(-1)" aria-label="Bulan sebelumnya">‹</button><button type="button" onclick="goReservationToday()">Hari ini</button><button type="button" onclick="changeReservationMonth(1)" aria-label="Bulan berikutnya">›</button></div>
+      <div class="reservation-toolbar-heading">
+        <span class="eyebrow">KALENDER RESERVASI</span>
+        <button class="reservation-today-button" type="button" onclick="goReservationToday()">Hari ini</button>
+      </div>
+      <div class="reservation-toolbar-month">
+        <strong id="reservationMonthLabel"></strong>
+        <div class="reservation-month-nav">
+          <button type="button" onclick="changeReservationMonth(-1)" aria-label="Bulan sebelumnya">‹</button>
+          <button type="button" onclick="changeReservationMonth(1)" aria-label="Bulan berikutnya">›</button>
+        </div>
+      </div>
     </div>
     <div class="reservation-legend"><span><i class="r-dot waiting"></i> Menunggu</span><span><i class="r-dot seated"></i> Duduk</span><span><i class="r-dot cancelled"></i> Batal</span></div>
     <div class="reservation-calendar" id="reservationCalendar"></div>
