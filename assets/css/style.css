@@ -7211,3 +7211,41 @@ button.history-date {
   font-size:8px;
   font-weight:700;
 }
+
+
+/* LIQUID TOGGLE — INITIAL GUEST STATUS */
+#sheet .seg.is-switching::before {
+  transition:none;
+  will-change:transform;
+}
+
+#sheet .seg.is-switching[data-selected="seated"]::before {
+  transform-origin:left center;
+  animation:liquid-toggle-right .58s cubic-bezier(.2,.78,.22,1) both;
+}
+
+#sheet .seg.is-switching[data-selected="waiting"]::before {
+  transform-origin:right center;
+  animation:liquid-toggle-left .58s cubic-bezier(.2,.78,.22,1) both;
+}
+
+@keyframes liquid-toggle-right {
+  0% { transform:translateX(0) scaleX(1); }
+  38% { transform:translateX(42%) scaleX(1.28); }
+  78% { transform:translateX(calc(100% + 8px)) scaleX(.82); }
+  100% { transform:translateX(calc(100% + 8px)) scaleX(1); }
+}
+
+@keyframes liquid-toggle-left {
+  0% { transform:translateX(calc(100% + 8px)) scaleX(1); }
+  38% { transform:translateX(58%) scaleX(1.28); }
+  78% { transform:translateX(0) scaleX(.82); }
+  100% { transform:translateX(0) scaleX(1); }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  #sheet .seg.is-switching::before {
+    animation:none;
+    transition:none;
+  }
+}
