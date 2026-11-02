@@ -1,43 +1,56 @@
-# Guest Operations — standalone frontend
+# Guest Operations
 
-Aplikasi operasional tamu mandiri. Nama produk belum ditentukan; **Waiting List** dan **Reservasi** adalah fitur di dalam aplikasi ini.
+Aplikasi mobile-first untuk mengelola kedatangan tamu, antrean, dan reservasi secara mandiri.
 
-## Fitur saat ini
+## Susunan fitur
 
-- Dashboard ringkasan tamu dan antrean aktif.
-- Waiting List: pendaftaran tamu, nomor antrean otomatis, perubahan status, detail, dan koreksi data.
-- Reservasi: kalender bulanan, pembuatan kode reservasi, detail, pembatalan, dan proses mendudukkan tamu.
-- Riwayat: pencarian berdasarkan tanggal.
-- Pengaturan demo dan ekspor data antrean ke CSV.
-- Navigasi melalui tombol hamburger, dengan layout responsif untuk HP dan desktop.
+- **Guest Operational** — halaman utama berisi ringkasan jumlah tamu, pack, status, dan antrean aktif.
+- **Antrean** — tambah tamu, nomor antrean otomatis, panggil lewat WhatsApp, ubah status, lihat detail, dan koreksi data.
+- **Riwayat** — cari catatan tamu berdasarkan tanggal.
+- **Reservasi** — kalender bulanan, pembuatan kode reservasi, detail, pembatalan, dan proses mendudukkan tamu.
+- **Pengaturan** — durasi Seating Time, ekspor CSV, dan reset data demo.
+- **Menu cepat (+)** — akses Antrean, Riwayat, Reservasi, dan Tambah Tamu.
 
 ## Struktur file
 
 ```
-index.html                 Struktur halaman dan komponen
+index.html
+  Struktur halaman dan komponen aplikasi.
+
 assets/
   css/
-    style.css              Warna, layout, komponen, dan animasi
+    style.css
+      Sistem warna, layout, komponen, responsive rules, dan animasi.
   js/
-    app.js                 Alur aplikasi, penyimpanan demo, dan interaksi
+    app.js
+      Navigasi, state aplikasi, penyimpanan demo, dan interaksi.
+
 .github/
   workflows/
-    deploy-pages.yml       Pemeriksaan JavaScript dan deployment GitHub Pages
+    deploy-pages.yml
+      Pemeriksaan sintaks JavaScript dan deployment GitHub Pages.
+
+.editorconfig
+  Aturan dasar konsistensi file.
 ```
 
 ## Menjalankan aplikasi
 
-Buka `index.html` melalui browser atau gunakan alamat GitHub Pages yang terhubung ke repository ini. Tidak perlu Vite atau proses build untuk struktur saat ini.
+Buka `index.html` melalui browser atau gunakan alamat GitHub Pages repository ini. Struktur saat ini masih berupa HTML, CSS, dan JavaScript biasa; tidak memerlukan Vite atau proses build.
 
 ## Penyimpanan dan batasan
 
-- Data demo disimpan di `localStorage` browser perangkat yang digunakan.
-- Data tidak tersinkron otomatis antarperangkat dan belum memakai backend/database.
-- Jangan menganggap data demo sebagai data operasional permanen.
+- Data demo tersimpan di `localStorage` pada browser perangkat yang digunakan.
+- Data belum tersinkron otomatis antarperangkat dan belum menggunakan backend/database.
+- Pengaturan Seating Time tersimpan bersama data demo di browser yang sama.
+- Ekspor tersedia dalam format CSV.
 - Repository ini berdiri sendiri dan tidak terhubung dengan Barapp.
 
-## Menjaga proyek
+## Aturan saat mengembangkan
 
-- Pertahankan nama kunci `localStorage` yang sudah ada agar data demo pengguna tidak hilang.
-- Perubahan UI sebaiknya tidak mengubah alur penyimpanan atau status tanpa kebutuhan yang jelas.
-- Workflow GitHub Pages menjalankan pemeriksaan sintaks JavaScript sebelum deployment.
+- Pertahankan kunci `localStorage` `waitlist_frontend_demo_v1` agar data demo yang sudah ada tetap terbaca.
+- Jangan menghapus atau mengubah data pengguna maupun struktur penyimpanan tanpa persetujuan.
+- Pertahankan pemisahan fitur: Guest Operational adalah halaman utama; Antrean, Riwayat, Reservasi, dan Tambah Tamu diakses dari tombol `+`.
+- Semua ikon antarmuka baru harus berasal dari Lucide Icons.
+- Jaga tampilan mobile sebagai prioritas dan hindari mengubah alur fitur yang tidak diminta.
+- Perubahan JavaScript harus melewati pemeriksaan sintaks di GitHub Actions sebelum deployment.
