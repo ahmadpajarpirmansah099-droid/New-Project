@@ -6937,3 +6937,199 @@ button.history-date {
   }
 }
 
+
+
+/* Reservation form controls — use the same visual language as the app */
+.reservation-picker-trigger,
+.reservation-select-trigger {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  width:100%;
+  min-height:46px;
+  padding:0 13px;
+  border:1px solid #eeedf0;
+  border-radius:12px;
+  background:#f8f8f6;
+  color:var(--ink);
+  font-size:13px;
+  font-weight:500;
+  text-align:left;
+  box-shadow:0 2px 5px rgba(17,18,37,.045),0 1px 2px rgba(17,18,37,.035);
+}
+
+.reservation-picker-trigger:active,
+.reservation-select-trigger:active {
+  transform:scale(.995);
+}
+
+.reservation-picker-trigger svg,
+.reservation-select-trigger svg {
+  width:18px;
+  height:18px;
+  flex:0 0 auto;
+  fill:none;
+  stroke:#8d8b9d;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.reservation-select {
+  position:relative;
+}
+
+.reservation-select-options {
+  display:grid;
+  gap:3px;
+  margin-top:7px;
+  padding:5px;
+  border:1px solid #eeedf0;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 8px 22px rgba(17,18,37,.09);
+}
+
+.reservation-select-options[hidden] {
+  display:none!important;
+}
+
+.reservation-select-option {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  min-height:42px;
+  padding:0 11px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:#555469;
+  font-size:13px;
+  font-weight:600;
+  text-align:left;
+}
+
+.reservation-select-option.selected {
+  background:#eef7c7;
+  color:#111225;
+}
+
+.reservation-select-option svg {
+  width:17px;
+  height:17px;
+  fill:none;
+  stroke:#15966a;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  opacity:0;
+}
+
+.reservation-select-option.selected svg {
+  opacity:1;
+}
+
+.reservation-date-dialog .calendar-day:disabled {
+  color:#cbc9d1;
+  opacity:.34;
+  cursor:not-allowed;
+}
+
+.reservation-date-dialog .calendar-monthbar button:disabled {
+  opacity:.3;
+  cursor:not-allowed;
+}
+
+.reservation-time-dialog {
+  width:min(90vw,370px);
+}
+
+.reservation-time-display {
+  display:flex;
+  align-items:baseline;
+  justify-content:center;
+  gap:8px;
+  margin:4px 0 16px;
+  padding:17px 14px;
+  border-radius:15px;
+  background:#eef7c7;
+  color:#111225;
+}
+
+.reservation-time-display small {
+  align-self:center;
+  margin-right:auto;
+  color:#697347;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.1em;
+}
+
+.reservation-time-display strong {
+  font:800 29px Manrope,sans-serif;
+  letter-spacing:-.04em;
+}
+
+.reservation-time-display span {
+  color:#697347;
+  font-size:11px;
+  font-weight:800;
+}
+
+.reservation-time-controls {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.reservation-time-unit {
+  display:grid;
+  justify-items:center;
+  gap:7px;
+  padding:12px 8px;
+  border:1px solid #eeedf0;
+  border-radius:15px;
+  background:#f8f8f6;
+}
+
+.reservation-time-unit label {
+  color:#858492;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.reservation-time-unit button {
+  width:34px;
+  height:30px;
+  border:0;
+  border-radius:9px;
+  background:#efedfb;
+  color:#55518c;
+  font-size:18px;
+  font-weight:700;
+  line-height:1;
+}
+
+.reservation-time-unit input {
+  width:74px;
+  height:42px;
+  padding:0 8px;
+  border:1px solid #e6e3ec;
+  border-radius:10px;
+  background:#fff;
+  color:#111225;
+  font:800 20px Manrope,sans-serif;
+  text-align:center;
+  outline-offset:2px;
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .reservation-picker-trigger,
+  .reservation-select-trigger {
+    transition:none;
+  }
+}
