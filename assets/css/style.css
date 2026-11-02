@@ -644,12 +644,12 @@ button.history-date{
 /* FLOATING QUICK MENU — MOBILE ACTIONS
    Icon paths in this menu follow the Lucide Icons family.
 */
-.fab{z-index:65}
+.fab{z-index:15}
 .fab svg{transition:transform .28s cubic-bezier(.2,.8,.2,1)}
 .fab.is-open svg{transform:rotate(45deg)}
-.quick-menu-backdrop{position:fixed;inset:0;z-index:63;background:rgba(17,18,37,.08);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease,visibility .2s ease}
+.quick-menu-backdrop{position:fixed;inset:0;z-index:13;background:rgba(17,18,37,.08);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease,visibility .2s ease}
 .quick-menu-backdrop.show{opacity:1;visibility:visible;pointer-events:auto}
-.quick-menu{position:fixed;z-index:66;right:max(20px,calc((100vw - 520px)/2 + 20px));bottom:calc(24px + 54px + 12px + env(safe-area-inset-bottom));width:min(258px,calc(100vw - 36px));padding:9px;background:#fff;border:1px solid rgba(20,20,38,.06);border-radius:19px;box-shadow:0 16px 42px rgba(17,18,37,.18);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(10px) scale(.97);transform-origin:bottom right;transition:opacity .22s ease,transform .26s cubic-bezier(.2,.8,.2,1),visibility .22s ease}
+.quick-menu{position:fixed;z-index:16;right:max(20px,calc((100vw - 520px)/2 + 20px));bottom:calc(24px + 54px + 12px + env(safe-area-inset-bottom));width:min(258px,calc(100vw - 36px));padding:9px;background:#fff;border:1px solid rgba(20,20,38,.06);border-radius:19px;box-shadow:0 16px 42px rgba(17,18,37,.18);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(10px) scale(.97);transform-origin:bottom right;transition:opacity .22s ease,transform .26s cubic-bezier(.2,.8,.2,1),visibility .22s ease}
 .quick-menu.show{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0) scale(1)}
 .quick-menu-heading{padding:8px 11px 7px;color:#a09eaa;font-size:9px;font-weight:800;letter-spacing:.14em}
 .quick-menu-item{width:100%;min-height:48px;padding:0 11px;display:flex;align-items:center;gap:12px;border:0;border-radius:12px;background:transparent;color:#17172a;text-align:left;font-size:13px;font-weight:700;transition:background .18s ease,transform .18s ease}
