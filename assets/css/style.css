@@ -666,10 +666,14 @@ button.history-date{
 .setting-icon svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
 .seating-setting-row{align-items:flex-start;padding-top:16px;padding-bottom:16px}
 .seating-setting-control{display:flex;align-items:center;gap:8px;margin-top:10px}
-.seating-setting-control input{width:82px;height:38px;padding:0 10px;border:1px solid #e5e5ec;border-radius:10px;background:#fafafc;color:var(--ink);font-size:14px;font-weight:800;text-align:center}
+.seating-stepper{display:flex;align-items:center;height:42px;border:1px solid #e5e5ec;border-radius:12px;background:#fafafc;overflow:hidden}
+.seating-step-button{width:38px;height:40px;display:grid;place-items:center;border:0;background:transparent;color:var(--ink);font-size:21px;font-weight:600;line-height:1;touch-action:manipulation}
+.seating-step-button:active{background:#ececf5}
+.seating-stepper input{width:54px;height:40px;padding:0;border:0;background:transparent;color:var(--ink);font-size:15px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;outline:none}
 .seating-setting-control span{font-size:11px;color:var(--muted)}
-.seating-setting-control button{min-height:38px;padding:0 14px;border:0;border-radius:10px;background:#111225;color:#fff;font-size:11px;font-weight:800}
+.seating-setting-control>button{min-height:42px;padding:0 16px;border:0;border-radius:11px;background:#111225;color:#fff;font-size:12px;font-weight:800;touch-action:manipulation}
+.seating-setting-control>button:active{transform:scale(.97)}
 .waittime b[data-seating-countdown],.detail-cell [data-seating-countdown]{font-variant-numeric:tabular-nums;letter-spacing:.02em}
 [data-seating-countdown].is-expired{color:#c44e5c!important}
 [data-seating-countdown].is-expired::after{content:' · Habis';font-size:.9em;font-weight:700}
-@media(max-width:380px){.seating-setting-control{gap:6px}.seating-setting-control input{width:72px}}
+@media(max-width:380px){.seating-setting-control{gap:6px}.seating-stepper input{width:48px}}
