@@ -6502,9 +6502,9 @@ button.history-date {
 }
 
 .quick-menu-item:nth-child(2) { right: -15px; bottom: 0; }
-.quick-menu-item:nth-child(3) { right: -15px; bottom: 44px; }
-.quick-menu-item:nth-child(4) { right: -15px; bottom: 88px; }
-.quick-menu-item:nth-child(5) { right: -15px; bottom: 132px; }
+.quick-menu-item:nth-child(3) { right: -15px; bottom: 58px; }
+.quick-menu-item:nth-child(4) { right: -15px; bottom: 116px; }
+.quick-menu-item:nth-child(5) { right: -15px; bottom: 174px; }
 
 .quick-menu.show .quick-menu-item {
   opacity: 1;
