@@ -25,6 +25,7 @@ function seatingRemainingMs(guest,now=Date.now()){const seatedAt=Number(guest.se
 function seatingCountdownText(guest,now=Date.now()){const seconds=Math.ceil(seatingRemainingMs(guest,now)/1000);const minutes=String(Math.floor(seconds/60)).padStart(2,'0');const remainder=String(seconds%60).padStart(2,'0');return minutes+':'+remainder}
 function updateSeatingCountdowns(){const now=Date.now();document.querySelectorAll('[data-seating-countdown]').forEach(element=>{const guest=state.guests.find(item=>item.id===element.dataset.seatingCountdown);if(!guest||guest.status!=='seated')return;element.textContent=seatingCountdownText(guest,now);element.classList.toggle('is-expired',seatingRemainingMs(guest,now)<=0)})}
 function syncSeatingSettingInput(){const input=$('seatingDurationInput');if(input)input.value=String(seatingDurationMinutes())}
+function adjustSeatingDuration(change){const input=$('seatingDurationInput');if(!input)return;const current=Number(input.value)||seatingDurationMinutes();input.value=String(Math.min(1440,Math.max(1,current+change)))}
 function saveSeatingDuration(){const input=$('seatingDurationInput');const value=Number(input?.value);if(!Number.isInteger(value)||value<1||value>1440){toast('Masukkan durasi 1 sampai 1440 menit');syncSeatingSettingInput();return}state.settings=state.settings||{};state.settings.seatingDurationMinutes=value;save();updateSeatingCountdowns();toast('Durasi Seating Time disimpan')}
 
 function nextTicket(day){let n=(state.counters[day]||0)+1;state.counters[day]=n;return'WL-'+String(n).padStart(3,'0')}
