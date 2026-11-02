@@ -24,10 +24,13 @@ jobs:
           node --check assets/js/masterdata-ui.js
           node --check assets/js/wip-service.js
           node --check assets/js/wip-ui.js
+          node --check assets/js/menu-service.js
+          node --check assets/js/menu-ui.js
       - name: Test frontend logic
         run: |
           node --test tests/masterdata-phase1.test.js
           node --test tests/wip-phase2.test.js
+          node --test tests/menu-phase3.test.js
 
   deploy:
     needs: validate
