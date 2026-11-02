@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6f6f1">
 <title>Guest Operations — Admin</title>
-<link rel="stylesheet" href="assets/css/style.css?v=20261102-lucide-menu1">
+<link rel="stylesheet" href="assets/css/style.css?v=20261102-fab-quickmenu1">
 </head>
 <body>
 <div class="app">
@@ -69,9 +69,34 @@
     <div class="empty"><div class="empty-icon">✦</div><h3>Frontend Prototype</h3><p>Data disimpan sementara di browser perangkat ini. Belum terhubung ke database atau akun admin sungguhan.</p></div>
   </section>
 </main>
-<button class="fab" id="fab" onclick="openAdd()" aria-label="Tambah tamu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg></button>
+<button class="fab" id="fab" type="button" onclick="toggleQuickMenu()" aria-label="Buka menu cepat" aria-expanded="false" aria-controls="quickMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 
 </div>
+<!-- Quick actions use Lucide Icons. Keep all future interface icons from Lucide. -->
+<div class="quick-menu-backdrop" id="quickMenuBackdrop" onclick="closeQuickMenu()" aria-hidden="true"></div>
+<nav class="quick-menu" id="quickMenu" aria-label="Menu cepat" aria-hidden="true">
+  <div class="quick-menu-heading">AKSI CEPAT</div>
+  <button class="quick-menu-item" type="button" onclick="runQuickAction('add')">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
+    <span>Tambah tamu</span>
+    <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+  </button>
+  <button class="quick-menu-item" type="button" onclick="runQuickAction('waiting')">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg>
+    <span>Antrean</span>
+    <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+  </button>
+  <button class="quick-menu-item" type="button" onclick="runQuickAction('reservations')">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18M8 15h.01M12 15h.01M16 15h.01M8 18h.01M12 18h.01"/></svg>
+    <span>Reservasi</span>
+    <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+  </button>
+  <button class="quick-menu-item" type="button" onclick="runQuickAction('history')">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    <span>Riwayat</span>
+    <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+  </button>
+</nav>
 <div class="sheet-backdrop" id="backdrop" onclick="closeSheet()"></div>
 <div class="sheet" id="sheet"><div class="sheet-handle-row"><button class="handle" id="sheetHandle" type="button" aria-label="Tarik ke bawah untuk menutup"></button></div><div id="sheetContent"></div></div>
 <div class="calendar-backdrop" id="calendarBackdrop" onclick="closeHistoryDatePicker()"></div>
@@ -108,6 +133,6 @@
 <button class="drawer-item" data-page="history" onclick="navigateFromMenu('history')"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Riwayat</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
 <button class="drawer-item" data-page="settings" onclick="navigateFromMenu('settings')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 2.94-.08-.02a1.7 1.7 0 0 0-1.82.6l-.05.07h-3.4l-.05-.07a1.7 1.7 0 0 0-1.82-.6l-.08.02-1.7-2.94.06-.06A1.7 1.7 0 0 0 9.5 15l-.08-.05v-3.4l.08-.05a1.7 1.7 0 0 0-.34-1.88L9.1 9.56l1.7-2.94.08.02a1.7 1.7 0 0 0 1.82-.6l.05-.07h3.4l.05.07a1.7 1.7 0 0 0 1.82.6l.08-.02 1.7 2.94-.06.06A1.7 1.7 0 0 0 19.4 11l.08.05v3.4z" transform="translate(-1 -1)"/></svg><span>Pengaturan</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
 </nav><div class="drawer-foot">ADMIN WORKSPACE</div></aside><div class="toast" id="toast"></div>
-<script src="assets/js/app.js?v=20261102-lucide-menu1" defer></script>
+<script src="assets/js/app.js?v=20261102-fab-quickmenu1" defer></script>
 </body>
 </html>
