@@ -254,7 +254,7 @@ function renderOperationalDetail() {
     '<div class="operational-summary-meta"><div><span class="summary-icon">♧</span><span>Total pack</span><b>' + packTotal + '</b></div><div><span class="summary-icon">◷</span><span>Rata-rata tunggu</span><b>' + esc(averageWait) + '</b></div><div><span class="summary-icon">✓</span><span>Tamu sudah duduk</span><b>' + seatedTotal + '</b></div></div><span class="operational-live"><i></i> LIVE DEMO</span></section>',
     '<section class="operational-chart-card"><div class="operational-section-head"><h3>Tren kunjungan</h3><div class="chart-toggle" role="group" aria-label="Mode grafik"><button type="button" class="' + (operationalChartMode === 'hour' ? 'active' : '') + '" onclick="setOperationalChartMode(\'hour\')">Jam</button><button type="button" class="' + (operationalChartMode === 'pack' ? 'active' : '') + '" onclick="setOperationalChartMode(\'pack\')">Pack</button></div></div><div id="operationalChart" class="operational-chart"></div></section>',
     '<section class="operational-guests"><div class="operational-section-head operational-list-head"><div><h3>Daftar tamu hari ini</h3><small>' + total + ' tamu terdaftar</small></div><span class="operational-list-total">' + total + '</span></div>',
-    '<div class="operational-list-tools"><label class="operational-search"><span>⌕</span><input id="operationalSearch" type="search" placeholder="Cari nama atau nomor antrean..." oninput="renderOperationalGuestList()"></label><select id="operationalFilter" aria-label="Filter status tamu" onchange="setOperationalStatusFilter(this.value)"><option value="all">Semua</option><option value="waiting">Menunggu</option><option value="called">Dipanggil</option><option value="seated">Duduk</option><option value="done">Selesai</option><option value="cancelled">Batal</option></select></div>',
+    '<div class="operational-list-tools"><label class="operational-search"><span>⌕</span><input id="operationalSearch" type="search" placeholder="Cari nama atau nomor antrean..." oninput="renderOperationalGuestList()"></label><div class="operational-filter-wrap"><button type="button" id="operationalFilterTrigger" class="operational-filter-trigger" aria-haspopup="listbox" aria-expanded="false" onclick="toggleOperationalFilterMenu()"><span id="operationalFilterLabel">Semua</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div id="operationalFilterMenu" class="operational-filter-menu" role="listbox" aria-label="Filter status tamu" hidden><button type="button" role="option" aria-selected="true" data-filter="all" onclick="setOperationalStatusFilter(\'all\')">Semua</button><button type="button" role="option" aria-selected="false" data-filter="waiting" onclick="setOperationalStatusFilter(\'waiting\')">Menunggu</button><button type="button" role="option" aria-selected="false" data-filter="called" onclick="setOperationalStatusFilter(\'called\')">Dipanggil</button><button type="button" role="option" aria-selected="false" data-filter="seated" onclick="setOperationalStatusFilter(\'seated\')">Duduk</button><button type="button" role="option" aria-selected="false" data-filter="done" onclick="setOperationalStatusFilter(\'done\')">Selesai</button><button type="button" role="option" aria-selected="false" data-filter="cancelled" onclick="setOperationalStatusFilter(\'cancelled\')">Batal</button></div></div></div>',
     '<div id="operationalGuestList" class="operational-guest-list"></div></section>',
     '<button class="operational-all-button" type="button" onclick="closeSheet();go(\'waiting\')">Lihat semua tamu (' + total + ') <span>→</span></button>'
   ].join('');
@@ -289,8 +289,30 @@ function operationalGuestRow(guest) {
   const time = ['waiting', 'called'].includes(guest.status) ? duration(guest) : fmtTime(guest.resolved || guest.created);
   return '<button type="button" class="operational-guest-row" onclick="closeSheet();openDetail(\'' + guest.id + '\')"><span class="operational-ticket">' + esc(guest.ticket) + '</span><span class="operational-guest-copy"><b>' + esc(guest.name) + '</b><small>' + guest.pack + ' orang · ' + fmtTime(guest.created) + '</small></span><span class="operational-guest-state"><i class="status ' + statusClass(guest.status) + '">' + esc(status) + '</i><small>' + esc(time) + '</small></span><span class="operational-chevron">›</span></button>';
 }
+function toggleOperationalFilterMenu() {
+  const menu = $('operationalFilterMenu');
+  const trigger = $('operationalFilterTrigger');
+  if (!menu || !trigger) return;
+  const open = menu.hidden;
+  menu.hidden = !open;
+  trigger.setAttribute('aria-expanded', String(open));
+}
+function closeOperationalFilterMenu() {
+  const menu = $('operationalFilterMenu');
+  const trigger = $('operationalFilterTrigger');
+  if (menu) menu.hidden = true;
+  if (trigger) trigger.setAttribute('aria-expanded', 'false');
+}
 function setOperationalStatusFilter(value) {
   operationalStatusFilter = value;
+  const labels = { all: 'Semua', waiting: 'Menunggu', called: 'Dipanggil', seated: 'Duduk', done: 'Selesai', cancelled: 'Batal' };
+  const label = $('operationalFilterLabel');
+  if (label) label.textContent = labels[value] || 'Semua';
+  document.querySelectorAll('#operationalFilterMenu [data-filter]').forEach(option => {
+    const selected = option.dataset.filter === value;
+    option.setAttribute('aria-selected', String(selected));
+  });
+  closeOperationalFilterMenu();
   renderOperationalGuestList();
 }
 function renderOperationalGuestList() {
