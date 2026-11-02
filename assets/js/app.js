@@ -847,17 +847,279 @@ function renderReservations(animateDateChange = false) {
     requestAnimationFrame(() => reservationList.classList.add('is-changing'));
   }
 }
-function openReservationForm(){
- const min=todayKey();
- openSheet('<div class="sheet-head"><h2>Reservasi baru</h2><button class="close" onclick="closeSheet()">✕</button></div><form onsubmit="saveReservation(event)"><div class="field"><label>Nama tamu *</label><input id="rName" required maxlength="120" placeholder="Nama tamu"></div><div class="field"><label>Jumlah pack *</label><input id="rPack" type="number" min="1" max="500" value="2" required></div><div class="field"><label>Tanggal reservasi *</label><input id="rDate" type="date" min="'+min+'" value="'+(reservationDate<min?min:reservationDate)+'" required></div><div class="field"><label>Jam reservasi *</label><input id="rTime" type="time" value="19:00" required></div><div class="field"><label>WhatsApp (opsional)</label><input id="rPhone" inputmode="tel" maxlength="24" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Preferensi smoking</label><select id="rSmoking"><option>Non Smoking</option><option>Smoking</option></select></div><div class="field"><label>Catatan (opsional)</label><textarea id="rNote" rows="2" maxlength="1000" placeholder="Catatan untuk staf"></textarea></div><div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button class="primary" type="submit">Simpan reservasi</button></div></form>');
+let reservationDatePickerMonth = new Date();
+let reservationDatePickerDraft = '';
+
+function openReservationForm() {
+  const minDate = todayKey();
+  const initialDate = reservationDate < minDate ? minDate : reservationDate;
+
+  openSheet(
+    '<div class="sheet-head"><h2>Reservasi baru</h2><button class="close" onclick="closeSheet()">✕</button></div>' +
+    '<form onsubmit="saveReservation(event)">' +
+      '<div class="field"><label>Nama tamu *</label><input id="rName" required maxlength="120" placeholder="Nama tamu"></div>' +
+      '<div class="field"><label>Jumlah pack *</label><input id="rPack" type="number" min="1" max="500" value="2" required></div>' +
+      '<div class="field"><label>Tanggal reservasi *</label>' +
+        '<input id="rDate" type="hidden" value="' + initialDate + '">' +
+        '<button class="reservation-picker-trigger" id="rDateTrigger" type="button" onclick="openReservationDatePicker()">' +
+          '<span id="rDateLabel">' + historyDateLabel(initialDate) + '</span>' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>' +
+        '</button>' +
+      '</div>' +
+      '<div class="field"><label>Jam reservasi *</label>' +
+        '<input id="rTime" type="hidden" value="19:00">' +
+        '<button class="reservation-picker-trigger" id="rTimeTrigger" type="button" onclick="openReservationTimePicker()">' +
+          '<span id="rTimeLabel">19.00 WIB</span>' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>' +
+        '</button>' +
+      '</div>' +
+      '<div class="field"><label>WhatsApp (opsional)</label><input id="rPhone" inputmode="tel" maxlength="24" placeholder="08xxxxxxxxxx"></div>' +
+      '<div class="field"><label>Preferensi smoking</label>' +
+        '<input id="rSmoking" type="hidden" value="Non Smoking">' +
+        '<div class="reservation-select">' +
+          '<button class="reservation-select-trigger" id="rSmokingTrigger" type="button" onclick="toggleReservationSmokingOptions()" aria-expanded="false" aria-controls="rSmokingOptions">' +
+            '<span id="rSmokingLabel">Non Smoking</span>' +
+            '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>' +
+          '</button>' +
+          '<div class="reservation-select-options" id="rSmokingOptions" hidden>' +
+            '<button class="reservation-select-option selected" type="button" onclick="selectReservationSmoking(\'Non Smoking\')"><span>Non Smoking</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button>' +
+            '<button class="reservation-select-option" type="button" onclick="selectReservationSmoking(\'Smoking\')"><span>Smoking</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="field"><label>Catatan (opsional)</label><textarea id="rNote" rows="2" maxlength="1000" placeholder="Catatan untuk staf"></textarea></div>' +
+      '<div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button class="primary" type="submit">Simpan reservasi</button></div>' +
+    '</form>'
+  );
 }
-function saveReservation(e){e.preventDefault();const name=$('rName').value.trim(),pack=Number($('rPack').value),date=$('rDate').value,time=$('rTime').value,phone=$('rPhone').value.trim();
- if(!name||!Number.isInteger(pack)||pack<1||pack>500||!date||!time){toast('Lengkapi data reservasi terlebih dahulu');return}
- if(date<todayKey()||(date===todayKey()&&time<new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date()))){toast('Tanggal dan jam tidak boleh di masa lalu');return}
- if(phone&&!/^(\+?62|0)\d{8,13}$/.test(phone.replace(/[\s-]/g,''))){toast('Format WhatsApp belum sesuai');return}
- const r={id:uid(),code:reservationCode(date),name,pack,date,time,phone,smoking:$('rSmoking').value,note:$('rNote').value.trim(),status:'pending',created:Date.now(),guestId:null};
- state.reservations.push(r);save();reservationMonth=date.slice(0,7);reservationDate=date;closeSheet();renderAll();toast('Reservasi tersimpan · '+r.code);
+
+function toggleReservationSmokingOptions() {
+  const options = $('rSmokingOptions');
+  const trigger = $('rSmokingTrigger');
+  if (!options || !trigger) return;
+
+  options.hidden = !options.hidden;
+  trigger.setAttribute('aria-expanded', String(!options.hidden));
 }
+
+function selectReservationSmoking(value) {
+  $('rSmoking').value = value;
+  $('rSmokingLabel').textContent = value;
+
+  $('rSmokingOptions').querySelectorAll('.reservation-select-option').forEach(option => {
+    const selected = option.textContent.trim() === value;
+    option.classList.toggle('selected', selected);
+    option.setAttribute('aria-pressed', String(selected));
+  });
+
+  $('rSmokingOptions').hidden = true;
+  $('rSmokingTrigger').setAttribute('aria-expanded', 'false');
+}
+
+function openReservationDatePicker() {
+  const current = $('rDate').value || todayKey();
+  reservationDatePickerDraft = current;
+
+  const date = parseHistoryDate(current);
+  reservationDatePickerMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+
+  renderReservationDatePicker();
+  $('reservationDateBackdrop').classList.add('show');
+  $('reservationDateDialog').classList.add('show');
+}
+
+function closeReservationDatePicker() {
+  $('reservationDateBackdrop').classList.remove('show');
+  $('reservationDateDialog').classList.remove('show');
+}
+
+function changeReservationDatePickerMonth(delta) {
+  reservationDatePickerMonth = new Date(
+    reservationDatePickerMonth.getFullYear(),
+    reservationDatePickerMonth.getMonth() + delta,
+    1
+  );
+  renderReservationDatePicker();
+}
+
+function selectReservationDateDraft(value) {
+  if (value < todayKey()) return;
+  reservationDatePickerDraft = value;
+  renderReservationDatePicker();
+}
+
+function selectTodayForReservation() {
+  reservationDatePickerDraft = todayKey();
+  const date = parseHistoryDate(reservationDatePickerDraft);
+  reservationDatePickerMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+  renderReservationDatePicker();
+}
+
+function applyReservationDate() {
+  if (!reservationDatePickerDraft || reservationDatePickerDraft < todayKey()) {
+    toast('Tanggal reservasi tidak boleh di masa lalu');
+    return;
+  }
+
+  $('rDate').value = reservationDatePickerDraft;
+  $('rDateLabel').textContent = historyDateLabel(reservationDatePickerDraft);
+  closeReservationDatePicker();
+}
+
+function renderReservationDatePicker() {
+  const year = reservationDatePickerMonth.getFullYear();
+  const month = reservationDatePickerMonth.getMonth();
+  const today = todayKey();
+  const todayDate = parseHistoryDate(today);
+  const previousMonth = year < todayDate.getFullYear() ||
+    (year === todayDate.getFullYear() && month <= todayDate.getMonth());
+
+  $('reservationDateMonthLabel').textContent = new Intl.DateTimeFormat('id-ID', {
+    month: 'long',
+    year: 'numeric'
+  }).format(reservationDatePickerMonth);
+
+  $('reservationDateSelectedLabel').textContent = historyDateLabel(reservationDatePickerDraft);
+  $('reservationDatePrev').disabled = previousMonth;
+
+  const firstDayOffset = new Date(year, month, 1).getDay();
+  let days = '';
+
+  for (let index = 0; index < 42; index++) {
+    const date = new Date(year, month, 1 - firstDayOffset + index);
+    const key = historyDateKey(date);
+    const outside = date.getMonth() !== month;
+    const disabled = outside || key < today;
+    const classes = ['calendar-day'];
+
+    if (outside) classes.push('outside');
+    if (key === today) classes.push('today');
+    if (key === reservationDatePickerDraft) classes.push('selected');
+
+    days +=
+      '<button type="button" class="' + classes.join(' ') + '"' +
+      (disabled ? ' disabled' : '') +
+      ' onclick="selectReservationDateDraft(\'' + key + '\')"' +
+      ' aria-label="' + historyDateLabel(key) + '"' +
+      ' aria-pressed="' + (key === reservationDatePickerDraft) + '">' +
+      date.getDate() +
+      '</button>';
+  }
+
+  $('reservationDatePickerDays').innerHTML = days;
+}
+
+function openReservationTimePicker() {
+  const value = $('rTime').value || '19:00';
+  const [hour, minute] = value.split(':').map(Number);
+
+  $('reservationTimeHour').value = String(hour).padStart(2, '0');
+  $('reservationTimeMinute').value = String(minute).padStart(2, '0');
+  syncReservationTimePreview();
+
+  $('reservationTimeBackdrop').classList.add('show');
+  $('reservationTimeDialog').classList.add('show');
+}
+
+function closeReservationTimePicker() {
+  $('reservationTimeBackdrop').classList.remove('show');
+  $('reservationTimeDialog').classList.remove('show');
+}
+
+function syncReservationTimePreview() {
+  const hour = $('reservationTimeHour').value.trim();
+  const minute = $('reservationTimeMinute').value.trim();
+  const validHour = /^\d{1,2}$/.test(hour) && Number(hour) >= 0 && Number(hour) <= 23;
+  const validMinute = /^\d{1,2}$/.test(minute) && Number(minute) >= 0 && Number(minute) <= 59;
+
+  $('reservationTimePreview').textContent = validHour && validMinute
+    ? String(Number(hour)).padStart(2, '0') + '.' + String(Number(minute)).padStart(2, '0')
+    : '--.--';
+}
+
+function adjustReservationTime(part, amount) {
+  const input = part === 'hour' ? $('reservationTimeHour') : $('reservationTimeMinute');
+  const current = Number(input.value || (part === 'hour' ? 19 : 0));
+  const next = part === 'hour'
+    ? (current + amount + 24) % 24
+    : (current + amount * 5 + 60) % 60;
+
+  input.value = String(next).padStart(2, '0');
+  syncReservationTimePreview();
+}
+
+function applyReservationTime() {
+  const hourText = $('reservationTimeHour').value.trim();
+  const minuteText = $('reservationTimeMinute').value.trim();
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+
+  if (!/^\d{1,2}$/.test(hourText) || !/^\d{1,2}$/.test(minuteText) ||
+      hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+    toast('Format jam belum sesuai');
+    return;
+  }
+
+  const value = String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
+  $('rTime').value = value;
+  $('rTimeLabel').textContent = value.replace(':', '.') + ' WIB';
+  closeReservationTimePicker();
+}
+
+function saveReservation(e) {
+  e.preventDefault();
+
+  const name = $('rName').value.trim();
+  const pack = Number($('rPack').value);
+  const date = $('rDate').value;
+  const time = $('rTime').value;
+  const phone = $('rPhone').value.trim();
+
+  if (!name || !Number.isInteger(pack) || pack < 1 || pack > 500 || !date || !time) {
+    toast('Lengkapi data reservasi terlebih dahulu');
+    return;
+  }
+
+  if (date < todayKey() || (date === todayKey() &&
+      time < new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+      }).format(new Date()))) {
+    toast('Tanggal dan jam tidak boleh di masa lalu');
+    return;
+  }
+
+  if (phone && !/^(\+?62|0)\d{8,13}$/.test(phone.replace(/[\s-]/g, ''))) {
+    toast('Format WhatsApp belum sesuai');
+    return;
+  }
+
+  const reservation = {
+    id: uid(),
+    code: reservationCode(date),
+    name,
+    pack,
+    date,
+    time,
+    phone,
+    smoking: $('rSmoking').value,
+    note: $('rNote').value.trim(),
+    status: 'pending',
+    created: Date.now(),
+    guestId: null
+  };
+
+  state.reservations.push(reservation);
+  save();
+  reservationMonth = date.slice(0, 7);
+  reservationDate = date;
+  closeSheet();
+  renderAll();
+  toast('Reservasi tersimpan · ' + reservation.code);
+}
+
 function openReservationDetail(id){const r=state.reservations.find(x=>x.id===id);if(!r)return;openSheet('<div class="sheet-head"><h2>Detail reservasi</h2><button class="close" onclick="closeSheet()">✕</button></div><div class="detail-ticket"><small>KODE RESERVASI</small><strong>'+esc(r.code)+'</strong><small>'+esc(reservationDateText(r.date))+'</small></div><div style="font:800 18px Manrope">'+esc(r.name)+'</div><div class="detail-grid"><div class="detail-cell"><small>Jam reservasi</small><b>'+esc(r.time)+' WIB</b></div><div class="detail-cell"><small>Jumlah pack</small><b>'+r.pack+' pack</b></div><div class="detail-cell"><small>Status</small><b>'+reservationStatusLabel(r.status)+'</b></div><div class="detail-cell"><small>Smoking</small><b>'+esc(r.smoking)+'</b></div><div class="detail-cell" style="grid-column:1/-1"><small>WhatsApp</small><b>'+esc(r.phone||'—')+'</b></div><div class="detail-cell" style="grid-column:1/-1"><small>Catatan</small><b>'+esc(r.note||'—')+'</b></div></div><div class="sheet-actions"><button class="secondary" onclick="closeSheet()">Tutup</button></div>')}
 function cancelReservation(id) {
   const reservation = state.reservations.find(item => item.id === id);
