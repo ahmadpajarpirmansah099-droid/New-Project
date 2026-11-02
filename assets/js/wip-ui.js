@@ -228,6 +228,10 @@
       }
     }
     if (action === 'retry') renderPage('wips');
+    if (action === 'nav') {
+      if (typeof root.closeMenu === 'function') root.closeMenu();
+      if (typeof root.go === 'function') root.go('wips');
+    }
   }
 
   function handleInput(event) {
