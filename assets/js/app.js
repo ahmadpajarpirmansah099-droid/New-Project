@@ -373,7 +373,7 @@ function chooseInitial(v){
  $('segSeated').classList.toggle('selected',v==='seated');
  group.classList.add('is-switching');
  window.clearTimeout(group._liquidTimer);
- group._liquidTimer=window.setTimeout(()=>group.classList.remove('is-switching'),420);
+ group._liquidTimer=window.setTimeout(()=>group.classList.remove('is-switching'),280);
 }
 function saveGuest(e){
  e.preventDefault();
