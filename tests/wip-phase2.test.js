@@ -198,5 +198,5 @@ test('Changing a WIP yield unit is blocked while a parent recipe still uses the 
     id: child.id, nama_wip: 'Syrup', hasil_per_batch: 500, satuan_hasil: 'GR'
   }, [{
     component_type: 'material', item_id: milk.id, qty_input: 1, unit_input: 'L'
-  }]), /Perbarui satuan pada resep induk/);
+  }]), /Perbarui satuan pada resep yang terkait/);
 });
