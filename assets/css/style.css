@@ -6224,9 +6224,9 @@ button.history-date {
   position: fixed;
   inset: 0;
   z-index: 13;
-  background: rgba(17, 18, 37, 0.10);
-  backdrop-filter: blur(5px) saturate(0.92);
-  -webkit-backdrop-filter: blur(5px) saturate(0.92);
+  background: rgba(17, 18, 37, 0.08);
+  backdrop-filter: blur(2px) saturate(0.96);
+  -webkit-backdrop-filter: blur(2px) saturate(0.96);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -6283,10 +6283,10 @@ button.history-date {
   -webkit-tap-highlight-color: transparent;
 }
 
-.quick-menu-item:nth-child(1) { right: 0; bottom: 52px; }
-.quick-menu-item:nth-child(2) { right: 10px; bottom: 112px; }
-.quick-menu-item:nth-child(3) { right: 30px; bottom: 172px; }
-.quick-menu-item:nth-child(4) { right: 58px; bottom: 232px; }
+.quick-menu-item:nth-child(1) { right: 0; bottom: 54px; }
+.quick-menu-item:nth-child(2) { right: 62px; bottom: 108px; }
+.quick-menu-item:nth-child(3) { right: 112px; bottom: 54px; }
+.quick-menu-item:nth-child(4) { right: 164px; bottom: 0; }
 
 .quick-menu.show .quick-menu-item {
   opacity: 1;
@@ -6341,10 +6341,10 @@ button.history-date {
 }
 
 @media (max-height: 700px) {
-  .quick-menu-item:nth-child(1) { right: 0; bottom: 48px; }
-  .quick-menu-item:nth-child(2) { right: 8px; bottom: 98px; }
-  .quick-menu-item:nth-child(3) { right: 24px; bottom: 148px; }
-  .quick-menu-item:nth-child(4) { right: 46px; bottom: 198px; }
+  .quick-menu-item:nth-child(1) { right: 0; bottom: 50px; }
+  .quick-menu-item:nth-child(2) { right: 52px; bottom: 98px; }
+  .quick-menu-item:nth-child(3) { right: 96px; bottom: 50px; }
+  .quick-menu-item:nth-child(4) { right: 142px; bottom: 0; }
 }
 
 @media (min-width: 900px) {
