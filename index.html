@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6f6f1">
 <title>Guest Operations — Admin</title>
-<link rel="stylesheet" href="assets/css/style.css?v=20261102-swipe-home1">
+<link rel="stylesheet" href="assets/css/style.css?v=20261102-page-back1">
 </head>
 <body>
 <div class="app">
@@ -28,12 +28,14 @@
     <div class="queue-list" id="dashboardList"></div>
   </section>
   <section class="page" id="page-waiting">
+    <button class="page-back" type="button" onclick="returnToGuestOperational()" aria-label="Kembali ke Guest Operational"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>
     <div class="page-title">Waiting List</div><p class="page-sub">Kelola tamu dan status antrean hari ini.</p>
     <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input id="queueSearch" placeholder="Cari nama atau nomor antrean..." oninput="renderQueue()"></div>
     <div class="filters" id="queueFilters"><button class="filter active" data-filter="waiting" onclick="setFilter('waiting')">Menunggu</button><button class="filter" data-filter="seated" onclick="setFilter('seated')">Duduk</button><button class="filter" data-filter="done" onclick="setFilter('done')">Selesai</button><button class="filter" data-filter="cancelled" onclick="setFilter('cancelled')">Batal</button></div>
     <div class="queue-list" id="queueList"></div>
   </section>
   <section class="page" id="page-history">
+    <button class="page-back" type="button" onclick="returnToGuestOperational()" aria-label="Kembali ke Guest Operational"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>
     <div class="page-title">Riwayat</div><p class="page-sub">Semua antrean berdasarkan tanggal pendaftaran.</p>
     <button class="history-date" id="historyDateDisplay" type="button" onclick="openHistoryDatePicker()" aria-label="Pilih tanggal riwayat">
       <span class="history-date-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span>
@@ -45,6 +47,7 @@
     <div class="queue-list" id="historyList"></div>
   </section>
   <section class="page" id="page-reservations">
+    <button class="page-back" type="button" onclick="returnToGuestOperational()" aria-label="Kembali ke Guest Operational"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>
     <div class="page-title">Reservasi</div><p class="page-sub">Kelola jadwal kedatangan dan tamu yang sudah memesan.</p>
     <div class="reservation-toolbar">
       <div><span class="eyebrow">KALENDER RESERVASI</span><strong id="reservationMonthLabel"></strong></div>
@@ -148,6 +151,6 @@
 <button class="drawer-item active" data-page="dashboard" onclick="navigateFromMenu('dashboard')" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Guest Operational</span></button>
 <button class="drawer-item" data-page="settings" onclick="navigateFromMenu('settings')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg><span>Pengaturan</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
 </nav><div class="drawer-foot">ADMIN WORKSPACE</div></aside><div class="toast" id="toast"></div>
-<script src="assets/js/app.js?v=20261102-swipe-home1" defer></script>
+<script src="assets/js/app.js?v=20261102-page-back1" defer></script>
 </body>
 </html>
