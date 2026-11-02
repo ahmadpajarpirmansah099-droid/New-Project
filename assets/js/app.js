@@ -1039,7 +1039,12 @@ function syncReservationTimePreview() {
 
 function adjustReservationTime(part, amount) {
   const input = part === 'hour' ? $('reservationTimeHour') : $('reservationTimeMinute');
-  const current = Number(input.value || (part === 'hour' ? 19 : 0));
+  const fallback = part === 'hour' ? 19 : 0;
+  const parsed = Number(input.value);
+  const maximum = part === 'hour' ? 23 : 59;
+  const current = Number.isFinite(parsed) && parsed >= 0 && parsed <= maximum
+    ? parsed
+    : fallback;
   const next = part === 'hour'
     ? (current + amount + 24) % 24
     : (current + amount * 5 + 60) % 60;
