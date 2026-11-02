@@ -3615,17 +3615,15 @@ button.history-date {
 
 .reservation-toolbar {
 
-  display:flex;
+  display:grid;
 
-  flex-direction:column;
+  grid-template-columns:minmax(0,1fr);
 
-  align-items:stretch;
-
-  gap:10px;
+  gap:9px;
 
   background:#fff;
 
-  padding:12px 16px;
+  padding:12px 15px;
 
   border-radius:17px;
 
@@ -3649,7 +3647,15 @@ button.history-date {
 
 }
 
+.reservation-toolbar-heading {
+
+  min-height:28px;
+
+}
+
 .reservation-toolbar strong {
+
+  min-width:0;
 
   font:800 17px Manrope;
 
@@ -3657,19 +3663,17 @@ button.history-date {
 
 }
 
-.reservation-today,
+.reservation-today-button {
 
-.reservation-month-nav button {
+  flex:0 0 auto;
 
-  min-height:32px;
+  min-height:29px;
 
-  min-width:32px;
-
-  padding:0 10px;
+  padding:0 12px;
 
   border:0;
 
-  border-radius:10px;
+  border-radius:9px;
 
   background:#f3f2f7;
 
@@ -3678,12 +3682,6 @@ button.history-date {
   font-size:11px;
 
   font-weight:800;
-
-}
-
-.reservation-today {
-
-  flex-shrink:0;
 
 }
 
@@ -3697,15 +3695,33 @@ button.history-date {
 
   gap:5px;
 
+  width:auto;
+
+  flex:0 0 auto;
+
 }
 
 .reservation-month-nav button {
 
-  height:32px;
+  width:34px;
 
-  padding:0 9px;
+  min-width:34px;
+
+  height:34px;
+
+  padding:0;
+
+  border:0;
+
+  border-radius:10px;
+
+  background:#f3f2f7;
+
+  color:#55536d;
 
   font-size:14px;
+
+  font-weight:800;
 
 }
 
@@ -4175,29 +4191,6 @@ button.history-date {
     padding:9px;
 
   }
-
-  .reservation-toolbar {
-
-    align-items:stretch;
-
-  }
-
-  .reservation-toolbar-heading,
-
-  .reservation-toolbar-month {
-
-    width:100%;
-
-  }
-
-  .reservation-month-nav {
-
-    width:auto;
-
-    justify-content:flex-end;
-
-  }
-
 
 }
 
@@ -6944,55 +6937,3 @@ button.history-date {
   }
 }
 
-
-/* Compact reservation calendar toolbar */
-.reservation-toolbar {
-  display:grid;
-  grid-template-columns:minmax(0,1fr);
-  gap:9px;
-  padding:12px 15px;
-}
-
-.reservation-toolbar-heading,
-.reservation-toolbar-month {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  min-width:0;
-}
-
-.reservation-toolbar-heading {
-  min-height:28px;
-}
-
-.reservation-toolbar-month strong {
-  min-width:0;
-  font:800 17px Manrope;
-  color:#111225;
-}
-
-.reservation-today-button {
-  flex:0 0 auto;
-  min-height:29px;
-  padding:0 12px;
-  border:0;
-  border-radius:9px;
-  background:#f3f2f7;
-  color:#55536d;
-  font-size:11px;
-  font-weight:800;
-}
-
-.reservation-toolbar .reservation-month-nav {
-  width:auto;
-  flex:0 0 auto;
-  justify-content:flex-end;
-}
-
-.reservation-toolbar .reservation-month-nav button {
-  width:34px;
-  min-width:34px;
-  height:34px;
-  padding:0;
-}
