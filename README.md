@@ -15,15 +15,36 @@ Aplikasi mobile-first untuk mengelola kedatangan tamu, antrean, dan reservasi se
 
 ```
 index.html
-  Struktur halaman dan komponen aplikasi.
+  Kerangka halaman dan komponen antarmuka.
+  - #page-dashboard: ringkasan Guest Operational.
+  - #page-waiting: daftar Waiting List.
+  - #page-history: daftar dan pemilih tanggal riwayat.
+  - #page-reservations: kalender dan daftar reservasi.
+  - #page-settings: pengaturan operasional.
+  - Bagian bawah file: menu cepat, drawer, bottom sheet, dan dialog kalender/jam.
 
 assets/
   css/
     style.css
-      Sistem warna, layout, komponen, responsive rules, dan animasi.
+      Semua aturan tampilan dan animasi.
+      - .page-back: tombol kembali halaman fitur.
+      - .operational-filter-*: filter status detail operasional.
+      - .quick-menu-*: menu cepat model kipas.
+      - .reservation-day dan .reservation-list.is-changing: gerak kalender reservasi.
+      - .seating-settings-* dan .seating-stepper: pengaturan Seating Time di HP.
+      - #sheet .seg.is-switching: animasi pilihan status awal tamu.
+
   js/
     app.js
-      Navigasi, state aplikasi, penyimpanan demo, dan interaksi.
+      Logika, penyimpanan demo, dan interaksi.
+      - Bagian 1: utilitas, tanggal/jam, dan penyimpanan lokal.
+      - Bagian 2: navigasi, popup, dan bottom sheet.
+      - Bagian 3–4: tambah tamu, status antrean, dan tampilan daftar.
+      - Bagian 5: detail operasional dari dashboard.
+      - Bagian 6 (History): filter tanggal dan riwayat.
+      - Bagian Reservations: kalender, formulir, dan proses duduk.
+      - Bagian 7: detail tamu, koreksi, ekspor, dan reset demo.
+      - Bagian 8: proses awal aplikasi dan pembaruan berkala.
 
 .github/
   workflows/
