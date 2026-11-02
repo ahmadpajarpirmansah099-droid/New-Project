@@ -7230,12 +7230,12 @@ button.history-date {
 
 #sheet .seg.is-switching[data-selected="seated"]::before {
   transform-origin:left center;
-  animation:liquid-toggle-right .58s cubic-bezier(.2,.78,.22,1) both;
+  animation:liquid-toggle-right .36s cubic-bezier(.16,1,.3,1) both;
 }
 
 #sheet .seg.is-switching[data-selected="waiting"]::before {
   transform-origin:right center;
-  animation:liquid-toggle-left .58s cubic-bezier(.2,.78,.22,1) both;
+  animation:liquid-toggle-left .36s cubic-bezier(.16,1,.3,1) both;
 }
 
 @keyframes liquid-toggle-right {
