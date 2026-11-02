@@ -692,3 +692,10 @@ button.history-date{
 .operational-filter-menu button:active{background:#f1f0f7}
 @keyframes operational-filter-in{from{opacity:0;transform:translateY(-4px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){.operational-filter-menu,.operational-filter-trigger svg{animation:none;transition:none}}
+
+
+/* CHILD PAGE BACK NAVIGATION */
+.page-back{display:inline-flex;align-items:center;gap:8px;min-height:34px;margin:0 0 9px;padding:0 10px 0 0;border:0;border-radius:10px;background:transparent;color:#68677f;font-size:11px;font-weight:800;letter-spacing:-.01em;touch-action:manipulation}
+.page-back svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.page-back:active{opacity:.65;transform:translateX(-2px)}
+@media(prefers-reduced-motion:reduce){.page-back{transition:none}}
