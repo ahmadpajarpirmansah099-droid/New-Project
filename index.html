@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="assets/css/style.css?v=20261102-seating-compact">
 <link rel="stylesheet" href="assets/css/masterdata.css?v=20261102-masterdata-p1">
 <link rel="stylesheet" href="assets/css/wip.css?v=20261103-wip-p2">
+<link rel="stylesheet" href="assets/css/menu.css?v=20261103-menu-p3">
 </head>
 <body>
 <div class="app">
@@ -105,6 +106,9 @@
   </section>
   <section class="page" id="page-wips">
     <div id="wipDataRoot"></div>
+  </section>
+  <section class="page" id="page-menus">
+    <div id="menuDataRoot"></div>
   </section>
 </main>
 <button class="fab" id="fab" type="button" onclick="toggleQuickMenu()" aria-label="Buka menu cepat" aria-expanded="false" aria-controls="quickMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -221,12 +225,14 @@
 <nav class="drawer-nav">
 <button class="drawer-item active" data-page="dashboard" onclick="navigateFromMenu('dashboard')" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Guest Operational</span></button>
 <button class="drawer-item" data-page="settings" onclick="navigateFromMenu('settings')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg><span>Pengaturan</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
-<button class="drawer-item" type="button" data-page="master-items" data-md-action="nav" aria-label="Master Barang"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M4 7.5 12 12l8-4.5M12 12v9M8 5.3l8 4.5"/></svg><span>Master Barang</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button><button class="drawer-item" type="button" data-page="wips" data-wip-action="nav" aria-label="Resep WIP"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 8 4-8 4-8-4 8-4Z"/><path d="m4 10 8 4 8-4"/><path d="m4 14 8 4 8-4"/></svg><span>Resep WIP</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></nav><div class="drawer-foot">ADMIN WORKSPACE</div></aside><div class="toast" id="toast"></div>
+<button class="drawer-item" type="button" data-page="master-items" data-md-action="nav" aria-label="Master Barang"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M4 7.5 12 12l8-4.5M12 12v9M8 5.3l8 4.5"/></svg><span>Master Barang</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button><button class="drawer-item" type="button" data-page="wips" data-wip-action="nav" aria-label="Resep WIP"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 8 4-8 4-8-4 8-4Z"/><path d="m4 10 8 4 8-4"/><path d="m4 14 8 4 8-4"/></svg><span>Resep WIP</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button><button class="drawer-item" type="button" data-page="menus" data-menu-action="nav" aria-label="Menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 2v7a4 4 0 0 0 4 4v9"/><path d="M7 2v7"/><path d="M11 2v7a4 4 0 0 1-4 4"/><path d="M17 2v20"/><path d="M17 2a4 4 0 0 1 4 4v5h-4"/></svg><span>Menu</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></nav><div class="drawer-foot">ADMIN WORKSPACE</div></aside><div class="toast" id="toast"></div>
 <script src="assets/js/masterdata-store.js?v=20261102-p1" defer></script>
 <script src="assets/js/masterdata-service.js?v=20261102-p1" defer></script>
 <script src="assets/js/masterdata-ui.js?v=20261102-p1" defer></script>
 <script src="assets/js/wip-service.js?v=20261103-p2" defer></script>
 <script src="assets/js/wip-ui.js?v=20261103-p2" defer></script>
+<script src="assets/js/menu-service.js?v=20261103-p3" defer></script>
+<script src="assets/js/menu-ui.js?v=20261103-p3" defer></script>
 <script src="assets/js/app.js?v=20261102-masterdata-p1" defer></script>
 </body>
 </html>
