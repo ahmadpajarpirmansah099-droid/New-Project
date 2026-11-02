@@ -7213,6 +7213,14 @@ button.history-date {
 }
 
 
+/* Keep the moving liquid layer visible beneath both status labels */
+#sheet .seg button,
+#sheet .seg button.selected {
+  background:transparent!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+}
+
 /* LIQUID TOGGLE — INITIAL GUEST STATUS */
 #sheet .seg.is-switching::before {
   transition:none;
