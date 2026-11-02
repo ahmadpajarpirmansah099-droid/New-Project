@@ -6207,39 +6207,246 @@ button.history-date {
 
 }
 
-/* FLOATING QUICK MENU — MINIMAL RADIAL FAN */
+/* FLOATING QUICK MENU — MOBILE ACTIONS
+   Icon paths in this menu follow the Lucide Icons family.
+*/
+
 .fab {
-  z-index: 15;
+
+  z-index:15;
+
 }
 
 .fab svg {
-  transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  transition:transform .28s cubic-bezier(.2,.8,.2,1);
+
 }
 
 .fab.is-open svg {
-  transform: rotate(45deg);
+
+  transform:rotate(45deg);
+
 }
 
 .quick-menu-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 13;
-  background: rgba(17, 18, 37, 0.08);
-  backdrop-filter: blur(2px) saturate(0.96);
-  -webkit-backdrop-filter: blur(2px) saturate(0.96);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.18s ease, visibility 0.18s ease;
+
+  position:fixed;
+
+  inset:0;
+
+  z-index:13;
+
+  background:rgba(17,18,37,.08);
+
+  backdrop-filter:blur(2px);
+
+  -webkit-backdrop-filter:blur(2px);
+
+  opacity:0;
+
+  visibility:hidden;
+
+  pointer-events:none;
+
+  transition:opacity .2s ease,visibility .2s ease;
+
 }
 
 .quick-menu-backdrop.show {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
+
+  opacity:1;
+
+  visibility:visible;
+
+  pointer-events:auto;
+
 }
 
-/* Titik pusat kipas disejajarkan dengan tengah tombol FAB. */
+.quick-menu {
+
+  position:fixed;
+
+  z-index:16;
+
+  right:max(20px,calc((100vw - 520px)/2 + 20px));
+
+  bottom:calc(24px + 54px + 12px + env(safe-area-inset-bottom));
+
+  width:min(258px,calc(100vw - 36px));
+
+  padding:9px;
+
+  background:#fff;
+
+  border:1px solid rgba(20,20,38,.06);
+
+  border-radius:19px;
+
+  box-shadow:0 16px 42px rgba(17,18,37,.18);
+
+  opacity:0;
+
+  visibility:hidden;
+
+  pointer-events:none;
+
+  transform:translateY(10px) scale(.97);
+
+  transform-origin:bottom right;
+
+  transition:opacity .22s ease,transform .26s cubic-bezier(.2,.8,.2,1),visibility .22s ease;
+
+}
+
+.quick-menu.show {
+
+  opacity:1;
+
+  visibility:visible;
+
+  pointer-events:auto;
+
+  transform:translateY(0) scale(1);
+
+}
+
+.quick-menu-heading {
+
+  padding:8px 11px 7px;
+
+  color:#a09eaa;
+
+  font-size:9px;
+
+  font-weight:800;
+
+  letter-spacing:.14em;
+
+}
+
+.quick-menu-item {
+
+  width:100%;
+
+  min-height:48px;
+
+  padding:0 11px;
+
+  display:flex;
+
+  align-items:center;
+
+  gap:12px;
+
+  border:0;
+
+  border-radius:12px;
+
+  background:transparent;
+
+  color:#17172a;
+
+  text-align:left;
+
+  font-size:13px;
+
+  font-weight:700;
+
+  transition:background .18s ease,transform .18s ease;
+
+}
+
+.quick-menu-item+ .quick-menu-item {
+
+  margin-top:2px;
+
+}
+
+.quick-menu-item>svg:first-child {
+
+  width:19px;
+
+  height:19px;
+
+  flex:none;
+
+  fill:none;
+
+  stroke:#777587;
+
+  stroke-width:1.9;
+
+  stroke-linecap:round;
+
+  stroke-linejoin:round;
+
+}
+
+.quick-menu-item>span {
+
+  flex:1;
+
+}
+
+.quick-menu-chevron {
+
+  width:16px;
+
+  height:16px;
+
+  flex:none;
+
+  fill:none;
+
+  stroke:#aaa8b2;
+
+  stroke-width:2;
+
+  stroke-linecap:round;
+
+  stroke-linejoin:round;
+
+}
+
+.quick-menu-item:active {
+
+  background:#f3f5ea;
+
+  transform:scale(.985);
+
+}
+
+@media(min-width:900px) {
+
+  .quick-menu {
+
+    right:max(20px,calc((100vw - 1100px)/2 + 20px));
+
+  }
+
+
+}
+
+@media(prefers-reduced-motion:reduce) {
+
+  .fab svg,.quick-menu-backdrop,.quick-menu,.quick-menu-item {
+
+    transition:none;
+
+  }
+
+
+}
+
+
+/* FAN MENU — rebuilt from the original menu structure to match the approved mockup */
+.quick-menu-backdrop {
+  background: rgba(17, 18, 37, 0.08);
+  backdrop-filter: blur(2px) saturate(0.96);
+  -webkit-backdrop-filter: blur(2px) saturate(0.96);
+}
+
 .quick-menu {
   position: fixed;
   z-index: 16;
@@ -6249,15 +6456,26 @@ button.history-date {
   height: 0;
   padding: 0;
   margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  transform: none;
+  transition: opacity 0.18s ease, visibility 0.18s ease;
 }
 
 .quick-menu.show {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+  transform: none;
+}
+
+.quick-menu-heading {
+  display: none;
 }
 
 .quick-menu-item {
@@ -6271,52 +6489,43 @@ button.history-date {
   flex-direction: row-reverse;
   align-items: center;
   justify-content: flex-start;
-  gap: 9px;
+  gap: 10px;
   border: 0;
+  border-radius: 0;
   background: transparent;
   color: #17172a;
   opacity: 0;
-  transform: translateY(12px) scale(0.76);
+  transform: translateY(9px) scale(0.94);
   transform-origin: right center;
-  transition:
-    opacity 0.18s ease,
-    transform 0.28s cubic-bezier(0.18, 0.9, 0.25, 1);
+  transition: opacity 0.16s ease, transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Satu lintasan busur: Antrean paling dekat ke FAB, Tambah Tamu paling jauh. */
-.quick-menu-item:nth-child(1) { right: 0; bottom: 0; }
-.quick-menu-item:nth-child(2) { right: 21px; bottom: 45px; }
-.quick-menu-item:nth-child(3) { right: 54px; bottom: 88px; }
-.quick-menu-item:nth-child(4) { right: 76px; bottom: 132px; }
+.quick-menu-item:nth-child(2) { right: 86px; bottom: 0; }
+.quick-menu-item:nth-child(3) { right: 88px; bottom: 65px; }
+.quick-menu-item:nth-child(4) { right: 56px; bottom: 140px; }
+.quick-menu-item:nth-child(5) { right: -15px; bottom: 215px; }
 
 .quick-menu.show .quick-menu-item {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
-.quick-menu.show .quick-menu-item:nth-child(1) { transition-delay: 0ms; }
-.quick-menu.show .quick-menu-item:nth-child(2) { transition-delay: 35ms; }
-.quick-menu.show .quick-menu-item:nth-child(3) { transition-delay: 70ms; }
-.quick-menu.show .quick-menu-item:nth-child(4) { transition-delay: 105ms; }
+.quick-menu.show .quick-menu-item:nth-child(2) { transition-delay: 0ms; }
+.quick-menu.show .quick-menu-item:nth-child(3) { transition-delay: 35ms; }
+.quick-menu.show .quick-menu-item:nth-child(4) { transition-delay: 70ms; }
+.quick-menu.show .quick-menu-item:nth-child(5) { transition-delay: 105ms; }
 
-.quick-menu-icon {
+.quick-menu-item > svg:first-child {
   width: 48px;
   height: 48px;
-  display: grid;
-  place-items: center;
   flex: 0 0 48px;
+  padding: 12px;
   border: 1px solid rgba(30, 32, 50, 0.07);
   border-radius: 50%;
   background: #fff;
   color: #202238;
   box-shadow: 0 7px 18px rgba(17, 18, 37, 0.12);
-  transition: transform 0.16s ease;
-}
-
-.quick-menu-icon svg {
-  width: 21px;
-  height: 21px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
@@ -6324,9 +6533,9 @@ button.history-date {
   stroke-linejoin: round;
 }
 
-.quick-menu-label {
-  display: block;
-  padding: 5px 9px;
+.quick-menu-item > span {
+  flex: 0 0 auto;
+  padding: 5px 10px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.97);
   color: #25263a;
@@ -6334,812 +6543,33 @@ button.history-date {
   font-size: 11px;
   font-weight: 700;
   line-height: 1.2;
-  text-align: center;
   white-space: nowrap;
 }
 
-.quick-menu-item:active .quick-menu-icon {
-  transform: scale(0.92);
+.quick-menu-chevron {
+  display: none;
 }
 
-@media (max-height: 700px) {
-  .quick-menu-item:nth-child(1) { right: 0; bottom: 0; }
-  .quick-menu-item:nth-child(2) { right: 17px; bottom: 36px; }
-  .quick-menu-item:nth-child(3) { right: 42px; bottom: 70px; }
-  .quick-menu-item:nth-child(4) { right: 60px; bottom: 104px; }
-  .quick-menu {
-    bottom: 48px;
-  }
+.quick-menu-item:active {
+  background: transparent;
+  transform: scale(0.97);
 }
 
 @media (min-width: 900px) {
   .quick-menu {
-    right: calc(max(20px, (100vw - 520px) / 2 + 20px) + 27px);
+    right: calc(38px + 27px);
+    bottom: calc(34px + 27px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .fab svg,
   .quick-menu-backdrop,
-  .quick-menu-item,
-  .quick-menu-icon {
+  .quick-menu,
+  .quick-menu-item {
     transition: none;
   }
 }
-
-/* SEATING TIME — CONFIGURATION AND COUNTDOWN */
-
-.setting-icon svg {
-
-  width:17px;
-
-  height:17px;
-
-  fill:none;
-
-  stroke:currentColor;
-
-  stroke-linecap:round;
-
-  stroke-linejoin:round;
-
-}
-
-.seating-setting-row {
-
-  align-items:flex-start;
-
-  padding-top:16px;
-
-  padding-bottom:16px;
-
-}
-
-.seating-setting-control {
-
-  display:flex;
-
-  align-items:center;
-
-  gap:8px;
-
-  margin-top:10px;
-
-}
-
-.seating-stepper {
-
-  display:flex;
-
-  align-items:center;
-
-  height:42px;
-
-  border:1px solid #e5e5ec;
-
-  border-radius:12px;
-
-  background:#fafafc;
-
-  overflow:hidden;
-
-}
-
-.seating-step-button {
-
-  width:38px;
-
-  height:40px;
-
-  display:grid;
-
-  place-items:center;
-
-  border:0;
-
-  background:transparent;
-
-  color:var(--ink);
-
-  font-size:21px;
-
-  font-weight:600;
-
-  line-height:1;
-
-  touch-action:manipulation;
-
-}
-
-.seating-step-button:active {
-
-  background:#ececf5;
-
-}
-
-.seating-stepper input {
-
-  width:54px;
-
-  height:40px;
-
-  padding:0;
-
-  border:0;
-
-  background:transparent;
-
-  color:var(--ink);
-
-  font-size:15px;
-
-  font-weight:800;
-
-  text-align:center;
-
-  font-variant-numeric:tabular-nums;
-
-  outline:none;
-
-}
-
-.seating-setting-control span {
-
-  font-size:11px;
-
-  color:var(--muted);
-
-}
-
-.seating-setting-control>button {
-
-  min-height:42px;
-
-  padding:0 16px;
-
-  border:0;
-
-  border-radius:11px;
-
-  background:#111225;
-
-  color:#fff;
-
-  font-size:12px;
-
-  font-weight:800;
-
-  touch-action:manipulation;
-
-}
-
-.seating-setting-control>button:active {
-
-  transform:scale(.97);
-
-}
-
-.waittime b[data-seating-countdown],.detail-cell [data-seating-countdown] {
-
-  font-variant-numeric:tabular-nums;
-
-  letter-spacing:.02em;
-
-}
-
-[data-seating-countdown].is-expired {
-
-  color:#c44e5c!important;
-
-}
-
-[data-seating-countdown].is-expired::after {
-
-  content:' · Habis';
-
-  font-size:.9em;
-
-  font-weight:700;
-
-}
-
-@media(max-width:380px) {
-
-  .seating-setting-control {
-
-    gap:6px;
-
-  }
-
-  .seating-stepper input {
-
-    width:48px;
-
-  }
-
-
-}
-
-/* OPERATIONAL DETAIL — CUSTOM STATUS FILTER (NO NATIVE ANDROID SELECT) */
-
-.operational-filter-wrap {
-
-  position:relative;
-
-  min-width:0;
-
-}
-
-.operational-filter-trigger {
-
-  width:100%;
-
-  height:39px;
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:space-between;
-
-  gap:6px;
-
-  padding:0 10px;
-
-  border:1px solid #e8e7ef;
-
-  border-radius:11px;
-
-  background:#f1f0f7;
-
-  color:#55536d;
-
-  font-size:10px;
-
-  font-weight:800;
-
-  text-align:left;
-
-}
-
-.operational-filter-trigger svg {
-
-  width:15px;
-
-  height:15px;
-
-  flex:none;
-
-  fill:none;
-
-  stroke:currentColor;
-
-  stroke-width:2;
-
-  stroke-linecap:round;
-
-  stroke-linejoin:round;
-
-  transition:transform .18s ease;
-
-}
-
-.operational-filter-trigger[aria-expanded="true"] svg {
-
-  transform:rotate(180deg);
-
-}
-
-.operational-filter-menu {
-
-  position:absolute;
-
-  z-index:40;
-
-  top:calc(100% + 7px);
-
-  right:0;
-
-  width:max(100%,154px);
-
-  padding:5px;
-
-  border:1px solid #ecebf2;
-
-  border-radius:14px;
-
-  background:#fff;
-
-  box-shadow:0 12px 30px rgba(17,18,37,.16);
-
-  transform-origin:top right;
-
-  animation:operational-filter-in .16s ease-out;
-
-}
-
-.operational-filter-menu[hidden] {
-
-  display:none;
-
-}
-
-.operational-filter-menu button {
-
-  width:100%;
-
-  min-height:37px;
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:space-between;
-
-  gap:8px;
-
-  padding:0 10px;
-
-  border:0;
-
-  border-radius:9px;
-
-  background:transparent;
-
-  color:#777586;
-
-  font-size:11px;
-
-  font-weight:700;
-
-  text-align:left;
-
-}
-
-.operational-filter-menu button[aria-selected="true"] {
-
-  background:#eff7ce;
-
-  color:#222b17;
-
-}
-
-.operational-filter-menu button[aria-selected="true"]::after {
-
-  content:"✓";
-
-  font-size:13px;
-
-  font-weight:900;
-
-  color:#566b2e;
-
-}
-
-.operational-filter-menu button:active {
-
-  background:#f1f0f7;
-
-}
-
-@keyframes operational-filter-in {
-
-  from {
-
-    opacity:0;
-
-    transform:translateY(-4px) scale(.98);
-
-  }
-
-  to {
-
-    opacity:1;
-
-    transform:translateY(0) scale(1);
-
-  }
-
-
-}
-
-@media(prefers-reduced-motion:reduce) {
-
-  .operational-filter-menu,.operational-filter-trigger svg {
-
-    animation:none;
-
-    transition:none;
-
-  }
-
-
-}
-
-/* CHILD PAGE BACK NAVIGATION */
-
-.page-back {
-
-  display:inline-flex;
-
-  align-items:center;
-
-  gap:8px;
-
-  min-height:34px;
-
-  margin:0 0 9px;
-
-  padding:0 10px 0 0;
-
-  border:0;
-
-  border-radius:10px;
-
-  background:transparent;
-
-  color:#68677f;
-
-  font-size:11px;
-
-  font-weight:800;
-
-  letter-spacing:-.01em;
-
-  touch-action:manipulation;
-
-}
-
-.page-back svg {
-
-  width:17px;
-
-  height:17px;
-
-  fill:none;
-
-  stroke:currentColor;
-
-  stroke-width:2;
-
-  stroke-linecap:round;
-
-  stroke-linejoin:round;
-
-}
-
-.page-back:active {
-
-  opacity:.65;
-
-  transform:translateX(-2px);
-
-}
-
-@media(prefers-reduced-motion:reduce) {
-
-  .page-back {
-
-    transition:none;
-
-  }
-
-
-}
-
-
-/* Lightweight date-selection motion for the reservation calendar */
-.reservation-day {
-  transition:background-color .16s ease,color .16s ease,transform .16s ease;
-  touch-action:manipulation;
-}
-
-.reservation-day:active {
-  transform:scale(.94);
-}
-
-.reservation-day.selected {
-  animation:reservation-date-pop .2s ease-out both;
-}
-
-.reservation-list.is-changing {
-  animation:reservation-list-enter .2s ease-out both;
-}
-
-@keyframes reservation-date-pop {
-  0% { transform:scale(.92); }
-  65% { transform:scale(1.045); }
-  100% { transform:scale(1); }
-}
-
-@keyframes reservation-list-enter {
-  from { opacity:.45; transform:translateY(5px); }
-  to { opacity:1; transform:translateY(0); }
-}
-
-@media(prefers-reduced-motion:reduce) {
-  .reservation-day,
-  .reservation-list.is-changing {
-    animation:none;
-    transition:none;
-  }
-}
-
-
-
-/* Reservation form controls — use the same visual language as the app */
-.reservation-picker-trigger,
-.reservation-select-trigger {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  width:100%;
-  min-height:46px;
-  padding:0 13px;
-  border:1px solid #eeedf0;
-  border-radius:12px;
-  background:#f8f8f6;
-  color:var(--ink);
-  font-size:13px;
-  font-weight:500;
-  text-align:left;
-  box-shadow:0 2px 5px rgba(17,18,37,.045),0 1px 2px rgba(17,18,37,.035);
-}
-
-.reservation-picker-trigger:active,
-.reservation-select-trigger:active {
-  transform:scale(.995);
-}
-
-.reservation-picker-trigger svg,
-.reservation-select-trigger svg {
-  width:18px;
-  height:18px;
-  flex:0 0 auto;
-  fill:none;
-  stroke:#8d8b9d;
-  stroke-width:1.8;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
-
-.reservation-select {
-  position:relative;
-  z-index:5;
-}
-
-.reservation-select-options {
-  position:absolute;
-  top:calc(100% + 7px);
-  left:0;
-  right:0;
-  z-index:30;
-  display:grid;
-  gap:3px;
-  margin:0;
-  padding:5px;
-  border:1px solid #eeedf0;
-  border-radius:14px;
-  background:#fff;
-  box-shadow:0 12px 28px rgba(17,18,37,.15);
-}
-
-.reservation-select-options[hidden] {
-  display:none!important;
-}
-
-.reservation-select-option {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  width:100%;
-  min-height:42px;
-  padding:0 11px;
-  border:0;
-  border-radius:10px;
-  background:transparent;
-  color:#555469;
-  font-size:13px;
-  font-weight:600;
-  text-align:left;
-}
-
-.reservation-select-option.selected {
-  background:#eef7c7;
-  color:#111225;
-}
-
-.reservation-select-option svg {
-  width:17px;
-  height:17px;
-  fill:none;
-  stroke:#15966a;
-  stroke-width:2;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-  opacity:0;
-}
-
-.reservation-select-option.selected svg {
-  opacity:1;
-}
-
-.reservation-date-dialog .calendar-day:disabled {
-  color:#cbc9d1;
-  opacity:.34;
-  cursor:not-allowed;
-}
-
-.reservation-date-dialog .calendar-monthbar button:disabled {
-  opacity:.3;
-  cursor:not-allowed;
-}
-
-.reservation-time-dialog {
-  width:min(90vw,370px);
-}
-
-.reservation-time-display {
-  display:flex;
-  align-items:baseline;
-  justify-content:center;
-  gap:8px;
-  margin:4px 0 16px;
-  padding:17px 14px;
-  border-radius:15px;
-  background:#eef7c7;
-  color:#111225;
-}
-
-.reservation-time-display small {
-  align-self:center;
-  margin-right:auto;
-  color:#697347;
-  font-size:9px;
-  font-weight:800;
-  letter-spacing:.1em;
-}
-
-.reservation-time-display strong {
-  font:800 29px Manrope,sans-serif;
-  letter-spacing:-.04em;
-}
-
-.reservation-time-display span {
-  color:#697347;
-  font-size:11px;
-  font-weight:800;
-}
-
-.reservation-time-controls {
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-}
-
-.reservation-time-unit {
-  display:grid;
-  justify-items:center;
-  gap:7px;
-  padding:12px 8px;
-  border:1px solid #eeedf0;
-  border-radius:15px;
-  background:#f8f8f6;
-}
-
-.reservation-time-unit label {
-  color:#858492;
-  font-size:10px;
-  font-weight:800;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-}
-
-.reservation-time-unit button {
-  width:34px;
-  height:30px;
-  border:0;
-  border-radius:9px;
-  background:#efedfb;
-  color:#55518c;
-  font-size:18px;
-  font-weight:700;
-  line-height:1;
-}
-
-.reservation-time-unit input {
-  width:74px;
-  height:42px;
-  padding:0 8px;
-  border:1px solid #e6e3ec;
-  border-radius:10px;
-  background:#fff;
-  color:#111225;
-  font:800 20px Manrope,sans-serif;
-  text-align:center;
-  outline-offset:2px;
-}
-
-@media(prefers-reduced-motion:reduce) {
-  .reservation-picker-trigger,
-  .reservation-select-trigger {
-    transition:none;
-  }
-}
-
-
-/* Reservation guests keep their WL number while showing RSV as the main identity */
-.guest.guest-reservation {
-  border-color:#d7e9dc;
-  background:linear-gradient(180deg,#fff 0%,#fbfefb 100%);
-}
-
-.ticket.reservation-ticket {
-  width:44px;
-  height:auto;
-  min-height:0;
-  flex-direction:column;
-  justify-content:center;
-  gap:3px;
-  background:#dcefe3;
-  color:#204c39;
-  letter-spacing:0;
-  padding:8px 2px;
-}
-
-.reservation-ticket strong {
-  font:800 9px Manrope,sans-serif;
-  line-height:1.1;
-  white-space:nowrap;
-}
-
-.reservation-ticket small {
-  color:#54745f;
-  font-size:8px;
-  font-weight:700;
-  line-height:1;
-}
-
-.detail-ticket.reservation-detail-ticket {
-  background:linear-gradient(135deg,#e4f2e8,#d6eadc);
-  color:#204c39;
-}
-
-.detail-ticket.reservation-detail-ticket small {
-  color:#54745f;
-}
-
-.reservation-operational-number {
-  display:block;
-  margin-top:7px;
-  color:#54745f;
-  font-size:11px;
-  font-weight:700;
-}
-
-.reservation-operational-ticket {
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  gap:2px;
-  background:#dcefe3;
-  color:#204c39;
-  line-height:1.1;
-}
-
-.reservation-operational-ticket strong {
-  font:800 9px Manrope,sans-serif;
-  white-space:nowrap;
-}
-
-.reservation-operational-ticket small {
-  color:#54745f;
-  font-size:8px;
-  font-weight:700;
-}
-
 
 /* Keep labels clear while removing the individual button outlines */
 #sheet .seg button,
