@@ -6865,3 +6865,41 @@ button.history-date {
 
 
 }
+
+
+/* Lightweight date-selection motion for the reservation calendar */
+.reservation-day {
+  transition:background-color .16s ease,color .16s ease,transform .16s ease;
+  touch-action:manipulation;
+}
+
+.reservation-day:active {
+  transform:scale(.94);
+}
+
+.reservation-day.selected {
+  animation:reservation-date-pop .2s ease-out both;
+}
+
+.reservation-list.is-changing {
+  animation:reservation-list-enter .2s ease-out both;
+}
+
+@keyframes reservation-date-pop {
+  0% { transform:scale(.92); }
+  65% { transform:scale(1.045); }
+  100% { transform:scale(1); }
+}
+
+@keyframes reservation-list-enter {
+  from { opacity:.45; transform:translateY(5px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .reservation-day,
+  .reservation-list.is-changing {
+    animation:none;
+    transition:none;
+  }
+}
