@@ -388,15 +388,62 @@ function saveGuest(e){
 /* =========================================================
    4. WAITING LIST: STATUS, CARDS, AND DASHBOARD RENDERING
    ========================================================= */
-function statusLabel(s){return{waiting:'Menunggu',called:'Dipanggil',seated:'Duduk',done:'Selesai',cancelled:'Dibatalkan'}[s]||s}
-function statusClass(s){return's-'+s}
-function duration(g){return fmtElapsed((g.resolved||Date.now())-g.created)}
-function guestCard(g,i,history=false){
- let act='';
- if(!history&&g.status==='waiting')act=`<button class="mini blue" onclick="callGuestWhatsApp('${g.id}')"><svg class="wa-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.8 11.8 0 0 0 12.1 0C5.55 0 .23 5.32.22 11.87c0 2.1.55 4.15 1.6 5.95L.12 24l6.34-1.66a11.8 11.8 0 0 0 5.63 1.43h.01c6.55 0 11.87-5.33 11.88-11.88a11.8 11.8 0 0 0-3.46-8.41ZM12.1 21.75h-.01a9.8 9.8 0 0 1-5-1.37l-.36-.21-3.76.98 1-3.67-.23-.38a9.82 9.82 0 1 1 8.36 4.65Zm5.39-7.36c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.23-.65.08-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.76-1.66-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.38-.03-.53-.08-.15-.67-1.62-.92-2.22-.24-.58-.48-.5-.67-.51h-.57c-.2 0-.52.08-.79.38-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.21 5.1 4.5.71.3 1.27.49 1.7.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.3.18-1.42-.08-.13-.27-.2-.57-.35Z"/></svg><span>Panggil</span></button><button class="mini green" onclick="setGuestStatus('${g.id}','seated')">Duduk</button>`;
- else if(!history&&g.status==='called')act=`<button class="mini green" onclick="setGuestStatus('${g.id}','seated')">Duduk</button>`;
- else if(!history&&g.status==='seated')act=`<button class="mini green" onclick="setGuestStatus('${g.id}','done')">Selesaikan</button>`;
- return`<article class="guest" style="animation-delay:${Math.min(i,7)*.035}s"><div class="guest-row" onclick="openDetail('${g.id}')"><div class="ticket">${g.ticket}</div><div class="guest-main"><div class="guest-name">${esc(g.name)}</div><div class="guest-meta"><span>${g.pack} pack</span><span>·</span><span>${fmtTime(g.created)}</span></div></div><span class="status ${statusClass(g.status)}">${statusLabel(g.status)}</span></div><div class="guest-bottom"><span class="waittime">${g.status==='seated'?'Seating time':'Waiting time'} <b${g.status==='seated'?' data-seating-countdown="'+esc(g.id)+'"':''}>${g.status==='seated'?seatingCountdownText(g):duration(g)}</b></span><div class="actions">${act}<button class="mini" onclick="openDetail('${g.id}')">Detail</button></div></div></article>`}
+function statusLabel(s) {
+  return { waiting: 'Menunggu', called: 'Dipanggil', seated: 'Duduk', done: 'Selesai', cancelled: 'Dibatalkan' }[s] || s;
+}
+
+function statusClass(s) {
+  return 's-' + s;
+}
+
+function duration(g) {
+  return fmtElapsed((g.resolved || Date.now()) - g.created);
+}
+
+// Resolve reservation identity for both new and previously saved seated guests.
+function reservationIdentity(guest) {
+  const reservations = Array.isArray(state.reservations) ? state.reservations : [];
+  const linkedReservation = reservations.find(reservation =>
+    reservation.guestId === guest.id || reservation.id === guest.reservationId
+  );
+  const auditEntry = (Array.isArray(guest.audit) ? guest.audit.slice().reverse() : [])
+    .find(entry => /^Reservasi\\s+RSV-\\d+/.test(String(entry.label || '')));
+  const auditCode = String(auditEntry?.label || '').match(/RSV-\\d+/)?.[0];
+  const code = guest.reservationCode || linkedReservation?.code || auditCode;
+  if (!code || !/^RSV-\\d+$/.test(code)) return null;
+  const auditTable = String(auditEntry?.detail || '').replace(/^Meja\\s*/i, '');
+  const table = guest.reservationTable || linkedReservation?.table || auditTable;
+  return { code, table };
+}
+
+function guestCard(g, i, history = false) {
+  const reservation = reservationIdentity(g);
+  const isReservation = Boolean(reservation);
+  let act = '';
+
+  if (!history && g.status === 'waiting') {
+    act = '<button class="mini blue" onclick="callGuestWhatsApp(\'' + g.id + '\')"><span>Panggil</span></button>' +
+      '<button class="mini green" onclick="setGuestStatus(\'' + g.id + '\',\'seated\')">Duduk</button>';
+  } else if (!history && g.status === 'called') {
+    act = '<button class="mini green" onclick="setGuestStatus(\'' + g.id + '\',\'seated\')">Duduk</button>';
+  } else if (!history && g.status === 'seated') {
+    act = '<button class="mini green" onclick="setGuestStatus(\'' + g.id + '\',\'done\')">Selesaikan</button>';
+  }
+
+  const ticketMarkup = isReservation
+    ? '<div class="ticket reservation-ticket"><strong>' + esc(reservation.code) + '</strong><small>' + esc(g.ticket) + '</small></div>'
+    : '<div class="ticket">' + esc(g.ticket) + '</div>';
+
+  return '<article class="guest' + (isReservation ? ' guest-reservation' : '') + '" style="animation-delay:' + Math.min(i, 7) * .035 + 's">' +
+    '<div class="guest-row" onclick="openDetail(\'' + g.id + '\')">' + ticketMarkup +
+      '<div class="guest-main"><div class="guest-name">' + esc(g.name) + '</div>' +
+      '<div class="guest-meta"><span>' + g.pack + ' pack</span><span>·</span><span>' + fmtTime(g.created) + '</span></div></div>' +
+      '<span class="status ' + statusClass(g.status) + '">' + statusLabel(g.status) + '</span></div>' +
+    '<div class="guest-bottom"><span class="waittime">' + (g.status === 'seated' ? 'Seating time' : 'Waiting time') +
+      ' <b' + (g.status === 'seated' ? ' data-seating-countdown="' + esc(g.id) + '"' : '') + '>' +
+      (g.status === 'seated' ? seatingCountdownText(g) : duration(g)) + '</b></span>' +
+      '<div class="actions">' + act + '<button class="mini" onclick="openDetail(\'' + g.id + '\')">Detail</button></div></div></article>';
+}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function setDashboardCounter(id,targetValue,animate=false){
  const element=$(id);
@@ -482,7 +529,11 @@ function renderQueue(){
   ? ['waiting','called'].includes(g.status)
   : g.status===activeFilter;
  const list=state.guests
-  .filter(g=>g.day===day&&matchesFilter(g)&&(g.name+' '+g.ticket).toLowerCase().includes(q))
+  .filter(g=>{
+   const reservation=reservationIdentity(g);
+   const searchText=(g.name+' '+g.ticket+' '+(reservation?.code||'')).toLowerCase();
+   return g.day===day&&matchesFilter(g)&&searchText.includes(q);
+  })
   .sort((a,b)=>a.created-b.created);
  $('queueList').innerHTML=list.length
   ? list.map((g,i)=>guestCard(g,i)).join('')
@@ -567,8 +618,19 @@ function renderOperationalChart(guests) {
 }
 function operationalGuestRow(guest) {
   const status = statusLabel(guest.status);
-  const time = ['waiting', 'called'].includes(guest.status) ? duration(guest) : fmtTime(guest.resolved || guest.created);
-  return '<button type="button" class="operational-guest-row" onclick="closeSheet();openDetail(\'' + guest.id + '\')"><span class="operational-ticket">' + esc(guest.ticket) + '</span><span class="operational-guest-copy"><b>' + esc(guest.name) + '</b><small>' + guest.pack + ' orang · ' + fmtTime(guest.created) + '</small></span><span class="operational-guest-state"><i class="status ' + statusClass(guest.status) + '">' + esc(status) + '</i><small>' + esc(time) + '</small></span><span class="operational-chevron">›</span></button>';
+  const time = ['waiting', 'called'].includes(guest.status)
+    ? duration(guest)
+    : fmtTime(guest.resolved || guest.created);
+  const reservation = reservationIdentity(guest);
+  const ticket = reservation
+    ? '<span class="operational-ticket reservation-operational-ticket"><strong>' + esc(reservation.code) + '</strong><small>' + esc(guest.ticket) + '</small></span>'
+    : '<span class="operational-ticket">' + esc(guest.ticket) + '</span>';
+
+  return '<button type="button" class="operational-guest-row" onclick="closeSheet();openDetail(\'' + guest.id + '\')">' +
+    ticket + '<span class="operational-guest-copy"><b>' + esc(guest.name) + '</b><small>' +
+    guest.pack + ' orang · ' + fmtTime(guest.created) + '</small></span>' +
+    '<span class="operational-guest-state"><i class="status ' + statusClass(guest.status) + '">' +
+    esc(status) + '</i><small>' + esc(time) + '</small></span><span class="operational-chevron">›</span></button>';
 }
 function toggleOperationalFilterMenu() {
   const menu = $('operationalFilterMenu');
@@ -1173,6 +1235,10 @@ function confirmSeatReservation(event, id) {
     pack: reservation.pack,
     phone: reservation.phone,
     status: 'seated',
+    source: 'reservation',
+    reservationId: reservation.id,
+    reservationCode: reservation.code,
+    reservationTable: table,
     created: now,
     resolved: now,
     seatedAt: now,
@@ -1228,7 +1294,67 @@ function callGuestWhatsApp(id){
  setGuestStatus(id,'called');
 }
 
-function openDetail(id){let g=state.guests.find(x=>x.id===id);if(!g)return;sheetGuest=id;let canCancel=['waiting','called'].includes(g.status),canFinish=g.status==='seated';openSheet(`<div class="sheet-head"><h2>Detail tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><div class="detail-ticket"><small>NOMOR ANTREAN</small><strong>${g.ticket}</strong><small>${fmtDate(g.day)}</small></div><div style="font:800 18px Manrope">${esc(g.name)}</div><div class="detail-grid"><div class="detail-cell"><small>Jumlah pack</small><b>${g.pack} orang</b></div><div class="detail-cell"><small>Status</small><b>${statusLabel(g.status)}</b></div><div class="detail-cell"><small>Waktu daftar</small><b>${fmtTime(g.created)}</b></div><div class="detail-cell"><small>${g.status==='seated'?'Seating time':'Waiting time'}</small><b>${g.status==='seated'?'<span data-seating-countdown="'+esc(g.id)+'">'+seatingCountdownText(g)+'</span>':duration(g)}</b></div><div class="detail-cell" style="grid-column:1/-1"><small>WhatsApp</small><b>${esc(g.phone||'Tidak diisi')}</b></div></div><div class="sheet-actions"><button class="secondary" onclick="editGuest('${g.id}')">Koreksi data</button>${g.phone?`<button class="primary" onclick="toast('Aksi WhatsApp demo')">WhatsApp</button>`:''}</div>${canCancel?`<div class="sheet-actions"><button class="secondary" onclick="setGuestStatus('${g.id}','cancelled')">Batalkan</button><button class="primary" onclick="setGuestStatus('${g.id}','seated')">Dudukkan tamu</button></div>`:''}${canFinish?`<div class="sheet-actions"><button class="primary" onclick="setGuestStatus('${g.id}','done')">Selesaikan kunjungan</button></div>`:''}<div style="margin-top:20px;font:800 13px Manrope">Riwayat perubahan</div><div class="timeline">${g.audit.slice().reverse().map(a=>`<div class="timeline-item"><b>${esc(a.label)}</b><small>${new Date(a.at).toLocaleString('id-ID',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})}${a.detail?' · '+esc(a.detail):''}${a.reason?' · Alasan: '+esc(a.reason):''}</small></div>`).join('')}</div>`)}
+function openDetail(id) {
+  const guest = state.guests.find(item => item.id === id);
+  if (!guest) return;
+
+  sheetGuest = id;
+  const canCancel = ['waiting', 'called'].includes(guest.status);
+  const canFinish = guest.status === 'seated';
+  const reservation = reservationIdentity(guest);
+  const isReservation = Boolean(reservation);
+
+  const ticketPanel = isReservation
+    ? '<div class="detail-ticket reservation-detail-ticket"><small>KODE RESERVASI</small><strong>' +
+      esc(reservation.code) + '</strong><small>' + fmtDate(guest.day) +
+      '</small><span class="reservation-operational-number">Nomor operasional · ' +
+      esc(guest.ticket) + '</span></div>'
+    : '<div class="detail-ticket"><small>NOMOR ANTREAN</small><strong>' +
+      esc(guest.ticket) + '</strong><small>' + fmtDate(guest.day) + '</small></div>';
+
+  const tableCell = isReservation && reservation.table
+    ? '<div class="detail-cell"><small>Meja</small><b>' + esc(reservation.table) + '</b></div>'
+    : '';
+
+  const whatsappButton = guest.phone
+    ? '<button class="primary" onclick="toast(\'Aksi WhatsApp demo\')">WhatsApp</button>'
+    : '';
+
+  const cancelActions = canCancel
+    ? '<div class="sheet-actions"><button class="secondary" onclick="setGuestStatus(\'' + guest.id + '\',\'cancelled\')">Batalkan</button>' +
+      '<button class="primary" onclick="setGuestStatus(\'' + guest.id + '\',\'seated\')">Dudukkan tamu</button></div>'
+    : '';
+
+  const finishAction = canFinish
+    ? '<div class="sheet-actions"><button class="primary" onclick="setGuestStatus(\'' + guest.id + '\',\'done\')">Selesaikan kunjungan</button></div>'
+    : '';
+
+  const timeline = guest.audit.slice().reverse().map(item =>
+    '<div class="timeline-item"><b>' + esc(item.label) + '</b><small>' +
+    new Date(item.at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) +
+    (item.detail ? ' · ' + esc(item.detail) : '') +
+    (item.reason ? ' · Alasan: ' + esc(item.reason) : '') + '</small></div>'
+  ).join('');
+
+  openSheet(
+    '<div class="sheet-head"><h2>Detail tamu</h2><button class="close" onclick="closeSheet()">✕</button></div>' +
+    ticketPanel +
+    '<div style="font:800 18px Manrope">' + esc(guest.name) + '</div>' +
+    '<div class="detail-grid">' +
+      '<div class="detail-cell"><small>Jumlah pack</small><b>' + guest.pack + ' orang</b></div>' +
+      '<div class="detail-cell"><small>Status</small><b>' + statusLabel(guest.status) + '</b></div>' +
+      '<div class="detail-cell"><small>Waktu daftar</small><b>' + fmtTime(guest.created) + '</b></div>' +
+      '<div class="detail-cell"><small>' + (guest.status === 'seated' ? 'Seating time' : 'Waiting time') + '</small><b>' +
+      (guest.status === 'seated' ? '<span data-seating-countdown="' + esc(guest.id) + '">' + seatingCountdownText(guest) + '</span>' : duration(guest)) +
+      '</b></div>' + tableCell +
+      '<div class="detail-cell" style="grid-column:1/-1"><small>WhatsApp</small><b>' +
+      esc(guest.phone || 'Tidak diisi') + '</b></div></div>' +
+    '<div class="sheet-actions"><button class="secondary" onclick="editGuest(\'' + guest.id + '\')">Koreksi data</button>' +
+      whatsappButton + '</div>' + cancelActions + finishAction +
+    '<div style="margin-top:20px;font:800 13px Manrope">Riwayat perubahan</div>' +
+    '<div class="timeline">' + timeline + '</div>'
+  );
+}
 function editGuest(id) {
   const guest = state.guests.find(item => item.id === id);
   if (!guest) return;
