@@ -3615,9 +3615,17 @@ button.history-date {
 
 .reservation-toolbar {
 
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:stretch;
+
+  gap:10px;
+
   background:#fff;
 
-  padding:15px 16px;
+  padding:12px 16px;
 
   border-radius:17px;
 
@@ -3625,13 +3633,19 @@ button.history-date {
 
 }
 
-.reservation-toolbar>div:first-child {
+.reservation-toolbar-heading,
+
+.reservation-toolbar-month {
 
   display:flex;
 
-  flex-direction:column;
+  align-items:center;
 
-  gap:5px;
+  justify-content:space-between;
+
+  gap:12px;
+
+  min-width:0;
 
 }
 
@@ -3643,21 +3657,13 @@ button.history-date {
 
 }
 
-.reservation-month-nav {
-
-  display:flex;
-
-  align-items:center;
-
-  gap:5px;
-
-}
+.reservation-today,
 
 .reservation-month-nav button {
 
-  height:34px;
+  min-height:32px;
 
-  min-width:34px;
+  min-width:32px;
 
   padding:0 10px;
 
@@ -3669,9 +3675,37 @@ button.history-date {
 
   color:#55536d;
 
-  font-size:12px;
+  font-size:11px;
 
   font-weight:800;
+
+}
+
+.reservation-today {
+
+  flex-shrink:0;
+
+}
+
+.reservation-month-nav {
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:flex-end;
+
+  gap:5px;
+
+}
+
+.reservation-month-nav button {
+
+  height:32px;
+
+  padding:0 9px;
+
+  font-size:14px;
 
 }
 
@@ -4144,17 +4178,23 @@ button.history-date {
 
   .reservation-toolbar {
 
-    align-items:flex-start;
+    align-items:stretch;
 
-    flex-direction:column;
+  }
+
+  .reservation-toolbar-heading,
+
+  .reservation-toolbar-month {
+
+    width:100%;
 
   }
 
   .reservation-month-nav {
 
-    width:100%;
+    width:auto;
 
-    justify-content:space-between;
+    justify-content:flex-end;
 
   }
 
