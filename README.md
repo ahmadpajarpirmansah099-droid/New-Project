@@ -10,6 +10,7 @@ Aplikasi mobile-first untuk mengelola kedatangan tamu, antrean, dan reservasi se
 - **Reservasi** — kalender bulanan, pembuatan kode reservasi, detail, pembatalan, dan proses mendudukkan tamu.
 - **Pengaturan** — durasi Seating Time, ekspor CSV, dan reset data demo.
 - **Master Barang** — sumber bahan, satuan dasar, konversi satuan, harga referensi, dan status barang.
+- **Resep WIP** — komposisi bahan/WIP turunan, hasil per batch, kalkulasi HPP rekursif, dan validasi resep.
 - **Menu cepat (+)** — akses Antrean, Riwayat, Reservasi, dan Tambah Tamu.
 
 ## Struktur file
@@ -28,6 +29,8 @@ assets/
   css/
     masterdata.css
       Tampilan mobile-first untuk modul Master Barang dengan design tokens Guest Operations.
+    wip.css
+      Tampilan mobile-first untuk modul Resep WIP.
     style.css
       Semua aturan tampilan dan animasi.
       - .page-back: tombol kembali halaman fitur.
@@ -44,6 +47,10 @@ assets/
       Validasi Master Barang, konversi satuan, dan kalkulasi harga referensi.
     masterdata-ui.js
       Daftar, pencarian, filter, form, dan preview Master Barang.
+    wip-service.js
+      Validasi komposisi WIP, pencegahan siklus, dan kalkulasi HPP bertingkat.
+    wip-ui.js
+      Daftar, pencarian, filter, form komposisi, dan ringkasan HPP WIP.
     app.js
       Logika, penyimpanan demo, dan interaksi.
       - Bagian 1: utilitas, tanggal/jam, dan penyimpanan lokal.
@@ -68,7 +75,12 @@ assets/
 
 - Master Barang menyimpan data pada localStorage key `guestops_masterdata_demo_v1`.
 - Data Master Data dipisahkan dari `waitlist_frontend_demo_v1`; data antrean, riwayat, reservasi, dan pengaturan Guest Operational tidak dipakai atau ditulis oleh modul ini.
-- Struktur Master Data menyiapkan array `masterItems`, `wips`, `wipRecipeLines`, `menus`, dan `menuRecipeLines`. Pada Phase 1, yang digunakan adalah Master Barang; array WIP dan Menu masih kosong untuk fase berikutnya.
+- Struktur Master Data menggunakan array terpisah `masterItems`, `wips`, `wipRecipeLines`, `menus`, dan `menuRecipeLines`.
+- Phase 1 menggunakan `masterItems` untuk Master Barang. Phase 2 menggunakan `wips` dan `wipRecipeLines` untuk Resep WIP.
+- HPP WIP dihitung dari kuantitas dasar bahan dikali harga per satuan dasar. WIP turunan dihitung secara rekursif berdasarkan HPP per satuan hasilnya.
+- Harga beli terakhir menjadi sumber utama; jika belum tersedia, harga referensi digunakan dan hasil HPP diberi tanda estimasi. Jika harga tidak tersedia, HPP ditandai tidak valid, bukan dianggap nol.
+- Perubahan satuan Master Barang memperbarui kuantitas dasar pada resep WIP yang terkait. Perubahan satuan hasil WIP diblokir jika masih dipakai oleh resep induk dengan satuan lama.
+- Menu dan `menuRecipeLines` disiapkan untuk fase berikutnya; belum digunakan pada Phase 2.
 - Scope awal memakai `scope-demo-default`; model menyimpan `scope_id` agar dapat dikembangkan ke multi-outlet/divisi.
 - Aplikasi belum terhubung ke Supabase atau backend. Tidak ada data produksi Barapp yang disalin.
 
@@ -91,5 +103,5 @@ Buka `index.html` melalui browser atau gunakan alamat GitHub Pages repository in
 - Pertahankan pemisahan fitur: Guest Operational adalah halaman utama; Antrean, Riwayat, Reservasi, dan Tambah Tamu diakses dari tombol `+`.
 - Semua ikon antarmuka baru harus berasal dari Lucide Icons.
 - Jaga tampilan mobile sebagai prioritas dan hindari mengubah alur fitur yang tidak diminta.
-- Perubahan JavaScript harus melewati pemeriksaan sintaks dan tes Master Data di GitHub Actions.
+- Perubahan JavaScript harus melewati pemeriksaan sintaks dan tes Master Barang serta Resep WIP di GitHub Actions.
 - Jangan mengganti key `guestops_masterdata_demo_v1` atau bentuk data tersimpan tanpa rencana migrasi dan persetujuan.
