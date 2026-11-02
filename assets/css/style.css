@@ -6239,11 +6239,12 @@ button.history-date {
   pointer-events: auto;
 }
 
+/* Titik pusat kipas disejajarkan dengan tengah tombol FAB. */
 .quick-menu {
   position: fixed;
   z-index: 16;
-  right: max(44px, calc((100vw - 520px) / 2 + 44px));
-  bottom: calc(96px + env(safe-area-inset-bottom));
+  right: calc(max(20px, (100vw - 520px) / 2 + 20px) + 27px);
+  bottom: 51px;
   width: 0;
   height: 0;
   padding: 0;
@@ -6283,10 +6284,11 @@ button.history-date {
   -webkit-tap-highlight-color: transparent;
 }
 
-.quick-menu-item:nth-child(1) { right: 0; bottom: 54px; }
-.quick-menu-item:nth-child(2) { right: 62px; bottom: 108px; }
-.quick-menu-item:nth-child(3) { right: 112px; bottom: 54px; }
-.quick-menu-item:nth-child(4) { right: 164px; bottom: 0; }
+/* Satu lintasan busur: Antrean paling dekat ke FAB, Tambah Tamu paling jauh. */
+.quick-menu-item:nth-child(1) { right: 0; bottom: 0; }
+.quick-menu-item:nth-child(2) { right: 60px; bottom: 68px; }
+.quick-menu-item:nth-child(3) { right: 115px; bottom: 138px; }
+.quick-menu-item:nth-child(4) { right: 150px; bottom: 210px; }
 
 .quick-menu.show .quick-menu-item {
   opacity: 1;
@@ -6341,15 +6343,18 @@ button.history-date {
 }
 
 @media (max-height: 700px) {
-  .quick-menu-item:nth-child(1) { right: 0; bottom: 50px; }
-  .quick-menu-item:nth-child(2) { right: 52px; bottom: 98px; }
-  .quick-menu-item:nth-child(3) { right: 96px; bottom: 50px; }
-  .quick-menu-item:nth-child(4) { right: 142px; bottom: 0; }
+  .quick-menu-item:nth-child(1) { right: 0; bottom: 0; }
+  .quick-menu-item:nth-child(2) { right: 50px; bottom: 52px; }
+  .quick-menu-item:nth-child(3) { right: 100px; bottom: 106px; }
+  .quick-menu-item:nth-child(4) { right: 132px; bottom: 160px; }
+  .quick-menu {
+    bottom: 48px;
+  }
 }
 
 @media (min-width: 900px) {
   .quick-menu {
-    right: max(44px, calc((100vw - 1100px) / 2 + 44px));
+    right: calc(max(20px, (100vw - 520px) / 2 + 20px) + 27px);
   }
 }
 
