@@ -24,8 +24,10 @@ jobs:
           node --check assets/js/masterdata-ui.js
           node --check assets/js/wip-service.js
           node --check assets/js/wip-ui.js
-      - name: Test Master Barang frontend logic
-        run: node --test tests/masterdata-phase1.test.js
+      - name: Test frontend logic
+        run: |
+          node --test tests/masterdata-phase1.test.js
+          node --test tests/wip-phase2.test.js
 
   deploy:
     needs: validate
