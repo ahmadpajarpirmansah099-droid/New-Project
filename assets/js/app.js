@@ -361,19 +361,27 @@ function changePack(d){
  void value.offsetWidth;
  value.classList.add('pack-number-animate');
 }
-function chooseInitial(v){
- const group=$('segWait').parentElement;
- const current=$('initialStatus').value;
- if(current===v)return;
- group.classList.remove('is-switching');
- void group.offsetWidth;
- $('initialStatus').value=v;
- group.dataset.selected=v;
- $('segWait').classList.toggle('selected',v==='waiting');
- $('segSeated').classList.toggle('selected',v==='seated');
- group.classList.add('is-switching');
- window.clearTimeout(group._liquidTimer);
- group._liquidTimer=window.setTimeout(()=>group.classList.remove('is-switching'),280);
+/* BAGIAN: Pilihan status awal tamu dan pemicu animasi liquid toggle */
+function chooseInitial(status) {
+  const group = $('segWait').parentElement;
+  const currentStatus = $('initialStatus').value;
+
+  if (currentStatus === status) return;
+
+  group.classList.remove('is-switching');
+  void group.offsetWidth;
+
+  $('initialStatus').value = status;
+  group.dataset.selected = status;
+  $('segWait').classList.toggle('selected', status === 'waiting');
+  $('segSeated').classList.toggle('selected', status === 'seated');
+
+  group.classList.add('is-switching');
+  window.clearTimeout(group._liquidTimer);
+  group._liquidTimer = window.setTimeout(
+    () => group.classList.remove('is-switching'),
+    280
+  );
 }
 function saveGuest(e){
  e.preventDefault();
