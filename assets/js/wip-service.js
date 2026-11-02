@@ -264,6 +264,17 @@
     });
     if (duplicate) throw new Error('Nama WIP sudah digunakan dalam scope ini.');
 
+    if (existing && unitKey(existing.satuan_hasil) !== yieldUnit) {
+      const incompatibleParent = data.wipRecipeLines.find(function (line) {
+        return line.component_type === 'wip' &&
+          String(line.component_wip_id) === String(existing.id) &&
+          unitKey(line.unit_input) !== yieldUnit;
+      });
+      if (incompatibleParent) {
+        throw new Error('Satuan hasil WIP ini masih digunakan oleh resep WIP lain. Perbarui satuan pada resep induk terlebih dahulu.');
+      }
+    }
+
     const id = existing ? existing.id : store.createId();
     const lines = normalizeLines(data, id, sourceLines);
     assertNoCycle(data, id, lines);
