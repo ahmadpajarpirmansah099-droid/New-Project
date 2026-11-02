@@ -11,38 +11,265 @@ const uid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
 const key='waitlist_frontend_demo_v1';
 let state=loadState(),activeFilter='waiting',sheetGuest=null,toastTimer;
 let dashboardCountUpPending = true;
-function loadState(){try{let s=JSON.parse(localStorage.getItem(key));if(s&&Array.isArray(s.guests)&&s.counters){if(!Array.isArray(s.reservations))s.reservations=[];if(!s.reservationCounters)s.reservationCounters={};if(!s.settings||typeof s.settings!=='object')s.settings={};let minutes=Number(s.settings.seatingDurationMinutes);s.settings.seatingDurationMinutes=Number.isFinite(minutes)&&minutes>=1&&minutes<=1440?Math.round(minutes):90;if(s.settings.seatingDurationMinutes===30)s.settings.seatingDurationMinutes=90;s.guests.forEach(g=>{if(g.status==='seated'&&!Number(g.seatedAt)){let seatAudit=Array.isArray(g.audit)?g.audit.slice().reverse().find(a=>a.label==='Duduk'):null;g.seatedAt=Number(g.resolved)||Number(seatAudit?.at)||Number(g.created)||Date.now()}});return s}}catch(e){}return seed()}
+function loadState() {
+  try {
+    const savedState = JSON.parse(localStorage.getItem(key));
+
+    if (savedState && Array.isArray(savedState.guests) && savedState.counters) {
+      if (!Array.isArray(savedState.reservations)) {
+        savedState.reservations = [];
+      }
+
+      if (!savedState.reservationCounters) {
+        savedState.reservationCounters = {};
+      }
+
+      if (!savedState.settings || typeof savedState.settings !== 'object') {
+        savedState.settings = {};
+      }
+
+      const savedDuration = Number(savedState.settings.seatingDurationMinutes);
+      savedState.settings.seatingDurationMinutes =
+        Number.isFinite(savedDuration) && savedDuration >= 1 && savedDuration <= 1440
+          ? Math.round(savedDuration)
+          : 90;
+
+      // Upgrade the previous default while preserving customized durations.
+      if (savedState.settings.seatingDurationMinutes === 30) {
+        savedState.settings.seatingDurationMinutes = 90;
+      }
+
+      savedState.guests.forEach(guest => {
+        if (guest.status === 'seated' && !Number(guest.seatedAt)) {
+          const seatingAudit = Array.isArray(guest.audit)
+            ? guest.audit.slice().reverse().find(item => item.label === 'Duduk')
+            : null;
+
+          guest.seatedAt =
+            Number(guest.resolved) ||
+            Number(seatingAudit?.at) ||
+            Number(guest.created) ||
+            Date.now();
+        }
+      });
+
+      return savedState;
+    }
+  } catch (error) {
+    // Invalid local demo data falls back to the initial demo state.
+  }
+
+  return seed();
+}
+
+
 function seed(){let d=todayKey(),y=new Date(Date.now()-86400000);let yd=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(y),now=Date.now();let gs=[
 ['WL-001','Rina Kusuma',2,'0812-xxxx-1043','done',142,118],['WL-002','Budi Santoso',4,'0813-xxxx-7720','done',128,96],['WL-003','Dewi Lestari',3,'','cancelled',110,90],['WL-004','Andika Pratama',2,'0857-xxxx-3381','done',92,70],['WL-005','Sari Wulandari',6,'0821-xxxx-5590','waiting',48],['WL-006','Fajar Nugroho',2,'0878-xxxx-2214','called',36],['WL-007','Maya Anggraini',5,'','waiting',27],['WL-009','Hendra Wijaya',3,'0812-xxxx-9907','cancelled',22,15],['WL-010','Putri Ramadhani',2,'0896-xxxx-4412','waiting',14],['WL-011','Yoga Saputra',8,'0815-xxxx-6630','waiting',6]
 ].map(([ticket,name,pack,phone,status,ago,res])=>({id:uid(),ticket,day:d,name,pack,phone,status,created:now-ago*60000,resolved:res?now-res*60000:null,audit:[{at:now-ago*60000,label:'Terdaftar',detail:pack+' pack'}]}));
 gs.forEach(g=>{if(g.status!=='waiting'&&g.status!=='called')g.audit.push({at:g.resolved,label:g.status==='done'?'Selesai / Sudah Duduk':'Dibatalkan'})});
 let prev=[['WL-001','Agus Salim',2,'done'],['WL-002','Lina Marlina',4,'done'],['WL-003','Rizky Firmansyah',3,'waiting'],['WL-004','Nadia Paramitha',2,'cancelled'],['WL-005','Teguh Prakoso',5,'waiting']].map(([ticket,name,pack,status],i)=>({id:uid(),ticket,day:yd,name,pack,phone:'',status,created:now-(24*60+300-i*40)*60000,resolved:status==='waiting'?null:now-(24*60+275-i*40)*60000,audit:[{at:now-86400000,label:'Terdaftar'}]}));
 return{guests:[...prev,...gs],counters:{[d]:11,[yd]:5},reservations:[],reservationCounters:{},settings:{seatingDurationMinutes:90}}}
-function save(){localStorage.setItem(key,JSON.stringify(state))}
+function save() {
+  localStorage.setItem(key, JSON.stringify(state));
+}
 
-function seatingDurationMinutes(){const value=Number(state.settings?.seatingDurationMinutes);return Number.isFinite(value)&&value>=1?value:90}
-function seatingRemainingMs(guest,now=Date.now()){const seatedAt=Number(guest.seatedAt||guest.resolved||guest.created||now);return Math.max(0,seatingDurationMinutes()*60000-(now-seatedAt))}
-function seatingCountdownText(guest,now=Date.now()){const seconds=Math.ceil(seatingRemainingMs(guest,now)/1000);const minutes=String(Math.floor(seconds/60)).padStart(2,'0');const remainder=String(seconds%60).padStart(2,'0');return minutes+':'+remainder}
-function updateSeatingCountdowns(){const now=Date.now();document.querySelectorAll('[data-seating-countdown]').forEach(element=>{const guest=state.guests.find(item=>item.id===element.dataset.seatingCountdown);if(!guest||guest.status!=='seated')return;element.textContent=seatingCountdownText(guest,now);element.classList.toggle('is-expired',seatingRemainingMs(guest,now)<=0)})}
-function syncSeatingSettingInput(){const input=$('seatingDurationInput');if(input)input.value=String(seatingDurationMinutes())}
-function adjustSeatingDuration(change){const input=$('seatingDurationInput');if(!input)return;const current=Number(input.value)||seatingDurationMinutes();input.value=String(Math.min(1440,Math.max(1,current+change)))}
-function saveSeatingDuration(){const input=$('seatingDurationInput');const value=Number(input?.value);if(!Number.isInteger(value)||value<1||value>1440){toast('Masukkan durasi 1 sampai 1440 menit');syncSeatingSettingInput();return}state.settings=state.settings||{};state.settings.seatingDurationMinutes=value;save();updateSeatingCountdowns();toast('Durasi Seating Time disimpan')}
 
-function nextTicket(day){let n=(state.counters[day]||0)+1;state.counters[day]=n;return'WL-'+String(n).padStart(3,'0')}
-function toast(msg){let t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2300)}
+
+function seatingDurationMinutes() {
+  const value = Number(state.settings?.seatingDurationMinutes);
+  return Number.isFinite(value) && value >= 1 ? value : 90;
+}
+
+function seatingRemainingMs(guest, now = Date.now()) {
+  const seatedAt = Number(guest.seatedAt || guest.resolved || guest.created || now);
+  return Math.max(0, seatingDurationMinutes() * 60000 - (now - seatedAt));
+}
+
+function seatingCountdownText(guest, now = Date.now()) {
+  const totalSeconds = Math.ceil(seatingRemainingMs(guest, now) / 1000);
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const seconds = String(totalSeconds % 60).padStart(2, '0');
+
+  return minutes + ':' + seconds;
+}
+
+function updateSeatingCountdowns() {
+  const now = Date.now();
+
+  document.querySelectorAll('[data-seating-countdown]').forEach(element => {
+    const guest = state.guests.find(item => item.id === element.dataset.seatingCountdown);
+
+    if (!guest || guest.status !== 'seated') return;
+
+    element.textContent = seatingCountdownText(guest, now);
+    element.classList.toggle('is-expired', seatingRemainingMs(guest, now) <= 0);
+  });
+}
+
+function syncSeatingSettingInput() {
+  const input = $('seatingDurationInput');
+  if (input) input.value = String(seatingDurationMinutes());
+}
+
+function adjustSeatingDuration(change) {
+  const input = $('seatingDurationInput');
+  if (!input) return;
+
+  const current = Number(input.value) || seatingDurationMinutes();
+  input.value = String(Math.min(1440, Math.max(1, current + change)));
+}
+
+function saveSeatingDuration() {
+  const input = $('seatingDurationInput');
+  const value = Number(input?.value);
+
+  if (!Number.isInteger(value) || value < 1 || value > 1440) {
+    toast('Masukkan durasi 1 sampai 1440 menit');
+    syncSeatingSettingInput();
+    return;
+  }
+
+  state.settings = state.settings || {};
+  state.settings.seatingDurationMinutes = value;
+  save();
+  updateSeatingCountdowns();
+  toast('Durasi Seating Time disimpan');
+}
+
+
+
+function nextTicket(day) {
+  const number = (state.counters[day] || 0) + 1;
+  state.counters[day] = number;
+
+  return 'WL-' + String(number).padStart(3, '0');
+}
+
+function toast(message) {
+  const element = $('toast');
+  element.textContent = message;
+  element.classList.add('show');
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => element.classList.remove('show'), 2300);
+}
+
+
 /* =========================================================
    2. APP NAVIGATION AND SHARED POPUP / SHEET CONTROLS
    ========================================================= */
-function returnToGuestOperational(){go('dashboard')}
-function go(page){closeQuickMenu();document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$('page-'+page).classList.add('active');document.querySelectorAll('.drawer-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page));$('fab').style.display=page==='settings'?'none':'grid';if(page==='settings')syncSeatingSettingInput();if(page==='dashboard')dashboardCountUpPending=true;renderAll();window.scrollTo({top:0,behavior:'auto'})}
-function toggleQuickMenu(){const open=!$('quickMenu').classList.contains('show');if(open&&$('menuDrawer').classList.contains('show'))closeMenu();$('quickMenu').classList.toggle('show',open);$('quickMenuBackdrop').classList.toggle('show',open);$('quickMenu').setAttribute('aria-hidden',String(!open));$('quickMenuBackdrop').setAttribute('aria-hidden',String(!open));$('fab').classList.toggle('is-open',open);$('fab').setAttribute('aria-expanded',String(open));$('fab').setAttribute('aria-label',open?'Tutup menu cepat':'Buka menu cepat')}
-function closeQuickMenu(){const menu=$('quickMenu'),backdrop=$('quickMenuBackdrop'),fab=$('fab');if(!menu||!backdrop||!fab)return;menu.classList.remove('show');backdrop.classList.remove('show');menu.setAttribute('aria-hidden','true');backdrop.setAttribute('aria-hidden','true');fab.classList.remove('is-open');fab.setAttribute('aria-expanded','false');fab.setAttribute('aria-label','Buka menu cepat')}
-function runQuickAction(action){closeQuickMenu();if(action==='add'){openAdd();return}if(['waiting','reservations','history'].includes(action)){go(action)}}
-function toggleMenu(){const open=!$('menuDrawer').classList.contains('show');if(open)closeQuickMenu();$('menuDrawer').classList.toggle('show',open);$('menuBackdrop').classList.toggle('show',open);$('menuDrawer').setAttribute('aria-hidden',String(!open));$('menuToggle').setAttribute('aria-expanded',String(open));document.body.style.overflow=open?'hidden':''}
-function closeMenu(){$('menuDrawer').classList.remove('show');$('menuBackdrop').classList.remove('show');$('menuDrawer').setAttribute('aria-hidden','true');$('menuToggle').setAttribute('aria-expanded','false');document.body.style.overflow=''}
-function navigateFromMenu(page){closeMenu();go(page)}
-function openSheet(content){$('sheetContent').innerHTML=content;$('sheet').style.transform='';$('backdrop').classList.add('show');$('sheet').classList.add('show');document.body.style.overflow='hidden';initSheetDrag();initSheetBodySwipe()}
-function closeSheet(){$('backdrop').classList.remove('show');$('sheet').classList.remove('show');$('sheet').classList.remove('operational-modal');$('sheet').style.transform='';document.body.style.overflow='';sheetGuest=null}
+function returnToGuestOperational() {
+  go('dashboard');
+}
+
+function go(page) {
+  closeQuickMenu();
+  document.querySelectorAll('.page').forEach(element => element.classList.remove('active'));
+  $('page-' + page).classList.add('active');
+
+  document.querySelectorAll('.drawer-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.page === page);
+  });
+
+  $('fab').style.display = page === 'settings' ? 'none' : 'grid';
+
+  if (page === 'settings') syncSeatingSettingInput();
+  if (page === 'dashboard') dashboardCountUpPending = true;
+
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function toggleQuickMenu() {
+  const open = !$('quickMenu').classList.contains('show');
+
+  if (open && $('menuDrawer').classList.contains('show')) {
+    closeMenu();
+  }
+
+  $('quickMenu').classList.toggle('show', open);
+  $('quickMenuBackdrop').classList.toggle('show', open);
+  $('quickMenu').setAttribute('aria-hidden', String(!open));
+  $('quickMenuBackdrop').setAttribute('aria-hidden', String(!open));
+  $('fab').classList.toggle('is-open', open);
+  $('fab').setAttribute('aria-expanded', String(open));
+  $('fab').setAttribute('aria-label', open ? 'Tutup menu cepat' : 'Buka menu cepat');
+}
+
+function closeQuickMenu() {
+  const menu = $('quickMenu');
+  const backdrop = $('quickMenuBackdrop');
+  const fab = $('fab');
+
+  if (!menu || !backdrop || !fab) return;
+
+  menu.classList.remove('show');
+  backdrop.classList.remove('show');
+  menu.setAttribute('aria-hidden', 'true');
+  backdrop.setAttribute('aria-hidden', 'true');
+  fab.classList.remove('is-open');
+  fab.setAttribute('aria-expanded', 'false');
+  fab.setAttribute('aria-label', 'Buka menu cepat');
+}
+
+function runQuickAction(action) {
+  closeQuickMenu();
+
+  if (action === 'add') {
+    openAdd();
+    return;
+  }
+
+  if (['waiting', 'reservations', 'history'].includes(action)) {
+    go(action);
+  }
+}
+
+function toggleMenu() {
+  const open = !$('menuDrawer').classList.contains('show');
+
+  if (open) closeQuickMenu();
+
+  $('menuDrawer').classList.toggle('show', open);
+  $('menuBackdrop').classList.toggle('show', open);
+  $('menuDrawer').setAttribute('aria-hidden', String(!open));
+  $('menuToggle').setAttribute('aria-expanded', String(open));
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+
+function closeMenu() {
+  $('menuDrawer').classList.remove('show');
+  $('menuBackdrop').classList.remove('show');
+  $('menuDrawer').setAttribute('aria-hidden', 'true');
+  $('menuToggle').setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
+
+function navigateFromMenu(page) {
+  closeMenu();
+  go(page);
+}
+
+function openSheet(content) {
+  $('sheetContent').innerHTML = content;
+  $('sheet').style.transform = '';
+  $('backdrop').classList.add('show');
+  $('sheet').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  initSheetDrag();
+  initSheetBodySwipe();
+}
+
+function closeSheet() {
+  $('backdrop').classList.remove('show');
+  $('sheet').classList.remove('show');
+  $('sheet').classList.remove('operational-modal');
+  $('sheet').style.transform = '';
+  document.body.style.overflow = '';
+  sheetGuest = null;
+}
+
+
 let sheetDragStartY=0,sheetDragCurrentY=0,sheetDragging=false,sheetDragPointerId=null;
 function initSheetDrag(){
  const handle=$('sheetHandle'),sheet=$('sheet');
@@ -193,7 +420,60 @@ function setDashboardCounter(id,targetValue,animate=false){
  element.textContent='0';
  requestAnimationFrame(step);
 }
-function renderAll(){let d=todayKey(),today=state.guests.filter(g=>g.day===d),waiting=today.filter(g=>g.status==='waiting'||g.status==='called'),done=today.filter(g=>g.status==='done'),cancel=today.filter(g=>g.status==='cancelled');$('dateLabel').textContent=new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'numeric',month:'short'}).format(new Date());const animateDashboardCounts=dashboardCountUpPending&&$('page-dashboard')?.classList.contains('active');dashboardCountUpPending=false;setDashboardCounter('totalCount',today.length,animateDashboardCounts);setDashboardCounter('packCount',today.reduce((a,g)=>a+g.pack,0),animateDashboardCounts);setDashboardCounter('waitingCount',waiting.length,animateDashboardCounts);setDashboardCounter('doneCount',done.length,animateDashboardCounts);setDashboardCounter('cancelCount',cancel.length,animateDashboardCounts);let resolved=today.filter(g=>g.resolved);$('avgWait').textContent=resolved.length?fmtElapsed(resolved.reduce((a,g)=>a+g.resolved-g.created,0)/resolved.length):'—';let pending=state.guests.filter(g=>g.day!==d&&(g.status==='waiting'||g.status==='called'));$('pendingWrap').innerHTML=pending.length?`<div class="pending"><h3>⚠ ${pending.length} tugas tertunda dari hari sebelumnya</h3><p>Periksa tamu yang belum diselesaikan. Data tidak dihapus otomatis.</p>${pending.map(g=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #f3e5d0;font-size:11px"><span><b>${g.ticket}</b> · ${esc(g.name)}</span><button class="mini green" onclick="openDetail('${g.id}')">Periksa</button></div>`).join('')}</div>`:'';$('dashboardList').innerHTML=waiting.length?waiting.sort((a,b)=>a.created-b.created).map(guestCard).join(''):`<div class="empty"><div class="empty-icon">✓</div><h3>Belum ada antrean aktif</h3><p>Tambahkan tamu baru untuk mulai mengelola antrean.</p></div>`;renderQueue();renderHistory();renderReservations()}
+function renderAll() {
+  const day = todayKey();
+  const todayGuests = state.guests.filter(guest => guest.day === day);
+  const waitingGuests = todayGuests.filter(guest => ['waiting', 'called'].includes(guest.status));
+  const doneGuests = todayGuests.filter(guest => guest.status === 'done');
+  const cancelledGuests = todayGuests.filter(guest => guest.status === 'cancelled');
+
+  $('dateLabel').textContent = new Intl.DateTimeFormat('id-ID', {
+    timeZone: 'Asia/Jakarta',
+    day: 'numeric',
+    month: 'short'
+  }).format(new Date());
+
+  const animateCounts =
+    dashboardCountUpPending && $('page-dashboard')?.classList.contains('active');
+  dashboardCountUpPending = false;
+
+  setDashboardCounter('totalCount', todayGuests.length, animateCounts);
+  setDashboardCounter(
+    'packCount',
+    todayGuests.reduce((total, guest) => total + guest.pack, 0),
+    animateCounts
+  );
+  setDashboardCounter('waitingCount', waitingGuests.length, animateCounts);
+  setDashboardCounter('doneCount', doneGuests.length, animateCounts);
+  setDashboardCounter('cancelCount', cancelledGuests.length, animateCounts);
+
+  const resolvedGuests = todayGuests.filter(guest => guest.resolved);
+  $('avgWait').textContent = resolvedGuests.length
+    ? fmtElapsed(
+        resolvedGuests.reduce((total, guest) => total + guest.resolved - guest.created, 0) /
+          resolvedGuests.length
+      )
+    : '—';
+
+  const pendingGuests = state.guests.filter(
+    guest => guest.day !== day && ['waiting', 'called'].includes(guest.status)
+  );
+
+  $('pendingWrap').innerHTML = pendingGuests.length
+    ? `<div class="pending"><h3>⚠ ${pendingGuests.length} tugas tertunda dari hari sebelumnya</h3><p>Periksa tamu yang belum diselesaikan. Data tidak dihapus otomatis.</p>${pendingGuests.map(guest => `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #f3e5d0;font-size:11px"><span><b>${guest.ticket}</b> · ${esc(guest.name)}</span><button class="mini green" onclick="openDetail('${guest.id}')">Periksa</button></div>`).join('')}</div>`
+    : '';
+
+  $('dashboardList').innerHTML = waitingGuests.length
+    ? waitingGuests
+        .sort((a, b) => a.created - b.created)
+        .map(guestCard)
+        .join('')
+    : `<div class="empty"><div class="empty-icon">✓</div><h3>Belum ada antrean aktif</h3><p>Tambahkan tamu baru untuk mulai mengelola antrean.</p></div>`;
+
+  renderQueue();
+  renderHistory();
+  renderReservations();
+}
 function setFilter(f){activeFilter=f;document.querySelectorAll('#queueFilters .filter').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));renderQueue()}
 function renderQueue(){
  if(!$('queueList'))return;
@@ -402,33 +682,162 @@ function renderHistoryCalendar() {
   $('historyCalendarDays').innerHTML = days;
 }
 
-function renderHistory(){if(!$('historyList'))return;let d=$('historyDate').value||todayKey(),q=($('historySearch')?.value||'').toLowerCase(),list=state.guests.filter(g=>g.day===d&&g.name.toLowerCase().includes(q)).sort((a,b)=>b.created-a.created);$('historyList').innerHTML=list.length?list.map((g,i)=>guestCard(g,i,true)).join(''):`<div class="empty"><div class="empty-icon">◷</div><h3>Belum ada riwayat</h3><p>Tidak ada tamu pada tanggal yang dipilih.</p></div>`}
+function renderHistory() {
+  if (!$('historyList')) return;
+
+  const selectedDay = $('historyDate').value || todayKey();
+  const query = ($('historySearch')?.value || '').toLowerCase();
+  const guests = state.guests
+    .filter(guest => guest.day === selectedDay && guest.name.toLowerCase().includes(query))
+    .sort((a, b) => b.created - a.created);
+
+  $('historyList').innerHTML = guests.length
+    ? guests.map((guest, index) => guestCard(guest, index, true)).join('')
+    : `<div class="empty"><div class="empty-icon">◷</div><h3>Belum ada riwayat</h3><p>Tidak ada tamu pada tanggal yang dipilih.</p></div>`;
+}
+
+
 
 /* =========================================================
    6. RESERVATIONS: CALENDAR, FORM, AND GUEST SEATING
    ========================================================= */
-let reservationMonth=todayKey().slice(0,7),reservationDate=todayKey();
-const reservationStatusLabel=s=>({pending:'Menunggu Reservasi',seated:'Duduk',cancelled:'Dibatalkan'}[s]||s);
-function reservationDateKey(y,m,d){return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
-function reservationDateText(value,opts={weekday:'long',day:'numeric',month:'long',year:'numeric'}){return new Intl.DateTimeFormat('id-ID',{timeZone:'UTC',...opts}).format(new Date(value+'T12:00:00Z'))}
-function reservationCode(date){let n=(state.reservationCounters[date]||0)+1;state.reservationCounters[date]=n;return'RSV-'+String(n).padStart(3,'0')}
-function changeReservationMonth(delta){let [y,m]=reservationMonth.split('-').map(Number);let d=new Date(Date.UTC(y,m-1+delta,1));reservationMonth=d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0');reservationDate=reservationMonth+'-01';renderReservations()}
-function goReservationToday(){reservationMonth=todayKey().slice(0,7);reservationDate=todayKey();renderReservations()}
-function selectReservationDate(date){reservationDate=date;renderReservations()}
-function renderReservations(){
- if(!$('reservationCalendar'))return;
- const [year,month]=reservationMonth.split('-').map(Number),firstOffset=new Date(Date.UTC(year,month-1,1)).getUTCDay(),days=new Date(Date.UTC(year,month,0)).getUTCDate();
- $('reservationMonthLabel').textContent=reservationDateText(reservationMonth+'-01',{month:'long',year:'numeric'});
- const weekday=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];let cells=weekday.map(d=>'<div class="reservation-weekday">'+d+'</div>').join('');
- for(let i=0;i<firstOffset;i++)cells+='<div class="reservation-day outside"></div>';
- for(let day=1;day<=days;day++){const date=reservationDateKey(year,month,day),items=state.reservations.filter(r=>r.date===date),has=items.length>0;
- const dots=(items.some(r=>r.status==='pending')?'<i></i>':'')+(items.some(r=>r.status==='seated')?'<i class="seated"></i>':'')+(items.some(r=>r.status==='cancelled')?'<i class="cancelled"></i>':'');
- cells+='<button type="button" class="reservation-day'+(date===todayKey()?' today':'')+(date===reservationDate?' selected':'')+(has?' has-items':'')+'" onclick="selectReservationDate(\''+date+'\')"><span>'+day+'</span><span class="reservation-day-dots">'+dots+'</span></button>'}
- $('reservationCalendar').innerHTML=cells;
- const list=state.reservations.filter(r=>r.date===reservationDate).sort((a,b)=>a.time.localeCompare(b.time));
- $('reservationDateLabel').textContent=reservationDateText(reservationDate);
- $('reservationCount').textContent=list.length+' reservasi';
- $('reservationList').innerHTML=list.length?list.map(r=>'<article class="reservation-card"><div><div class="reservation-code">'+esc(r.code)+'</div><div class="reservation-name">'+esc(r.name)+'</div><div class="reservation-meta"><span>'+r.pack+' pack</span><span>·</span><span>'+esc(r.phone||'Tanpa WhatsApp')+'</span><span>·</span><span>'+esc(r.smoking)+'</span></div><span class="reservation-status '+r.status+'">'+reservationStatusLabel(r.status)+'</span></div><div class="reservation-time"><small>JAM</small><strong>'+esc(r.time)+'</strong></div><div class="reservation-actions"><button onclick="openReservationDetail(\''+r.id+'\')">Detail</button>'+(r.status==='pending'?'<button class="seat-action" onclick="seatReservation(\''+r.id+'\')">Dudukkan tamu</button><button class="cancel-action" onclick="cancelReservation(\''+r.id+'\')">Batalkan</button>':'')+'</div></article>').join(''):'<div class="reservation-empty"><strong>Belum ada reservasi</strong>Tidak ada reservasi pada tanggal ini.</div>';
+let reservationMonth = todayKey().slice(0, 7);
+let reservationDate = todayKey();
+
+const reservationStatusLabel = status => ({
+  pending: 'Menunggu Reservasi',
+  seated: 'Duduk',
+  cancelled: 'Dibatalkan'
+}[status] || status);
+
+function reservationDateKey(year, month, day) {
+  return year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+}
+
+function reservationDateText(value, options = {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric'
+}) {
+  return new Intl.DateTimeFormat('id-ID', {
+    timeZone: 'UTC',
+    ...options
+  }).format(new Date(value + 'T12:00:00Z'));
+}
+
+function reservationCode(date) {
+  const number = (state.reservationCounters[date] || 0) + 1;
+  state.reservationCounters[date] = number;
+
+  return 'RSV-' + String(number).padStart(3, '0');
+}
+
+function changeReservationMonth(delta) {
+  const [year, month] = reservationMonth.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1 + delta, 1));
+
+  reservationMonth =
+    date.getUTCFullYear() + '-' + String(date.getUTCMonth() + 1).padStart(2, '0');
+  reservationDate = reservationMonth + '-01';
+
+  renderReservations();
+}
+
+function goReservationToday() {
+  reservationMonth = todayKey().slice(0, 7);
+  reservationDate = todayKey();
+  renderReservations();
+}
+
+function selectReservationDate(date) {
+  reservationDate = date;
+  renderReservations();
+}
+
+
+function renderReservations() {
+  if (!$('reservationCalendar')) return;
+
+  const [year, month] = reservationMonth.split('-').map(Number);
+  const firstOffset = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+
+  $('reservationMonthLabel').textContent = reservationDateText(
+    reservationMonth + '-01',
+    { month: 'long', year: 'numeric' }
+  );
+
+  const weekdays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+  let cells = weekdays
+    .map(day => '<div class="reservation-weekday">' + day + '</div>')
+    .join('');
+
+  for (let index = 0; index < firstOffset; index++) {
+    cells += '<div class="reservation-day outside"></div>';
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = reservationDateKey(year, month, day);
+    const items = state.reservations.filter(reservation => reservation.date === date);
+    const hasItems = items.length > 0;
+
+    const dots =
+      (items.some(item => item.status === 'pending') ? '<i></i>' : '') +
+      (items.some(item => item.status === 'seated') ? '<i class="seated"></i>' : '') +
+      (items.some(item => item.status === 'cancelled') ? '<i class="cancelled"></i>' : '');
+
+    cells +=
+      '<button type="button" class="reservation-day' +
+      (date === todayKey() ? ' today' : '') +
+      (date === reservationDate ? ' selected' : '') +
+      (hasItems ? ' has-items' : '') +
+      '" onclick="selectReservationDate(\'' + date + '\')"><span>' +
+      day +
+      '</span><span class="reservation-day-dots">' +
+      dots +
+      '</span></button>';
+  }
+
+  $('reservationCalendar').innerHTML = cells;
+
+  const reservations = state.reservations
+    .filter(reservation => reservation.date === reservationDate)
+    .sort((a, b) => a.time.localeCompare(b.time));
+
+  $('reservationDateLabel').textContent = reservationDateText(reservationDate);
+  $('reservationCount').textContent = reservations.length + ' reservasi';
+
+  $('reservationList').innerHTML = reservations.length
+    ? reservations.map(reservation => {
+        const actions = reservation.status === 'pending'
+          ? '<button class="seat-action" onclick="seatReservation(\'' + reservation.id + '\')">Dudukkan tamu</button>' +
+            '<button class="cancel-action" onclick="cancelReservation(\'' + reservation.id + '\')">Batalkan</button>'
+          : '';
+
+        return '<article class="reservation-card">' +
+          '<div>' +
+            '<div class="reservation-code">' + esc(reservation.code) + '</div>' +
+            '<div class="reservation-name">' + esc(reservation.name) + '</div>' +
+            '<div class="reservation-meta">' +
+              '<span>' + reservation.pack + ' pack</span>' +
+              '<span>·</span>' +
+              '<span>' + esc(reservation.phone || 'Tanpa WhatsApp') + '</span>' +
+              '<span>·</span>' +
+              '<span>' + esc(reservation.smoking) + '</span>' +
+            '</div>' +
+            '<span class="reservation-status ' + reservation.status + '">' +
+              reservationStatusLabel(reservation.status) +
+            '</span>' +
+          '</div>' +
+          '<div class="reservation-time"><small>JAM</small><strong>' + esc(reservation.time) + '</strong></div>' +
+          '<div class="reservation-actions">' +
+            '<button onclick="openReservationDetail(\'' + reservation.id + '\')">Detail</button>' +
+            actions +
+          '</div>' +
+        '</article>';
+      }).join('')
+    : '<div class="reservation-empty"><strong>Belum ada reservasi</strong>Tidak ada reservasi pada tanggal ini.</div>';
 }
 function openReservationForm(){
  const min=todayKey();
@@ -442,9 +851,74 @@ function saveReservation(e){e.preventDefault();const name=$('rName').value.trim(
  state.reservations.push(r);save();reservationMonth=date.slice(0,7);reservationDate=date;closeSheet();renderAll();toast('Reservasi tersimpan · '+r.code);
 }
 function openReservationDetail(id){const r=state.reservations.find(x=>x.id===id);if(!r)return;openSheet('<div class="sheet-head"><h2>Detail reservasi</h2><button class="close" onclick="closeSheet()">✕</button></div><div class="detail-ticket"><small>KODE RESERVASI</small><strong>'+esc(r.code)+'</strong><small>'+esc(reservationDateText(r.date))+'</small></div><div style="font:800 18px Manrope">'+esc(r.name)+'</div><div class="detail-grid"><div class="detail-cell"><small>Jam reservasi</small><b>'+esc(r.time)+' WIB</b></div><div class="detail-cell"><small>Jumlah pack</small><b>'+r.pack+' pack</b></div><div class="detail-cell"><small>Status</small><b>'+reservationStatusLabel(r.status)+'</b></div><div class="detail-cell"><small>Smoking</small><b>'+esc(r.smoking)+'</b></div><div class="detail-cell" style="grid-column:1/-1"><small>WhatsApp</small><b>'+esc(r.phone||'—')+'</b></div><div class="detail-cell" style="grid-column:1/-1"><small>Catatan</small><b>'+esc(r.note||'—')+'</b></div></div><div class="sheet-actions"><button class="secondary" onclick="closeSheet()">Tutup</button></div>')}
-function cancelReservation(id){const r=state.reservations.find(x=>x.id===id);if(!r||r.status!=='pending')return;if(!confirm('Batalkan reservasi '+r.code+'?'))return;r.status='cancelled';r.cancelledAt=Date.now();save();renderAll();toast('Reservasi dibatalkan')}
-function seatReservation(id){const r=state.reservations.find(x=>x.id===id);if(!r||r.status!=='pending')return;if(r.date!==todayKey()){toast('Tamu hanya bisa didudukkan pada tanggal reservasinya');return}openSheet('<div class="sheet-head"><h2>Dudukkan tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><p class="page-sub">'+esc(r.code)+' · '+esc(r.name)+'</p><form onsubmit="confirmSeatReservation(event,\''+id+'\')"><div class="field"><label>Nomor / nama meja *</label><input id="rTable" required maxlength="80" placeholder="Contoh: Meja 05, VIP 2"></div><div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button class="primary">Konfirmasi duduk</button></div></form>')}
-function confirmSeatReservation(e,id){e.preventDefault();const r=state.reservations.find(x=>x.id===id),table=$('rTable').value.trim();if(!r||!table)return;const now=Date.now(),g={id:uid(),ticket:nextTicket(todayKey()),day:todayKey(),name:r.name,pack:r.pack,phone:r.phone,status:'seated',created:now,resolved:now,seatedAt:now,audit:[{at:now,label:'Reservasi '+r.code+' · Duduk',detail:'Meja '+table}]};state.guests.push(g);r.status='seated';r.guestId=g.id;r.table=table;r.seatedAt=now;save();closeSheet();renderAll();toast('Tamu masuk ke catatan operasional · '+g.ticket)}
+function cancelReservation(id) {
+  const reservation = state.reservations.find(item => item.id === id);
+  if (!reservation || reservation.status !== 'pending') return;
+  if (!confirm('Batalkan reservasi ' + reservation.code + '?')) return;
+
+  reservation.status = 'cancelled';
+  reservation.cancelledAt = Date.now();
+  save();
+  renderAll();
+  toast('Reservasi dibatalkan');
+}
+
+function seatReservation(id) {
+  const reservation = state.reservations.find(item => item.id === id);
+  if (!reservation || reservation.status !== 'pending') return;
+
+  if (reservation.date !== todayKey()) {
+    toast('Tamu hanya bisa didudukkan pada tanggal reservasinya');
+    return;
+  }
+
+  openSheet(
+    '<div class="sheet-head"><h2>Dudukkan tamu</h2><button class="close" onclick="closeSheet()">✕</button></div>' +
+    '<p class="page-sub">' + esc(reservation.code) + ' · ' + esc(reservation.name) + '</p>' +
+    '<form onsubmit="confirmSeatReservation(event,\'' + id + '\')">' +
+      '<div class="field"><label>Nomor / nama meja *</label><input id="rTable" required maxlength="80" placeholder="Contoh: Meja 05, VIP 2"></div>' +
+      '<div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button class="primary">Konfirmasi duduk</button></div>' +
+    '</form>'
+  );
+}
+
+function confirmSeatReservation(event, id) {
+  event.preventDefault();
+
+  const reservation = state.reservations.find(item => item.id === id);
+  const table = $('rTable').value.trim();
+  if (!reservation || !table) return;
+
+  const now = Date.now();
+  const guest = {
+    id: uid(),
+    ticket: nextTicket(todayKey()),
+    day: todayKey(),
+    name: reservation.name,
+    pack: reservation.pack,
+    phone: reservation.phone,
+    status: 'seated',
+    created: now,
+    resolved: now,
+    seatedAt: now,
+    audit: [{
+      at: now,
+      label: 'Reservasi ' + reservation.code + ' · Duduk',
+      detail: 'Meja ' + table
+    }]
+  };
+
+  state.guests.push(guest);
+  reservation.status = 'seated';
+  reservation.guestId = guest.id;
+  reservation.table = table;
+  reservation.seatedAt = now;
+
+  save();
+  closeSheet();
+  renderAll();
+  toast('Tamu masuk ke catatan operasional · ' + guest.ticket);
+}
 
 /* =========================================================
    7. GUEST DETAIL, EDITING, EXPORT, AND DEMO RESET
@@ -480,9 +954,87 @@ function callGuestWhatsApp(id){
 }
 
 function openDetail(id){let g=state.guests.find(x=>x.id===id);if(!g)return;sheetGuest=id;let canCancel=['waiting','called'].includes(g.status),canFinish=g.status==='seated';openSheet(`<div class="sheet-head"><h2>Detail tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><div class="detail-ticket"><small>NOMOR ANTREAN</small><strong>${g.ticket}</strong><small>${fmtDate(g.day)}</small></div><div style="font:800 18px Manrope">${esc(g.name)}</div><div class="detail-grid"><div class="detail-cell"><small>Jumlah pack</small><b>${g.pack} orang</b></div><div class="detail-cell"><small>Status</small><b>${statusLabel(g.status)}</b></div><div class="detail-cell"><small>Waktu daftar</small><b>${fmtTime(g.created)}</b></div><div class="detail-cell"><small>${g.status==='seated'?'Seating time':'Waiting time'}</small><b>${g.status==='seated'?'<span data-seating-countdown="'+esc(g.id)+'">'+seatingCountdownText(g)+'</span>':duration(g)}</b></div><div class="detail-cell" style="grid-column:1/-1"><small>WhatsApp</small><b>${esc(g.phone||'Tidak diisi')}</b></div></div><div class="sheet-actions"><button class="secondary" onclick="editGuest('${g.id}')">Koreksi data</button>${g.phone?`<button class="primary" onclick="toast('Aksi WhatsApp demo')">WhatsApp</button>`:''}</div>${canCancel?`<div class="sheet-actions"><button class="secondary" onclick="setGuestStatus('${g.id}','cancelled')">Batalkan</button><button class="primary" onclick="setGuestStatus('${g.id}','seated')">Dudukkan tamu</button></div>`:''}${canFinish?`<div class="sheet-actions"><button class="primary" onclick="setGuestStatus('${g.id}','done')">Selesaikan kunjungan</button></div>`:''}<div style="margin-top:20px;font:800 13px Manrope">Riwayat perubahan</div><div class="timeline">${g.audit.slice().reverse().map(a=>`<div class="timeline-item"><b>${esc(a.label)}</b><small>${new Date(a.at).toLocaleString('id-ID',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'})}${a.detail?' · '+esc(a.detail):''}${a.reason?' · Alasan: '+esc(a.reason):''}</small></div>`).join('')}</div>`)}
-function editGuest(id){let g=state.guests.find(x=>x.id===id);if(!g)return;sheetGuest=id;openSheet(`<div class="sheet-head"><h2>Koreksi data tamu</h2><button class="close" onclick="openDetail('${id}')">✕</button></div><form onsubmit="saveEdit(event,'${id}')"><div class="field"><label>Nama tamu *</label><input id="editName" required value="${esc(g.name)}"></div><div class="field"><label>Jumlah pack *</label><input id="editPack" type="number" min="1" max="30" required value="${g.pack}"></div><div class="field"><label>WhatsApp</label><input id="editPhone" value="${esc(g.phone)}"></div><div class="field"><label>Alasan koreksi *</label><textarea id="editReason" required placeholder="Tuliskan alasan perubahan data..."></textarea></div><div class="sheet-actions"><button type="button" class="secondary" onclick="openDetail('${id}')">Kembali</button><button class="primary">Simpan koreksi</button></div></form>`)}
-function saveEdit(e,id){e.preventDefault();let g=state.guests.find(x=>x.id===id),now=Date.now();g.audit.push({at:now,label:'Dikoreksi',detail:`Nama: ${g.name} → ${$('editName').value}; Pack: ${g.pack} → ${$('editPack').value}`,reason:$('editReason').value.trim()});g.name=$('editName').value.trim();g.pack=Number($('editPack').value);g.phone=$('editPhone').value.trim();save();renderAll();openDetail(id);toast('Koreksi berhasil disimpan')}
-function exportCSV(){let rows=[['Tanggal','Nomor antrean','Nama','Pack','WhatsApp','Status','Waktu daftar','Waiting time'],...state.guests.filter(g=>g.day===todayKey()).map(g=>[g.day,g.ticket,g.name,g.pack,g.phone,statusLabel(g.status),fmtTime(g.created),duration(g)])];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');let blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='waiting-list-'+todayKey()+'.csv';a.click();URL.revokeObjectURL(a.href);toast('File CSV berhasil dibuat')}
-function resetDemo(){if(!confirm('Reset seluruh data demo di browser ini?'))return;state=seed();save();renderAll();toast('Data demo dikembalikan')}
+function editGuest(id) {
+  const guest = state.guests.find(item => item.id === id);
+  if (!guest) return;
 
-$('historyDate').value=todayKey();updateHistoryDateLabel();syncSeatingSettingInput();renderAll();setInterval(()=>{renderAll()},30000);setInterval(updateSeatingCountdowns,1000);
+  sheetGuest = id;
+  openSheet(`<div class="sheet-head"><h2>Koreksi data tamu</h2><button class="close" onclick="openDetail('${id}')">✕</button></div><form onsubmit="saveEdit(event,'${id}')"><div class="field"><label>Nama tamu *</label><input id="editName" required value="${esc(guest.name)}"></div><div class="field"><label>Jumlah pack *</label><input id="editPack" type="number" min="1" max="30" required value="${guest.pack}"></div><div class="field"><label>WhatsApp</label><input id="editPhone" value="${esc(guest.phone)}"></div><div class="field"><label>Alasan koreksi *</label><textarea id="editReason" required placeholder="Tuliskan alasan perubahan data..."></textarea></div><div class="sheet-actions"><button type="button" class="secondary" onclick="openDetail('${id}')">Kembali</button><button class="primary">Simpan koreksi</button></div></form>`);
+}
+
+function saveEdit(event, id) {
+  event.preventDefault();
+
+  const guest = state.guests.find(item => item.id === id);
+  const now = Date.now();
+
+  guest.audit.push({
+    at: now,
+    label: 'Dikoreksi',
+    detail: `Nama: ${guest.name} → ${$('editName').value}; Pack: ${guest.pack} → ${$('editPack').value}`,
+    reason: $('editReason').value.trim()
+  });
+
+  guest.name = $('editName').value.trim();
+  guest.pack = Number($('editPack').value);
+  guest.phone = $('editPhone').value.trim();
+
+  save();
+  renderAll();
+  openDetail(id);
+  toast('Koreksi berhasil disimpan');
+}
+
+function exportCSV() {
+  const rows = [
+    ['Tanggal', 'Nomor antrean', 'Nama', 'Pack', 'WhatsApp', 'Status', 'Waktu daftar', 'Waiting time'],
+    ...state.guests
+      .filter(guest => guest.day === todayKey())
+      .map(guest => [
+        guest.day,
+        guest.ticket,
+        guest.name,
+        guest.pack,
+        guest.phone,
+        statusLabel(guest.status),
+        fmtTime(guest.created),
+        duration(guest)
+      ])
+  ];
+
+  const csv = rows
+    .map(row => row.map(value => '"' + String(value ?? '').replace(/"/g, '""') + '"').join(','))
+    .join('\n');
+
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'waiting-list-' + todayKey() + '.csv';
+  link.click();
+  URL.revokeObjectURL(link.href);
+
+  toast('File CSV berhasil dibuat');
+}
+
+function resetDemo() {
+  if (!confirm('Reset seluruh data demo di browser ini?')) return;
+
+  state = seed();
+  save();
+  renderAll();
+  toast('Data demo dikembalikan');
+}
+
+/* =========================================================
+   8. APP STARTUP AND LIGHTWEIGHT LIVE UPDATES
+   ========================================================= */
+$('historyDate').value = todayKey();
+updateHistoryDateLabel();
+syncSeatingSettingInput();
+renderAll();
+
+setInterval(() => {
+  renderAll();
+}, 30000);
+
+setInterval(updateSeatingCountdowns, 1000);
