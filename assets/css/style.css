@@ -6501,9 +6501,9 @@ button.history-date {
   -webkit-tap-highlight-color: transparent;
 }
 
-.quick-menu-item:nth-child(2) { right: 86px; bottom: 0; }
-.quick-menu-item:nth-child(3) { right: 88px; bottom: 65px; }
-.quick-menu-item:nth-child(4) { right: 56px; bottom: 140px; }
+.quick-menu-item:nth-child(2) { right: -15px; bottom: 0; }
+.quick-menu-item:nth-child(3) { right: -15px; bottom: 65px; }
+.quick-menu-item:nth-child(4) { right: -15px; bottom: 140px; }
 .quick-menu-item:nth-child(5) { right: -15px; bottom: 215px; }
 
 .quick-menu.show .quick-menu-item {
