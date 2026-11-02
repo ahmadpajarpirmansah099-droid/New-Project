@@ -182,3 +182,21 @@ test('WIP records and recipe lines persist under the separate Master Data key', 
   assert.equal(second.runtime.WipService.findWip(wip.id).nama_wip, 'Simple Syrup');
   assert.equal(second.runtime.WipService.getLines(wip.id).length, 1);
 });
+
+
+test('Changing a WIP yield unit is blocked while a parent recipe still uses the old unit', () => {
+  const { runtime } = createRuntime();
+  const milk = addMilk(runtime);
+  const child = addWip(runtime, { nama_wip: 'Syrup', satuan_hasil: 'ML' }, [{
+    component_type: 'material', item_id: milk.id, qty_input: 1, unit_input: 'L'
+  }]);
+  addWip(runtime, { nama_wip: 'Coffee Base', hasil_per_batch: 100, satuan_hasil: 'ML' }, [{
+    component_type: 'wip', component_wip_id: child.id, qty_input: 10, unit_input: 'ML'
+  }]);
+
+  assert.throws(() => runtime.WipService.saveWip({
+    id: child.id, nama_wip: 'Syrup', hasil_per_batch: 500, satuan_hasil: 'GR'
+  }, [{
+    component_type: 'material', item_id: milk.id, qty_input: 1, unit_input: 'L'
+  }]), /Perbarui satuan pada resep induk/);
+});
