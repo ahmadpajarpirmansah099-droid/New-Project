@@ -22,6 +22,8 @@ jobs:
           node --check assets/js/masterdata-store.js
           node --check assets/js/masterdata-service.js
           node --check assets/js/masterdata-ui.js
+          node --check assets/js/wip-service.js
+          node --check assets/js/wip-ui.js
       - name: Test Master Barang frontend logic
         run: node --test tests/masterdata-phase1.test.js
 
