@@ -33,6 +33,7 @@ function toast(msg){let t=$('toast');t.textContent=msg;t.classList.add('show');c
 /* =========================================================
    2. APP NAVIGATION AND SHARED POPUP / SHEET CONTROLS
    ========================================================= */
+function returnToGuestOperational(){go('dashboard')}
 function go(page){closeQuickMenu();document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$('page-'+page).classList.add('active');document.querySelectorAll('.drawer-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page));$('fab').style.display=page==='settings'?'none':'grid';if(page==='settings')syncSeatingSettingInput();if(page==='dashboard')dashboardCountUpPending=true;renderAll();window.scrollTo({top:0,behavior:'auto'})}
 function toggleQuickMenu(){const open=!$('quickMenu').classList.contains('show');if(open&&$('menuDrawer').classList.contains('show'))closeMenu();$('quickMenu').classList.toggle('show',open);$('quickMenuBackdrop').classList.toggle('show',open);$('quickMenu').setAttribute('aria-hidden',String(!open));$('quickMenuBackdrop').setAttribute('aria-hidden',String(!open));$('fab').classList.toggle('is-open',open);$('fab').setAttribute('aria-expanded',String(open));$('fab').setAttribute('aria-label',open?'Tutup menu cepat':'Buka menu cepat')}
 function closeQuickMenu(){const menu=$('quickMenu'),backdrop=$('quickMenuBackdrop'),fab=$('fab');if(!menu||!backdrop||!fab)return;menu.classList.remove('show');backdrop.classList.remove('show');menu.setAttribute('aria-hidden','true');backdrop.setAttribute('aria-hidden','true');fab.classList.remove('is-open');fab.setAttribute('aria-expanded','false');fab.setAttribute('aria-label','Buka menu cepat')}
@@ -484,58 +485,4 @@ function saveEdit(e,id){e.preventDefault();let g=state.guests.find(x=>x.id===id)
 function exportCSV(){let rows=[['Tanggal','Nomor antrean','Nama','Pack','WhatsApp','Status','Waktu daftar','Waiting time'],...state.guests.filter(g=>g.day===todayKey()).map(g=>[g.day,g.ticket,g.name,g.pack,g.phone,statusLabel(g.status),fmtTime(g.created),duration(g)])];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');let blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='waiting-list-'+todayKey()+'.csv';a.click();URL.revokeObjectURL(a.href);toast('File CSV berhasil dibuat')}
 function resetDemo(){if(!confirm('Reset seluruh data demo di browser ini?'))return;state=seed();save();renderAll();toast('Data demo dikembalikan')}
 
-/* =========================================================
-   12. MOBILE EDGE SWIPE — RETURN TO GUEST OPERATIONAL
-   ========================================================= */
-function initSwipeHomeNavigation() {
-  if (window.matchMedia && !window.matchMedia('(max-width: 900px)').matches) return;
-  if (document.documentElement.dataset.swipeHomeReady) return;
-  document.documentElement.dataset.swipeHomeReady = '1';
-  let startX = 0;
-  let startY = 0;
-  let tracking = false;
-  const childPages = ['waiting', 'reservations', 'history'];
-
-  document.addEventListener('touchstart', event => {
-    if (event.touches.length !== 1) { tracking = false; return; }
-    const activePage = document.querySelector('.page.active');
-    if (!activePage || !childPages.some(page => activePage.id === 'page-' + page)) {
-      tracking = false;
-      return;
-    }
-    if ($('sheet')?.classList.contains('show') ||
-        $('menuDrawer')?.classList.contains('show') ||
-        $('quickMenu')?.classList.contains('show') ||
-        $('backdrop')?.classList.contains('show')) {
-      tracking = false;
-      return;
-    }
-    const target = event.target;
-    if (target.closest('input,textarea,select,button,a,[contenteditable="true"],[data-no-swipe-home],.operational-filter-menu,.calendar')) {
-      tracking = false;
-      return;
-    }
-    const touch = event.touches[0];
-    // Stay slightly inside the screen edge so Android's system-back gesture can keep its own area.
-    tracking = touch.clientX >= 16 && touch.clientX <= 52;
-    if (tracking) {
-      startX = touch.clientX;
-      startY = touch.clientY;
-    }
-  }, { passive: true, capture: true });
-
-  document.addEventListener('touchend', event => {
-    if (!tracking || event.changedTouches.length !== 1) { tracking = false; return; }
-    const touch = event.changedTouches[0];
-    const deltaX = touch.clientX - startX;
-    const deltaY = touch.clientY - startY;
-    tracking = false;
-    if (deltaX >= 88 && Math.abs(deltaY) <= 68 && deltaX > Math.abs(deltaY) * 1.25) {
-      go('dashboard');
-    }
-  }, { passive: true, capture: true });
-
-  document.addEventListener('touchcancel', () => { tracking = false; }, { passive: true, capture: true });
-}
-
-$('historyDate').value=todayKey();updateHistoryDateLabel();syncSeatingSettingInput();initSwipeHomeNavigation();renderAll();setInterval(()=>{renderAll()},30000);setInterval(updateSeatingCountdowns,1000);
+$('historyDate').value=todayKey();updateHistoryDateLabel();syncSeatingSettingInput();renderAll();setInterval(()=>{renderAll()},30000);setInterval(updateSeatingCountdowns,1000);
