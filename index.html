@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6f6f1">
 <title>Guest Operations — Admin</title>
-<link rel="stylesheet" href="assets/css/style.css?v=20261101-detail-scroll2">
+<link rel="stylesheet" href="assets/css/style.css?v=20261102-operational-detail1">
 </head>
 <body>
 <div class="app">
@@ -16,7 +16,7 @@
 <main class="content">
   <section class="page active" id="page-dashboard">
     <div class="greeting"><div><div class="eyebrow">Admin</div><h1>Selamat datang.</h1></div><div class="date" id="dateLabel">Hari ini</div></div>
-    <div class="hero"><div class="hero-head"><span class="hero-label">Total tamu terdaftar hari ini</span><span class="live"><i class="dot"></i> LIVE DEMO</span></div><div class="hero-total" id="totalCount">0</div><div class="hero-foot"><span><b id="packCount">0</b> total pack</span><span><b id="avgWait">—</b> rata-rata tunggu</span></div></div>
+    <div class="hero hero-detail-trigger" role="button" tabindex="0" aria-label="Buka detail operasional hari ini" onclick="openOperationalDetail()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openOperationalDetail()}"><div class="hero-head"><span class="hero-label">Total tamu terdaftar hari ini</span><span class="hero-action" aria-hidden="true">↗</span><span class="live"><i class="dot"></i> LIVE DEMO</span></div><div class="hero-total" id="totalCount">0</div><div class="hero-foot"><span><b id="packCount">0</b> total pack</span><span><b id="avgWait">—</b> rata-rata tunggu</span></div></div>
     <div class="metrics">
       <div class="metric"><div class="metric-top"><span class="eyebrow">Menunggu</span><span class="metric-icon i-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div><strong id="waitingCount">0</strong><small>Antrean aktif</small></div>
       <div class="metric"><div class="metric-top"><span class="eyebrow">Selesai</span><span class="metric-icon i-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg></span></div><strong id="doneCount">0</strong><small>Kunjungan selesai</small></div>
@@ -107,6 +107,6 @@
 <button class="drawer-item" data-page="history" onclick="navigateFromMenu('history')">◷ <span>Riwayat</span></button>
 <button class="drawer-item" data-page="settings" onclick="navigateFromMenu('settings')">⚙ <span>Pengaturan</span></button>
 </nav><div class="drawer-foot">ADMIN WORKSPACE</div></aside><div class="toast" id="toast"></div>
-<script src="assets/js/app.js?v=20261101-detail-scroll2" defer></script>
+<script src="assets/js/app.js?v=20261102-operational-detail1" defer></script>
 </body>
 </html>
