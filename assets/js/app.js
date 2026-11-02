@@ -751,12 +751,14 @@ function goReservationToday() {
 }
 
 function selectReservationDate(date) {
+  if (date === reservationDate) return;
+
   reservationDate = date;
-  renderReservations();
+  renderReservations(true);
 }
 
 
-function renderReservations() {
+function renderReservations(animateDateChange = false) {
   if (!$('reservationCalendar')) return;
 
   const [year, month] = reservationMonth.split('-').map(Number);
@@ -808,7 +810,8 @@ function renderReservations() {
   $('reservationDateLabel').textContent = reservationDateText(reservationDate);
   $('reservationCount').textContent = reservations.length + ' reservasi';
 
-  $('reservationList').innerHTML = reservations.length
+  const reservationList = $('reservationList');
+  reservationList.innerHTML = reservations.length
     ? reservations.map(reservation => {
         const actions = reservation.status === 'pending'
           ? '<button class="seat-action" onclick="seatReservation(\'' + reservation.id + '\')">Dudukkan tamu</button>' +
@@ -838,6 +841,11 @@ function renderReservations() {
         '</article>';
       }).join('')
     : '<div class="reservation-empty"><strong>Belum ada reservasi</strong>Tidak ada reservasi pada tanggal ini.</div>';
+
+  if (animateDateChange) {
+    reservationList.classList.remove('is-changing');
+    requestAnimationFrame(() => reservationList.classList.add('is-changing'));
+  }
 }
 function openReservationForm(){
  const min=todayKey();
