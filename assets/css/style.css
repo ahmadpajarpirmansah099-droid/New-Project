@@ -6261,28 +6261,30 @@ button.history-date {
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 68px;
-  min-height: 76px;
+  width: max-content;
+  min-height: 48px;
   padding: 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: row-reverse;
   align-items: center;
   justify-content: flex-start;
-  gap: 5px;
+  gap: 9px;
   border: 0;
   background: transparent;
   color: #17172a;
   opacity: 0;
-  transform: translateY(13px) scale(0.72);
-  transform-origin: center bottom;
-  transition: opacity 0.18s ease, transform 0.28s cubic-bezier(0.18, 0.9, 0.25, 1);
+  transform: translateY(12px) scale(0.76);
+  transform-origin: right center;
+  transition:
+    opacity 0.18s ease,
+    transform 0.28s cubic-bezier(0.18, 0.9, 0.25, 1);
   -webkit-tap-highlight-color: transparent;
 }
 
-.quick-menu-item:nth-child(1) { right: 0; bottom: 76px; }
-.quick-menu-item:nth-child(2) { right: 62px; bottom: 122px; }
-.quick-menu-item:nth-child(3) { right: 124px; bottom: 122px; }
-.quick-menu-item:nth-child(4) { right: 186px; bottom: 76px; }
+.quick-menu-item:nth-child(1) { right: 202px; bottom: 60px; }
+.quick-menu-item:nth-child(2) { right: 192px; bottom: 192px; }
+.quick-menu-item:nth-child(3) { right: 126px; bottom: 306px; }
+.quick-menu-item:nth-child(4) { right: 0; bottom: 396px; }
 
 .quick-menu.show .quick-menu-item {
   opacity: 1;
@@ -6295,20 +6297,22 @@ button.history-date {
 .quick-menu.show .quick-menu-item:nth-child(4) { transition-delay: 105ms; }
 
 .quick-menu-icon {
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
+  flex: 0 0 48px;
   border: 1px solid rgba(30, 32, 50, 0.07);
   border-radius: 50%;
   background: #fff;
-  color: #34364a;
+  color: #202238;
   box-shadow: 0 7px 18px rgba(17, 18, 37, 0.12);
+  transition: transform 0.16s ease;
 }
 
 .quick-menu-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 21px;
+  height: 21px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
@@ -6317,21 +6321,28 @@ button.history-date {
 }
 
 .quick-menu-label {
-  max-width: 78px;
-  padding: 3px 6px;
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.96);
+  display: block;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.97);
   color: #25263a;
   box-shadow: 0 2px 8px rgba(17, 18, 37, 0.08);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.2;
   text-align: center;
   white-space: nowrap;
 }
 
 .quick-menu-item:active .quick-menu-icon {
   transform: scale(0.92);
+}
+
+@media (max-height: 700px) {
+  .quick-menu-item:nth-child(1) { right: 172px; bottom: 54px; }
+  .quick-menu-item:nth-child(2) { right: 164px; bottom: 154px; }
+  .quick-menu-item:nth-child(3) { right: 106px; bottom: 250px; }
+  .quick-menu-item:nth-child(4) { right: 0; bottom: 330px; }
 }
 
 @media (min-width: 900px) {
@@ -6343,7 +6354,8 @@ button.history-date {
 @media (prefers-reduced-motion: reduce) {
   .fab svg,
   .quick-menu-backdrop,
-  .quick-menu-item {
+  .quick-menu-item,
+  .quick-menu-icon {
     transition: none;
   }
 }
