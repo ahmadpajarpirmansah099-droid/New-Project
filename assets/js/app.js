@@ -664,7 +664,10 @@ function renderOperationalGuestList() {
   const query = ($('operationalSearch')?.value || '').trim().toLowerCase();
   const guests = state.guests.filter(guest => guest.day === todayKey())
     .filter(guest => operationalStatusFilter === 'all' || guest.status === operationalStatusFilter)
-    .filter(guest => (guest.name + ' ' + guest.ticket).toLowerCase().includes(query))
+    .filter(guest => {
+      const reservation = reservationIdentity(guest);
+      return (guest.name + ' ' + guest.ticket + ' ' + (reservation?.code || '')).toLowerCase().includes(query);
+    })
     .sort((a, b) => b.created - a.created);
   element.innerHTML = guests.length ? guests.map(operationalGuestRow).join('') : '<div class="operational-empty">Tidak ada tamu yang cocok dengan pencarian atau filter ini.</div>';
 }
