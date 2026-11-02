@@ -6978,17 +6978,23 @@ button.history-date {
 
 .reservation-select {
   position:relative;
+  z-index:5;
 }
 
 .reservation-select-options {
+  position:absolute;
+  top:calc(100% + 7px);
+  left:0;
+  right:0;
+  z-index:30;
   display:grid;
   gap:3px;
-  margin-top:7px;
+  margin:0;
   padding:5px;
   border:1px solid #eeedf0;
   border-radius:14px;
   background:#fff;
-  box-shadow:0 8px 22px rgba(17,18,37,.09);
+  box-shadow:0 12px 28px rgba(17,18,37,.15);
 }
 
 .reservation-select-options[hidden] {
