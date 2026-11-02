@@ -10,6 +10,7 @@ const uid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
 // Keep this key stable so existing demo data in the browser is preserved.
 const key='waitlist_frontend_demo_v1';
 let state=loadState(),activeFilter='waiting',sheetGuest=null,toastTimer;
+let dashboardCountUpPending = true;
 function loadState(){try{let s=JSON.parse(localStorage.getItem(key));if(s&&Array.isArray(s.guests)&&s.counters){if(!Array.isArray(s.reservations))s.reservations=[];if(!s.reservationCounters)s.reservationCounters={};return s}}catch(e){}return seed()}
 function seed(){let d=todayKey(),y=new Date(Date.now()-86400000);let yd=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(y),now=Date.now();let gs=[
 ['WL-001','Rina Kusuma',2,'0812-xxxx-1043','done',142,118],['WL-002','Budi Santoso',4,'0813-xxxx-7720','done',128,96],['WL-003','Dewi Lestari',3,'','cancelled',110,90],['WL-004','Andika Pratama',2,'0857-xxxx-3381','done',92,70],['WL-005','Sari Wulandari',6,'0821-xxxx-5590','waiting',48],['WL-006','Fajar Nugroho',2,'0878-xxxx-2214','called',36],['WL-007','Maya Anggraini',5,'','waiting',27],['WL-009','Hendra Wijaya',3,'0812-xxxx-9907','cancelled',22,15],['WL-010','Putri Ramadhani',2,'0896-xxxx-4412','waiting',14],['WL-011','Yoga Saputra',8,'0815-xxxx-6630','waiting',6]
@@ -23,7 +24,7 @@ function toast(msg){let t=$('toast');t.textContent=msg;t.classList.add('show');c
 /* =========================================================
    2. APP NAVIGATION AND SHARED POPUP / SHEET CONTROLS
    ========================================================= */
-function go(page){closeQuickMenu();document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$('page-'+page).classList.add('active');document.querySelectorAll('.drawer-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page));$('fab').style.display=page==='settings'?'none':'grid';renderAll();window.scrollTo({top:0,behavior:'auto'})}
+function go(page){closeQuickMenu();document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$('page-'+page).classList.add('active');document.querySelectorAll('.drawer-item').forEach(n=>n.classList.toggle('active',n.dataset.page===page));$('fab').style.display=page==='settings'?'none':'grid';if(page==='dashboard')dashboardCountUpPending=true;renderAll();window.scrollTo({top:0,behavior:'auto'})}
 function toggleQuickMenu(){const open=!$('quickMenu').classList.contains('show');if(open&&$('menuDrawer').classList.contains('show'))closeMenu();$('quickMenu').classList.toggle('show',open);$('quickMenuBackdrop').classList.toggle('show',open);$('quickMenu').setAttribute('aria-hidden',String(!open));$('quickMenuBackdrop').setAttribute('aria-hidden',String(!open));$('fab').classList.toggle('is-open',open);$('fab').setAttribute('aria-expanded',String(open));$('fab').setAttribute('aria-label',open?'Tutup menu cepat':'Buka menu cepat')}
 function closeQuickMenu(){const menu=$('quickMenu'),backdrop=$('quickMenuBackdrop'),fab=$('fab');if(!menu||!backdrop||!fab)return;menu.classList.remove('show');backdrop.classList.remove('show');menu.setAttribute('aria-hidden','true');backdrop.setAttribute('aria-hidden','true');fab.classList.remove('is-open');fab.setAttribute('aria-expanded','false');fab.setAttribute('aria-label','Buka menu cepat')}
 function runQuickAction(action){closeQuickMenu();if(action==='add'){openAdd();return}if(['waiting','reservations','history'].includes(action)){go(action)}}
@@ -160,7 +161,29 @@ function guestCard(g,i,history=false){
  else if(!history&&g.status==='seated')act=`<button class="mini green" onclick="setGuestStatus('${g.id}','done')">Selesaikan</button>`;
  return`<article class="guest" style="animation-delay:${Math.min(i,7)*.035}s"><div class="guest-row" onclick="openDetail('${g.id}')"><div class="ticket">${g.ticket}</div><div class="guest-main"><div class="guest-name">${esc(g.name)}</div><div class="guest-meta"><span>${g.pack} pack</span><span>·</span><span>${fmtTime(g.created)}</span></div></div><span class="status ${statusClass(g.status)}">${statusLabel(g.status)}</span></div><div class="guest-bottom"><span class="waittime">Waiting time <b>${duration(g)}</b></span><div class="actions">${act}<button class="mini" onclick="openDetail('${g.id}')">Detail</button></div></div></article>`}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function renderAll(){let d=todayKey(),today=state.guests.filter(g=>g.day===d),waiting=today.filter(g=>g.status==='waiting'||g.status==='called'),done=today.filter(g=>g.status==='done'),cancel=today.filter(g=>g.status==='cancelled');$('dateLabel').textContent=new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'numeric',month:'short'}).format(new Date());$('totalCount').textContent=today.length;$('packCount').textContent=today.reduce((a,g)=>a+g.pack,0);$('waitingCount').textContent=waiting.length;$('doneCount').textContent=done.length;$('cancelCount').textContent=cancel.length;let resolved=today.filter(g=>g.resolved);$('avgWait').textContent=resolved.length?fmtElapsed(resolved.reduce((a,g)=>a+g.resolved-g.created,0)/resolved.length):'—';let pending=state.guests.filter(g=>g.day!==d&&(g.status==='waiting'||g.status==='called'));$('pendingWrap').innerHTML=pending.length?`<div class="pending"><h3>⚠ ${pending.length} tugas tertunda dari hari sebelumnya</h3><p>Periksa tamu yang belum diselesaikan. Data tidak dihapus otomatis.</p>${pending.map(g=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #f3e5d0;font-size:11px"><span><b>${g.ticket}</b> · ${esc(g.name)}</span><button class="mini green" onclick="openDetail('${g.id}')">Periksa</button></div>`).join('')}</div>`:'';$('dashboardList').innerHTML=waiting.length?waiting.sort((a,b)=>a.created-b.created).map(guestCard).join(''):`<div class="empty"><div class="empty-icon">✓</div><h3>Belum ada antrean aktif</h3><p>Tambahkan tamu baru untuk mulai mengelola antrean.</p></div>`;renderQueue();renderHistory();renderReservations()}
+function setDashboardCounter(id,targetValue,animate=false){
+ const element=$(id);
+ if(!element)return;
+ const target=Math.max(0,Math.round(Number(targetValue)||0));
+ const reduceMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(!animate||target===0||reduceMotion||typeof requestAnimationFrame!=='function'){
+  element.textContent=String(target);
+  return;
+ }
+ const duration=640;
+ let startTime=null;
+ const step=now=>{
+  if(startTime===null)startTime=now;
+  const progress=Math.min((now-startTime)/duration,1);
+  const eased=1-Math.pow(1-progress,3);
+  element.textContent=String(Math.min(target,Math.round(target*eased)));
+  if(progress<1)requestAnimationFrame(step);
+  else element.textContent=String(target);
+ };
+ element.textContent='0';
+ requestAnimationFrame(step);
+}
+function renderAll(){let d=todayKey(),today=state.guests.filter(g=>g.day===d),waiting=today.filter(g=>g.status==='waiting'||g.status==='called'),done=today.filter(g=>g.status==='done'),cancel=today.filter(g=>g.status==='cancelled');$('dateLabel').textContent=new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',day:'numeric',month:'short'}).format(new Date());const animateDashboardCounts=dashboardCountUpPending&&$('page-dashboard')?.classList.contains('active');dashboardCountUpPending=false;setDashboardCounter('totalCount',today.length,animateDashboardCounts);setDashboardCounter('packCount',today.reduce((a,g)=>a+g.pack,0),animateDashboardCounts);setDashboardCounter('waitingCount',waiting.length,animateDashboardCounts);setDashboardCounter('doneCount',done.length,animateDashboardCounts);setDashboardCounter('cancelCount',cancel.length,animateDashboardCounts);let resolved=today.filter(g=>g.resolved);$('avgWait').textContent=resolved.length?fmtElapsed(resolved.reduce((a,g)=>a+g.resolved-g.created,0)/resolved.length):'—';let pending=state.guests.filter(g=>g.day!==d&&(g.status==='waiting'||g.status==='called'));$('pendingWrap').innerHTML=pending.length?`<div class="pending"><h3>⚠ ${pending.length} tugas tertunda dari hari sebelumnya</h3><p>Periksa tamu yang belum diselesaikan. Data tidak dihapus otomatis.</p>${pending.map(g=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #f3e5d0;font-size:11px"><span><b>${g.ticket}</b> · ${esc(g.name)}</span><button class="mini green" onclick="openDetail('${g.id}')">Periksa</button></div>`).join('')}</div>`:'';$('dashboardList').innerHTML=waiting.length?waiting.sort((a,b)=>a.created-b.created).map(guestCard).join(''):`<div class="empty"><div class="empty-icon">✓</div><h3>Belum ada antrean aktif</h3><p>Tambahkan tamu baru untuk mulai mengelola antrean.</p></div>`;renderQueue();renderHistory();renderReservations()}
 function setFilter(f){activeFilter=f;document.querySelectorAll('#queueFilters .filter').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));renderQueue()}
 function renderQueue(){
  if(!$('queueList'))return;
