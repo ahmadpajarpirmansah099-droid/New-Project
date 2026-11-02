@@ -6783,3 +6783,110 @@ button.history-date {
     transition:none;
   }
 }
+
+/* Mobile fix: Seating Time settings layout */
+.seating-settings-card {
+  overflow: hidden;
+}
+
+.seating-setting-row {
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 16px;
+}
+
+.seating-setting-row > .setting-icon {
+  flex: 0 0 34px;
+  margin-top: 2px;
+}
+
+.seating-setting-row > .setting-copy {
+  min-width: 0;
+  width: 100%;
+}
+
+.seating-setting-control {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.seating-stepper {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 230px;
+  width: 100%;
+  max-width: 230px;
+  min-width: 0;
+}
+
+.seating-stepper input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  border: 1px solid #e5e3eb;
+  border-radius: 10px;
+  outline: none;
+  background: #fff;
+  color: #17172a;
+  font: 700 16px Manrope, sans-serif;
+  text-align: center;
+}
+
+.seating-stepper input:focus {
+  border-color: #aaa3e8;
+  box-shadow: 0 0 0 3px rgba(170, 163, 232, .14);
+}
+
+.seating-setting-control .seating-step-button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  min-width: 34px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: #f0eff8;
+  color: #55536d;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.seating-setting-control > span {
+  color: #777585;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.seating-setting-control > button:not(.seating-step-button) {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 10px;
+  background: #f0eff8;
+  color: #55536d;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+@media (max-width: 380px) {
+  .seating-setting-row {
+    gap: 10px;
+    padding: 17px 13px;
+  }
+
+  .seating-stepper {
+    flex-basis: 205px;
+    max-width: 205px;
+  }
+}
