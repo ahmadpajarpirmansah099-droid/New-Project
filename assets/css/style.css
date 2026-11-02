@@ -7213,11 +7213,12 @@ button.history-date {
 }
 
 
-/* Keep the moving liquid layer visible beneath both status labels */
+/* Keep labels clear while removing the individual button outlines */
 #sheet .seg button,
 #sheet .seg button.selected {
+  border:0!important;
+  outline:0!important;
   background:transparent!important;
-  border-color:transparent!important;
   box-shadow:none!important;
 }
 
