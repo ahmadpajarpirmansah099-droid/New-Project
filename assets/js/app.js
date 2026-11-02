@@ -380,7 +380,7 @@ function chooseInitial(status) {
   window.clearTimeout(group._liquidTimer);
   group._liquidTimer = window.setTimeout(
     () => group.classList.remove('is-switching'),
-    280
+    200
   );
 }
 function saveGuest(e){
