@@ -6344,9 +6344,9 @@ button.history-date {
 
 @media (max-height: 700px) {
   .quick-menu-item:nth-child(1) { right: 0; bottom: 0; }
-  .quick-menu-item:nth-child(2) { right: 50px; bottom: 52px; }
-  .quick-menu-item:nth-child(3) { right: 100px; bottom: 106px; }
-  .quick-menu-item:nth-child(4) { right: 132px; bottom: 160px; }
+  .quick-menu-item:nth-child(2) { right: 17px; bottom: 36px; }
+  .quick-menu-item:nth-child(3) { right: 42px; bottom: 70px; }
+  .quick-menu-item:nth-child(4) { right: 60px; bottom: 104px; }
   .quick-menu {
     bottom: 48px;
   }
