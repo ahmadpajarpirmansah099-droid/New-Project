@@ -9,6 +9,7 @@ Aplikasi mobile-first untuk mengelola kedatangan tamu, antrean, dan reservasi se
 - **Riwayat** — cari catatan tamu berdasarkan tanggal.
 - **Reservasi** — kalender bulanan, pembuatan kode reservasi, detail, pembatalan, dan proses mendudukkan tamu.
 - **Pengaturan** — durasi Seating Time, ekspor CSV, dan reset data demo.
+- **Master Barang** — sumber bahan, satuan dasar, konversi satuan, harga referensi, dan status barang.
 - **Menu cepat (+)** — akses Antrean, Riwayat, Reservasi, dan Tambah Tamu.
 
 ## Struktur file
@@ -25,6 +26,8 @@ index.html
 
 assets/
   css/
+    masterdata.css
+      Tampilan mobile-first untuk modul Master Barang dengan design tokens Guest Operations.
     style.css
       Semua aturan tampilan dan animasi.
       - .page-back: tombol kembali halaman fitur.
@@ -35,6 +38,12 @@ assets/
       - #sheet .seg.is-switching: animasi pilihan status awal tamu.
 
   js/
+    masterdata-store.js
+      Penyimpanan Master Data terpisah dari data Guest Operational.
+    masterdata-service.js
+      Validasi Master Barang, konversi satuan, dan kalkulasi harga referensi.
+    masterdata-ui.js
+      Daftar, pencarian, filter, form, dan preview Master Barang.
     app.js
       Logika, penyimpanan demo, dan interaksi.
       - Bagian 1: utilitas, tanggal/jam, dan penyimpanan lokal.
@@ -55,6 +64,14 @@ assets/
   Aturan dasar konsistensi file.
 ```
 
+## Master Data frontend
+
+- Master Barang menyimpan data pada localStorage key `guestops_masterdata_demo_v1`.
+- Data Master Data dipisahkan dari `waitlist_frontend_demo_v1`; data antrean, riwayat, reservasi, dan pengaturan Guest Operational tidak dipakai atau ditulis oleh modul ini.
+- Struktur Master Data menyiapkan array `masterItems`, `wips`, `wipRecipeLines`, `menus`, dan `menuRecipeLines`. Pada Phase 1, yang digunakan adalah Master Barang; array WIP dan Menu masih kosong untuk fase berikutnya.
+- Scope awal memakai `scope-demo-default`; model menyimpan `scope_id` agar dapat dikembangkan ke multi-outlet/divisi.
+- Aplikasi belum terhubung ke Supabase atau backend. Tidak ada data produksi Barapp yang disalin.
+
 ## Menjalankan aplikasi
 
 Buka `index.html` melalui browser atau gunakan alamat GitHub Pages repository ini. Struktur saat ini masih berupa HTML, CSS, dan JavaScript biasa; tidak memerlukan Vite atau proses build.
@@ -74,4 +91,5 @@ Buka `index.html` melalui browser atau gunakan alamat GitHub Pages repository in
 - Pertahankan pemisahan fitur: Guest Operational adalah halaman utama; Antrean, Riwayat, Reservasi, dan Tambah Tamu diakses dari tombol `+`.
 - Semua ikon antarmuka baru harus berasal dari Lucide Icons.
 - Jaga tampilan mobile sebagai prioritas dan hindari mengubah alur fitur yang tidak diminta.
-- Perubahan JavaScript harus melewati pemeriksaan sintaks di GitHub Actions sebelum deployment.
+- Perubahan JavaScript harus melewati pemeriksaan sintaks dan tes Master Data di GitHub Actions.
+- Jangan mengganti key `guestops_masterdata_demo_v1` atau bentuk data tersimpan tanpa rencana migrasi dan persetujuan.
