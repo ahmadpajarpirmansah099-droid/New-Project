@@ -625,3 +625,17 @@ button.history-date{
 .operational-guest-copy b{font-size:11px}
 }
 @media(prefers-reduced-motion:reduce){.hero-action,.sheet.operational-modal,.operational-bar-track i,.operational-all-button{transition:none}}
+
+
+/* DRAWER NAV — LUCIDE ICON SYSTEM
+   All newly added interface icons must use Lucide SVG paths.
+*/
+.drawer-close{display:grid;place-items:center;flex:none}
+.drawer-close svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.drawer-item{position:relative;gap:13px;min-height:54px;height:54px;padding:0 14px;font-size:14px;transition:background .2s ease,color .2s ease,transform .18s ease}
+.drawer-item>svg:not(.drawer-chevron){width:19px;height:19px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.drawer-item>span{flex:1}
+.drawer-item .drawer-chevron{width:17px;height:17px;flex:none;fill:none;stroke:#aaa8b2;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.drawer-item.active .drawer-chevron{display:none}
+.drawer-item:active{transform:scale(.985)}
+@media(prefers-reduced-motion:reduce){.drawer-item{transition:none}}
