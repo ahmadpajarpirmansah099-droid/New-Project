@@ -7148,14 +7148,16 @@ button.history-date {
 }
 
 .ticket.reservation-ticket {
-  width:64px;
-  height:48px;
+  width:44px;
+  height:auto;
+  min-height:0;
   flex-direction:column;
   justify-content:center;
-  gap:2px;
+  gap:3px;
   background:#dcefe3;
   color:#204c39;
   letter-spacing:0;
+  padding:8px 2px;
 }
 
 .reservation-ticket strong {
