@@ -7230,25 +7230,25 @@ button.history-date {
 
 #sheet .seg.is-switching[data-selected="seated"]::before {
   transform-origin: left center;
-  animation: liquid-toggle-right 0.22s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  animation: liquid-toggle-right 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 #sheet .seg.is-switching[data-selected="waiting"]::before {
   transform-origin: right center;
-  animation: liquid-toggle-left 0.22s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  animation: liquid-toggle-left 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes liquid-toggle-right {
   0% { transform: translateX(0) scaleX(1); }
-  42% { transform: translateX(72%) scaleX(1.2); }
-  72% { transform: translateX(calc(100% + 8px)) scaleX(0.96); }
+  34% { transform: translateX(calc(50% + 4px)) scaleX(1.18); }
+  66% { transform: translateX(calc(100% + 8px)) scaleX(1.02); }
   100% { transform: translateX(calc(100% + 8px)) scaleX(1); }
 }
 
 @keyframes liquid-toggle-left {
   0% { transform: translateX(calc(100% + 8px)) scaleX(1); }
-  42% { transform: translateX(28%) scaleX(1.2); }
-  72% { transform: translateX(0) scaleX(0.96); }
+  34% { transform: translateX(calc(50% + 4px)) scaleX(1.18); }
+  66% { transform: translateX(0) scaleX(1.02); }
   100% { transform: translateX(0) scaleX(1); }
 }
 
