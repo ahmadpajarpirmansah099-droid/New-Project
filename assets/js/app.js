@@ -362,11 +362,18 @@ function changePack(d){
  value.classList.add('pack-number-animate');
 }
 function chooseInitial(v){
- $('initialStatus').value=v;
  const group=$('segWait').parentElement;
+ const current=$('initialStatus').value;
+ if(current===v)return;
+ group.classList.remove('is-switching');
+ void group.offsetWidth;
+ $('initialStatus').value=v;
  group.dataset.selected=v;
  $('segWait').classList.toggle('selected',v==='waiting');
  $('segSeated').classList.toggle('selected',v==='seated');
+ group.classList.add('is-switching');
+ window.clearTimeout(group._liquidTimer);
+ group._liquidTimer=window.setTimeout(()=>group.classList.remove('is-switching'),620);
 }
 function saveGuest(e){
  e.preventDefault();
