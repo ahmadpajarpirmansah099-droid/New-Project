@@ -6931,3 +6931,114 @@ button.history-date {
   width: 22px;
   height: 22px;
 }
+
+
+/* App-wide select styling: consistent dropdowns without Android picker UI */
+.app-select-wrap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-width: 0;
+}
+.app-select-wrap.is-open { z-index: 120; }
+.app-select-native {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+}
+.app-select-trigger {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 13px;
+  border: 1px solid var(--line, #e7e7e2);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink, #17172a);
+  font: 600 16px 'DM Sans', sans-serif;
+  text-align: left;
+  box-shadow: 0 2px 5px rgba(17,18,37,.045), 0 1px 2px rgba(17,18,37,.035);
+  -webkit-tap-highlight-color: transparent;
+}
+.app-select-trigger:disabled { opacity: .55; }
+.app-select-trigger:focus-visible {
+  outline: 2px solid rgba(126,115,177,.45);
+  outline-offset: 2px;
+}
+.app-select-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.app-select-arrow {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform .18s ease;
+}
+.app-select-wrap.is-open .app-select-arrow { transform: rotate(180deg); }
+.app-select-menu {
+  position: absolute;
+  z-index: 121;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  max-height: min(240px, 34dvh);
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid rgba(23,23,42,.08);
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(17,18,37,.12), 0 2px 5px rgba(17,18,37,.045);
+  overscroll-behavior: contain;
+}
+.app-select-menu[hidden] { display: none !important; }
+.app-select-wrap.opens-up .app-select-menu {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+.app-select-option {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink, #17172a);
+  font: 500 16px 'DM Sans', sans-serif;
+  text-align: left;
+}
+.app-select-option + .app-select-option {
+  border-top: 1px solid #f0f0ec;
+}
+.app-select-option.is-selected {
+  background: #f2f6e5;
+  color: #526b36;
+  font-weight: 700;
+}
+.app-select-option:disabled { color: #a5a5ad; }
+.app-select-option:active { background: #edf2df; }
+@media (prefers-reduced-motion: reduce) {
+  .app-select-arrow { transition: none; }
+}
