@@ -243,3 +243,12 @@
 .wip-recipe-actions .wip-add-row { width:auto; min-height:44px; height:44px; margin:0; border:1px solid #dedbed; background:#f2f0f8; color:#625b92; box-shadow:none; }
 .wip-recipe-actions .wip-save { background:var(--ink); color:#fff; }
 .wip-recipe-actions .wip-cancel { border:1px solid var(--line); background:#fff; color:var(--ink); }
+
+/* Match recipe values to the section title and suppress the legacy picker */
+.wip-recipe-row [data-wip-component] { display:none !important; }
+.wip-recipe-row .wip-field select,
+.wip-recipe-row .wip-field input,
+.wip-component-search input { font-size:16px !important; font-weight:500; }
+.wip-recipe-row .wip-field input::placeholder,
+.wip-component-search input::placeholder { font-size:16px; }
+.wip-component-option { font-size:16px; }
