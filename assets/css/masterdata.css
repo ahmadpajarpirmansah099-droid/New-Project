@@ -681,3 +681,62 @@
     font-size: 10px;
   }
 }
+
+
+/* Compact Master Barang form controls */
+.md-sheet-simple { gap: 14px; }
+.md-sheet-simple form { gap: 12px; }
+.md-sheet-simple .md-sheet-heading h2 { font-size: 20px; }
+.md-sheet-simple .md-eyebrow { font-size: 8px; }
+.md-sheet-simple .md-field {
+  gap: 6px;
+  font-size: 13px;
+}
+.md-sheet-simple .md-field input,
+.md-sheet-simple .md-field select {
+  height: 48px;
+  border-radius: 11px;
+  font-size: 16px;
+  box-shadow: 0 2px 5px rgba(17,18,37,.045), 0 1px 2px rgba(17,18,37,.035);
+}
+.md-sheet-simple .md-supply-toggle {
+  min-height: 54px;
+  padding: 10px 12px;
+  box-shadow: 0 2px 5px rgba(17,18,37,.035);
+}
+.md-sheet-simple .md-supply-toggle b { font-size: 12px; }
+.md-sheet-simple .md-supply-toggle small { font-size: 11px; }
+.md-advanced summary { min-height: 56px; }
+.md-advanced summary b { font-size: 13px; }
+.md-advanced summary small { font-size: 11px; }
+.md-advanced-content { gap: 10px; }
+.md-advanced-content .md-section-heading b { font-size: 10px; }
+.md-advanced-content .md-section-heading small { font-size: 10px; }
+.md-advanced-content .md-add-unit {
+  min-height: 38px;
+  box-shadow: 0 2px 5px rgba(17,18,37,.045);
+}
+.md-sheet-simple .md-close {
+  box-shadow: 0 2px 5px rgba(17,18,37,.055);
+}
+.md-sheet-simple .md-price-result {
+  padding: 10px 12px;
+  box-shadow: 0 2px 6px rgba(17,18,37,.035);
+}
+.md-sheet-simple .md-price-result span { font-size: 11px; }
+.md-sheet-simple .md-price-result strong { font-size: 15px; }
+.md-sheet-simple .md-price-result small { font-size: 11px; }
+.md-sheet-simple .md-form-note { font-size: 11px; }
+.md-sheet-simple .md-save {
+  box-shadow: 0 3px 8px rgba(17,18,37,.10), 0 1px 2px rgba(17,18,37,.045);
+}
+.md-sheet-simple .md-remove-unit {
+  box-shadow: 0 1px 3px rgba(17,18,37,.035);
+}
+@media (max-width: 390px) {
+  .md-sheet-simple form { gap: 11px; }
+  .md-sheet-simple .md-sheet-heading h2 { font-size: 19px; }
+  .md-sheet-simple .md-field { font-size: 12px; }
+  .md-sheet-simple .md-field input { height: 46px; }
+  .md-advanced summary { min-height: 52px; }
+}
