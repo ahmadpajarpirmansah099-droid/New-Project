@@ -122,9 +122,9 @@ function findComponent(type, id) {
       '<section class="menu-recipe-section"><div class="menu-recipe-heading"><div><b>Komposisi per porsi</b><small>Isi jenis item, nama item, jumlah, dan satuannya.</small></div></div>' +
       '<div class="menu-recipe-labels"><span>JENIS ITEM</span><span>ITEM</span><span>JUMLAH</span><span>SATUAN</span><span></span></div>' +
       '<div id="menuRecipeRows">' + initialRecipeRows(lines) + '</div>' +
-      '<button type="button" class="menu-add-row" data-menu-action="add-row">+ Tambah baris</button></section>'
+      '</section>' +
       '<p class="menu-form-note">HPP menu adalah total biaya seluruh komponen dalam satu porsi. Margin dihitung dari harga jual dibanding HPP.</p>' +
-      '<div class="menu-sheet-actions"><button type="button" class="menu-cancel" data-menu-action="close">Batal</button><button type="submit" class="menu-save">Simpan menu</button></div></form></div>';
+      '<div class="menu-sheet-actions menu-recipe-actions"><button type="button" class="menu-add-row" data-menu-action="add-row">Tambah baris</button><button type="submit" class="menu-save">Simpan</button><button type="button" class="menu-cancel" data-menu-action="close">Batal</button></div></form></div>';
     if (typeof root.openSheet !== 'function') return notify('Komponen popup belum tersedia.');
     root.openSheet(html);
   }
