@@ -10,6 +10,7 @@ const uid=()=>window.crypto?.randomUUID ? window.crypto.randomUUID() : 'g-' + Da
 // Legacy browser key retained only to clear the old prototype data once.
 const legacyStorageKey='waitlist_frontend_demo_v1';
 let state=loadState(),activeFilter='waiting',sheetGuest=null,toastTimer;
+let selectedOperationalDate = todayKey();
 let remoteSaveQueue = Promise.resolve();
 save();
 let dashboardCountUpPending = true;
@@ -654,17 +655,14 @@ function setDashboardCounter(id,targetValue,animate=false){
  requestAnimationFrame(step);
 }
 function renderAll() {
-  const day = todayKey();
+  const day = selectedOperationalDate;
   const todayGuests = state.guests.filter(guest => guest.day === day);
   const waitingGuests = todayGuests.filter(guest => ['waiting', 'called'].includes(guest.status));
   const doneGuests = todayGuests.filter(guest => guest.status === 'done');
   const cancelledGuests = todayGuests.filter(guest => guest.status === 'cancelled');
 
-  $('dateLabel').textContent = new Intl.DateTimeFormat('id-ID', {
-    timeZone: 'Asia/Jakarta',
-    day: 'numeric',
-    month: 'short'
-  }).format(new Date());
+  $('dateLabel').textContent = historyDateLabel(day, { day: 'numeric', month: 'short', year: 'numeric' });
+  updateOperationalDateLabels();
 
   const animateCounts =
     dashboardCountUpPending && $('page-dashboard')?.classList.contains('active');
@@ -710,7 +708,7 @@ function renderAll() {
 function setFilter(f){activeFilter=f;document.querySelectorAll('#queueFilters .filter').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));renderQueue()}
 function renderQueue(){
  if(!$('queueList'))return;
- const q=($('queueSearch')?.value||'').toLowerCase(),day=todayKey();
+ const q=($('queueSearch')?.value||'').toLowerCase(),day=selectedOperationalDate;
  const matchesFilter=g=>activeFilter==='waiting'
   ? ['waiting','called'].includes(g.status)
   : g.status===activeFilter;
@@ -755,7 +753,7 @@ function openOperationalDetail() {
   initSheetDrag();
 }
 function renderOperationalDetail() {
-  const day = todayKey();
+  const day = selectedOperationalDate;
   const guests = state.guests.filter(guest => guest.day === day).sort((a, b) => b.created - a.created);
   const yesterday = state.guests.filter(guest => guest.day === shiftDateKey(day, -1));
   const total = guests.length;
@@ -879,7 +877,7 @@ function updateHistoryDateLabel() {
   if (label && $('historyDate').value) label.textContent = historyDateLabel($('historyDate').value);
 }
 function openHistoryDatePicker() {
-  const current = $('historyDate').value || todayKey();
+  const current = selectedOperationalDate || todayKey();
   historyCalendarDraft = current;
   const date = parseHistoryDate(current);
   historyCalendarMonth = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -908,10 +906,24 @@ function selectTodayInHistoryCalendar() {
   renderHistoryCalendar();
 }
 function applyHistoryCalendarDate() {
-  $('historyDate').value = historyCalendarDraft;
+  selectedOperationalDate = historyCalendarDraft;
+  $('historyDate').value = selectedOperationalDate;
   updateHistoryDateLabel();
-  renderHistory();
+  updateOperationalDateLabels();
+  renderAll();
   closeHistoryDatePicker();
+}
+
+function updateOperationalDateLabels() {
+  const label = historyDateLabel(selectedOperationalDate, { day: 'numeric', month: 'long', year: 'numeric' });
+  const dashboard = $('dashboardDateLabel');
+  const queue = $('queueDateLabel');
+  const history = $('historyDateLabel');
+  if (dashboard) dashboard.textContent = label;
+  if (queue) queue.textContent = label;
+  if (history) history.textContent = label;
+  const hidden = $('historyDate');
+  if (hidden) hidden.value = selectedOperationalDate;
 }
 function renderHistoryCalendar() {
   const year = historyCalendarMonth.getFullYear();
@@ -936,7 +948,7 @@ function renderHistoryCalendar() {
 function renderHistory() {
   if (!$('historyList')) return;
 
-  const selectedDay = $('historyDate').value || todayKey();
+  const selectedDay = selectedOperationalDate;
   const query = ($('historySearch')?.value || '').toLowerCase();
   const guests = state.guests
     .filter(guest => guest.day === selectedDay && guest.name.toLowerCase().includes(query))
@@ -1675,8 +1687,9 @@ function exportCSV() {
 /* =========================================================
    8. APP STARTUP: LOAD OPERATIONAL DATA FROM SUPABASE
    ========================================================= */
-$('historyDate').value = todayKey();
+$('historyDate').value = selectedOperationalDate;
 updateHistoryDateLabel();
+updateOperationalDateLabels();
 
 let appDataReady = false;
 window.addEventListener('app:auth-ready', async function (event) {
