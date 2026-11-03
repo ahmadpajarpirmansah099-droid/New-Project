@@ -123,7 +123,7 @@
     <div class="settings-card">
       <div class="setting-row"><div class="setting-icon">⇩</div><div class="setting-copy"><b>Ekspor data</b><small>Unduh data antrean hari ini dalam CSV</small></div><button onclick="exportCSV()">Ekspor</button></div>
     </div>
-    <div class="empty"><div class="empty-icon">✦</div><h3>Penyimpanan lokal</h3><p>Data Guest Operations saat ini tersimpan di browser perangkat ini. Sinkronisasi ke database belum tersedia.</p></div>
+    <div class="empty"><div class="empty-icon">✦</div><h3>Penyimpanan lokal</h3><p>Data Guest Operations, Master Barang, WIP, dan Menu disimpan di workspace Supabase dan mengikuti izin akun.</p></div>
   </section>
 
   <section class="page" id="page-master-items">
@@ -263,7 +263,7 @@
 <button class="drawer-item" type="button" data-page="master-items" data-md-action="nav" aria-label="Master Barang"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M4 7.5 12 12l8-4.5M12 12v9M8 5.3l8 4.5"/></svg><span>Master Barang</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></nav><div class="drawer-foot">ADMIN WORKSPACE</div></aside><div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="assets/js/auth.js?v=20261103-auth-login-p1" defer></script>
-<script src="assets/js/masterdata-store.js?v=20261102-p1" defer></script>
+<script src="assets/js/masterdata-store.js?v=20261103-supabase-module-state-v1" defer></script>
 <script src="assets/js/masterdata-service.js?v=20261103-p4" defer></script>
 <script src="assets/js/masterdata-ui.js?v=20261103-remove-guest-back-p1" defer></script>
 <script src="assets/js/wip-service.js?v=20261103-p4" defer></script>
@@ -271,6 +271,6 @@
 <script src="assets/js/menu-service.js?v=20261103-p4" defer></script>
 <script src="assets/js/menu-ui.js?v=20261103-auto-unit-p1" defer></script>
 <script src="assets/js/guestops-service.js?v=20261103-supabase-core-v1" defer></script>
-<script src="assets/js/app.js?v=20261103-supabase-core-v1" defer></script>
+<script src="assets/js/app.js?v=20261103-supabase-module-state-v1" defer></script>
 </body>
 </html>
