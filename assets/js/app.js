@@ -293,6 +293,9 @@ function closeAppSelectMenus(except) {
     if (trigger) trigger.setAttribute('aria-expanded', 'false');
     if (menu) menu.hidden = true;
   });
+  document.querySelectorAll('.app-select-dim').forEach(function (layer) {
+    layer.remove();
+  });
 }
 
 function syncAppSelect(select) {
@@ -368,6 +371,15 @@ function enhanceAppSelect(select) {
     wrap.classList.toggle('is-open', shouldOpen);
     trigger.setAttribute('aria-expanded', String(shouldOpen));
     menu.hidden = !shouldOpen;
+    if (shouldOpen) {
+      const sheet = wrap.closest('.sheet');
+      if (sheet) {
+        const dim = document.createElement('div');
+        dim.className = 'app-select-dim';
+        dim.setAttribute('aria-hidden', 'true');
+        sheet.appendChild(dim);
+      }
+    }
 
     if (shouldOpen) {
       const rect = wrap.getBoundingClientRect();
