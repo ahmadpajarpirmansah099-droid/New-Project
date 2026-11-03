@@ -60,7 +60,7 @@ function save() {
     .catch(error => {
       console.error('Guest Operations database save failed:', error);
       toast('Data belum tersimpan ke database. Periksa koneksi lalu coba lagi.');
-      throw error;
+      return false;
     });
   return remoteSaveQueue;
 }
@@ -582,7 +582,7 @@ async function saveGuest(e){
  try {
   g.ticket = await window.GuestOpsService.nextTicket(day);
   state.guests.push(g);
-  await save();
+  if (await save() === false) { state.guests = state.guests.filter(item => item.id !== g.id); return; }
   closeSheet();renderAll();
   toast('Tamu berhasil ditambahkan · '+g.ticket);
  } catch (error) {
@@ -1389,7 +1389,7 @@ async function saveReservation(e) {
   try {
     reservation.code = await window.GuestOpsService.nextReservationCode(date);
     state.reservations.push(reservation);
-    await save();
+    if (await save() === false) { state.reservations = state.reservations.filter(item => item.id !== reservation.id); return; }
   } catch (error) {
     console.error(error);
     toast('Reservasi belum berhasil disimpan. Coba lagi.');
@@ -1479,7 +1479,7 @@ async function confirmSeatReservation(event, id) {
   reservation.seatedAt = now;
 
   try {
-    await save();
+    if (await save() === false) throw new Error('Database menolak penyimpanan');
   } catch (error) {
     state.guests = state.guests.filter(item => item.id !== guest.id);
     reservation.status = 'pending';
@@ -1495,15 +1495,21 @@ async function confirmSeatReservation(event, id) {
 /* =========================================================
    7. GUEST DETAIL, EDITING, AND EXPORT
    ========================================================= */
-function setGuestStatus(id,status){
+async function setGuestStatus(id,status){
  const guest=state.guests.find(item=>item.id===id);
  if(!guest||['done','cancelled'].includes(guest.status))return;
  const now=Date.now();
+ const previous={status:guest.status,resolved:guest.resolved,seatedAt:guest.seatedAt,audit:guest.audit.slice()};
  guest.status=status;
  if(status==='seated'){guest.resolved=guest.resolved||now;guest.seatedAt=now}else if(status==='cancelled')guest.resolved=guest.resolved||now;
  const labels={called:'Dipanggil',seated:'Duduk',done:'Selesai',cancelled:'Dibatalkan'};
  guest.audit.push({at:now,label:labels[status]||status});
- save();renderAll();
+ if (await save() === false) {
+   Object.assign(guest, previous);
+   renderAll();
+   return;
+ }
+ renderAll();
  if($('sheet').classList.contains('show'))openDetail(id);
  const messages={called:'Tamu dipanggil',seated:'Tamu sudah duduk',done:'Kunjungan ditandai selesai',cancelled:'Antrean dibatalkan'};
  toast(messages[status]||'Status tamu diperbarui');
@@ -1604,7 +1610,8 @@ async function saveEdit(event, id) {
     at: now,
     label: 'Dikoreksi',
     detail: `Nama: ${guest.name} → ${$('editName').value}; Pack: ${guest.pack} → ${$('editPack').value}`,
-    reason: $('editReason').value.trim()
+    reason: $('editReason').value.trim(),
+    status: guest.status
   });
 
   guest.name = $('editName').value.trim();
@@ -1613,7 +1620,7 @@ async function saveEdit(event, id) {
 
   try {
     await window.GuestOpsService.appendGuestAudit(id, guest.audit[guest.audit.length - 1]);
-    await save();
+    if (await save() === false) throw new Error('Database menolak penyimpanan');
     renderAll();
     openDetail(id);
     toast('Koreksi berhasil disimpan');
