@@ -39,7 +39,7 @@ function findComponent(type, id) {
   }
 
   function componentSearchOptions(type, query, excludeId) {
-    const entries = type === 'wip' ? getAvailableWips(excludeId) : materials();
+    const entries = type === 'wip' ? wips() : materials();
     const q = String(query || '').trim().toLocaleLowerCase('id-ID');
     const filtered = entries.filter(function (entry) {
       return String(type === 'wip' ? entry.nama_wip : entry.nama_barang).toLocaleLowerCase('id-ID').includes(q);
