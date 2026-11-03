@@ -182,11 +182,6 @@
   }
 
   function itemCardHtml(item) {
-    const conversions = (item.konversi_satuan || []).map(function (row) {
-      return '<span class="md-unit-chip">1 ' + escapeHtml(row.unit) + ' = ' +
-        formatNumber(row.factor, 6) + ' ' + escapeHtml(item.satuan_dasar) + '</span>';
-    }).join('');
-
     return '<article class="md-item-card">' +
       '<div class="md-item-heading">' +
         '<div class="md-item-copy">' +
@@ -203,7 +198,6 @@
           formatMoney(item.harga_per_satuan_dasar) + '</b></div>' +
         '</div>' +
       '</div>' +
-      '<div class="md-unit-section"><span class="md-unit-caption">Konversi satuan</span><div class="md-unit-list">' + conversions + '</div></div>' +
       '<div class="md-item-footer"><span>' + (item.status === 'active' ? 'Tersedia untuk resep baru' : 'Tidak tersedia untuk resep baru') + '</span>' +
       '<div class="md-item-actions">' +
         '<button type="button" class="md-more" data-md-action="edit" data-item-id="' + escapeHtml(item.id) + '" aria-label="Edit ' + escapeHtml(item.nama_barang) + '">Edit</button>' +
