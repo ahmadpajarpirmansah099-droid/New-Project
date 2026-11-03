@@ -118,24 +118,34 @@
 <div class="quick-menu-backdrop" id="quickMenuBackdrop" onclick="closeQuickMenu()" aria-hidden="true"></div>
 <nav class="quick-menu" id="quickMenu" aria-label="Guest Operational" aria-hidden="true">
   <div class="quick-menu-heading">GUEST OPERATIONAL</div>
-  <button class="quick-menu-item" type="button" onclick="runQuickAction('waiting')">
+  <button class="quick-menu-item" data-quick-context="guest" type="button" onclick="runQuickAction('waiting')">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg>
     <span>Antrean</span>
     <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
   </button>
-  <button class="quick-menu-item" type="button" onclick="runQuickAction('history')">
+  <button class="quick-menu-item" data-quick-context="guest" type="button" onclick="runQuickAction('history')">
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
     <span>Riwayat</span>
     <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
   </button>
-  <button class="quick-menu-item" type="button" onclick="runQuickAction('reservations')">
+  <button class="quick-menu-item" data-quick-context="guest" type="button" onclick="runQuickAction('reservations')">
     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18M8 15h.01M12 15h.01M16 15h.01M8 18h.01M12 18h.01"/></svg>
     <span>Reservasi</span>
     <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
   </button>
-  <button class="quick-menu-item" type="button" onclick="runQuickAction('add')">
+  <button class="quick-menu-item" data-quick-context="guest" type="button" onclick="runQuickAction('add')">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
     <span>Tambah Tamu</span>
+    <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+  </button>
+  <button class="quick-menu-item" data-quick-context="master" type="button" onclick="runQuickAction('wips')">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 8 4-8 4-8-4 8-4Z"/><path d="m4 10 8 4 8-4"/><path d="m4 14 8 4 8-4"/></svg>
+    <span>Resep WIP</span>
+    <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+  </button>
+  <button class="quick-menu-item" data-quick-context="master" type="button" onclick="runQuickAction('menus')">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 2v7a4 4 0 0 0 4 4v9"/><path d="M7 2v7"/><path d="M11 2v7a4 4 0 0 1-4 4"/><path d="M17 2v20"/><path d="M17 2a4 4 0 0 1 4 4v5h-4"/></svg>
+    <span>Menu</span>
     <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
   </button>
 </nav>
@@ -225,7 +235,7 @@
 <nav class="drawer-nav">
 <button class="drawer-item active" data-page="dashboard" onclick="navigateFromMenu('dashboard')" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Guest Operational</span></button>
 <button class="drawer-item" data-page="settings" onclick="navigateFromMenu('settings')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg><span>Pengaturan</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
-<button class="drawer-item" type="button" data-page="master-items" data-md-action="nav" aria-label="Master Barang"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M4 7.5 12 12l8-4.5M12 12v9M8 5.3l8 4.5"/></svg><span>Master Barang</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button><button class="drawer-item" type="button" data-page="wips" data-wip-action="nav" aria-label="Resep WIP"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 8 4-8 4-8-4 8-4Z"/><path d="m4 10 8 4 8-4"/><path d="m4 14 8 4 8-4"/></svg><span>Resep WIP</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button><button class="drawer-item" type="button" data-page="menus" data-menu-action="nav" aria-label="Menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 2v7a4 4 0 0 0 4 4v9"/><path d="M7 2v7"/><path d="M11 2v7a4 4 0 0 1-4 4"/><path d="M17 2v20"/><path d="M17 2a4 4 0 0 1 4 4v5h-4"/></svg><span>Menu</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></nav><div class="drawer-foot">ADMIN WORKSPACE</div></aside><div class="toast" id="toast"></div>
+<button class="drawer-item" type="button" data-page="master-items" data-md-action="nav" aria-label="Master Barang"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M4 7.5 12 12l8-4.5M12 12v9M8 5.3l8 4.5"/></svg><span>Master Barang</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></nav><div class="drawer-foot">ADMIN WORKSPACE</div></aside><div class="toast" id="toast"></div>
 <script src="assets/js/masterdata-store.js?v=20261102-p1" defer></script>
 <script src="assets/js/masterdata-service.js?v=20261103-p4" defer></script>
 <script src="assets/js/masterdata-ui.js?v=20261103-masterdata-conversion-p2" defer></script>
@@ -233,6 +243,6 @@
 <script src="assets/js/wip-ui.js?v=20261103-p2" defer></script>
 <script src="assets/js/menu-service.js?v=20261103-p4" defer></script>
 <script src="assets/js/menu-ui.js?v=20261103-p3" defer></script>
-<script src="assets/js/app.js?v=20261103-masterdata-wip-menu-p4" defer></script>
+<script src="assets/js/app.js?v=20261103-masterdata-fan-p1" defer></script>
 </body>
 </html>
