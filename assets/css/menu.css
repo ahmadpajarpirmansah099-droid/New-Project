@@ -11,7 +11,7 @@
 .menu-count-grid>div { display:grid; gap:5px; min-width:0; padding:12px; border:1px solid var(--line); border-radius:13px; background:#fff; }
 .menu-count-grid span { color:var(--muted); font-size:9px; }
 .menu-count-grid b { color:var(--ink); font:800 20px Manrope,sans-serif; }
-.menu-search { display:flex; align-items:center; gap:9px; height:43px; padding:0 12px; border:1px solid var(--line); border-radius:12px; background:#fff; color:#858594; }
+.menu-search { position:relative; min-width:0; }
 .menu-search>span { font-size:20px; line-height:1; }
 .menu-search input { width:100%; min-width:0; border:0; outline:0; background:transparent; color:var(--ink); font:500 12px 'DM Sans',sans-serif; }
 .menu-filter-row { display:flex; gap:7px; margin:12px 0 17px; }
@@ -39,7 +39,11 @@
 .menu-card-footer { display:flex; align-items:center; justify-content:space-between; gap:9px; margin-top:12px; padding-top:10px; border-top:1px solid var(--line); }
 .menu-card-footer span { color:var(--muted); font-size:9px; }
 .menu-card-footer button { padding:3px 0; border:0; background:transparent; color:#6e659d; font-size:9px; font-weight:800; }
-.menu-empty { padding:28px 18px; border:1px dashed #dcdce5; border-radius:16px; background:#fff; text-align:center; }
+.menu-empty {
+  padding:9px 7px;
+  color:#85838f;
+  font-size:11px;
+}
 .menu-empty b { color:var(--ink); font-size:12px; }
 .menu-empty p { margin:5px 0 0; color:var(--muted); font-size:10px; line-height:1.5; }
 .menu-sheet { display:grid; gap:13px; }
@@ -73,7 +77,6 @@
 }
 @media(prefers-reduced-motion:reduce) { .menu-page { animation:none; } }
 
-
 /* Master Barang visual language — Menu */
 .menu-page { padding-top: 2px; }
 .menu-page-heading { margin: 12px 0 14px; gap: 10px; }
@@ -85,7 +88,6 @@
 .menu-count-grid>div { gap: 4px; padding: 10px; border-radius: 12px; box-shadow: 0 2px 5px rgba(17,18,37,.035); }
 .menu-count-grid span { font-size: 8px; }
 .menu-count-grid b { font-size: 18px; }
-.menu-search { height: 44px; border-radius: 12px; box-shadow: 0 2px 5px rgba(17,18,37,.035); }
 .menu-search input { font-size: 12px; }
 .menu-filter-row { gap: 7px; margin: 10px 0 13px; }
 .menu-filter-row button { min-height: 34px; padding: 0 12px; font-size: 10px; box-shadow: 0 1px 3px rgba(17,18,37,.035); }
@@ -113,7 +115,6 @@
 .menu-card-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 3px; }
 .menu-card-actions button { min-height: 36px; padding: 0 7px; border: 0; border-radius: 9px; background: #f5f5f0; color: var(--ink); font-size: 10px; font-weight: 800; box-shadow: 0 1px 3px rgba(17,18,37,.04); }
 .menu-card-actions .menu-status-action { background: #f0eff9; color: #6e659d; }
-.menu-empty { padding: 22px 14px; border-radius: 14px; }
 .menu-empty b { font-size: 11px; }
 .menu-empty p { font-size: 9px; }
 
@@ -156,7 +157,6 @@
   .menu-card-actions button { min-height: 35px; padding: 0 6px; font-size: 9px; }
   .menu-field input { height: 44px; }
 }
-
 
 /* Compact entry form — align dimensions with Master Barang */
 .menu-sheet { gap: 8px; }
@@ -269,9 +269,6 @@
 .menu-component-option { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .menu-component-option small { flex:none; color:#77758a; font-size:11px; }
 
-.menu-unit-display { min-width:0; min-height:44px; display:flex; align-items:center; justify-content:center; padding:0 8px; border:1px solid #e7e6e8; border-radius:14px; background:#fff; color:#55546a; font-size:13px; font-weight:600; overflow-wrap:anywhere; }
-
-/* Unit display follows the plain type label: no nested border or card */
 .menu-unit-display {
   min-width:0;
   min-height:44px;
@@ -288,3 +285,5 @@
   font-weight:600;
   overflow-wrap:anywhere;
 }
+
+/* Unit display follows the plain type label: no nested border or card */
