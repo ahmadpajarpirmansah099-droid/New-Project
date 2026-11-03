@@ -72,6 +72,10 @@
   async function handleLogin(event) {
     event.preventDefault();
     if (isSubmitting) return;
+    if (!supabaseClient) {
+      setMessage('Layanan autentikasi belum termuat. Periksa koneksi internet lalu muat ulang halaman.');
+      return;
+    }
     const email = $('authEmail').value.trim();
     const password = $('authPassword').value;
     if (!email || !password) {
@@ -101,12 +105,12 @@
   }
 
   function init() {
+    $('authLoginForm').addEventListener('submit', handleLogin);
     if (!window.supabase || typeof window.supabase.createClient !== 'function') {
       setMessage('Layanan autentikasi belum termuat. Periksa koneksi internet lalu muat ulang halaman.');
       return;
     }
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-    $('authLoginForm').addEventListener('submit', handleLogin);
     $('authPasswordToggle').addEventListener('click', function () {
       const password = $('authPassword');
       const visible = password.type === 'password';
