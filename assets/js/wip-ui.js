@@ -47,32 +47,47 @@
       }).join('');
   }
 
-  function unitOptions(type, selectedId, selectedUnit) {
-    let units = [];
+  function unitOptions(type, selectedId) {
+    let unit = '';
     if (type === 'wip') {
       const wip = root.WipService.findWip(selectedId);
-      if (wip) units = [wip.satuan_hasil];
+      if (wip) unit = wip.satuan_hasil;
     } else {
       const item = root.MasterDataService.findItem(selectedId);
-      if (item) units = (item.konversi_satuan || []).map(function (row) { return row.unit; });
+      if (item) unit = item.satuan_dasar;
     }
+    return unit ? '<option value="' + escapeHtml(unit) + '" selected>' + escapeHtml(unit) + '</option>' : '<option value="">Pilih komponen dulu</option>';
+  }
 
-    if (!units.length) return '<option value="">Satuan</option>';
-    return units.map(function (unit) {
-      return '<option value="' + escapeHtml(unit) + '" ' + (String(unit).toLocaleUpperCase('id-ID') === String(selectedUnit || '').toLocaleUpperCase('id-ID') ? 'selected' : '') + '>' +
-        escapeHtml(unit) + '</option>';
-    }).join('');
+  function findComponent(type, id, excludeId) {
+    const entries = type === 'wip' ? getAvailableWips(excludeId) : getAvailableMaterials();
+    return entries.find(function (entry) { return String(entry.id) === String(id || ''); }) || null;
+  }
+
+  function renderComponentOptions(row, query) {
+    const type = row.querySelector('[data-wip-type]').value;
+    const entries = type === 'wip' ? getAvailableWips(root.document.querySelector('[name="wipId"]')?.value) : getAvailableMaterials();
+    const q = String(query || '').trim().toLocaleLowerCase('id-ID');
+    const options = entries.filter(function (entry) {
+      return String(type === 'wip' ? entry.nama_wip : entry.nama_barang).toLocaleLowerCase('id-ID').includes(q);
+    });
+    row.querySelector('[data-wip-component-options]').innerHTML = options.map(function (entry) {
+      const name = type === 'wip' ? entry.nama_wip : entry.nama_barang;
+      return '<button type="button" class="wip-component-option" data-wip-component-option="' + escapeHtml(entry.id) + '" data-name="' + escapeHtml(name) + '">' + escapeHtml(name) + '</button>';
+    }).join('') || '<div class="wip-component-empty">Tidak ditemukan</div>';
+    row.querySelector('[data-wip-component-options]').hidden = !q;
   }
 
   function recipeRowHtml(line, excludeId) {
     const type = line && line.component_type === 'wip' ? 'wip' : 'material';
     const selectedId = type === 'wip' ? line && line.component_wip_id : line && line.item_id;
-    const unit = line && line.unit_input || '';
+    const selected = findComponent(type, selectedId, excludeId);
+    const selectedName = selected ? (type === 'wip' ? selected.nama_wip : selected.nama_barang) : '';
     return '<div class="wip-recipe-row" data-wip-recipe-row>' +
       '<div class="wip-row-top"><label class="wip-field wip-type-field"><select data-wip-type aria-label="Jenis komponen"><option value="material" ' + (type === 'material' ? 'selected' : '') + '>Master Barang</option><option value="wip" ' + (type === 'wip' ? 'selected' : '') + '>WIP lain</option></select></label>' +
-      '<label class="wip-field"><select data-wip-component aria-label="Pilih komponen">' + componentOptions(type, selectedId, excludeId) + '</select></label></div>' +
+      '<div class="wip-field wip-component-search"><input type="search" data-wip-component-search autocomplete="off" placeholder="Cari bahan..." value="' + escapeHtml(selectedName) + '" aria-label="Cari komponen"><select data-wip-component hidden>' + componentOptions(type, selectedId, excludeId) + '</select><div class="wip-component-options" data-wip-component-options hidden></div></div></div>' +
       '<div class="wip-row-bottom"><label class="wip-field"><span>Jumlah</span><input data-wip-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="1" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
-      '<label class="wip-field"><span>Satuan</span><select data-wip-unit>' + unitOptions(type, selectedId, unit) + '</select></label></div>' +
+      '<label class="wip-field"><span>Satuan</span><select data-wip-unit>' + unitOptions(type, selectedId) + '</select></label></div>' +
       '<button type="button" class="wip-remove-row" data-wip-action="remove-row" aria-label="Hapus komponen">×</button></div>';
   }
 
@@ -197,6 +212,15 @@
   }
 
   function handleClick(event) {
+    const option = event.target.closest('[data-wip-component-option]');
+    if (option) {
+      const row = option.closest('[data-wip-recipe-row]');
+      row.querySelector('[data-wip-component]').value = option.dataset.wipComponentOption;
+      row.querySelector('[data-wip-component-search]').value = option.dataset.name || option.textContent;
+      row.querySelector('[data-wip-component-options]').hidden = true;
+      refreshRowUnits(row);
+      return;
+    }
     const button = event.target.closest('[data-wip-action]');
     if (!button) return;
     const action = button.dataset.wipAction;
@@ -245,6 +269,13 @@
   }
 
   function handleInput(event) {
+    if (event.target.matches('[data-wip-component-search]')) {
+      const row = event.target.closest('[data-wip-recipe-row]');
+      row.querySelector('[data-wip-component]').value = '';
+      row.querySelector('[data-wip-unit]').innerHTML = unitOptions(row.querySelector('[data-wip-type]').value, '');
+      renderComponentOptions(row, event.target.value);
+      return;
+    }
     if (event.target.id === 'wipSearch') {
       searchQuery = event.target.value;
       const cursor = event.target.selectionStart;
@@ -263,8 +294,9 @@
       const row = target.closest('[data-wip-recipe-row]');
       if (!row) return;
       if (target.matches('[data-wip-type]')) {
-        const component = row.querySelector('[data-wip-component]');
-        component.innerHTML = componentOptions(target.value, '', root.document.querySelector('[name="wipId"]')?.value);
+        row.querySelector('[data-wip-component]').innerHTML = componentOptions(target.value, '', root.document.querySelector('[name="wipId"]')?.value);
+        row.querySelector('[data-wip-component-search]').value = '';
+        row.querySelector('[data-wip-component-options]').hidden = true;
       }
       refreshRowUnits(row);
     }
