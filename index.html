@@ -45,6 +45,7 @@
 <main class="content">
   <section class="page active" id="page-dashboard">
     <div class="greeting"><div><div class="eyebrow">Admin</div><h1>Selamat datang.</h1></div><div class="date" id="dateLabel">Hari ini</div></div>
+    <button class="history-date operational-date-trigger" type="button" onclick="openHistoryDatePicker()" aria-label="Pilih tanggal operasional"><span class="history-date-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span><span class="history-date-copy"><small>Tanggal operasional</small><strong id="dashboardDateLabel">Pilih tanggal</strong></span><span class="history-date-chevron">⌄</span></button>
     <div class="hero hero-detail-trigger" role="button" tabindex="0" aria-label="Buka detail operasional hari ini" onclick="openOperationalDetail()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openOperationalDetail()}"><div class="hero-head"><span class="hero-label">Total tamu terdaftar hari ini</span><span class="hero-action" aria-hidden="true">↗</span></div><div class="hero-total" id="totalCount">0</div><div class="hero-foot"><span><b id="packCount">0</b> total pack</span><span><b id="avgWait">—</b> rata-rata tunggu</span></div></div>
     <div class="metrics">
       <div class="metric"><div class="metric-top"><span class="eyebrow">Menunggu</span><span class="metric-icon i-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div><strong id="waitingCount">0</strong><small>Antrean aktif</small></div>
@@ -59,6 +60,7 @@
   <section class="page" id="page-waiting">
     <button class="page-back" type="button" onclick="returnToGuestOperational()" aria-label="Kembali ke Guest Operational"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>
     <div class="page-title">Waiting List</div><p class="page-sub">Kelola tamu dan status antrean hari ini.</p>
+    <button class="history-date operational-date-trigger" type="button" onclick="openHistoryDatePicker()" aria-label="Pilih tanggal antrean"><span class="history-date-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span><span class="history-date-copy"><small>Tanggal antrean</small><strong id="queueDateLabel">Pilih tanggal</strong></span><span class="history-date-chevron">⌄</span></button>
     <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input id="queueSearch" placeholder="Cari nama atau nomor antrean..." oninput="renderQueue()"></div>
     <div class="filters" id="queueFilters"><button class="filter active" data-filter="waiting" onclick="setFilter('waiting')">Menunggu</button><button class="filter" data-filter="seated" onclick="setFilter('seated')">Duduk</button><button class="filter" data-filter="done" onclick="setFilter('done')">Selesai</button><button class="filter" data-filter="cancelled" onclick="setFilter('cancelled')">Batal</button></div>
     <div class="queue-list" id="queueList"></div>
@@ -179,7 +181,7 @@
 <div class="calendar-backdrop" id="calendarBackdrop" onclick="closeHistoryDatePicker()"></div>
 <section class="calendar-dialog" id="historyCalendarDialog" role="dialog" aria-modal="true" aria-labelledby="calendarTitle">
   <div class="calendar-dialog-head">
-    <div><span class="calendar-eyebrow">FILTER RIWAYAT</span><h2 id="calendarTitle">Pilih tanggal</h2></div>
+    <div><span class="calendar-eyebrow">FILTER OPERASIONAL</span><h2 id="calendarTitle">Pilih tanggal operasional</h2></div>
     <button class="calendar-close" type="button" onclick="closeHistoryDatePicker()" aria-label="Tutup kalender">×</button>
   </div>
   <div class="calendar-selected">
@@ -270,7 +272,7 @@
 <script src="assets/js/wip-ui.js?v=20261103-auto-unit-p1" defer></script>
 <script src="assets/js/menu-service.js?v=20261103-p4" defer></script>
 <script src="assets/js/menu-ui.js?v=20261103-auto-unit-p1" defer></script>
-<script src="assets/js/guestops-service.js?v=20261104-wa-seated-status-fix-v1" defer></script>
+<script src="assets/js/guestops-service.js?v=20261104-shared-ops-date-filter-v1" defer></script>
 <script src="assets/js/app.js?v=20261104-wa-seated-status-fix-v2" defer></script>
 </body>
 </html>
