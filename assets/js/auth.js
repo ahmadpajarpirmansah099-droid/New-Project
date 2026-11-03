@@ -2,7 +2,7 @@
   'use strict';
   const SUPABASE_URL = 'https://niwapjafzaizlnenuyui.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_dDLvjwmNBaFMqOWASxwQpw_Uf408kX4';
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  let supabaseClient = null;
   const $ = (id) => document.getElementById(id);
   let activeUserId = null;
   let isSubmitting = false;
@@ -105,6 +105,7 @@
       setMessage('Layanan autentikasi belum termuat. Periksa koneksi internet lalu muat ulang halaman.');
       return;
     }
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     $('authLoginForm').addEventListener('submit', handleLogin);
     $('authPasswordToggle').addEventListener('click', function () {
       const password = $('authPassword');
