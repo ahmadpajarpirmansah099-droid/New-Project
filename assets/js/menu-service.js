@@ -174,6 +174,7 @@
     const name = clean(input.nama_menu);
     const sellingPrice = Number(input.harga_jual);
     if (!name) throw new Error('Nama menu wajib diisi.');
+    if (clean(input.harga_jual) === '') throw new Error('Harga jual menu wajib diisi.');
     if (name.length > 120) throw new Error('Nama menu maksimal 120 karakter.');
     if (!Number.isFinite(sellingPrice) || sellingPrice < 0) {
       throw new Error('Harga jual harus diisi dan tidak boleh negatif.');
