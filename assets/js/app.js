@@ -1599,8 +1599,8 @@ function saveEdit(event, id) {
 function sanitizeCSVText(value) {
   const text = String(value ?? '');
   const normalized = text.normalize('NFKC');
-  const startsWithFormula = /^[\\s\\u0000-\\u001F\\u007F-\\u009F]*[=+\\-@]/u.test(normalized);
-  const startsWithControl = /^[\\s]*[\\u0000-\\u001F\\u007F-\\u009F]/u.test(text);
+  const startsWithFormula = /^[\s\u0000-\u001F\u007F-\u009F]*[=+\-@]/u.test(normalized);
+  const startsWithControl = /^[\s]*[\u0000-\u001F\u007F-\u009F]/u.test(text);
 
   return startsWithFormula || startsWithControl ? "'" + text : text;
 }
@@ -1611,7 +1611,7 @@ function serializeCSVRows(rows) {
       const safeValue = typeof value === 'string' ? sanitizeCSVText(value) : String(value ?? '');
       return '"' + safeValue.replace(/"/g, '""') + '"';
     }).join(','))
-    .join('\\n');
+    .join('\n');
 }
 
 function exportCSV() {
