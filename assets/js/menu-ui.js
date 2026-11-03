@@ -106,16 +106,26 @@
     const marginText = hpp.valid
       ? number(hpp.margin_pct) + '% · ' + money(hpp.margin_amount)
       : '—';
-    return '<article class="menu-card"><div class="menu-card-heading"><div><h3>' + escapeHtml(menu.nama_menu) +
-      '</h3><span class="menu-status ' + (menu.status === 'active' ? 'is-active' : 'is-inactive') + '">' + status + '</span></div>' +
-      '<button type="button" class="menu-edit" data-menu-action="edit" data-menu-id="' + escapeHtml(menu.id) + '">Edit</button></div>' +
-      '<div class="menu-card-prices"><div><small>Harga jual</small><b>' + money(menu.harga_jual) + '</b></div>' +
-      '<div><small>HPP per porsi</small><b class="' + (hpp.valid ? '' : 'is-invalid') + '">' + hppText + '</b></div></div>' +
+    return '<article class="menu-card">' +
+      '<div class="menu-card-heading">' +
+        '<div class="menu-card-copy">' +
+          '<div class="menu-card-title-row"><h3>' + escapeHtml(menu.nama_menu) + '</h3>' +
+          '<span class="menu-status ' + (menu.status === 'active' ? 'is-active' : 'is-inactive') + '">' + status + '</span></div>' +
+          '<span class="menu-card-base">Harga per porsi</span>' +
+        '</div>' +
+        '<div class="menu-card-prices">' +
+          '<div><small>Harga jual</small><b>' + money(menu.harga_jual) + '</b></div>' +
+          '<div><small>HPP per porsi</small><b class="' + (hpp.valid ? '' : 'is-invalid') + '">' + hppText + '</b></div>' +
+        '</div>' +
+      '</div>' +
       '<div class="menu-margin"><span>Margin</span><b>' + marginText + '</b></div>' +
       (hpp.valid ? '' : '<p class="menu-invalid-reason">' + escapeHtml(hpp.reason) + '</p>') +
       '<div class="menu-card-footer"><span>' + (hpp.valid ? (hpp.is_estimated ? 'Perhitungan menggunakan harga referensi' : 'Perhitungan valid') : 'Periksa harga dan komposisi') + '</span>' +
-      '<button type="button" data-menu-action="toggle-status" data-menu-id="' + escapeHtml(menu.id) + '">' +
-      (menu.status === 'active' ? 'Nonaktifkan' : 'Aktifkan') + '</button></div></article>';
+      '<div class="menu-card-actions">' +
+        '<button type="button" class="menu-edit" data-menu-action="edit" data-menu-id="' + escapeHtml(menu.id) + '">Edit</button>' +
+        '<button type="button" class="menu-status-action" data-menu-action="toggle-status" data-menu-id="' + escapeHtml(menu.id) + '">' +
+        (menu.status === 'active' ? 'Nonaktifkan' : 'Aktifkan') + '</button>' +
+      '</div></div></article>';
   }
 
   function renderPage(page) {
