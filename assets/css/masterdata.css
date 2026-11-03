@@ -835,3 +835,40 @@
   .md-sheet-simple .md-price-result strong { font-size: 13px; }
   .md-sheet-simple .md-form-note { font-size: 9px; }
 }
+
+
+/* Match Master Barang form typography to the compact price summary card */
+.md-sheet-simple .md-sheet-heading h2 { font-size: 16px; }
+.md-sheet-simple .md-field {
+  font-size: 10px;
+  gap: 5px;
+}
+.md-sheet-simple .md-field input {
+  font-size: 14px;
+}
+.md-sheet-simple .app-select-trigger {
+  min-height: 44px;
+  font-size: 12px;
+}
+.md-sheet-simple .app-select-option {
+  min-height: 40px;
+  font-size: 12px;
+}
+.md-sheet-simple .md-supply-toggle b { font-size: 10px; }
+.md-sheet-simple .md-supply-toggle small { font-size: 9px; }
+.md-advanced summary b { font-size: 10px; }
+.md-advanced summary small { font-size: 9px; }
+.md-advanced-content .md-field { font-size: 9px; }
+.md-advanced-content .md-add-unit { font-size: 10px; }
+.md-sheet-simple .md-price-result span { font-size: 9px; }
+.md-sheet-simple .md-price-result strong { font-size: 12px; }
+.md-sheet-simple .md-price-result small { font-size: 9px; }
+.md-sheet-simple .md-form-note { font-size: 9px; }
+.md-sheet-simple .md-save { font-size: 13px; }
+@media (max-width: 390px) {
+  .md-sheet-simple .md-sheet-heading h2 { font-size: 16px; }
+  .md-sheet-simple .md-field { font-size: 9px; }
+  .md-sheet-simple .md-field input { font-size: 14px; }
+  .md-sheet-simple .app-select-trigger,
+  .md-sheet-simple .app-select-option { font-size: 12px; }
+}
