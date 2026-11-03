@@ -135,29 +135,27 @@
         })
       : [];
 
-    const html = '<div class="md-sheet">' +
+    const showAdvanced = conversions.length > 0;
+    const html = '<div class="md-sheet md-sheet-simple">' +
       '<div class="md-sheet-heading"><div><span class="md-eyebrow">MASTER BARANG</span><h2>' +
       (existing ? 'Edit barang' : 'Tambah barang') + '</h2></div>' +
       '<button type="button" class="md-close" data-md-action="close-sheet" aria-label="Tutup">×</button></div>' +
       '<form id="mdItemForm" novalidate>' +
         '<input id="mdItemId" type="hidden" name="mdItemId" value="' + escapeHtml(existing ? existing.id : '') + '">' +
         '<label class="md-field"><span>Nama barang <i>*</i></span><input id="mdItemName" name="mdItemName" type="text" maxlength="120" required placeholder="Contoh: Freshmilk" value="' + escapeHtml(existing ? existing.nama_barang : '') + '"></label>' +
-        '<div class="md-form-grid">' +
-          '<label class="md-field"><span>Satuan dasar <i>*</i></span><input id="mdBaseUnit" name="mdBaseUnit" type="text" maxlength="20" required placeholder="GR / ML / PCS" value="' + escapeHtml(existing ? existing.satuan_dasar : '') + '"></label>' +
-          '<label class="md-field"><span>Status</span><select id="mdStatus" name="mdStatus"><option value="active" ' + (!existing || existing.status === 'active' ? 'selected' : '') + '>Aktif</option><option value="inactive" ' + (existing && existing.status === 'inactive' ? 'selected' : '') + '>Nonaktif</option></select></label>' +
-        '</div>' +
-        '<section class="md-form-section"><div class="md-section-heading"><div><b>Konversi satuan</b><small>Satuan dasar otomatis memiliki faktor 1.</small></div><button type="button" class="md-add-unit" data-md-action="add-unit">+ Satuan</button></div>' +
-          '<div class="md-base-unit-row"><span>Satuan dasar</span><b id="mdBaseUnitPreview">' + escapeHtml(existing ? existing.satuan_dasar : '—') + '</b><strong>1</strong></div>' +
+        '<label class="md-field"><span>Satuan dasar <i>*</i></span><input id="mdBaseUnit" name="mdBaseUnit" type="text" maxlength="20" required placeholder="Contoh: ML, GR, PCS" value="' + escapeHtml(existing ? existing.satuan_dasar : '') + '"></label>' +
+        '<label class="md-field"><span>Status</span><select id="mdStatus" name="mdStatus"><option value="active" ' + (!existing || existing.status === 'active' ? 'selected' : '') + '>Aktif</option><option value="inactive" ' + (existing && existing.status === 'inactive' ? 'selected' : '') + '>Nonaktif</option></select></label>' +
+        '<label class="md-field"><span>Harga referensi <i>*</i></span><input id="mdReferencePrice" name="mdReferencePrice" type="number" min="0" step="any" inputmode="decimal" required placeholder="Contoh: 295000" value="' + escapeHtml(existing ? existing.harga_referensi : '') + '"></label>' +
+        '<label class="md-field"><span>Satuan harga <i>*</i></span><select name="mdPriceUnit" id="mdPriceUnit"></select></label>' +
+        '<label class="md-supply-toggle"><input id="mdIsSupply" name="mdIsSupply" type="checkbox" ' + (existing && existing.is_supply ? 'checked' : '') + '><span><b>Barang supply</b><small>Centang jika barang termasuk kategori supply.</small></span></label>' +
+        '<details class="md-advanced" ' + (showAdvanced ? 'open' : '') + '><summary><span><b>Konversi satuan</b><small>Opsional · untuk satuan pembelian atau resep berbeda</small></span><span class="md-advanced-mark" aria-hidden="true">+</span></summary>' +
+          '<div class="md-advanced-content"><div class="md-base-unit-row"><span>Satuan dasar</span><b id="mdBaseUnitPreview">' + escapeHtml(existing ? existing.satuan_dasar : '—') + '</b><strong>1</strong></div>' +
+          '<div class="md-section-heading"><div><b>Satuan tambahan</b><small>Masukkan faktor terhadap satuan dasar.</small></div><button type="button" class="md-add-unit" data-md-action="add-unit">+ Tambah satuan</button></div>' +
           '<div id="mdConversionRows" class="md-conversion-rows">' + conversions.map(conversionRowHtml).join('') + '</div>' +
-          '<div id="mdConversionPreview" class="md-conversion-preview"></div>' +
-        '</section>' +
-        '<label class="md-supply-toggle"><input id="mdIsSupply" name="mdIsSupply" type="checkbox" ' + (existing && existing.is_supply ? 'checked' : '') + '><span><b>Barang supply</b><small>Tandai jika barang termasuk kategori supply.</small></span></label>' +
-        '<section class="md-form-section"><b>Harga referensi</b><div class="md-form-grid">' +
-          '<label class="md-field"><span>Harga <i>*</i></span><input id="mdReferencePrice" name="mdReferencePrice" type="number" min="0" step="any" inputmode="decimal" required placeholder="295000" value="' + escapeHtml(existing ? existing.harga_referensi : '') + '"></label>' +
-          '<label class="md-field"><span>Satuan harga <i>*</i></span><select name="mdPriceUnit" id="mdPriceUnit"></select></label>' +
-        '</div><div class="md-price-result"><span>Harga per satuan dasar</span><strong id="mdPricePreview">Lengkapi harga dan satuan terlebih dahulu.</strong></div></section>' +
-        '<p class="md-form-note">Harga beli terakhir dikelola oleh transaksi pembelian pada tahap backend. Di tahap ini, harga referensi menjadi dasar estimasi HPP.</p>' +
-        '<div class="md-sheet-actions"><button type="button" class="md-cancel" data-md-action="close-sheet">Batal</button><button type="submit" class="md-save">Simpan barang</button></div>' +
+          '<div id="mdConversionPreview" class="md-conversion-preview"></div></div></details>' +
+        '<div class="md-price-result"><span>Harga per satuan dasar</span><strong id="mdPricePreview">Lengkapi harga dan satuan terlebih dahulu.</strong></div>' +
+        '<p class="md-form-note">Harga referensi digunakan sebagai dasar estimasi HPP. Harga beli terakhir mengikuti transaksi pembelian.</p>' +
+        '<div class="md-sheet-actions md-sheet-actions-simple"><button type="submit" class="md-save">Simpan barang</button></div>' +
       '</form></div>';
 
     if (typeof root.openSheet !== 'function') {
