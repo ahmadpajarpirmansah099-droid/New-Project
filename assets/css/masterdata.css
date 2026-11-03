@@ -410,3 +410,10 @@
 @media (prefers-reduced-motion: reduce) {
   .md-page,.md-primary { animation: none; transition: none; }
 }
+
+.md-supply-toggle { display:flex; align-items:center; gap:10px; padding:11px 12px; border:1px solid var(--line); border-radius:12px; background:#fcfcf9; color:var(--ink); cursor:pointer; }
+.md-supply-toggle input { width:17px; height:17px; accent-color:#8ea95a; }
+.md-supply-toggle span { display:grid; gap:3px; }
+.md-supply-toggle b { font-size:10px; }
+.md-supply-toggle small { color:var(--muted); font-size:9px; line-height:1.4; }
+.md-supply-chip { display:inline-flex; width:max-content; margin-top:7px; padding:3px 8px; border-radius:20px; background:#f0eff9; color:#625b92; font-size:9px; font-weight:800; }
