@@ -207,8 +207,9 @@
       }
     };
 
-    writeQueue = writeQueue.then(run);
-    return writeQueue;
+    const operation = writeQueue.catch(() => undefined).then(run);
+    writeQueue = operation;
+    return operation;
   }
 
   async function appendGuestAudit(guestId, entry) {
