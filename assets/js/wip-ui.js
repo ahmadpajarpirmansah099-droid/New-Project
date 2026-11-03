@@ -147,7 +147,7 @@
       const counts = root.WipService.getCounts();
       const items = root.WipService.listWips({ status: currentTab, query: searchQuery });
       host.innerHTML = '<div class="wip-page">' +
-        '<button type="button" class="page-back" data-wip-action="back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>' +
+        '<button type="button" class="page-back" data-wip-action="back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Master Barang</span></button>' +
         '<div class="wip-page-heading"><div><span class="wip-eyebrow">PENGELOLAAN RESEP</span><h1>Resep WIP</h1><p>Susun komposisi bahan dan hitung HPP per satuan hasil.</p></div>' +
         '<button class="wip-primary" type="button" data-wip-action="add">+ Tambah WIP</button></div>' +
         '<div class="wip-count-grid"><div><span>Total WIP</span><b>' + counts.total + '</b></div><div><span>Aktif</span><b>' + counts.active + '</b></div><div><span>Nonaktif</span><b>' + counts.inactive + '</b></div></div>' +
@@ -195,8 +195,7 @@
     if (action === 'edit') openWipForm(id);
     if (action === 'close' && typeof root.closeSheet === 'function') root.closeSheet();
     if (action === 'back') {
-      if (typeof root.returnToGuestOperational === 'function') root.returnToGuestOperational();
-      else if (typeof root.go === 'function') root.go('dashboard');
+      if (typeof root.go === 'function') root.go('master-items');
     }
     if (action === 'add-row') {
       const host = root.document.getElementById('wipRecipeRows');
