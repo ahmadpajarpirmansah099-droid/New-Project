@@ -503,3 +503,14 @@
   .md-sheet-simple form { gap: 14px; }
   .md-sheet-simple .md-sheet-heading h2 { font-size: 21px; }
 }
+
+
+.md-sheet-simple .md-price-result small {
+  display: block;
+  color: #526b43;
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.md-sheet-simple .md-price-result small[hidden] { display: none; }
