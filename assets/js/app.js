@@ -1616,21 +1616,22 @@ function serializeCSVRows(rows) {
 
 function exportCSV() {
   const rows = [
-    ['Tanggal', 'Nomor antrean', 'Na  const csv = serializeCSVRows(rows);
-
-    guest.phone,
+    ['Tanggal', 'Nomor antrean', 'Nama', 'Pack', 'WhatsApp', 'Status', 'Waktu daftar', 'Waiting time'],
+    ...state.guests
+      .filter(guest => guest.day === todayKey())
+      .map(guest => [
+        guest.day,
+        guest.ticket,
+        guest.name,
+        guest.pack,
+        guest.phone,
         statusLabel(guest.status),
         fmtTime(guest.created),
         duration(guest)
       ])
   ];
 
-  const csv = rows
-    .map(row => row.map(value => {
-      const safeValue = typeof value === 'string' ? sanitizeCSVText(value) : String(value ?? '');
-      return '"' + safeValue.replace(/"/g, '""') + '"';
-    }).join(','))
-    .join('\n');
+  const csv = serializeCSVRows(rows);
 
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
   const link = document.createElement('a');
