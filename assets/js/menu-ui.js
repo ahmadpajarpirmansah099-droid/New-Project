@@ -53,11 +53,11 @@
     const type = line && line.component_type === 'wip' ? 'wip' : 'material';
     const selectedId = type === 'wip' ? line && line.component_wip_id : line && line.item_id;
     return '<div class="menu-recipe-row" data-menu-recipe-row>' +
-      '<div class="menu-row-top"><label class="menu-field"><span>Jenis komponen</span><select data-menu-type><option value="material" ' + (type === 'material' ? 'selected' : '') + '>Master Barang</option><option value="wip" ' + (type === 'wip' ? 'selected' : '') + '>WIP</option></select></label>' +
-      '<button type="button" class="menu-remove-row" data-menu-action="remove-row" aria-label="Hapus komponen">×</button></div>' +
-      '<label class="menu-field"><span>Komponen</span><select data-menu-component>' + componentOptions(type, selectedId) + '</select></label>' +
+      '<div class="menu-row-top"><label class="menu-field menu-type-field"><select data-menu-type aria-label="Jenis komponen"><option value="material" ' + (type === 'material' ? 'selected' : '') + '>Master Barang</option><option value="wip" ' + (type === 'wip' ? 'selected' : '') + '>WIP</option></select></label>' +
+      '<label class="menu-field"><select data-menu-component aria-label="Pilih bahan">' + componentOptions(type, selectedId) + '</select></label></div>' +
       '<div class="menu-row-bottom"><label class="menu-field"><span>Jumlah per porsi</span><input data-menu-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="1" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
-      '<label class="menu-field"><span>Satuan</span><select data-menu-unit>' + unitOptions(type, selectedId, line && line.unit_input || '') + '</select></label></div></div>';
+      '<label class="menu-field"><span>Satuan</span><select data-menu-unit>' + unitOptions(type, selectedId, line && line.unit_input || '') + '</select></label></div>' +
+      '<button type="button" class="menu-remove-row" data-menu-action="remove-row" aria-label="Hapus komponen">×</button></div>';
   }
 
   function getRecipeRows() {
