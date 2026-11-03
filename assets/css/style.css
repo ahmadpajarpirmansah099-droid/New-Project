@@ -7178,3 +7178,119 @@ body.auth-ready .auth-screen{display:none}
     animation: none !important;
   }
 }
+
+
+/* =========================================================
+   RESERVATION FORM — MOBILE CONTROL NORMALIZATION
+   Fix native button appearance leaking into custom pickers.
+   ========================================================= */
+#sheet .field .reservation-picker-trigger,
+#sheet .field .reservation-select-trigger {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  background: #fbfcfe;
+  color: var(--ink);
+  box-shadow: 0 2px 5px rgba(17,18,37,.045), 0 1px 2px rgba(17,18,37,.035);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#sheet .field .reservation-picker-trigger:active,
+#sheet .field .reservation-select-trigger:active {
+  background: #f5f7fb;
+}
+
+#sheet .field .reservation-picker-trigger svg,
+#sheet .field .reservation-select-trigger svg {
+  display: block;
+  width: 19px;
+  height: 19px;
+  min-width: 19px;
+  fill: none;
+  stroke: #8490a5;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#sheet .field .reservation-select {
+  position: relative;
+  width: 100%;
+}
+
+#sheet .field .reservation-select-options {
+  position: absolute;
+  z-index: 45;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  padding: 5px;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(20,35,63,.12);
+}
+
+#sheet .field .reservation-select-options[hidden] {
+  display: none !important;
+}
+
+#sheet .field .reservation-select-option {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+}
+
+#sheet .field .reservation-select-option.selected {
+  background: #f1f5fb;
+  color: #2457d7;
+  font-weight: 700;
+}
+
+#sheet .field .reservation-select-option svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 520px) {
+  #sheet .field .reservation-picker-trigger,
+  #sheet .field .reservation-select-trigger {
+    min-height: 52px;
+    height: 52px;
+    font-size: 16px;
+  }
+}
