@@ -135,9 +135,9 @@
       '<section class="wip-recipe-section"><div class="wip-recipe-heading"><div><b>Komposisi resep</b><small>Isi jenis item, nama item, jumlah, dan satuannya.</small></div></div>' +
       '<div class="wip-recipe-labels"><span>JENIS ITEM</span><span>ITEM</span><span>JUMLAH</span><span>SATUAN</span><span></span></div>' +
       '<div id="wipRecipeRows">' + initialRecipeRows(lines, id) + '</div>' +
-      '<button type="button" class="wip-add-row" data-wip-action="add-row">+ Tambah baris</button></section>'
+      '</section>' +
       '<div class="wip-form-note">HPP dihitung dari biaya seluruh komponen dibagi hasil per batch. Harga referensi akan ditandai sebagai estimasi.</div>' +
-      '<div class="wip-sheet-actions"><button type="button" class="wip-cancel" data-wip-action="close">Batal</button><button type="submit" class="wip-save">Simpan resep</button></div>' +
+      '<div class="wip-sheet-actions wip-recipe-actions"><button type="button" class="wip-add-row" data-wip-action="add-row">Tambah baris</button><button type="submit" class="wip-save">Simpan</button><button type="button" class="wip-cancel" data-wip-action="close">Batal</button></div>' +
       '</form></div>';
 
     if (typeof root.openSheet !== 'function') return notify('Komponen popup belum tersedia.');
