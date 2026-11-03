@@ -54,17 +54,13 @@ function findComponent(type, id) {
     dropdown.hidden = !String(query || '').trim();
   }
 
-  function unitOptions(type, selectedId, selectedUnit) {
-    let baseUnit = '';
+  function getComponentUnit(type, selectedId) {
     if (type === 'wip') {
       const wip = root.WipService.findWip(selectedId);
-      if (wip) baseUnit = wip.satuan_hasil;
-    } else {
-      const item = root.MasterDataService.findItem(selectedId);
-      if (item) baseUnit = item.satuan_dasar;
+      return wip ? (wip.satuan_hasil || '') : '';
     }
-    if (!baseUnit) return '<option value="">Pilih bahan dulu</option>';
-    return '<option value="' + escapeHtml(baseUnit) + '" selected>' + escapeHtml(baseUnit) + '</option>';
+    const item = root.MasterDataService.findItem(selectedId);
+    return item ? (item.satuan_dasar || '') : '';
   }
   function recipeRowHtml(line) {
     const type = line && line.component_type === 'wip' ? 'wip' : 'material';
@@ -75,7 +71,7 @@ function findComponent(type, id) {
       '<input type="hidden" data-menu-type value="' + type + '">' + '<div class="menu-recipe-type" data-menu-recipe-type>' + (type === 'wip' ? 'WIP' : 'Barang') + '</div>' +
       '<div class="menu-field menu-component-search"><input type="search" data-menu-component-search autocomplete="off" placeholder="Cari item" value="' + escapeHtml(selectedName) + '" aria-label="Cari item"><select data-menu-component hidden style="display:none!important" aria-hidden="true" tabindex="-1">' + componentOptions(type, selectedId) + '</select><div class="menu-component-options" data-menu-component-options hidden></div></div>' +
       '<label class="menu-field"><input data-menu-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Jumlah" aria-label="Jumlah per porsi" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
-      '<label class="menu-field"><select data-menu-unit aria-label="Satuan">' + unitOptions(type, selectedId, line && line.unit_input || '') + '</select></label></div>';
+      '<input type="hidden" data-menu-unit value="' + escapeHtml(getComponentUnit(type, selectedId)) + '">' + '<div class="menu-unit-display" data-menu-unit-display>' + escapeHtml(getComponentUnit(type, selectedId) || '—') + '</div></div>';
   }
 
     function initialRecipeRows(lines) {
@@ -103,7 +99,9 @@ function findComponent(type, id) {
   function refreshRowUnits(row) {
     const type = row.querySelector('[data-menu-type]').value;
     const id = row.querySelector('[data-menu-component]').value;
-    row.querySelector('[data-menu-unit]').innerHTML = unitOptions(type, id, '');
+    const unit = getComponentUnit(type, id);
+    row.querySelector('[data-menu-unit]').value = unit;
+    row.querySelector('[data-menu-unit-display]').textContent = unit || '—';
   }
 
   function openMenuForm(id) {
@@ -262,7 +260,8 @@ function findComponent(type, id) {
       const row = event.target.closest('[data-menu-recipe-row]');
       if (row) {
         row.querySelector('[data-menu-component]').value = '';
-        row.querySelector('[data-menu-unit]').innerHTML = '<option value="">Pilih bahan dulu</option>';
+        row.querySelector('[data-menu-unit]').value = '';
+        row.querySelector('[data-menu-unit-display]').textContent = '—';
         renderComponentOptions(row, event.target.value);
       }
       return;
