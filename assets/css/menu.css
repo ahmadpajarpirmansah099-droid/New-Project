@@ -209,3 +209,22 @@
 .menu-component-option { display:block; width:100%; min-height:40px; padding:8px 10px; border:0; border-radius:8px; background:transparent; color:var(--ink); text-align:left; font-size:13px; }
 .menu-component-option:active { background:#f0f3e7; }
 .menu-component-empty { padding:10px; color:var(--muted); font-size:11px; }
+
+/* Compact four-column recipe editor with 25 prepared rows */
+.menu-recipe-section { gap:8px; }
+.menu-recipe-labels,.menu-recipe-row { display:grid; grid-template-columns:minmax(58px,.85fr) minmax(78px,1.2fr) minmax(42px,.65fr) minmax(42px,.65fr) 44px; gap:4px; align-items:center; }
+.menu-recipe-labels { padding:0 0 4px; color:#85838f; font-size:9px; font-weight:800; letter-spacing:.025em; }
+.menu-recipe-labels span { min-width:0; }
+.menu-recipe-row { padding:4px 0; border-bottom:1px solid #eeedf0; }
+.menu-recipe-row:last-child { border-bottom:0; }
+.menu-recipe-row .menu-field { min-width:0; margin:0; }
+.menu-recipe-row .menu-field select,.menu-recipe-row .menu-field input,.menu-component-search input { box-sizing:border-box; width:100%; min-width:0; height:44px; min-height:44px; padding:0 5px; border:1px solid #e8e7e9; border-radius:8px; background:#fff; color:#171725; font-size:12px; font-weight:600; }
+.menu-recipe-row .menu-field input::placeholder,.menu-component-search input::placeholder { color:#aaa8b0; font-weight:400; }
+.menu-component-search { position:relative; }
+.menu-component-options { position:absolute; z-index:50; top:calc(100% + 4px); left:0; right:0; max-height:180px; overflow:auto; padding:4px; border:1px solid #e6e4eb; border-radius:9px; background:rgba(255,255,255,.97); box-shadow:0 5px 14px rgba(25,25,40,.09); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); }
+.menu-component-options[hidden] { display:none; }
+.menu-component-option { display:block; width:100%; min-height:40px; padding:8px; border:0; border-radius:6px; background:transparent; color:#171725; text-align:left; font-size:12px; }
+.menu-component-option:active { background:#f0f3e7; }
+.menu-component-empty { padding:9px 7px; color:#85838f; font-size:11px; }
+.menu-recipe-row .menu-remove-row { width:44px; height:44px; min-height:44px; padding:0; border:1px solid #f1dfe2; border-radius:8px; background:#fff5f5; color:#a95d67; font-size:17px; }
+.menu-add-row { width:100%; min-height:44px; margin-top:6px; border:1px solid #dedbed; border-radius:9px; background:#f2f0f8; color:#625b92; font-size:12px; font-weight:700; }
