@@ -194,15 +194,17 @@
         const result = await client.from('guests').upsert(guests, { onConflict: 'id' });
         if (result.error) throw result.error;
       }
-      const setting = await client.from('workspace_settings').upsert({
-        workspace_id: workspaceId,
-        setting_key: 'guest_operations',
-        setting_value: {
-          seatingDurationMinutes: Number(state.settings?.seatingDurationMinutes) || 90
-        },
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'workspace_id,setting_key' });
-      if (setting.error) throw setting.error;
+      if (root.AppAuth?.getContext()?.role !== 'service') {
+        const setting = await client.from('workspace_settings').upsert({
+          workspace_id: workspaceId,
+          setting_key: 'guest_operations',
+          setting_value: {
+            seatingDurationMinutes: Number(state.settings?.seatingDurationMinutes) || 90
+          },
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'workspace_id,setting_key' });
+        if (setting.error) throw setting.error;
+      }
     };
 
     writeQueue = writeQueue.then(run);
@@ -216,7 +218,7 @@
     const { error } = await client.from('guest_status_history').insert({
       workspace_id: workspaceId,
       guest_id: guestId,
-      status: 'waiting',
+      status: entry.status || 'waiting',
       label: entry.label || 'Dikoreksi',
       detail: entry.detail || null,
       reason: entry.reason || null,
