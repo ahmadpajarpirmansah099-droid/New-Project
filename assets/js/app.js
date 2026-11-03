@@ -329,6 +329,8 @@ function syncAppSelect(select) {
 
 function enhanceAppSelect(select) {
   if (!select || select.tagName !== 'SELECT' || select.dataset.appSelectReady === 'true') return;
+  // Hidden backing selects are state holders for searchable recipe inputs, not visible controls.
+  if (select.hidden || select.hasAttribute('hidden') || select.getAttribute('aria-hidden') === 'true' || select.style.display === 'none') return;
 
   const wrap = document.createElement('div');
   wrap.className = 'app-select-wrap';
