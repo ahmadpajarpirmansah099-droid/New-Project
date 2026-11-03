@@ -99,7 +99,7 @@ test('CSV serialization protects WhatsApp +62 without mutating source rows', () 
 
   const csv = runtime.serializeCSVRows(rows);
 
-  assert.equal(csv, '"Nomor antrean","WhatsApp","Pack"\n"WL-001","''+628123456789","2"'.replace("''", "'"));
+  assert.equal(csv, `"Nomor antrean","WhatsApp","Pack"\n"WL-001","'+628123456789","2"`);
   assert.equal(JSON.stringify(rows), original);
 });
 
