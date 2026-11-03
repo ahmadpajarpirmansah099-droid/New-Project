@@ -9,7 +9,7 @@ Aplikasi mobile-first untuk mengelola kedatangan tamu, antrean, dan reservasi se
 - **Riwayat** — cari catatan tamu berdasarkan tanggal.
 - **Reservasi** — kalender bulanan, pembuatan kode reservasi, detail, pembatalan, dan proses mendudukkan tamu.
 - **Pengaturan** — durasi Seating Time, ekspor CSV, dan reset data demo.
-- **Master Barang** — sumber bahan, satuan dasar, konversi satuan, harga referensi, dan status barang.
+- **Master Barang** — sumber bahan, satuan dasar, konversi satuan, harga referensi, status aktif/nonaktif, dan penanda barang supply.
 - **Resep WIP** — komposisi bahan/WIP turunan, hasil per batch, kalkulasi HPP rekursif, dan validasi resep.
 - **Menu** — komposisi bahan/WIP per porsi, HPP per porsi, harga jual, dan margin.
 - **Menu cepat (+)** — akses Antrean, Riwayat, Reservasi, dan Tambah Tamu.
@@ -84,6 +84,7 @@ assets/
 - Data Master Data dipisahkan dari `waitlist_frontend_demo_v1`; data antrean, riwayat, reservasi, dan pengaturan Guest Operational tidak dipakai atau ditulis oleh modul ini.
 - Struktur Master Data menggunakan array terpisah `masterItems`, `wips`, `wipRecipeLines`, `menus`, dan `menuRecipeLines`.
 - Phase 1 menggunakan `masterItems` untuk Master Barang. Phase 2 menggunakan `wips` dan `wipRecipeLines` untuk Resep WIP.
+- Master Barang menyediakan penanda supply agar jenis barang dapat dibedakan tanpa membuat modul inventory tambahan.
 - HPP WIP dihitung dari kuantitas dasar bahan dikali harga per satuan dasar. WIP turunan dihitung secara rekursif berdasarkan HPP per satuan hasilnya.
 - Harga beli terakhir menjadi sumber utama; jika belum tersedia, harga referensi digunakan dan hasil HPP diberi tanda estimasi. Jika harga tidak tersedia, HPP ditandai tidak valid, bukan dianggap nol.
 - Perubahan satuan Master Barang memperbarui kuantitas dasar pada resep WIP yang terkait. Perubahan satuan hasil WIP diblokir jika masih dipakai oleh resep induk dengan satuan lama.
