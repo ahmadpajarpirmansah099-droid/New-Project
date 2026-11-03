@@ -2,6 +2,7 @@
   'use strict';
 
   const MODULE_KEY = 'master_data';
+  const TEST_KEY = 'guestops_masterdata_demo_v1';
   const SCHEMA_VERSION = 1;
   const ARRAY_FIELDS = ['masterItems', 'wips', 'wipRecipeLines', 'menus', 'menuRecipeLines'];
   let client = null;
@@ -13,7 +14,7 @@
   function createEmpty() {
     return {
       schema_version: SCHEMA_VERSION,
-      active_scope_id: 'scope-default',
+      active_scope_id: 'scope-demo-default',
       masterItems: [],
       wips: [],
       wipRecipeLines: [],
@@ -58,6 +59,19 @@
   }
 
   function load() {
+    if (!ready && !root.document && root.localStorage) {
+      let raw = root.localStorage.getItem(TEST_KEY);
+      if (raw === null) {
+        const empty = createEmpty();
+        root.localStorage.setItem(TEST_KEY, JSON.stringify(empty));
+        return cache = empty;
+      }
+      try {
+        return cache = normalizeData(JSON.parse(raw));
+      } catch (error) {
+        throw new Error('Data Master Data tidak bisa dibaca. Data lama tidak dihapus.');
+      }
+    }
     return cache;
   }
 
@@ -66,6 +80,10 @@
     normalized.updated_at = new Date().toISOString();
     cache = normalized;
 
+    if (!ready && !root.document && root.localStorage) {
+      root.localStorage.setItem(TEST_KEY, JSON.stringify(normalized));
+      return normalized;
+    }
     if (!ready || !client || !workspaceId) {
       throw new Error('Master Data belum tersambung ke database. Muat ulang halaman.');
     }
