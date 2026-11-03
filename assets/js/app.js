@@ -10,65 +10,48 @@ const uid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
 // Keep this key stable so existing demo data in the browser is preserved.
 const key='waitlist_frontend_demo_v1';
 let state=loadState(),activeFilter='waiting',sheetGuest=null,toastTimer;
+save();
 let dashboardCountUpPending = true;
 function loadState() {
   try {
     const savedState = JSON.parse(localStorage.getItem(key));
-
-    if (savedState && Array.isArray(savedState.guests) && savedState.counters) {
-      if (!Array.isArray(savedState.reservations)) {
-        savedState.reservations = [];
-      }
-
-      if (!savedState.reservationCounters) {
-        savedState.reservationCounters = {};
-      }
-
-      if (!savedState.settings || typeof savedState.settings !== 'object') {
-        savedState.settings = {};
-      }
-
-      const savedDuration = Number(savedState.settings.seatingDurationMinutes);
+    if (savedState && savedState.schemaVersion === 2 &&
+        Array.isArray(savedState.guests) && savedState.counters) {
+      if (!Array.isArray(savedState.reservations)) savedState.reservations = [];
+      if (!savedState.reservationCounters) savedState.reservationCounters = {};
+      if (!savedState.settings || typeof savedState.settings !== 'object') savedState.settings = {};
+      const duration = Number(savedState.settings.seatingDurationMinutes);
       savedState.settings.seatingDurationMinutes =
-        Number.isFinite(savedDuration) && savedDuration >= 1 && savedDuration <= 1440
-          ? Math.round(savedDuration)
-          : 90;
-
-      // Upgrade the previous default while preserving customized durations.
-      if (savedState.settings.seatingDurationMinutes === 30) {
-        savedState.settings.seatingDurationMinutes = 90;
-      }
-
+        Number.isFinite(duration) && duration >= 1 && duration <= 1440
+          ? Math.round(duration) : 90;
       savedState.guests.forEach(guest => {
         if (guest.status === 'seated' && !Number(guest.seatedAt)) {
           const seatingAudit = Array.isArray(guest.audit)
             ? guest.audit.slice().reverse().find(item => item.label === 'Duduk')
             : null;
-
-          guest.seatedAt =
-            Number(guest.resolved) ||
-            Number(seatingAudit?.at) ||
-            Number(guest.created) ||
-            Date.now();
+          guest.seatedAt = Number(guest.resolved) || Number(seatingAudit?.at) ||
+            Number(guest.created) || Date.now();
         }
       });
-
       return savedState;
     }
   } catch (error) {
-    // Invalid local demo data falls back to the initial demo state.
+    // Previous prototype data is replaced by the clean workspace below.
   }
-
   return seed();
 }
 
+function seed() {
+  return {
+    schemaVersion: 2,
+    guests: [],
+    counters: {},
+    reservations: [],
+    reservationCounters: {},
+    settings: { seatingDurationMinutes: 90 }
+  };
+}
 
-function seed(){let d=todayKey(),y=new Date(Date.now()-86400000);let yd=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(y),now=Date.now();let gs=[
-['WL-001','Rina Kusuma',2,'0812-xxxx-1043','done',142,118],['WL-002','Budi Santoso',4,'0813-xxxx-7720','done',128,96],['WL-003','Dewi Lestari',3,'','cancelled',110,90],['WL-004','Andika Pratama',2,'0857-xxxx-3381','done',92,70],['WL-005','Sari Wulandari',6,'0821-xxxx-5590','waiting',48],['WL-006','Fajar Nugroho',2,'0878-xxxx-2214','called',36],['WL-007','Maya Anggraini',5,'','waiting',27],['WL-009','Hendra Wijaya',3,'0812-xxxx-9907','cancelled',22,15],['WL-010','Putri Ramadhani',2,'0896-xxxx-4412','waiting',14],['WL-011','Yoga Saputra',8,'0815-xxxx-6630','waiting',6]
-].map(([ticket,name,pack,phone,status,ago,res])=>({id:uid(),ticket,day:d,name,pack,phone,status,created:now-ago*60000,resolved:res?now-res*60000:null,audit:[{at:now-ago*60000,label:'Terdaftar',detail:pack+' pack'}]}));
-gs.forEach(g=>{if(g.status!=='waiting'&&g.status!=='called')g.audit.push({at:g.resolved,label:g.status==='done'?'Selesai / Sudah Duduk':'Dibatalkan'})});
-let prev=[['WL-001','Agus Salim',2,'done'],['WL-002','Lina Marlina',4,'done'],['WL-003','Rizky Firmansyah',3,'waiting'],['WL-004','Nadia Paramitha',2,'cancelled'],['WL-005','Teguh Prakoso',5,'waiting']].map(([ticket,name,pack,status],i)=>({id:uid(),ticket,day:yd,name,pack,phone:'',status,created:now-(24*60+300-i*40)*60000,resolved:status==='waiting'?null:now-(24*60+275-i*40)*60000,audit:[{at:now-86400000,label:'Terdaftar'}]}));
-return{guests:[...prev,...gs],counters:{[d]:11,[yd]:5},reservations:[],reservationCounters:{},settings:{seatingDurationMinutes:90}}}
 function save() {
   localStorage.setItem(key, JSON.stringify(state));
 }
@@ -789,7 +772,7 @@ function renderOperationalDetail() {
   const html = [
     '<div class="operational-head"><div><h2>Detail Operasional</h2><p>Hari ini · ' + esc(dateLabel) + '</p></div><button class="close operational-close" type="button" onclick="closeSheet()" aria-label="Tutup detail">×</button></div>',
     '<section class="operational-summary"><div class="operational-summary-main"><span>Total tamu</span><strong>' + total + '</strong><small class="' + (difference >= 0 ? 'trend-up' : 'trend-down') + '">' + (difference > 0 ? '↑ ' : difference < 0 ? '↓ ' : '') + esc(trend) + '<span>' + esc(trendCopy) + '</span></small></div>',
-    '<div class="operational-summary-meta"><div><span class="summary-icon">♧</span><span>Total pack</span><b>' + packTotal + '</b></div><div><span class="summary-icon">◷</span><span>Rata-rata tunggu</span><b>' + esc(averageWait) + '</b></div><div><span class="summary-icon">✓</span><span>Tamu sudah duduk</span><b>' + seatedTotal + '</b></div></div><span class="operational-live"><i></i> LIVE DEMO</span></section>',
+    '<div class="operational-summary-meta"><div><span class="summary-icon">♧</span><span>Total pack</span><b>' + packTotal + '</b></div><div><span class="summary-icon">◷</span><span>Rata-rata tunggu</span><b>' + esc(averageWait) + '</b></div><div><span class="summary-icon">✓</span><span>Tamu sudah duduk</span><b>' + seatedTotal + '</b></div></div></section>',
     '<section class="operational-chart-card"><div class="operational-section-head"><h3>Tren kunjungan</h3><div class="chart-toggle" role="group" aria-label="Mode grafik"><button type="button" class="' + (operationalChartMode === 'hour' ? 'active' : '') + '" onclick="setOperationalChartMode(\'hour\')">Jam</button><button type="button" class="' + (operationalChartMode === 'pack' ? 'active' : '') + '" onclick="setOperationalChartMode(\'pack\')">Pack</button></div></div><div id="operationalChart" class="operational-chart"></div></section>',
     '<section class="operational-guests"><div class="operational-section-head operational-list-head"><div><h3>Daftar tamu hari ini</h3><small>' + total + ' tamu terdaftar</small></div><span class="operational-list-total">' + total + '</span></div>',
     '<div class="operational-list-tools"><label class="operational-search"><span>⌕</span><input id="operationalSearch" type="search" placeholder="Cari nama atau nomor antrean..." oninput="renderOperationalGuestList()"></label><div class="operational-filter-wrap"><button type="button" id="operationalFilterTrigger" class="operational-filter-trigger" aria-haspopup="listbox" aria-expanded="false" onclick="toggleOperationalFilterMenu()"><span id="operationalFilterLabel">Semua</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div id="operationalFilterMenu" class="operational-filter-menu" role="listbox" aria-label="Filter status tamu" hidden><button type="button" role="option" aria-selected="true" data-filter="all" onclick="setOperationalStatusFilter(\'all\')">Semua</button><button type="button" role="option" aria-selected="false" data-filter="waiting" onclick="setOperationalStatusFilter(\'waiting\')">Menunggu</button><button type="button" role="option" aria-selected="false" data-filter="called" onclick="setOperationalStatusFilter(\'called\')">Dipanggil</button><button type="button" role="option" aria-selected="false" data-filter="seated" onclick="setOperationalStatusFilter(\'seated\')">Duduk</button><button type="button" role="option" aria-selected="false" data-filter="done" onclick="setOperationalStatusFilter(\'done\')">Selesai</button><button type="button" role="option" aria-selected="false" data-filter="cancelled" onclick="setOperationalStatusFilter(\'cancelled\')">Batal</button></div></div></div>',
@@ -1471,7 +1454,7 @@ function confirmSeatReservation(event, id) {
 }
 
 /* =========================================================
-   7. GUEST DETAIL, EDITING, EXPORT, AND DEMO RESET
+   7. GUEST DETAIL, EDITING, AND EXPORT
    ========================================================= */
 function setGuestStatus(id,status){
  const guest=state.guests.find(item=>item.id===id);
@@ -1526,7 +1509,7 @@ function openDetail(id) {
     : '';
 
   const whatsappButton = guest.phone
-    ? '<button class="primary" onclick="toast(\'Aksi WhatsApp demo\')">WhatsApp</button>'
+    ? '<button class="primary" onclick="callGuestWhatsApp(\\'' + guest.id + '\\')">Kirim WhatsApp</button>'
     : '';
 
   const cancelActions = canCancel
@@ -1644,15 +1627,6 @@ function exportCSV() {
   URL.revokeObjectURL(link.href);
 
   toast('File CSV berhasil dibuat');
-}
-
-function resetDemo() {
-  if (!confirm('Reset seluruh data demo di browser ini?')) return;
-
-  state = seed();
-  save();
-  renderAll();
-  toast('Data demo dikembalikan');
 }
 
 /* =========================================================
