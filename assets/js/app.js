@@ -1607,9 +1607,9 @@ function sanitizeCSVText(value) {
 
 function serializeCSVRows(rows, textColumns = []) {
   return rows
-    .map(row => row.map((value, columnIndex) => {
+    .map((row, rowIndex) => row.map((value, columnIndex) => {
       let safeValue = typeof value === 'string' ? sanitizeCSVText(value) : String(value ?? '');
-      if (textColumns.includes(columnIndex) && safeValue !== '' && !safeValue.startsWith("'")) {
+      if (rowIndex > 0 && textColumns.includes(columnIndex) && safeValue !== '' && !safeValue.startsWith("'")) {
         safeValue = "'" + safeValue;
       }
       return '"' + safeValue.replace(/"/g, '""') + '"';
