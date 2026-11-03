@@ -1,5 +1,5 @@
 /* =========================================================
-   1. UTILITIES, DATE/TIME, AND LOCAL DEMO STORAGE
+   1. UTILITIES, DATE/TIME, AND APP STATE
    ========================================================= */
 const $=id=>document.getElementById(id);
 const todayKey=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -7,43 +7,19 @@ const fmtTime=t=>new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',hour:'
 const fmtDate=d=>new Intl.DateTimeFormat('id-ID',{timeZone:'UTC',weekday:'long',day:'numeric',month:'long'}).format(new Date(d+'T00:00:00Z'));
 const fmtElapsed=ms=>{let m=Math.max(0,Math.floor(ms/60000));return m<60?m+' menit':Math.floor(m/60)+'j '+m%60+'m'};
 const uid=()=>window.crypto?.randomUUID ? window.crypto.randomUUID() : 'g-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,10);
-// Keep this key stable so existing demo data in the browser is preserved.
-const key='waitlist_frontend_demo_v1';
+// Legacy browser key retained only to clear the old prototype data once.
+const legacyStorageKey='waitlist_frontend_demo_v1';
 let state=loadState(),activeFilter='waiting',sheetGuest=null,toastTimer;
 save();
 let dashboardCountUpPending = true;
 function loadState() {
   try {
-    const savedState = JSON.parse(localStorage.getItem(key));
-    if (savedState && savedState.schemaVersion === 2 &&
-        Array.isArray(savedState.guests) && savedState.counters) {
-      if (!Array.isArray(savedState.reservations)) savedState.reservations = [];
-      if (!savedState.reservationCounters) savedState.reservationCounters = {};
-      if (!savedState.settings || typeof savedState.settings !== 'object') savedState.settings = {};
-      const duration = Number(savedState.settings.seatingDurationMinutes);
-      savedState.settings.seatingDurationMinutes =
-        Number.isFinite(duration) && duration >= 1 && duration <= 1440
-          ? Math.round(duration) : 90;
-      savedState.guests.forEach(guest => {
-        if (guest.status === 'seated' && !Number(guest.seatedAt)) {
-          const seatingAudit = Array.isArray(guest.audit)
-            ? guest.audit.slice().reverse().find(item => item.label === 'Duduk')
-            : null;
-          guest.seatedAt = Number(guest.resolved) || Number(seatingAudit?.at) ||
-            Number(guest.created) || Date.now();
-        }
-      });
-      return savedState;
-    }
+    localStorage.removeItem(legacyStorageKey);
   } catch (error) {
-    // Previous prototype data is replaced by the clean workspace below.
+    console.warn('Legacy browser data could not be cleared:', error);
   }
-  return seed();
-}
-
-function seed() {
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     guests: [],
     counters: {},
     reservations: [],
@@ -52,7 +28,6 @@ function seed() {
   };
 }
 
-let remoteSaveQueue = Promise.resolve();
 function save() {
   if (!window.GuestOpsService || !window.GuestOpsService.isReady()) return;
   remoteSaveQueue = remoteSaveQueue
