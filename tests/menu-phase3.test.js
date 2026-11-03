@@ -190,3 +190,11 @@ test('WIP yield unit cannot change while a Menu recipe still uses the previous u
     component_type: 'material', item_id: milk.id, qty_input: 1, unit_input: 'L'
   }]), /resep WIP atau Menu/);
 });
+
+test('Menu cannot be saved with a blank selling price', () => {
+  const { runtime } = createRuntime();
+  const milk = addMilk(runtime);
+  assert.throws(() => saveMenu(runtime, [{
+    component_type: 'material', item_id: milk.id, qty_input: 100, unit_input: 'ML'
+  }], { harga_jual: '' }), /Harga jual menu wajib diisi/);
+});
