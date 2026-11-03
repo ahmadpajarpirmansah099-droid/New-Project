@@ -216,7 +216,7 @@
       const items = service().listItems({ status: currentTab, query: searchQuery });
       host.innerHTML = '<div class="md-page">' +
         '<button type="button" class="page-back" data-md-action="back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>' +
-        '<div class="md-page-heading"><div><span class="md-eyebrow">PENGELOLAAN DATA</span><h1>Master Barang</h1><p>Daftar bahan utama untuk seluruh resep WIP dan Menu.</p></div>' +
+        '<div class="md-page-heading"><div><p>Daftar bahan utama untuk seluruh resep WIP dan Menu.</p></div>' +
         '<button type="button" class="md-primary" data-md-action="add">+ Tambah barang</button></div>' +
         '<div class="md-count-grid"><div><span>Total barang</span><b>' + counts.total + '</b></div><div><span>Aktif</span><b>' + counts.active + '</b></div><div><span>Nonaktif</span><b>' + counts.inactive + '</b></div></div>' +
         '<label class="md-search"><span aria-hidden="true">⌕</span><input id="mdSearch" type="search" placeholder="Cari nama barang..." value="' + escapeHtml(searchQuery) + '"></label>' +
