@@ -53,7 +53,8 @@
       konversi_satuan: getConversionRows(),
       harga_referensi: form.elements.mdReferencePrice.value,
       satuan_harga: form.elements.mdPriceUnit.value,
-      status: form.elements.mdStatus.value
+      status: form.elements.mdStatus.value,
+      is_supply: form.elements.mdIsSupply.checked
     };
   }
 
@@ -150,6 +151,7 @@
           '<div id="mdConversionRows" class="md-conversion-rows">' + conversions.map(conversionRowHtml).join('') + '</div>' +
           '<div id="mdConversionPreview" class="md-conversion-preview"></div>' +
         '</section>' +
+        '<label class="md-supply-toggle"><input id="mdIsSupply" name="mdIsSupply" type="checkbox" ' + (existing && existing.is_supply ? 'checked' : '') + '><span><b>Barang supply</b><small>Tandai jika barang termasuk kategori supply.</small></span></label>' +
         '<section class="md-form-section"><b>Harga referensi</b><div class="md-form-grid">' +
           '<label class="md-field"><span>Harga <i>*</i></span><input id="mdReferencePrice" name="mdReferencePrice" type="number" min="0" step="any" inputmode="decimal" required placeholder="295000" value="' + escapeHtml(existing ? existing.harga_referensi : '') + '"></label>' +
           '<label class="md-field"><span>Satuan harga <i>*</i></span><select name="mdPriceUnit" id="mdPriceUnit"></select></label>' +
@@ -181,6 +183,7 @@
       '</h3><span class="md-status ' + (item.status === 'active' ? 'is-active' : 'is-inactive') + '">' +
       (item.status === 'active' ? 'Aktif' : 'Nonaktif') + '</span></div>' +
       '<button type="button" class="md-more" data-md-action="edit" data-item-id="' + escapeHtml(item.id) + '" aria-label="Edit ' + escapeHtml(item.nama_barang) + '">Edit</button></div>' +
+      (item.is_supply ? '<span class="md-supply-chip">Supply</span>' : '') +
       '<div class="md-item-prices"><div><small>Harga referensi</small><b>' +
       formatMoney(item.harga_referensi) + ' / ' + escapeHtml(item.satuan_harga) + '</b></div>' +
       '<div><small>Harga per ' + escapeHtml(item.satuan_dasar) + '</small><b>' +
