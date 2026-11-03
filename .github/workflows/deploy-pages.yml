@@ -18,6 +18,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Check JavaScript syntax
         run: |
+          node --check assets/js/auth.js
+          node --check assets/js/guestops-service.js
           node --check assets/js/app.js
           node --check assets/js/masterdata-store.js
           node --check assets/js/masterdata-service.js
@@ -28,6 +30,7 @@ jobs:
           node --check assets/js/menu-ui.js
       - name: Test frontend logic
         run: |
+          node --test tests/guestops-service.test.js
           node --test tests/masterdata-phase1.test.js
           node --test tests/wip-phase2.test.js
           node --test tests/menu-phase3.test.js
