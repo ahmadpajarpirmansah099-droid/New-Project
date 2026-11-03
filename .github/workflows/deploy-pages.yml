@@ -31,6 +31,7 @@ jobs:
           node --test tests/masterdata-phase1.test.js
           node --test tests/wip-phase2.test.js
           node --test tests/menu-phase3.test.js
+          node --test tests/csv-export.test.js
 
   deploy:
     needs: validate
