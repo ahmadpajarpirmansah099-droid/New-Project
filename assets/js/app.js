@@ -282,8 +282,153 @@ function navigateFromMenu(page) {
   go(page);
 }
 
+let sheetSelectObserver = null;
+
+function closeAppSelectMenus(except) {
+  document.querySelectorAll('.app-select-wrap.is-open').forEach(function (wrap) {
+    if (wrap === except) return;
+    wrap.classList.remove('is-open', 'opens-up');
+    const trigger = wrap.querySelector('.app-select-trigger');
+    const menu = wrap.querySelector('.app-select-menu');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    if (menu) menu.hidden = true;
+  });
+}
+
+function syncAppSelect(select) {
+  const wrap = select && select._appSelectWrap;
+  if (!wrap) return;
+
+  const trigger = wrap.querySelector('.app-select-trigger');
+  const label = wrap.querySelector('.app-select-value');
+  const menu = wrap.querySelector('.app-select-menu');
+  if (!trigger || !label || !menu) return;
+
+  const selected = select.options[select.selectedIndex];
+  label.textContent = selected ? selected.textContent.trim() : 'Pilih...';
+  trigger.disabled = select.disabled;
+  trigger.setAttribute('aria-label', select.getAttribute('aria-label') || label.textContent);
+  menu.replaceChildren();
+
+  Array.from(select.options).forEach(function (option) {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'app-select-option';
+    item.setAttribute('role', 'option');
+    item.setAttribute('aria-selected', String(option.value === select.value));
+    item.disabled = option.disabled;
+    item.dataset.value = option.value;
+    item.textContent = option.textContent.trim();
+    if (option.value === select.value) item.classList.add('is-selected');
+    menu.appendChild(item);
+  });
+}
+
+function enhanceAppSelect(select) {
+  if (!select || select.tagName !== 'SELECT' || select.dataset.appSelectReady === 'true') return;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'app-select-wrap';
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'app-select-trigger';
+  trigger.setAttribute('aria-haspopup', 'listbox');
+  trigger.setAttribute('aria-expanded', 'false');
+
+  const value = document.createElement('span');
+  value.className = 'app-select-value';
+
+  const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  arrow.setAttribute('viewBox', '0 0 24 24');
+  arrow.setAttribute('aria-hidden', 'true');
+  arrow.classList.add('app-select-arrow');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', 'm6 9 6 6 6-6');
+  arrow.appendChild(path);
+  trigger.append(value, arrow);
+
+  const menu = document.createElement('div');
+  menu.className = 'app-select-menu';
+  menu.hidden = true;
+  menu.setAttribute('role', 'listbox');
+
+  wrap.append(trigger, menu);
+  select.parentNode.insertBefore(wrap, select);
+  select.classList.add('app-select-native');
+  select.dataset.appSelectReady = 'true';
+  select.setAttribute('aria-hidden', 'true');
+  select.tabIndex = -1;
+  select._appSelectWrap = wrap;
+
+  trigger.addEventListener('click', function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const shouldOpen = !wrap.classList.contains('is-open');
+    closeAppSelectMenus(wrap);
+    wrap.classList.toggle('is-open', shouldOpen);
+    trigger.setAttribute('aria-expanded', String(shouldOpen));
+    menu.hidden = !shouldOpen;
+
+    if (shouldOpen) {
+      const rect = wrap.getBoundingClientRect();
+      const estimatedHeight = Math.min(240, Math.max(48, select.options.length * 46));
+      const roomBelow = window.innerHeight - rect.bottom;
+      const roomAbove = rect.top;
+      wrap.classList.toggle('opens-up', roomBelow < estimatedHeight + 16 && roomAbove > roomBelow);
+    } else {
+      wrap.classList.remove('opens-up');
+    }
+  });
+
+  menu.addEventListener('click', function (event) {
+    const optionButton = event.target.closest('.app-select-option');
+    if (!optionButton || optionButton.disabled) return;
+    event.preventDefault();
+    event.stopPropagation();
+    select.value = optionButton.dataset.value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    syncAppSelect(select);
+    closeAppSelectMenus();
+    trigger.focus({ preventScroll: true });
+  });
+
+  const optionObserver = new MutationObserver(function () {
+    syncAppSelect(select);
+  });
+  optionObserver.observe(select, { childList: true, subtree: true, characterData: true, attributes: true });
+  select._appSelectObserver = optionObserver;
+  syncAppSelect(select);
+}
+
+function enhanceAppSelects(container) {
+  if (!container) return;
+  if (container.matches && container.matches('select')) enhanceAppSelect(container);
+  container.querySelectorAll('select').forEach(enhanceAppSelect);
+}
+
+function initAppSelectObserver() {
+  const container = $('sheetContent');
+  if (!container || sheetSelectObserver) return;
+  sheetSelectObserver = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes.forEach(function (node) {
+        if (node.nodeType === 1) enhanceAppSelects(node);
+      });
+    });
+  });
+  sheetSelectObserver.observe(container, { childList: true, subtree: true });
+  document.addEventListener('pointerdown', function (event) {
+    if (!event.target.closest('.app-select-wrap')) closeAppSelectMenus();
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') closeAppSelectMenus();
+  });
+}
+
 function openSheet(content) {
   $('sheetContent').innerHTML = content;
+  initAppSelectObserver();
+  enhanceAppSelects($('sheetContent'));
   $('sheet').style.transform = '';
   $('backdrop').classList.add('show');
   $('sheet').classList.add('show');
