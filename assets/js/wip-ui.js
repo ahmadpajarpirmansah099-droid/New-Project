@@ -65,15 +65,12 @@
   }
 
   function renderComponentOptions(row, query) {
-    const type = row.querySelector('[data-wip-type]').value;
-    const entries = type === 'wip' ? getAvailableWips(root.document.querySelector('[name="wipId"]')?.value) : getAvailableMaterials();
+    const currentWipId = root.document.querySelector('[name="wipId"]')?.value;
     const q = String(query || '').trim().toLocaleLowerCase('id-ID');
-    const options = entries.filter(function (entry) {
-      return String(type === 'wip' ? entry.nama_wip : entry.nama_barang).toLocaleLowerCase('id-ID').includes(q);
-    });
-    row.querySelector('[data-wip-component-options]').innerHTML = options.map(function (entry) {
-      const name = type === 'wip' ? entry.nama_wip : entry.nama_barang;
-      return '<button type="button" class="wip-component-option" data-wip-component-option="' + escapeHtml(entry.id) + '" data-name="' + escapeHtml(name) + '">' + escapeHtml(name) + '</button>';
+    const materials = getAvailableMaterials().filter(function (item) { return String(item.nama_barang || '').toLocaleLowerCase('id-ID').includes(q); }).map(function (item) { return { id:item.id, type:'material', name:item.nama_barang, label:'Barang' }; });
+    const wips = getAvailableWips(currentWipId).filter(function (item) { return String(item.nama_wip || '').toLocaleLowerCase('id-ID').includes(q); }).map(function (item) { return { id:item.id, type:'wip', name:item.nama_wip, label:'WIP' }; });
+    row.querySelector('[data-wip-component-options]').innerHTML = materials.concat(wips).map(function (entry) {
+      return '<button type="button" class="wip-component-option" data-wip-component-option="' + escapeHtml(entry.id) + '" data-type="' + entry.type + '" data-name="' + escapeHtml(entry.name) + '"><span>' + escapeHtml(entry.name) + '</span><small>' + entry.label + '</small></button>';
     }).join('') || '<div class="wip-component-empty">Tidak ditemukan</div>';
     row.querySelector('[data-wip-component-options]').hidden = !q;
   }
@@ -84,7 +81,7 @@
     const selected = findComponent(type, selectedId, excludeId);
     const selectedName = selected ? (type === 'wip' ? selected.nama_wip : selected.nama_barang) : '';
     return '<div class="wip-recipe-row" data-wip-recipe-row>' +
-      '<label class="wip-field"><select data-wip-type aria-label="Jenis item"><option value="material" ' + (type === 'material' ? 'selected' : '') + '>Barang</option><option value="wip" ' + (type === 'wip' ? 'selected' : '') + '>WIP</option></select></label>' +
+      '<input type="hidden" data-wip-type value="' + type + '">' + '<div class="wip-recipe-type" data-wip-recipe-type>' + (type === 'wip' ? 'WIP' : 'Barang') + '</div>' +
       '<div class="wip-field wip-component-search"><input type="search" data-wip-component-search autocomplete="off" placeholder="Cari item" value="' + escapeHtml(selectedName) + '" aria-label="Cari item"><select data-wip-component hidden style="display:none!important" aria-hidden="true" tabindex="-1">' + componentOptions(type, selectedId, excludeId) + '</select><div class="wip-component-options" data-wip-component-options hidden></div></div>' +
       '<label class="wip-field"><input data-wip-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Jumlah" aria-label="Jumlah" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
       '<label class="wip-field"><select data-wip-unit aria-label="Satuan">' + unitOptions(type, selectedId) + '</select></label></div>';
@@ -224,7 +221,12 @@
     const option = event.target.closest('[data-wip-component-option]');
     if (option) {
       const row = option.closest('[data-wip-recipe-row]');
-      row.querySelector('[data-wip-component]').value = option.dataset.wipComponentOption;
+      const type = option.dataset.type === 'wip' ? 'wip' : 'material';
+      row.querySelector('[data-wip-type]').value = type;
+      row.querySelector('[data-wip-recipe-type]').textContent = type === 'wip' ? 'WIP' : 'Barang';
+      const select = row.querySelector('[data-wip-component]');
+      select.innerHTML = componentOptions(type, option.dataset.wipComponentOption, root.document.querySelector('[name="wipId"]')?.value);
+      select.value = option.dataset.wipComponentOption;
       row.querySelector('[data-wip-component-search]').value = option.dataset.name || option.textContent;
       row.querySelector('[data-wip-component-options]').hidden = true;
       refreshRowUnits(row);
@@ -281,7 +283,7 @@
     if (event.target.matches('[data-wip-component-search]')) {
       const row = event.target.closest('[data-wip-recipe-row]');
       row.querySelector('[data-wip-component]').value = '';
-      row.querySelector('[data-wip-unit]').innerHTML = unitOptions(row.querySelector('[data-wip-type]').value, '');
+      row.querySelector('[data-wip-unit]').innerHTML = '<option value="">Pilih komponen dulu</option>';
       renderComponentOptions(row, event.target.value);
       return;
     }
@@ -299,14 +301,9 @@
 
   function handleChange(event) {
     const target = event.target;
-    if (target.matches('[data-wip-type], [data-wip-component]')) {
+    if (target.matches('[data-wip-component]')) {
       const row = target.closest('[data-wip-recipe-row]');
       if (!row) return;
-      if (target.matches('[data-wip-type]')) {
-        row.querySelector('[data-wip-component]').innerHTML = componentOptions(target.value, '', root.document.querySelector('[name="wipId"]')?.value);
-        row.querySelector('[data-wip-component-search]').value = '';
-        row.querySelector('[data-wip-component-options]').hidden = true;
-      }
       refreshRowUnits(row);
     }
   }
