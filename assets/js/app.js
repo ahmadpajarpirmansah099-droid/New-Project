@@ -1598,23 +1598,27 @@ function saveEdit(event, id) {
 // Protect text cells from spreadsheet formula interpretation during export only.
 function sanitizeCSVText(value) {
   const text = String(value ?? '');
-  const startsWithFormula = /^[\u0000-\u0020]*[=+\-@]/.test(text);
-  const startsWithControl = /^[\u0000-\u001F\u007F]/.test(text);
+  const normalized = text.normalize('NFKC');
+  const startsWithFormula = /^[\\s\\u0000-\\u001F\\u007F-\\u009F]*[=+\\-@]/u.test(normalized);
+  const startsWithControl = /^[\\s]*[\\u0000-\\u001F\\u007F-\\u009F]/u.test(text);
 
   return startsWithFormula || startsWithControl ? "'" + text : text;
 }
 
+function serializeCSVRows(rows) {
+  return rows
+    .map(row => row.map(value => {
+      const safeValue = typeof value === 'string' ? sanitizeCSVText(value) : String(value ?? '');
+      return '"' + safeValue.replace(/"/g, '""') + '"';
+    }).join(','))
+    .join('\\n');
+}
+
 function exportCSV() {
   const rows = [
-    ['Tanggal', 'Nomor antrean', 'Nama', 'Pack', 'WhatsApp', 'Status', 'Waktu daftar', 'Waiting time'],
-    ...state.guests
-      .filter(guest => guest.day === todayKey())
-      .map(guest => [
-        guest.day,
-        guest.ticket,
-        guest.name,
-        guest.pack,
-        guest.phone,
+    ['Tanggal', 'Nomor antrean', 'Na  const csv = serializeCSVRows(rows);
+
+    guest.phone,
         statusLabel(guest.status),
         fmtTime(guest.created),
         duration(guest)
