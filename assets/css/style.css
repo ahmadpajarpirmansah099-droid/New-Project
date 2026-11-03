@@ -7064,3 +7064,15 @@ button.history-date {
 @media (prefers-reduced-motion: reduce) {
   .app-select-dim { animation: none; }
 }
+
+
+/* Consistent placeholder treatment across every form in the app */
+input::placeholder,
+textarea::placeholder,
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+  color: #a3a3aa;
+  opacity: .78;
+  font-weight: 400;
+  font-style: normal;
+}
