@@ -6638,6 +6638,8 @@ button.history-date {
 .quick-menu-item:nth-child(3) { right: -15px; bottom: 58px; }
 .quick-menu-item:nth-child(4) { right: -15px; bottom: 116px; }
 .quick-menu-item:nth-child(5) { right: -15px; bottom: 174px; }
+.quick-menu-item:nth-child(6) { right: -15px; bottom: 0; }
+.quick-menu-item:nth-child(7) { right: -15px; bottom: 58px; }
 
 .quick-menu.show .quick-menu-item {
   opacity: 1;
@@ -6649,6 +6651,8 @@ button.history-date {
 .quick-menu.show .quick-menu-item:nth-child(3) { transition-delay: 35ms; }
 .quick-menu.show .quick-menu-item:nth-child(4) { transition-delay: 70ms; }
 .quick-menu.show .quick-menu-item:nth-child(5) { transition-delay: 105ms; }
+.quick-menu.show .quick-menu-item:nth-child(6) { transition-delay: 0ms; }
+.quick-menu.show .quick-menu-item:nth-child(7) { transition-delay: 35ms; }
 
 .quick-menu-item > svg:first-child {
   width: 48px;
