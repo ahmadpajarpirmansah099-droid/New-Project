@@ -1,6 +1,6 @@
 /* =========================================================
-   1. UTILITIES, DATE/TIME, AND APP STATE
-   ========================================================= */
+    1. UTILITIES, DATE/TIME, AND APP STATE
+    ========================================================= */
 const $=id=>document.getElementById(id);
 const todayKey=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const fmtTime=t=>new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit'}).format(new Date(t));
@@ -41,8 +41,6 @@ function save() {
     });
   return remoteSaveQueue;
 }
-
-
 
 function seatingDurationMinutes() {
   const value = Number(state.settings?.seatingDurationMinutes);
@@ -110,8 +108,6 @@ async function saveSeatingDuration() {
   toast('Durasi Seating Time disimpan');
 }
 
-
-
 function nextTicket(day) {
   const number = (state.counters[day] || 0) + 1;
   state.counters[day] = number;
@@ -128,10 +124,9 @@ function toast(message) {
   toastTimer = setTimeout(() => element.classList.remove('show'), 2300);
 }
 
-
 /* =========================================================
-   2. APP NAVIGATION AND SHARED POPUP / SHEET CONTROLS
-   ========================================================= */
+    2. APP NAVIGATION AND SHARED POPUP / SHEET CONTROLS
+    ========================================================= */
 function returnToGuestOperational() {
   go('dashboard');
 }
@@ -434,18 +429,17 @@ function closeSheet() {
   sheetGuest = null;
 }
 
-
 let sheetDragStartY=0,sheetDragCurrentY=0,sheetDragging=false,sheetDragPointerId=null;
 function initSheetDrag(){
- const handle=$('sheetHandle'),sheet=$('sheet');
- if(!handle||handle.dataset.dragReady)return;
- handle.dataset.dragReady='1';
- const move=y=>{
+  const handle=$('sheetHandle'),sheet=$('sheet');
+  if(!handle||handle.dataset.dragReady)return;
+  handle.dataset.dragReady='1';
+  const move=y=>{
   if(!sheetDragging)return;
   sheetDragCurrentY=Math.max(0,y-sheetDragStartY);
   sheet.style.transform='translate3d(-50%, '+sheetDragCurrentY+'px, 0)';
- };
- const finish=()=>{
+  };
+  const finish=()=>{
   if(!sheetDragging)return;
   const shouldClose=sheetDragCurrentY>90;
   sheetDragging=false;sheetDragPointerId=null;
@@ -453,43 +447,42 @@ function initSheetDrag(){
   sheet.style.transform='';
   if(shouldClose)closeSheet();
   sheetDragStartY=0;sheetDragCurrentY=0;
- };
- handle.addEventListener('pointerdown',e=>{
+  };
+  handle.addEventListener('pointerdown',e=>{
   if(!sheet.classList.contains('show')||e.button!==0)return;
   sheetDragging=true;sheetDragPointerId=e.pointerId;
   sheetDragStartY=e.clientY;sheetDragCurrentY=0;
   sheet.style.transition='none';
   try{handle.setPointerCapture(e.pointerId)}catch(err){}
   e.preventDefault();
- });
- window.addEventListener('pointermove',e=>{
+  });
+  window.addEventListener('pointermove',e=>{
   if(!sheetDragging||e.pointerId!==sheetDragPointerId)return;
   e.preventDefault();move(e.clientY);
- },{passive:false});
- window.addEventListener('pointerup',e=>{
+  },{passive:false});
+  window.addEventListener('pointerup',e=>{
   if(sheetDragging&&e.pointerId===sheetDragPointerId)finish();
- });
- window.addEventListener('pointercancel',e=>{
+  });
+  window.addEventListener('pointercancel',e=>{
   if(sheetDragging&&e.pointerId===sheetDragPointerId)finish();
- });
-
+  });
 
 }
 
 function initSheetBodySwipe(){
- const sheet=$('sheet');
- if(!sheet||sheet.dataset.bodySwipeReady)return;
- sheet.dataset.bodySwipeReady='1';
- let startY=0,dragDistance=0,dragActive=false;
- sheet.addEventListener('touchstart',e=>{
+  const sheet=$('sheet');
+  if(!sheet||sheet.dataset.bodySwipeReady)return;
+  sheet.dataset.bodySwipeReady='1';
+  let startY=0,dragDistance=0,dragActive=false;
+  sheet.addEventListener('touchstart',e=>{
   if(!sheet.classList.contains('show')||!sheet.querySelector('.detail-ticket')||e.touches.length!==1){dragActive=false;return;}
   const target=e.target;
   if(target.closest('button,input,select,textarea,a,[contenteditable="true"],#sheetHandle')){dragActive=false;return;}
   startY=e.touches[0].clientY;
   dragDistance=0;
   dragActive=sheet.scrollTop<=1;
- },{passive:true});
- sheet.addEventListener('touchmove',e=>{
+  },{passive:true});
+  sheet.addEventListener('touchmove',e=>{
   if(!dragActive||e.touches.length!==1)return;
   const delta=e.touches[0].clientY-startY;
   if(delta<8){if(delta<-8)dragActive=false;return;}
@@ -498,8 +491,8 @@ function initSheetBodySwipe(){
   dragDistance=delta;
   sheet.style.transition='none';
   sheet.style.transform='translate3d(-50%, '+delta+'px, 0)';
- },{passive:false});
- const finishBodySwipe=()=>{
+  },{passive:false});
+  const finishBodySwipe=()=>{
   if(!dragActive)return;
   const shouldClose=dragDistance>90;
   dragActive=false;
@@ -507,24 +500,23 @@ function initSheetBodySwipe(){
   sheet.style.transition='';
   sheet.style.transform='';
   if(shouldClose)closeSheet();
- };
- sheet.addEventListener('touchend',finishBodySwipe,{passive:true});
- sheet.addEventListener('touchcancel',finishBodySwipe,{passive:true});
+  };
+  sheet.addEventListener('touchend',finishBodySwipe,{passive:true});
+  sheet.addEventListener('touchcancel',finishBodySwipe,{passive:true});
 }
 
-
 /* =========================================================
-   3. WAITING LIST: ADD GUEST AND QUEUE NUMBER
-   ========================================================= */
+    3. WAITING LIST: ADD GUEST AND QUEUE NUMBER
+    ========================================================= */
 function openAdd(){sheetGuest=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><form onsubmit="saveGuest(event)"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" onclick="changePack(-1)">−</button><strong id="packValue">2</strong><button type="button" onclick="changePack(1)">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span style="color:#9aa5b8;font-weight:500">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg" data-selected="waiting"><button type="button" class="selected" id="segWait" onclick="chooseInitial('waiting')">Menunggu</button><button type="button" id="segSeated" onclick="chooseInitial('seated')">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`)}
 function changePack(d){
- let v=Math.max(1,Math.min(30,Number($('guestPack').value)+d));
- $('guestPack').value=v;
- const value=$('packValue');
- value.textContent=v;
- value.classList.remove('pack-number-animate');
- void value.offsetWidth;
- value.classList.add('pack-number-animate');
+  let v=Math.max(1,Math.min(30,Number($('guestPack').value)+d));
+  $('guestPack').value=v;
+  const value=$('packValue');
+  value.textContent=v;
+  value.classList.remove('pack-number-animate');
+  void value.offsetWidth;
+  value.classList.add('pack-number-animate');
 }
 /* BAGIAN: Pilihan status awal tamu dan pemicu animasi liquid toggle */
 function chooseInitial(status) {
@@ -549,9 +541,9 @@ function chooseInitial(status) {
   );
 }
 async function saveGuest(e){
- e.preventDefault();
- const day=todayKey(),now=Date.now(),status=$('initialStatus').value;
- const g={
+  e.preventDefault();
+  const day=todayKey(),now=Date.now(),status=$('initialStatus').value;
+  const g={
   id:uid(),ticket:'',day,
   name:$('guestName').value.trim(),
   pack:Number($('guestPack').value),
@@ -559,22 +551,22 @@ async function saveGuest(e){
   status,created:now,
   resolved:status==='seated'?now:null,
   audit:[{at:now,label:'Terdaftar',detail:$('guestPack').value+' pack'}]
- };
- if(status==='seated')g.audit.push({at:now,label:'Langsung Duduk'});
- try {
+  };
+  if(status==='seated')g.audit.push({at:now,label:'Langsung Duduk'});
+  try {
   g.ticket = await window.GuestOpsService.nextTicket(day);
   state.guests.push(g);
   if (await save() === false) { state.guests = state.guests.filter(item => item.id !== g.id); return; }
   closeSheet();renderAll();
   toast('Tamu berhasil ditambahkan · '+g.ticket);
- } catch (error) {
+  } catch (error) {
   console.error(error);
   toast('Tamu belum berhasil disimpan. Coba lagi.');
- }
+  }
 }
 /* =========================================================
-   4. WAITING LIST: STATUS, CARDS, AND DASHBOARD RENDERING
-   ========================================================= */
+    4. WAITING LIST: STATUS, CARDS, AND DASHBOARD RENDERING
+    ========================================================= */
 function statusLabel(s) {
   return { waiting: 'Menunggu', called: 'Dipanggil', seated: 'Duduk', done: 'Selesai', cancelled: 'Dibatalkan' }[s] || s;
 }
@@ -633,26 +625,26 @@ function guestCard(g, i, history = false) {
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function setDashboardCounter(id,targetValue,animate=false){
- const element=$(id);
- if(!element)return;
- const target=Math.max(0,Math.round(Number(targetValue)||0));
- const reduceMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
- if(!animate||target===0||reduceMotion||typeof requestAnimationFrame!=='function'){
+  const element=$(id);
+  if(!element)return;
+  const target=Math.max(0,Math.round(Number(targetValue)||0));
+  const reduceMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!animate||target===0||reduceMotion||typeof requestAnimationFrame!=='function'){
   element.textContent=String(target);
   return;
- }
- const duration=640;
- let startTime=null;
- const step=now=>{
+  }
+  const duration=640;
+  let startTime=null;
+  const step=now=>{
   if(startTime===null)startTime=now;
   const progress=Math.min((now-startTime)/duration,1);
   const eased=1-Math.pow(1-progress,3);
   element.textContent=String(Math.min(target,Math.round(target*eased)));
   if(progress<1)requestAnimationFrame(step);
   else element.textContent=String(target);
- };
- element.textContent='0';
- requestAnimationFrame(step);
+  };
+  element.textContent='0';
+  requestAnimationFrame(step);
 }
 function renderAll() {
   const day = selectedOperationalDate;
@@ -707,26 +699,26 @@ function renderAll() {
 }
 function setFilter(f){activeFilter=f;document.querySelectorAll('#queueFilters .filter').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));renderQueue()}
 function renderQueue(){
- if(!$('queueList'))return;
- const q=($('queueSearch')?.value||'').toLowerCase(),day=selectedOperationalDate;
- const matchesFilter=g=>activeFilter==='waiting'
+  if(!$('queueList'))return;
+  const q=($('queueSearch')?.value||'').toLowerCase(),day=selectedOperationalDate;
+  const matchesFilter=g=>activeFilter==='waiting'
   ? ['waiting','called'].includes(g.status)
   : g.status===activeFilter;
- const list=state.guests
+  const list=state.guests
   .filter(g=>{
-   const reservation=reservationIdentity(g);
-   const searchText=(g.name+' '+g.ticket+' '+(reservation?.code||'')).toLowerCase();
-   return g.day===day&&matchesFilter(g)&&searchText.includes(q);
+    const reservation=reservationIdentity(g);
+    const searchText=(g.name+' '+g.ticket+' '+(reservation?.code||'')).toLowerCase();
+    return g.day===day&&matchesFilter(g)&&searchText.includes(q);
   })
   .sort((a,b)=>a.created-b.created);
- $('queueList').innerHTML=list.length
+  $('queueList').innerHTML=list.length
   ? list.map((g,i)=>guestCard(g,i)).join('')
   : `<div class="empty"><div class="empty-icon">⌕</div><h3>Tidak ada antrean</h3><p>Coba ubah filter atau kata pencarian.</p></div>`;
 }
 
 /* =========================================================
-   5. OPERATIONAL DETAIL MODAL — DASHBOARD DRILL-DOWN
-   ========================================================= */
+    5. OPERATIONAL DETAIL MODAL — DASHBOARD DRILL-DOWN
+    ========================================================= */
 let operationalChartMode = 'hour';
 let operationalStatusFilter = 'all';
 
@@ -857,8 +849,8 @@ function renderOperationalGuestList() {
 }
 
 /* =========================================================
-   6. HISTORY DATE FILTER AND HISTORY LIST
-   ========================================================= */
+    6. HISTORY DATE FILTER AND HISTORY LIST
+    ========================================================= */
 let historyCalendarMonth = null;
 let historyCalendarDraft = '';
 
@@ -959,11 +951,9 @@ function renderHistory() {
     : `<div class="empty"><div class="empty-icon">◷</div><h3>Belum ada riwayat</h3><p>Tidak ada tamu pada tanggal yang dipilih.</p></div>`;
 }
 
-
-
 /* =========================================================
-   6. RESERVATIONS: CALENDAR, FORM, AND GUEST SEATING
-   ========================================================= */
+    6. RESERVATIONS: CALENDAR, FORM, AND GUEST SEATING
+    ========================================================= */
 let reservationMonth = todayKey().slice(0, 7);
 let reservationDate = todayKey();
 
@@ -1019,7 +1009,6 @@ function selectReservationDate(date) {
   reservationDate = date;
   renderReservations(true);
 }
-
 
 function renderReservations(animateDateChange = false) {
   if (!$('reservationCalendar')) return;
@@ -1492,46 +1481,46 @@ async function confirmSeatReservation(event, id) {
 }
 
 /* =========================================================
-   7. GUEST DETAIL, EDITING, AND EXPORT
-   ========================================================= */
+    7. GUEST DETAIL, EDITING, AND EXPORT
+    ========================================================= */
 async function setGuestStatus(id,status){
- const guest=state.guests.find(item=>item.id===id);
- if(!guest||['done','cancelled'].includes(guest.status))return;
- const now=Date.now();
- const previous={status:guest.status,resolved:guest.resolved,seatedAt:guest.seatedAt,audit:guest.audit.slice()};
- guest.status=status;
- if(status==='seated'){guest.resolved=guest.resolved||now;guest.seatedAt=now}else if(status==='cancelled')guest.resolved=guest.resolved||now;
- const labels={called:'Dipanggil',seated:'Duduk',done:'Selesai',cancelled:'Dibatalkan'};
- guest.audit.push({at:now,label:labels[status]||status});
- if (await save() === false) {
-   Object.assign(guest, previous);
-   renderAll();
-   return;
- }
- renderAll();
- if($('sheet').classList.contains('show'))openDetail(id);
- const messages={called:'Tamu dipanggil',seated:'Tamu sudah duduk',done:'Kunjungan ditandai selesai',cancelled:'Antrean dibatalkan'};
- toast(messages[status]||'Status tamu diperbarui');
+  const guest=state.guests.find(item=>item.id===id);
+  if(!guest||['done','cancelled'].includes(guest.status))return;
+  const now=Date.now();
+  const previous={status:guest.status,resolved:guest.resolved,seatedAt:guest.seatedAt,audit:guest.audit.slice()};
+  guest.status=status;
+  if(status==='seated'){guest.resolved=guest.resolved||now;guest.seatedAt=now}else if(status==='cancelled')guest.resolved=guest.resolved||now;
+  const labels={called:'Dipanggil',seated:'Duduk',done:'Selesai',cancelled:'Dibatalkan'};
+  guest.audit.push({at:now,label:labels[status]||status});
+  if (await save() === false) {
+    Object.assign(guest, previous);
+    renderAll();
+    return;
+  }
+  renderAll();
+  if($('sheet').classList.contains('show'))openDetail(id);
+  const messages={called:'Tamu dipanggil',seated:'Tamu sudah duduk',done:'Kunjungan ditandai selesai',cancelled:'Antrean dibatalkan'};
+  toast(messages[status]||'Status tamu diperbarui');
 }
 async function callGuestWhatsApp(id){
- const guest=state.guests.find(item=>item.id===id);
- if(!guest)return;
- const digits=String(guest.phone||'').replace(/[^0-9]/g,'');
- let phone=digits;
- if(phone.startsWith('0'))phone='62'+phone.slice(1);
- else if(phone.startsWith('8'))phone='62'+phone;
- if(!/^[0-9]{8,15}$/.test(phone)){
+  const guest=state.guests.find(item=>item.id===id);
+  if(!guest)return;
+  const digits=String(guest.phone||'').replace(/[^0-9]/g,'');
+  let phone=digits;
+  if(phone.startsWith('0'))phone='62'+phone.slice(1);
+  else if(phone.startsWith('8'))phone='62'+phone;
+  if(!/^[0-9]{8,15}$/.test(phone)){
   toast('Nomor WhatsApp belum diisi atau formatnya belum valid');
   return;
- }
- const isSeated = guest.status === 'seated';
- const message = isSeated
+  }
+  const isSeated = guest.status === 'seated';
+  const message = isSeated
   ? 'Halo Kak '+guest.name+', reservasi '+(guest.reservationCode || '')+' sudah kami tempatkan. Terima kasih.'
   : 'Halo Kak '+guest.name+', nomor antrean '+guest.ticket+' sudah dipanggil. Mohon menuju area greeter kami. Terima kasih.';
- const waUrl='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
- window.open(waUrl,'_blank','noopener,noreferrer');
- // Mengirim WhatsApp tidak boleh mengubah status tamu yang sudah duduk.
- if (guest.status === 'waiting') await setGuestStatus(id,'called');
+  const waUrl='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
+  window.open(waUrl,'_blank','noopener,noreferrer');
+  // Mengirim WhatsApp tidak boleh mengubah status tamu yang sudah duduk.
+  if (guest.status === 'waiting') await setGuestStatus(id,'called');
 }
 
 function openDetail(id) {
@@ -1685,8 +1674,8 @@ function exportCSV() {
 }
 
 /* =========================================================
-   8. APP STARTUP: LOAD OPERATIONAL DATA FROM SUPABASE
-   ========================================================= */
+    8. APP STARTUP: LOAD OPERATIONAL DATA FROM SUPABASE
+    ========================================================= */
 $('historyDate').value = selectedOperationalDate;
 updateHistoryDateLabel();
 updateOperationalDateLabels();
