@@ -1595,6 +1595,15 @@ function saveEdit(event, id) {
   toast('Koreksi berhasil disimpan');
 }
 
+// Protect text cells from spreadsheet formula interpretation during export only.
+function sanitizeCSVText(value) {
+  const text = String(value ?? '');
+  const startsWithFormula = /^[\u0000-\u0020]*[=+\-@]/.test(text);
+  const startsWithControl = /^[\u0000-\u001F\u007F]/.test(text);
+
+  return startsWithFormula || startsWithControl ? "'" + text : text;
+}
+
 function exportCSV() {
   const rows = [
     ['Tanggal', 'Nomor antrean', 'Nama', 'Pack', 'WhatsApp', 'Status', 'Waktu daftar', 'Waiting time'],
@@ -1613,7 +1622,10 @@ function exportCSV() {
   ];
 
   const csv = rows
-    .map(row => row.map(value => '"' + String(value ?? '').replace(/"/g, '""') + '"').join(','))
+    .map(row => row.map(value => {
+      const safeValue = typeof value === 'string' ? sanitizeCSVText(value) : String(value ?? '');
+      return '"' + safeValue.replace(/"/g, '""') + '"';
+    }).join(','))
     .join('\n');
 
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
