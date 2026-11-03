@@ -5,6 +5,7 @@
   let supabaseClient = null;
   const $ = (id) => document.getElementById(id);
   let activeUserId = null;
+  let authContext = null;
   let isSubmitting = false;
 
   function setMessage(message, type) {
@@ -45,13 +46,33 @@
     const { data: profile, error } = await supabaseClient.from('profiles')
       .select('id, display_name, role').eq('id', userId).single();
 
-    if (error || !profile || !['developer', 'admin'].includes(profile.role)) {
+    if (error || !profile || !['developer', 'admin', 'service'].includes(profile.role)) {
       await supabaseClient.auth.signOut();
       showLogin('Akun belum memiliki izin akses. Hubungi Developer untuk pengaturan role.');
       return;
     }
 
+    const { data: membership, error: membershipError } = await supabaseClient
+      .from('workspace_memberships')
+      .select('workspace_id, role')
+      .eq('user_id', userId)
+      .limit(1)
+      .maybeSingle();
+
+    if (membershipError || !membership) {
+      await supabaseClient.auth.signOut();
+      showLogin('Akun belum terhubung ke workspace. Hubungi Developer.');
+      return;
+    }
+
     activeUserId = userId;
+    authContext = {
+      userId,
+      email: session.user.email || '',
+      role: profile.role,
+      workspaceId: membership.workspace_id,
+      workspaceRole: membership.role
+    };
     const displayName = profile.display_name || session.user.email || 'User';
     const initials = displayName.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
     const profileButton = $('authProfileButton');
@@ -66,6 +87,7 @@
     document.body.classList.add('auth-ready');
     setLoading(false);
     setMessage('');
+    window.dispatchEvent(new CustomEvent('app:auth-ready', { detail: authContext }));
   }
 
   // Sign in with Supabase Auth; the role is read from the protected profiles table.
@@ -136,7 +158,11 @@
     });
   }
 
-  window.AppAuth = { signOut: handleLogout, getClient: function () { return supabaseClient; } };
+  window.AppAuth = {
+    signOut: handleLogout,
+    getClient: function () { return supabaseClient; },
+    getContext: function () { return authContext; }
+  };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
   else init();
 }());
