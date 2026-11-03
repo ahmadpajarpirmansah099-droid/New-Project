@@ -547,7 +547,7 @@ function chooseInitial(status) {
     200
   );
 }
-async async function saveGuest(e){
+async function saveGuest(e){
  e.preventDefault();
  const day=todayKey(),now=Date.now(),status=$('initialStatus').value;
  const g={
@@ -1322,7 +1322,7 @@ function applyReservationTime() {
   closeReservationTimePicker();
 }
 
-async async function saveReservation(e) {
+async function saveReservation(e) {
   e.preventDefault();
 
   const name = $('rName').value.trim();
@@ -1421,7 +1421,7 @@ function seatReservation(id) {
   );
 }
 
-async async function confirmSeatReservation(event, id) {
+async function confirmSeatReservation(event, id) {
   event.preventDefault();
 
   const reservation = state.reservations.find(item => item.id === id);
@@ -1482,7 +1482,7 @@ async async function confirmSeatReservation(event, id) {
 /* =========================================================
    7. GUEST DETAIL, EDITING, AND EXPORT
    ========================================================= */
-async async function setGuestStatus(id,status){
+async function setGuestStatus(id,status){
  const guest=state.guests.find(item=>item.id===id);
  if(!guest||['done','cancelled'].includes(guest.status))return;
  const now=Date.now();
