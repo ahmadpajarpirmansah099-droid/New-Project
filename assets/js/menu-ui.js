@@ -32,34 +32,56 @@
       }).join('');
   }
 
-  function unitOptions(type, selectedId, selectedUnit) {
-    let units = [];
-    if (type === 'wip') {
-      const wip = root.WipService.findWip(selectedId);
-      if (wip) units = [wip.satuan_hasil];
-    } else {
-      const item = root.MasterDataService.findItem(selectedId);
-      if (item) units = (item.konversi_satuan || []).map(function (row) { return row.unit; });
-    }
-    if (!units.length) return '<option value="">Satuan</option>';
-    return units.map(function (unit) {
-      return '<option value="' + escapeHtml(unit) + '" ' +
-        (String(unit).toLocaleUpperCase('id-ID') === String(selectedUnit || '').toLocaleUpperCase('id-ID') ? 'selected' : '') +
-        '>' + escapeHtml(unit) + '</option>';
-    }).join('');
+function findComponent(type, id) {
+    if (!id) return null;
+    const entries = type === 'wip' ? wips() : materials();
+    return entries.find(function (entry) { return String(entry.id) === String(id); }) || null;
   }
 
+  function componentSearchOptions(type, query, excludeId) {
+    const entries = type === 'wip' ? getAvailableWips(excludeId) : materials();
+    const q = String(query || '').trim().toLocaleLowerCase('id-ID');
+    const filtered = entries.filter(function (entry) {
+      return String(type === 'wip' ? entry.nama_wip : entry.nama_barang).toLocaleLowerCase('id-ID').includes(q);
+    });
+    return filtered.map(function (entry) {
+      const name = type === 'wip' ? entry.nama_wip : entry.nama_barang;
+      return '<button type="button" class="menu-component-option" data-menu-component-option="' + escapeHtml(entry.id) + '" data-name="' + escapeHtml(name) + '">' + escapeHtml(name) + '</button>';
+    }).join('') || '<div class="menu-component-empty">Tidak ditemukan</div>';
+  }
+
+  function renderComponentOptions(row, query) {
+    const type = row.querySelector('[data-menu-type]').value;
+    const dropdown = row.querySelector('[data-menu-component-options]');
+    if (!dropdown) return;
+    dropdown.innerHTML = componentSearchOptions(type, query, '');
+    dropdown.hidden = !String(query || '').trim();
+  }
+
+  function unitOptions(type, selectedId, selectedUnit) {
+    let baseUnit = '';
+    if (type === 'wip') {
+      const wip = root.WipService.findWip(selectedId);
+      if (wip) baseUnit = wip.satuan_hasil;
+    } else {
+      const item = root.MasterDataService.findItem(selectedId);
+      if (item) baseUnit = item.satuan_dasar;
+    }
+    if (!baseUnit) return '<option value="">Pilih bahan dulu</option>';
+    return '<option value="' + escapeHtml(baseUnit) + '" selected>' + escapeHtml(baseUnit) + '</option>';
+  }
   function recipeRowHtml(line) {
     const type = line && line.component_type === 'wip' ? 'wip' : 'material';
     const selectedId = type === 'wip' ? line && line.component_wip_id : line && line.item_id;
+    const selected = findComponent(type, selectedId);
+    const selectedName = selected ? (type === 'wip' ? selected.nama_wip : selected.nama_barang) : '';
     return '<div class="menu-recipe-row" data-menu-recipe-row>' +
       '<div class="menu-row-top"><label class="menu-field menu-type-field"><select data-menu-type aria-label="Jenis komponen"><option value="material" ' + (type === 'material' ? 'selected' : '') + '>Master Barang</option><option value="wip" ' + (type === 'wip' ? 'selected' : '') + '>WIP</option></select></label>' +
-      '<label class="menu-field"><select data-menu-component aria-label="Pilih bahan">' + componentOptions(type, selectedId) + '</select></label></div>' +
+      '<div class="menu-field menu-component-search"><input type="search" data-menu-component-search autocomplete="off" placeholder="Cari bahan..." value="' + escapeHtml(selectedName) + '" aria-label="Cari bahan"><select data-menu-component hidden>' + componentOptions(type, selectedId) + '</select><div class="menu-component-options" data-menu-component-options hidden></div></div></div>' +
       '<div class="menu-row-bottom"><label class="menu-field"><span>Jumlah per porsi</span><input data-menu-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="1" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
       '<label class="menu-field"><span>Satuan</span><select data-menu-unit>' + unitOptions(type, selectedId, line && line.unit_input || '') + '</select></label></div>' +
       '<button type="button" class="menu-remove-row" data-menu-action="remove-row" aria-label="Hapus komponen">×</button></div>';
   }
-
   function getRecipeRows() {
     return Array.from(root.document.querySelectorAll('[data-menu-recipe-row]')).map(function (row) {
       const type = row.querySelector('[data-menu-type]').value;
@@ -171,6 +193,19 @@
   }
 
   function handleClick(event) {
+    const option = event.target.closest('[data-menu-component-option]');
+    if (option) {
+      const row = option.closest('[data-menu-recipe-row]');
+      const select = row && row.querySelector('[data-menu-component]');
+      const search = row && row.querySelector('[data-menu-component-search]');
+      if (select && search) {
+        select.value = option.dataset.menuComponentOption;
+        search.value = option.dataset.name || option.textContent;
+        row.querySelector('[data-menu-component-options]').hidden = true;
+        refreshRowUnits(row);
+      }
+      return;
+    }
     const button = event.target.closest('[data-menu-action]');
     if (!button) return;
     const action = button.dataset.menuAction;
@@ -213,6 +248,15 @@
   }
 
   function handleInput(event) {
+    if (event.target.matches('[data-menu-component-search]')) {
+      const row = event.target.closest('[data-menu-recipe-row]');
+      if (row) {
+        row.querySelector('[data-menu-component]').value = '';
+        row.querySelector('[data-menu-unit]').innerHTML = unitOptions(row.querySelector('[data-menu-type]').value, '', '');
+        renderComponentOptions(row, event.target.value);
+      }
+      return;
+    }
     if (event.target.id === 'menuSearch') {
       searchQuery = event.target.value;
       const cursor = event.target.selectionStart;
@@ -229,6 +273,8 @@
       if (!row) return;
       if (target.matches('[data-menu-type]')) {
         row.querySelector('[data-menu-component]').innerHTML = componentOptions(target.value, '');
+        row.querySelector('[data-menu-component-search]').value = '';
+        row.querySelector('[data-menu-component-options]').hidden = true;
       }
       refreshRowUnits(row);
     }
