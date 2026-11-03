@@ -77,7 +77,7 @@ function findComponent(type, id) {
     const selectedName = selected ? (type === 'wip' ? selected.nama_wip : selected.nama_barang) : '';
     return '<div class="menu-recipe-row" data-menu-recipe-row>' +
       '<label class="menu-field"><select data-menu-type aria-label="Jenis item"><option value="material" ' + (type === 'material' ? 'selected' : '') + '>Barang</option><option value="wip" ' + (type === 'wip' ? 'selected' : '') + '>WIP</option></select></label>' +
-      '<div class="menu-field menu-component-search"><input type="search" data-menu-component-search autocomplete="off" placeholder="Cari item" value="' + escapeHtml(selectedName) + '" aria-label="Cari item"><select data-menu-component hidden>' + componentOptions(type, selectedId) + '</select><div class="menu-component-options" data-menu-component-options hidden></div></div>' +
+      '<div class="menu-field menu-component-search"><input type="search" data-menu-component-search autocomplete="off" placeholder="Cari item" value="' + escapeHtml(selectedName) + '" aria-label="Cari item"><select data-menu-component hidden style="display:none!important" aria-hidden="true" tabindex="-1">' + componentOptions(type, selectedId) + '</select><div class="menu-component-options" data-menu-component-options hidden></div></div>' +
       '<label class="menu-field"><input data-menu-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Jumlah" aria-label="Jumlah per porsi" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
       '<label class="menu-field"><select data-menu-unit aria-label="Satuan">' + unitOptions(type, selectedId, line && line.unit_input || '') + '</select></label></div>';
   }
