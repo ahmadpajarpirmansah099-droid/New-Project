@@ -188,21 +188,28 @@
     }).join('');
 
     return '<article class="md-item-card">' +
-      '<div class="md-item-heading"><div class="md-item-copy">' +
-      '<div class="md-item-title-row"><h3>' + escapeHtml(item.nama_barang) + '</h3>' +
-      '<span class="md-status ' + (item.status === 'active' ? 'is-active' : 'is-inactive') + '">' +
-      (item.status === 'active' ? 'Aktif' : 'Nonaktif') + '</span>' +
-      (item.is_supply ? '<span class="md-supply-chip">Supply</span>' : '') + '</div>' +
-      '<span class="md-base-unit-label">Satuan dasar · ' + escapeHtml(item.satuan_dasar) + '</span></div>' +
-      '<button type="button" class="md-more" data-md-action="edit" data-item-id="' + escapeHtml(item.id) + '" aria-label="Edit ' + escapeHtml(item.nama_barang) + '">Edit</button></div>' +
-      '<div class="md-item-prices"><div class="md-price-reference"><small>Harga referensi</small><b>' +
-      formatMoney(item.harga_referensi) + '<span> / ' + escapeHtml(item.satuan_harga) + '</span></b></div>' +
-      '<div class="md-price-base"><small>Harga per ' + escapeHtml(item.satuan_dasar) + '</small><b>' +
-      formatMoney(item.harga_per_satuan_dasar) + '</b></div></div>' +
+      '<div class="md-item-heading">' +
+        '<div class="md-item-copy">' +
+          '<div class="md-item-title-row"><h3>' + escapeHtml(item.nama_barang) + '</h3>' +
+          '<span class="md-status ' + (item.status === 'active' ? 'is-active' : 'is-inactive') + '">' +
+          (item.status === 'active' ? 'Aktif' : 'Nonaktif') + '</span>' +
+          (item.is_supply ? '<span class="md-supply-chip">Supply</span>' : '') + '</div>' +
+          '<span class="md-base-unit-label">Satuan dasar · ' + escapeHtml(item.satuan_dasar) + '</span>' +
+        '</div>' +
+        '<div class="md-item-prices">' +
+          '<div class="md-price-reference"><small>Harga referensi</small><b>' +
+          formatMoney(item.harga_referensi) + '<span> / ' + escapeHtml(item.satuan_harga) + '</span></b></div>' +
+          '<div class="md-price-base"><small>Harga per ' + escapeHtml(item.satuan_dasar) + '</small><b>' +
+          formatMoney(item.harga_per_satuan_dasar) + '</b></div>' +
+        '</div>' +
+      '</div>' +
       '<div class="md-unit-section"><span class="md-unit-caption">Konversi satuan</span><div class="md-unit-list">' + conversions + '</div></div>' +
       '<div class="md-item-footer"><span>' + (item.status === 'active' ? 'Tersedia untuk resep baru' : 'Tidak tersedia untuk resep baru') + '</span>' +
-      '<button type="button" class="md-status-action" data-md-action="toggle-status" data-item-id="' + escapeHtml(item.id) + '">' +
-      (item.status === 'active' ? 'Nonaktifkan' : 'Aktifkan') + '</button></div></article>';
+      '<div class="md-item-actions">' +
+        '<button type="button" class="md-more" data-md-action="edit" data-item-id="' + escapeHtml(item.id) + '" aria-label="Edit ' + escapeHtml(item.nama_barang) + '">Edit</button>' +
+        '<button type="button" class="md-status-action" data-md-action="toggle-status" data-item-id="' + escapeHtml(item.id) + '">' +
+        (item.status === 'active' ? 'Nonaktifkan' : 'Aktifkan') + '</button>' +
+      '</div></div></article>';
   }
 
   function renderPage(page) {
