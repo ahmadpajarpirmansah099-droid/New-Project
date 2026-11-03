@@ -47,16 +47,13 @@
       }).join('');
   }
 
-  function unitOptions(type, selectedId) {
-    let unit = '';
+  function getComponentUnit(type, selectedId) {
     if (type === 'wip') {
       const wip = root.WipService.findWip(selectedId);
-      if (wip) unit = wip.satuan_hasil;
-    } else {
-      const item = root.MasterDataService.findItem(selectedId);
-      if (item) unit = item.satuan_dasar;
+      return wip ? (wip.satuan_hasil || '') : '';
     }
-    return unit ? '<option value="' + escapeHtml(unit) + '" selected>' + escapeHtml(unit) + '</option>' : '<option value="">Pilih komponen dulu</option>';
+    const item = root.MasterDataService.findItem(selectedId);
+    return item ? (item.satuan_dasar || '') : '';
   }
 
   function findComponent(type, id, excludeId) {
@@ -84,7 +81,7 @@
       '<input type="hidden" data-wip-type value="' + type + '">' + '<div class="wip-recipe-type" data-wip-recipe-type>' + (type === 'wip' ? 'WIP' : 'Barang') + '</div>' +
       '<div class="wip-field wip-component-search"><input type="search" data-wip-component-search autocomplete="off" placeholder="Cari item" value="' + escapeHtml(selectedName) + '" aria-label="Cari item"><select data-wip-component hidden style="display:none!important" aria-hidden="true" tabindex="-1">' + componentOptions(type, selectedId, excludeId) + '</select><div class="wip-component-options" data-wip-component-options hidden></div></div>' +
       '<label class="wip-field"><input data-wip-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Jumlah" aria-label="Jumlah" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
-      '<label class="wip-field"><select data-wip-unit aria-label="Satuan">' + unitOptions(type, selectedId) + '</select></label></div>';
+      '<input type="hidden" data-wip-unit value="' + escapeHtml(getComponentUnit(type, selectedId)) + '">' + '<div class="wip-unit-display" data-wip-unit-display>' + escapeHtml(getComponentUnit(type, selectedId) || '—') + '</div></div>';
   }
 
     function initialRecipeRows(lines, excludeId) {
@@ -112,8 +109,11 @@
   function refreshRowUnits(row) {
     const type = row.querySelector('[data-wip-type]').value;
     const componentId = row.querySelector('[data-wip-component]').value;
-    const unit = row.querySelector('[data-wip-unit]');
-    if (unit) unit.innerHTML = unitOptions(type, componentId, '');
+    const unit = getComponentUnit(type, componentId);
+    const unitInput = row.querySelector('[data-wip-unit]');
+    const unitDisplay = row.querySelector('[data-wip-unit-display]');
+    if (unitInput) unitInput.value = unit;
+    if (unitDisplay) unitDisplay.textContent = unit || '—';
   }
 
   function openWipForm(id) {
@@ -283,7 +283,8 @@
     if (event.target.matches('[data-wip-component-search]')) {
       const row = event.target.closest('[data-wip-recipe-row]');
       row.querySelector('[data-wip-component]').value = '';
-      row.querySelector('[data-wip-unit]').innerHTML = '<option value="">Pilih komponen dulu</option>';
+      row.querySelector('[data-wip-unit]').value = '';
+      row.querySelector('[data-wip-unit-display]').textContent = '—';
       renderComponentOptions(row, event.target.value);
       return;
     }
