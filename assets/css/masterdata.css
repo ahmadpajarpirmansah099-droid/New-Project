@@ -605,3 +605,79 @@
   .md-item-actions { gap: 3px; }
   .md-item-actions .md-more,.md-item-actions .md-status-action { padding: 0 7px; font-size: 12px; }
 }
+
+
+/* Final compact alignment for Master Barang item cards */
+.md-item-heading {
+  align-items: start;
+  gap: 6px;
+}
+.md-item-copy {
+  align-self: start;
+}
+.md-item-title-row {
+  gap: 3px;
+}
+.md-item-copy h3 {
+  font-size: 14px;
+}
+.md-base-unit-label {
+  margin-top: 4px;
+  font-size: 10px;
+}
+.md-item-prices {
+  align-content: start;
+  align-self: start;
+  gap: 4px;
+}
+.md-item-prices > div {
+  min-height: 46px;
+  padding: 5px 6px;
+}
+.md-item-prices small {
+  font-size: 9px;
+}
+.md-item-prices b {
+  margin-top: 2px;
+  font-size: 11px;
+}
+.md-price-reference b span {
+  font-size: 9px;
+}
+.md-item-footer {
+  margin-top: 4px;
+  padding-top: 4px;
+}
+.md-item-footer > span {
+  font-size: 10px;
+}
+.md-item-actions {
+  gap: 3px;
+}
+.md-item-actions .md-more,
+.md-item-actions .md-status-action {
+  min-height: 38px;
+  padding: 0 7px;
+  font-size: 11px;
+}
+@media (max-width: 390px) {
+  .md-item-card { padding: 10px; }
+  .md-item-heading {
+    grid-template-columns: minmax(68px,.58fr) minmax(0,1.72fr);
+    gap: 6px;
+  }
+  .md-item-copy h3 { font-size: 13px; }
+  .md-base-unit-label { font-size: 10px; }
+  .md-item-prices > div { min-height: 44px; padding: 4px 5px; }
+  .md-item-prices small { font-size: 8px; }
+  .md-item-prices b { font-size: 10px; }
+  .md-item-footer { margin-top: 3px; padding-top: 3px; }
+  .md-item-footer > span { font-size: 9px; }
+  .md-item-actions { gap: 2px; }
+  .md-item-actions .md-more,
+  .md-item-actions .md-status-action {
+    min-height: 36px;
+    padding: 0 6px;
+    font-size: 10px;
+  }
+}
