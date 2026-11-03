@@ -1598,10 +1598,20 @@ function saveEdit(event, id) {
 // Protect text cells from spreadsheet formula interpretation during export only.
 function sanitizeCSVText(value) {
   const text = String(value ?? '');
-  const startsWithFormula = /^[\u0000-\u0020]*[=+\-@]/.test(text);
-  const startsWithControl = /^[\u0000-\u001F\u007F]/.test(text);
+  const normalized = text.normalize('NFKC');
+  const startsWithFormula = /^[\s\u0000-\u001F\u007F-\u009F]*[=+\-@]/u.test(normalized);
+  const startsWithControl = /^[\s]*[\u0000-\u001F\u007F-\u009F]/u.test(text);
 
   return startsWithFormula || startsWithControl ? "'" + text : text;
+}
+
+function serializeCSVRows(rows) {
+  return rows
+    .map(row => row.map(value => {
+      const safeValue = typeof value === 'string' ? sanitizeCSVText(value) : String(value ?? '');
+      return '"' + safeValue.replace(/"/g, '""') + '"';
+    }).join(','))
+    .join('\n');
 }
 
 function exportCSV() {
@@ -1621,12 +1631,7 @@ function exportCSV() {
       ])
   ];
 
-  const csv = rows
-    .map(row => row.map(value => {
-      const safeValue = typeof value === 'string' ? sanitizeCSVText(value) : String(value ?? '');
-      return '"' + safeValue.replace(/"/g, '""') + '"';
-    }).join(','))
-    .join('\n');
+  const csv = serializeCSVRows(rows);
 
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
   const link = document.createElement('a');
