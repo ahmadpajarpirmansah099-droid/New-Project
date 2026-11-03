@@ -248,7 +248,17 @@
 .wip-recipe-row [data-wip-component] { display:none !important; }
 .wip-recipe-row .wip-field select,
 .wip-recipe-row .wip-field input,
-.wip-component-search input { font-size:16px !important; font-weight:500; }
+.wip-component-search input { font-size:13px !important; font-weight:500; }
 .wip-recipe-row .wip-field input::placeholder,
-.wip-component-search input::placeholder { font-size:16px; }
-.wip-component-option { font-size:16px; }
+.wip-component-search input::placeholder { font-size:13px; }
+.wip-component-option { font-size:13px; }
+
+/* Final recipe typography: consistent and compact on mobile */
+.wip-recipe-heading b { font-size:13px; }
+.wip-recipe-row .wip-field input,
+.wip-recipe-row .wip-field select,
+.wip-component-search input,
+.wip-component-option { font-size:13px !important; }
+.wip-recipe-row .wip-field input::placeholder,
+.wip-component-search input::placeholder { font-size:13px !important; }
+.wip-recipe-row .app-select-trigger { font-size:13px !important; }
