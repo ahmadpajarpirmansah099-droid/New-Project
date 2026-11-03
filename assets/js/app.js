@@ -162,7 +162,29 @@ function returnToGuestOperational() {
   go('dashboard');
 }
 
+function setWorkspaceHeader(page) {
+  const isMasterWorkspace = ['master-items', 'wips', 'menus'].includes(page);
+  const mark = $('workspaceBrandmark');
+  const name = $('workspaceBrandname');
+  const meta = $('workspaceBrandmeta');
+  if (!mark || !name || !meta) return;
+
+  if (isMasterWorkspace) {
+    mark.classList.add('is-master');
+    mark.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M4 7.5 12 12l8-4.5M12 12v9M8 5.3l8 4.5"/></svg>';
+    name.textContent = 'MASTER BARANG';
+    meta.textContent = 'MASTER DATA WORKSPACE';
+    return;
+  }
+
+  mark.classList.remove('is-master');
+  mark.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+  name.textContent = 'GUEST OPERATIONS';
+  meta.textContent = 'ADMIN WORKSPACE';
+}
+
 function go(page) {
+  setWorkspaceHeader(page);
   closeQuickMenu();
   document.querySelectorAll('.page').forEach(element => element.classList.remove('active'));
   $('page-' + page).classList.add('active');
