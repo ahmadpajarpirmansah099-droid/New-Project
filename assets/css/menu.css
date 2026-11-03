@@ -262,3 +262,9 @@
 .menu-recipe-row .menu-field input::placeholder,
 .menu-component-search input::placeholder { font-size:13px !important; }
 .menu-recipe-row .app-select-trigger { font-size:13px !important; }
+
+.menu-recipe-row { grid-template-columns:minmax(54px,.72fr) minmax(0,1.65fr) minmax(52px,.72fr) minmax(58px,.78fr); }
+.menu-recipe-labels { grid-template-columns:minmax(54px,.72fr) minmax(0,1.65fr) minmax(52px,.72fr) minmax(58px,.78fr); }
+.menu-recipe-type { min-width:0; min-height:44px; display:flex; align-items:center; padding:0 6px; color:#55546a; font-size:13px; font-weight:600; }
+.menu-component-option { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.menu-component-option small { flex:none; color:#77758a; font-size:11px; }
