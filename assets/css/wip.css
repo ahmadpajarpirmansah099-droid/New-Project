@@ -190,3 +190,12 @@
   .wip-recipe-section { padding: 8px; }
   .wip-recipe-row { padding: 7px; }
 }
+
+/* Two-row ingredient layout */
+.wip-recipe-row { position:relative; padding:10px 8px 8px; }
+.wip-row-top,.wip-row-bottom { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+.wip-row-top { align-items:end; }
+.wip-row-top .wip-field { min-width:0; }
+.wip-row-top .wip-field select { width:100%; min-width:0; }
+.wip-recipe-row .wip-remove-row { position:absolute; top:-7px; right:-7px; z-index:2; width:26px; height:26px; border-radius:8px; font-size:15px; background:#fff3f3; }
+.wip-row-bottom { margin-top:7px; }
