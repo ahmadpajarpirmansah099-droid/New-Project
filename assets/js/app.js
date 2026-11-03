@@ -171,7 +171,7 @@ function go(page) {
     item.classList.toggle('active', item.dataset.page === page);
   });
 
-  $('fab').style.display = page === 'settings' ? 'none' : 'grid';
+  $('fab').style.display = ['settings', 'wips', 'menus'].includes(page) ? 'none' : 'grid';
 
   if (page === 'settings') syncSeatingSettingInput();
   if (page === 'dashboard') dashboardCountUpPending = true;
@@ -184,13 +184,20 @@ function go(page) {
 }
 
 function toggleQuickMenu() {
-  const open = !$('quickMenu').classList.contains('show');
+  const menu = $('quickMenu');
+  const open = !menu.classList.contains('show');
+  const context = $('page-master-items').classList.contains('active') ? 'master' : 'guest';
 
   if (open && $('menuDrawer').classList.contains('show')) {
     closeMenu();
   }
 
-  $('quickMenu').classList.toggle('show', open);
+  menu.querySelectorAll('.quick-menu-item[data-quick-context]').forEach(item => {
+    item.style.display = item.dataset.quickContext === context ? 'flex' : 'none';
+  });
+  menu.setAttribute('aria-label', context === 'master' ? 'Master Barang' : 'Guest Operational');
+
+  menu.classList.toggle('show', open);
   $('quickMenuBackdrop').classList.toggle('show', open);
   $('quickMenu').setAttribute('aria-hidden', String(!open));
   $('quickMenuBackdrop').setAttribute('aria-hidden', String(!open));
@@ -223,7 +230,7 @@ function runQuickAction(action) {
     return;
   }
 
-  if (['waiting', 'reservations', 'history'].includes(action)) {
+  if (['waiting', 'reservations', 'history', 'wips', 'menus'].includes(action)) {
     go(action);
   }
 }
