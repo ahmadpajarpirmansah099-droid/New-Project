@@ -1605,10 +1605,13 @@ function sanitizeCSVText(value) {
   return startsWithFormula || startsWithControl ? "'" + text : text;
 }
 
-function serializeCSVRows(rows) {
+function serializeCSVRows(rows, textColumns = []) {
   return rows
-    .map(row => row.map(value => {
-      const safeValue = typeof value === 'string' ? sanitizeCSVText(value) : String(value ?? '');
+    .map((row, rowIndex) => row.map((value, columnIndex) => {
+      let safeValue = typeof value === 'string' ? sanitizeCSVText(value) : String(value ?? '');
+      if (rowIndex > 0 && textColumns.includes(columnIndex) && safeValue !== '' && !safeValue.startsWith("'")) {
+        safeValue = "'" + safeValue;
+      }
       return '"' + safeValue.replace(/"/g, '""') + '"';
     }).join(','))
     .join('\n');
@@ -1631,9 +1634,9 @@ function exportCSV() {
       ])
   ];
 
-  const csv = serializeCSVRows(rows);
+  const csv = serializeCSVRows(rows, [4]);
 
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = 'waiting-list-' + todayKey() + '.csv';
