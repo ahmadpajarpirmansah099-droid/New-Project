@@ -243,3 +243,12 @@
 .menu-recipe-actions .menu-add-row { width:auto; min-height:44px; height:44px; margin:0; border:1px solid #dedbed; background:#f2f0f8; color:#625b92; box-shadow:none; }
 .menu-recipe-actions .menu-save { background:var(--ink); color:#fff; }
 .menu-recipe-actions .menu-cancel { border:1px solid var(--line); background:#fff; color:var(--ink); }
+
+/* Match recipe values to the section title and suppress the legacy picker */
+.menu-recipe-row [data-menu-component] { display:none !important; }
+.menu-recipe-row .menu-field select,
+.menu-recipe-row .menu-field input,
+.menu-component-search input { font-size:16px !important; font-weight:500; }
+.menu-recipe-row .menu-field input::placeholder,
+.menu-component-search input::placeholder { font-size:16px; }
+.menu-component-option { font-size:16px; }
