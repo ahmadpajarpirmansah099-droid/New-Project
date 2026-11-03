@@ -126,16 +126,27 @@
     const hppLabel = hpp.valid
       ? money(hpp.hpp_per_yield) + ' / ' + escapeHtml(hpp.yield_unit) + (hpp.is_estimated ? ' · Estimasi' : '')
       : 'Belum valid';
+    const batchCost = hpp.valid ? money(hpp.batch_cost) : '—';
     const hppReason = hpp.valid ? '' : '<p class="wip-invalid-reason">' + escapeHtml(hpp.reason) + '</p>';
 
-    return '<article class="wip-card"><div class="wip-card-heading"><div><h3>' + escapeHtml(wip.nama_wip) +
-      '</h3><span class="wip-status ' + (wip.status === 'active' ? 'is-active' : 'is-inactive') + '">' + statusLabel + '</span></div>' +
-      '<button type="button" class="wip-edit" data-wip-action="edit" data-wip-id="' + escapeHtml(wip.id) + '">Edit</button></div>' +
-      '<div class="wip-card-yield">Hasil batch <b>' + number(wip.hasil_per_batch) + ' ' + escapeHtml(wip.satuan_hasil) + '</b></div>' +
-      '<div class="wip-hpp"><small>HPP per satuan hasil</small><strong class="' + (hpp.valid ? '' : 'is-invalid') + '">' + hppLabel + '</strong>' + hppReason + '</div>' +
-      '<div class="wip-card-footer"><span>' + (hpp.valid ? 'Biaya batch ' + money(hpp.batch_cost) : 'Periksa komponen resep') + '</span>' +
-      '<button type="button" data-wip-action="toggle-status" data-wip-id="' + escapeHtml(wip.id) + '">' +
-      (wip.status === 'active' ? 'Nonaktifkan' : 'Aktifkan') + '</button></div></article>';
+    return '<article class="wip-card">' +
+      '<div class="wip-card-heading">' +
+        '<div class="wip-card-copy">' +
+          '<div class="wip-card-title-row"><h3>' + escapeHtml(wip.nama_wip) + '</h3>' +
+          '<span class="wip-status ' + (wip.status === 'active' ? 'is-active' : 'is-inactive') + '">' + statusLabel + '</span></div>' +
+          '<span class="wip-card-base">Hasil batch · ' + number(wip.hasil_per_batch) + ' ' + escapeHtml(wip.satuan_hasil) + '</span>' +
+        '</div>' +
+        '<div class="wip-card-metrics">' +
+          '<div><small>HPP per satuan hasil</small><b class="' + (hpp.valid ? '' : 'is-invalid') + '">' + hppLabel + '</b></div>' +
+          '<div><small>Biaya batch</small><b>' + batchCost + '</b></div>' +
+        '</div>' +
+      '</div>' + hppReason +
+      '<div class="wip-card-footer"><span>' + (hpp.valid ? (hpp.is_estimated ? 'Perhitungan menggunakan harga referensi' : 'Perhitungan valid') : 'Periksa komponen resep') + '</span>' +
+      '<div class="wip-card-actions">' +
+        '<button type="button" class="wip-edit" data-wip-action="edit" data-wip-id="' + escapeHtml(wip.id) + '">Edit</button>' +
+        '<button type="button" class="wip-status-action" data-wip-action="toggle-status" data-wip-id="' + escapeHtml(wip.id) + '">' +
+        (wip.status === 'active' ? 'Nonaktifkan' : 'Aktifkan') + '</button>' +
+      '</div></div></article>';
   }
 
   function renderPage(page) {
