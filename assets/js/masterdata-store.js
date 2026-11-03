@@ -47,6 +47,11 @@
     if (!supabaseClient || !selectedWorkspaceId) throw new Error('Koneksi Master Data belum siap.');
     client = supabaseClient;
     workspaceId = selectedWorkspaceId;
+    try {
+      if (root.document && root.localStorage) root.localStorage.removeItem(TEST_KEY);
+    } catch (error) {
+      console.warn('Legacy Master Data browser data could not be cleared:', error);
+    }
     const result = await client.from('workspace_module_state')
       .select('payload')
       .eq('workspace_id', workspaceId)
