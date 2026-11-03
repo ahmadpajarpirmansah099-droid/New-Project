@@ -10,6 +10,7 @@ const uid=()=>window.crypto?.randomUUID ? window.crypto.randomUUID() : 'g-' + Da
 // Legacy browser key retained only to clear the old prototype data once.
 const legacyStorageKey='waitlist_frontend_demo_v1';
 let state=loadState(),activeFilter='waiting',sheetGuest=null,toastTimer;
+let remoteSaveQueue = Promise.resolve();
 save();
 let dashboardCountUpPending = true;
 function loadState() {
@@ -86,7 +87,7 @@ function adjustSeatingDuration(change) {
   input.value = String(Math.min(1440, Math.max(1, current + change)));
 }
 
-function saveSeatingDuration() {
+async function saveSeatingDuration() {
   const input = $('seatingDurationInput');
   const value = Number(input?.value);
 
@@ -96,9 +97,14 @@ function saveSeatingDuration() {
     return;
   }
 
+  const previous = seatingDurationMinutes();
   state.settings = state.settings || {};
   state.settings.seatingDurationMinutes = value;
-  save();
+  if (await save() === false) {
+    state.settings.seatingDurationMinutes = previous;
+    syncSeatingSettingInput();
+    return;
+  }
   updateSeatingCountdowns();
   toast('Durasi Seating Time disimpan');
 }
@@ -541,7 +547,7 @@ function chooseInitial(status) {
     200
   );
 }
-async function saveGuest(e){
+async async function saveGuest(e){
  e.preventDefault();
  const day=todayKey(),now=Date.now(),status=$('initialStatus').value;
  const g={
@@ -1316,7 +1322,7 @@ function applyReservationTime() {
   closeReservationTimePicker();
 }
 
-async function saveReservation(e) {
+async async function saveReservation(e) {
   e.preventDefault();
 
   const name = $('rName').value.trim();
@@ -1378,14 +1384,20 @@ async function saveReservation(e) {
 }
 
 function openReservationDetail(id){const r=state.reservations.find(x=>x.id===id);if(!r)return;openSheet('<div class="sheet-head"><h2>Detail reservasi</h2><button class="close" onclick="closeSheet()">✕</button></div><div class="detail-ticket"><small>KODE RESERVASI</small><strong>'+esc(r.code)+'</strong><small>'+esc(reservationDateText(r.date))+'</small></div><div style="font:800 18px Manrope">'+esc(r.name)+'</div><div class="detail-grid"><div class="detail-cell"><small>Jam reservasi</small><b>'+esc(r.time)+' WIB</b></div><div class="detail-cell"><small>Jumlah pack</small><b>'+r.pack+' pack</b></div><div class="detail-cell"><small>Status</small><b>'+reservationStatusLabel(r.status)+'</b></div><div class="detail-cell"><small>Smoking</small><b>'+esc(r.smoking)+'</b></div><div class="detail-cell" style="grid-column:1/-1"><small>WhatsApp</small><b>'+esc(r.phone||'—')+'</b></div><div class="detail-cell" style="grid-column:1/-1"><small>Catatan</small><b>'+esc(r.note||'—')+'</b></div></div><div class="sheet-actions"><button class="secondary" onclick="closeSheet()">Tutup</button></div>')}
-function cancelReservation(id) {
+async function cancelReservation(id) {
   const reservation = state.reservations.find(item => item.id === id);
   if (!reservation || reservation.status !== 'pending') return;
   if (!confirm('Batalkan reservasi ' + reservation.code + '?')) return;
 
+  const previousStatus = reservation.status;
   reservation.status = 'cancelled';
   reservation.cancelledAt = Date.now();
-  save();
+  if (await save() === false) {
+    reservation.status = previousStatus;
+    delete reservation.cancelledAt;
+    renderAll();
+    return;
+  }
   renderAll();
   toast('Reservasi dibatalkan');
 }
@@ -1409,7 +1421,7 @@ function seatReservation(id) {
   );
 }
 
-async function confirmSeatReservation(event, id) {
+async async function confirmSeatReservation(event, id) {
   event.preventDefault();
 
   const reservation = state.reservations.find(item => item.id === id);
@@ -1470,7 +1482,7 @@ async function confirmSeatReservation(event, id) {
 /* =========================================================
    7. GUEST DETAIL, EDITING, AND EXPORT
    ========================================================= */
-async function setGuestStatus(id,status){
+async async function setGuestStatus(id,status){
  const guest=state.guests.find(item=>item.id===id);
  if(!guest||['done','cancelled'].includes(guest.status))return;
  const now=Date.now();
@@ -1489,7 +1501,7 @@ async function setGuestStatus(id,status){
  const messages={called:'Tamu dipanggil',seated:'Tamu sudah duduk',done:'Kunjungan ditandai selesai',cancelled:'Antrean dibatalkan'};
  toast(messages[status]||'Status tamu diperbarui');
 }
-function callGuestWhatsApp(id){
+async function callGuestWhatsApp(id){
  const guest=state.guests.find(item=>item.id===id);
  if(!guest)return;
  const digits=String(guest.phone||'').replace(/[^0-9]/g,'');
@@ -1503,7 +1515,7 @@ function callGuestWhatsApp(id){
  const message='Halo Kak '+guest.name+', nomor antrean '+guest.ticket+' sudah dipanggil. Mohon menuju area greeter kami. Terima kasih.';
  const waUrl='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
  window.open(waUrl,'_blank','noopener,noreferrer');
- setGuestStatus(id,'called');
+ await setGuestStatus(id,'called');
 }
 
 function openDetail(id) {
