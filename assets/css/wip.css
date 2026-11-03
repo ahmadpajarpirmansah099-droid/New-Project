@@ -250,7 +250,7 @@
   background:transparent;
   color:#171725;
   text-align:left;
-  font-size:13px;
+  font-size:13px !important;
 }
 .wip-component-option:active { background:#f0f3e7; }
 .wip-component-empty {
