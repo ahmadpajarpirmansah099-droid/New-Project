@@ -193,7 +193,7 @@ function go(page) {
     item.classList.toggle('active', item.dataset.page === page);
   });
 
-  $('fab').style.display = ['settings', 'wips', 'menus'].includes(page) ? 'none' : 'grid';
+  $('fab').style.display = page === 'settings' ? 'none' : 'grid';
 
   if (page === 'settings') syncSeatingSettingInput();
   if (page === 'dashboard') dashboardCountUpPending = true;
@@ -208,7 +208,7 @@ function go(page) {
 function toggleQuickMenu() {
   const menu = $('quickMenu');
   const open = !menu.classList.contains('show');
-  const context = $('page-master-items').classList.contains('active') ? 'master' : 'guest';
+  const context = ['master-items', 'wips', 'menus'].some(page => $('page-' + page).classList.contains('active')) ? 'master' : 'guest';
 
   if (open && $('menuDrawer').classList.contains('show')) {
     closeMenu();
