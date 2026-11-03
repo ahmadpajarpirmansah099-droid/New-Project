@@ -38,23 +38,19 @@ function findComponent(type, id) {
     return entries.find(function (entry) { return String(entry.id) === String(id); }) || null;
   }
 
-  function componentSearchOptions(type, query, excludeId) {
-    const entries = type === 'wip' ? wips() : materials();
+  function componentSearchOptions(query) {
     const q = String(query || '').trim().toLocaleLowerCase('id-ID');
-    const filtered = entries.filter(function (entry) {
-      return String(type === 'wip' ? entry.nama_wip : entry.nama_barang).toLocaleLowerCase('id-ID').includes(q);
-    });
-    return filtered.map(function (entry) {
-      const name = type === 'wip' ? entry.nama_wip : entry.nama_barang;
-      return '<button type="button" class="menu-component-option" data-menu-component-option="' + escapeHtml(entry.id) + '" data-name="' + escapeHtml(name) + '">' + escapeHtml(name) + '</button>';
+    const materialMatches = materials().filter(function (item) { return String(item.nama_barang || '').toLocaleLowerCase('id-ID').includes(q); }).map(function (item) { return { id:item.id, type:'material', name:item.nama_barang, label:'Barang' }; });
+    const wipMatches = wips().filter(function (item) { return String(item.nama_wip || '').toLocaleLowerCase('id-ID').includes(q); }).map(function (item) { return { id:item.id, type:'wip', name:item.nama_wip, label:'WIP' }; });
+    return materialMatches.concat(wipMatches).map(function (entry) {
+      return '<button type="button" class="menu-component-option" data-menu-component-option="' + escapeHtml(entry.id) + '" data-type="' + entry.type + '" data-name="' + escapeHtml(entry.name) + '"><span>' + escapeHtml(entry.name) + '</span><small>' + entry.label + '</small></button>';
     }).join('') || '<div class="menu-component-empty">Tidak ditemukan</div>';
   }
 
   function renderComponentOptions(row, query) {
-    const type = row.querySelector('[data-menu-type]').value;
     const dropdown = row.querySelector('[data-menu-component-options]');
     if (!dropdown) return;
-    dropdown.innerHTML = componentSearchOptions(type, query, '');
+    dropdown.innerHTML = componentSearchOptions(query);
     dropdown.hidden = !String(query || '').trim();
   }
 
@@ -76,7 +72,7 @@ function findComponent(type, id) {
     const selected = findComponent(type, selectedId);
     const selectedName = selected ? (type === 'wip' ? selected.nama_wip : selected.nama_barang) : '';
     return '<div class="menu-recipe-row" data-menu-recipe-row>' +
-      '<label class="menu-field"><select data-menu-type aria-label="Jenis item"><option value="material" ' + (type === 'material' ? 'selected' : '') + '>Barang</option><option value="wip" ' + (type === 'wip' ? 'selected' : '') + '>WIP</option></select></label>' +
+      '<input type="hidden" data-menu-type value="' + type + '">' + '<div class="menu-recipe-type" data-menu-recipe-type>' + (type === 'wip' ? 'WIP' : 'Barang') + '</div>' +
       '<div class="menu-field menu-component-search"><input type="search" data-menu-component-search autocomplete="off" placeholder="Cari item" value="' + escapeHtml(selectedName) + '" aria-label="Cari item"><select data-menu-component hidden style="display:none!important" aria-hidden="true" tabindex="-1">' + componentOptions(type, selectedId) + '</select><div class="menu-component-options" data-menu-component-options hidden></div></div>' +
       '<label class="menu-field"><input data-menu-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Jumlah" aria-label="Jumlah per porsi" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
       '<label class="menu-field"><select data-menu-unit aria-label="Satuan">' + unitOptions(type, selectedId, line && line.unit_input || '') + '</select></label></div>';
@@ -209,6 +205,10 @@ function findComponent(type, id) {
       const select = row && row.querySelector('[data-menu-component]');
       const search = row && row.querySelector('[data-menu-component-search]');
       if (select && search) {
+        const type = option.dataset.type === 'wip' ? 'wip' : 'material';
+        row.querySelector('[data-menu-type]').value = type;
+        row.querySelector('[data-menu-recipe-type]').textContent = type === 'wip' ? 'WIP' : 'Barang';
+        select.innerHTML = componentOptions(type, option.dataset.menuComponentOption);
         select.value = option.dataset.menuComponentOption;
         search.value = option.dataset.name || option.textContent;
         row.querySelector('[data-menu-component-options]').hidden = true;
@@ -262,7 +262,7 @@ function findComponent(type, id) {
       const row = event.target.closest('[data-menu-recipe-row]');
       if (row) {
         row.querySelector('[data-menu-component]').value = '';
-        row.querySelector('[data-menu-unit]').innerHTML = unitOptions(row.querySelector('[data-menu-type]').value, '', '');
+        row.querySelector('[data-menu-unit]').innerHTML = '<option value="">Pilih bahan dulu</option>';
         renderComponentOptions(row, event.target.value);
       }
       return;
@@ -278,14 +278,9 @@ function findComponent(type, id) {
 
   function handleChange(event) {
     const target = event.target;
-    if (target.matches('[data-menu-type], [data-menu-component]')) {
+    if (target.matches('[data-menu-component]')) {
       const row = target.closest('[data-menu-recipe-row]');
       if (!row) return;
-      if (target.matches('[data-menu-type]')) {
-        row.querySelector('[data-menu-component]').innerHTML = componentOptions(target.value, '');
-        row.querySelector('[data-menu-component-search]').value = '';
-        row.querySelector('[data-menu-component-options]').hidden = true;
-      }
       refreshRowUnits(row);
     }
   }
