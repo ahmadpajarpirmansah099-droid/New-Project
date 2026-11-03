@@ -84,11 +84,17 @@
     const selected = findComponent(type, selectedId, excludeId);
     const selectedName = selected ? (type === 'wip' ? selected.nama_wip : selected.nama_barang) : '';
     return '<div class="wip-recipe-row" data-wip-recipe-row>' +
-      '<div class="wip-row-top"><label class="wip-field wip-type-field"><select data-wip-type aria-label="Jenis komponen"><option value="material" ' + (type === 'material' ? 'selected' : '') + '>Master Barang</option><option value="wip" ' + (type === 'wip' ? 'selected' : '') + '>WIP lain</option></select></label>' +
-      '<div class="wip-field wip-component-search"><input type="search" data-wip-component-search autocomplete="off" placeholder="Cari bahan..." value="' + escapeHtml(selectedName) + '" aria-label="Cari komponen"><select data-wip-component hidden>' + componentOptions(type, selectedId, excludeId) + '</select><div class="wip-component-options" data-wip-component-options hidden></div></div></div>' +
-      '<div class="wip-row-bottom"><label class="wip-field"><span>Jumlah</span><input data-wip-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="1" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
-      '<label class="wip-field"><span>Satuan</span><select data-wip-unit>' + unitOptions(type, selectedId) + '</select></label></div>' +
+      '<label class="wip-field"><select data-wip-type aria-label="Jenis item"><option value="material" ' + (type === 'material' ? 'selected' : '') + '>Master</option><option value="wip" ' + (type === 'wip' ? 'selected' : '') + '>WIP</option></select></label>' +
+      '<div class="wip-field wip-component-search"><input type="search" data-wip-component-search autocomplete="off" placeholder="Cari item" value="' + escapeHtml(selectedName) + '" aria-label="Cari item"><select data-wip-component hidden>' + componentOptions(type, selectedId, excludeId) + '</select><div class="wip-component-options" data-wip-component-options hidden></div></div>' +
+      '<label class="wip-field"><input data-wip-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Jumlah" aria-label="Jumlah" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
+      '<label class="wip-field"><select data-wip-unit aria-label="Satuan">' + unitOptions(type, selectedId) + '</select></label>' +
       '<button type="button" class="wip-remove-row" data-wip-action="remove-row" aria-label="Hapus komponen">×</button></div>';
+  }
+
+  function initialRecipeRows(lines, excludeId) {
+    const rows = Array.isArray(lines) ? lines.slice() : [];
+    while (rows.length < 25) rows.push(null);
+    return rows.map(function (line) { return recipeRowHtml(line, excludeId); }).join('');
   }
 
   function getRecipeRows() {
@@ -102,6 +108,8 @@
         qty_input: row.querySelector('[data-wip-qty]').value,
         unit_input: row.querySelector('[data-wip-unit]').value
       };
+    }).filter(function (line) {
+      return Boolean(line.item_id || line.component_wip_id || String(line.qty_input || '').trim());
     });
   }
 
@@ -125,8 +133,10 @@
       '<label class="wip-field"><span>Nama WIP <i>*</i></span><input name="wipName" type="text" maxlength="120" required placeholder="Contoh: Simple Syrup" value="' + escapeHtml(existing ? existing.nama_wip : '') + '"></label>' +
       '<div class="wip-form-grid"><label class="wip-field"><span>Hasil per batch <i>*</i></span><input name="wipYield" type="number" min="0.000001" step="any" inputmode="decimal" required placeholder="1000" value="' + escapeHtml(existing ? existing.hasil_per_batch : '') + '"></label>' +
       '<label class="wip-field"><span>Satuan hasil <i>*</i></span><input name="wipYieldUnit" type="text" maxlength="20" required placeholder="ML / GR / PCS" value="' + escapeHtml(existing ? existing.satuan_hasil : '') + '"></label></div>' +
-      '<section class="wip-recipe-section"><div class="wip-recipe-heading"><div><b>Komposisi resep</b><small>Campurkan Master Barang dan WIP lain jika diperlukan.</small></div><button type="button" class="wip-add-row" data-wip-action="add-row">+ Komponen</button></div>' +
-      '<div id="wipRecipeRows">' + (lines.length ? lines.map(function (line) { return recipeRowHtml(line, id); }).join('') : recipeRowHtml(null, id)) + '</div></section>' +
+      '<section class="wip-recipe-section"><div class="wip-recipe-heading"><div><b>Komposisi resep</b><small>Isi jenis item, nama item, jumlah, dan satuannya.</small></div></div>' +
+      '<div class="wip-recipe-labels"><span>JENIS ITEM</span><span>ITEM</span><span>JUMLAH</span><span>SATUAN</span><span></span></div>' +
+      '<div id="wipRecipeRows">' + initialRecipeRows(lines, id) + '</div>' +
+      '<button type="button" class="wip-add-row" data-wip-action="add-row">+ Tambah baris</button></section>'
       '<div class="wip-form-note">HPP dihitung dari biaya seluruh komponen dibagi hasil per batch. Harga referensi akan ditandai sebagai estimasi.</div>' +
       '<div class="wip-sheet-actions"><button type="button" class="wip-cancel" data-wip-action="close">Batal</button><button type="submit" class="wip-save">Simpan resep</button></div>' +
       '</form></div>';
