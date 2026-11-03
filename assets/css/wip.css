@@ -73,3 +73,84 @@
  .wip-form-grid { grid-template-columns:minmax(0,1fr); }
 }
 @media(prefers-reduced-motion:reduce) { .wip-page { animation:none; } }
+
+
+/* Master Barang visual language — Resep WIP */
+.wip-page { padding-top: 2px; }
+.wip-page-heading { margin: 12px 0 14px; gap: 10px; }
+.wip-page-heading h1 { font-size: 20px; }
+.wip-page-heading p { font-size: 9px; line-height: 1.4; }
+.wip-eyebrow { font-size: 8px; }
+.wip-primary { min-height: 42px; padding: 0 12px; border-radius: 11px; font-size: 10px; box-shadow: 0 3px 8px rgba(17,18,37,.10), 0 1px 2px rgba(17,18,37,.04); }
+.wip-count-grid { gap: 7px; margin-bottom: 11px; }
+.wip-count-grid>div { gap: 4px; padding: 10px; border-radius: 12px; box-shadow: 0 2px 5px rgba(17,18,37,.035); }
+.wip-count-grid span { font-size: 8px; }
+.wip-count-grid b { font-size: 18px; }
+.wip-search { height: 44px; border-radius: 12px; box-shadow: 0 2px 5px rgba(17,18,37,.035); }
+.wip-search input { font-size: 12px; }
+.wip-filter-row { gap: 7px; margin: 10px 0 13px; }
+.wip-filter-row button { min-height: 34px; padding: 0 12px; font-size: 10px; box-shadow: 0 1px 3px rgba(17,18,37,.035); }
+.wip-list-heading { margin-bottom: 8px; }
+.wip-list-heading h2 { font-size: 12px; }
+.wip-list-heading>span { font-size: 9px; }
+.wip-list { gap: 8px; }
+.wip-card { padding: 11px; border-radius: 15px; box-shadow: 0 3px 10px rgba(17,18,37,.045), 0 1px 2px rgba(17,18,37,.025); }
+.wip-card-heading { display: grid; grid-template-columns: minmax(74px,.68fr) minmax(0,1.55fr); align-items: start; gap: 7px; }
+.wip-card-copy { min-width: 0; }
+.wip-card-title-row { display: flex; align-items: flex-start; flex-direction: column; gap: 4px; }
+.wip-card-heading h3 { margin: 0; font-size: 13px; line-height: 1.2; }
+.wip-status { min-height: 21px; padding: 2px 8px; font-size: 9px; }
+.wip-card-base { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; line-height: 1.35; overflow-wrap: anywhere; }
+.wip-card-metrics { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px; min-width: 0; }
+.wip-card-metrics>div { display: flex; min-width: 0; min-height: 46px; flex-direction: column; justify-content: center; gap: 3px; padding: 5px 6px; border-radius: 9px; background: #f8f8f4; box-shadow: 0 1px 3px rgba(17,18,37,.025); }
+.wip-card-metrics small { color: var(--muted); font-size: 8px; font-weight: 700; line-height: 1.2; }
+.wip-card-metrics b { color: var(--ink); font-size: 10px; line-height: 1.2; overflow-wrap: anywhere; }
+.wip-card-metrics b.is-invalid { color: #9a5a63; font-size: 9px; }
+.wip-invalid-reason { margin: 7px 0 0; font-size: 9px; }
+.wip-card-footer { margin-top: 5px; padding-top: 5px; gap: 6px; }
+.wip-card-footer span { min-width: 0; font-size: 9px; line-height: 1.3; }
+.wip-card-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 3px; }
+.wip-card-actions button { min-height: 36px; padding: 0 7px; border: 0; border-radius: 9px; background: #f5f5f0; color: var(--ink); font-size: 10px; font-weight: 800; box-shadow: 0 1px 3px rgba(17,18,37,.04); }
+.wip-card-actions .wip-status-action { background: #f0eff9; color: #6e659d; }
+.wip-empty { padding: 22px 14px; border-radius: 14px; }
+.wip-empty b { font-size: 11px; }
+.wip-empty p { font-size: 9px; }
+
+/* Compact WIP form and controls */
+.wip-sheet { gap: 10px; }
+.wip-sheet-heading h2 { font-size: 16px; }
+.wip-close { width: 40px; height: 40px; border-radius: 10px; font-size: 20px; box-shadow: 0 2px 5px rgba(17,18,37,.055); }
+.wip-field { gap: 5px; font-size: 10px; }
+.wip-field input { height: 46px; padding: 0 11px; border-radius: 10px; background: #fff; font-size: 16px; box-shadow: 0 2px 5px rgba(17,18,37,.04), 0 1px 2px rgba(17,18,37,.03); }
+.wip-sheet .app-select-trigger { min-height: 44px; border-radius: 10px; font-size: 12px; box-shadow: 0 2px 5px rgba(17,18,37,.04), 0 1px 2px rgba(17,18,37,.03); }
+.wip-sheet .app-select-option { min-height: 40px; font-size: 12px; }
+.wip-form-grid { gap: 7px; }
+.wip-recipe-section { gap: 8px; padding: 10px; border-radius: 12px; box-shadow: 0 2px 5px rgba(17,18,37,.025); }
+.wip-recipe-heading b { font-size: 10px; }
+.wip-recipe-heading small { font-size: 8px; }
+.wip-add-row { min-height: 36px; padding: 0 9px; font-size: 9px; box-shadow: 0 2px 5px rgba(17,18,37,.035); }
+#wipRecipeRows { gap: 7px; }
+.wip-recipe-row { gap: 7px; padding: 9px; border-radius: 11px; box-shadow: 0 1px 4px rgba(17,18,37,.025); }
+.wip-row-top,.wip-row-bottom { gap: 7px; }
+.wip-row-top { grid-template-columns: minmax(0,1fr) 36px; }
+.wip-row-bottom { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.wip-remove-row { width: 36px; height: 42px; border-radius: 9px; font-size: 17px; box-shadow: 0 1px 3px rgba(17,18,37,.035); }
+.wip-form-note { font-size: 9px; line-height: 1.4; }
+.wip-sheet-actions { gap: 7px; }
+.wip-sheet-actions button { min-height: 42px; border-radius: 11px; font-size: 10px; box-shadow: 0 2px 6px rgba(17,18,37,.06); }
+@media(max-width:390px) {
+  .wip-page-heading h1 { font-size: 19px; }
+  .wip-count-grid>div { padding: 9px 7px; }
+  .wip-card { padding: 10px; }
+  .wip-card-heading { grid-template-columns: minmax(68px,.62fr) minmax(0,1.58fr); gap: 6px; }
+  .wip-card-heading h3 { font-size: 12px; }
+  .wip-card-base { font-size: 9px; }
+  .wip-card-metrics { gap: 3px; }
+  .wip-card-metrics>div { min-height: 43px; padding: 4px 5px; }
+  .wip-card-metrics small { font-size: 7px; }
+  .wip-card-metrics b { font-size: 9px; }
+  .wip-card-footer span { font-size: 8px; }
+  .wip-card-actions { gap: 2px; }
+  .wip-card-actions button { min-height: 35px; padding: 0 6px; font-size: 9px; }
+  .wip-field input { height: 44px; }
+}
