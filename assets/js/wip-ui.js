@@ -69,11 +69,11 @@
     const selectedId = type === 'wip' ? line && line.component_wip_id : line && line.item_id;
     const unit = line && line.unit_input || '';
     return '<div class="wip-recipe-row" data-wip-recipe-row>' +
-      '<div class="wip-row-top"><label class="wip-field"><span>Jenis komponen</span><select data-wip-type><option value="material" ' + (type === 'material' ? 'selected' : '') + '>Master Barang</option><option value="wip" ' + (type === 'wip' ? 'selected' : '') + '>WIP lain</option></select></label>' +
-      '<button type="button" class="wip-remove-row" data-wip-action="remove-row" aria-label="Hapus komponen">×</button></div>' +
-      '<label class="wip-field"><span>Komponen</span><select data-wip-component>' + componentOptions(type, selectedId, excludeId) + '</select></label>' +
+      '<div class="wip-row-top"><label class="wip-field wip-type-field"><select data-wip-type aria-label="Jenis komponen"><option value="material" ' + (type === 'material' ? 'selected' : '') + '>Master Barang</option><option value="wip" ' + (type === 'wip' ? 'selected' : '') + '>WIP lain</option></select></label>' +
+      '<label class="wip-field"><select data-wip-component aria-label="Pilih komponen">' + componentOptions(type, selectedId, excludeId) + '</select></label></div>' +
       '<div class="wip-row-bottom"><label class="wip-field"><span>Jumlah</span><input data-wip-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="1" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
-      '<label class="wip-field"><span>Satuan</span><select data-wip-unit>' + unitOptions(type, selectedId, unit) + '</select></label></div></div>';
+      '<label class="wip-field"><span>Satuan</span><select data-wip-unit>' + unitOptions(type, selectedId, unit) + '</select></label></div>' +
+      '<button type="button" class="wip-remove-row" data-wip-action="remove-row" aria-label="Hapus komponen">×</button></div>';
   }
 
   function getRecipeRows() {
