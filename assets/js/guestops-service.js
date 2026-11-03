@@ -167,8 +167,7 @@
         smoking: item.smoking || null,
         note: item.note || null,
         table_label: item.table || null,
-        status: item.status,
-        seated_at: item.seatedAt ? toIso(item.seatedAt) : null
+        status: item.status
       }));
       const guests = (state.guests || []).map(item => ({
         id: item.id,
