@@ -110,14 +110,25 @@
       if (!result.valid) {
         preview.textContent = result.reason;
         preview.classList.add('is-muted');
+        const equivalent = root.document.getElementById('mdPriceEquivalent');
+        if (equivalent) { equivalent.textContent = ''; equivalent.hidden = true; }
         return;
       }
 
-      preview.textContent = formatMoney(result.value) + ' / ' + result.baseUnit;
+      const equivalent = root.document.getElementById('mdPriceEquivalent');
+      preview.textContent = formatMoney(Number(input.harga_referensi)) + ' / ' + result.priceUnit;
+      if (equivalent) {
+        equivalent.textContent = '1 ' + result.priceUnit + ' = ' +
+          formatNumber(result.factor, 6) + ' ' + result.baseUnit +
+          ' · ' + formatMoney(result.value) + ' / ' + result.baseUnit;
+      }
       preview.classList.remove('is-muted');
+      if (equivalent) equivalent.hidden = false;
     } catch (error) {
       preview.textContent = error.message;
       preview.classList.add('is-muted');
+      const equivalent = root.document.getElementById('mdPriceEquivalent');
+      if (equivalent) { equivalent.textContent = ''; equivalent.hidden = true; }
       list.innerHTML = '';
     }
   }
@@ -153,7 +164,7 @@
           '<div class="md-section-heading"><div><b>Satuan tambahan</b><small>Masukkan faktor terhadap satuan dasar.</small></div><button type="button" class="md-add-unit" data-md-action="add-unit">+ Tambah satuan</button></div>' +
           '<div id="mdConversionRows" class="md-conversion-rows">' + conversions.map(conversionRowHtml).join('') + '</div>' +
           '<div id="mdConversionPreview" class="md-conversion-preview"></div></div></details>' +
-        '<div class="md-price-result"><span>Harga per satuan dasar</span><strong id="mdPricePreview">Lengkapi harga dan satuan terlebih dahulu.</strong></div>' +
+        '<div class="md-price-result"><span>Harga sesuai satuan pembelian</span><strong id="mdPricePreview">Lengkapi harga dan satuan terlebih dahulu.</strong><small id="mdPriceEquivalent" hidden></small></div>' +
         '<p class="md-form-note">Harga referensi digunakan sebagai dasar estimasi HPP. Harga beli terakhir mengikuti transaksi pembelian.</p>' +
         '<div class="md-sheet-actions md-sheet-actions-simple"><button type="submit" class="md-save">Simpan barang</button></div>' +
       '</form></div>';
