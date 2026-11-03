@@ -1509,7 +1509,7 @@ function openDetail(id) {
     : '';
 
   const whatsappButton = guest.phone
-    ? '<button class="primary" onclick="callGuestWhatsApp(\\'' + guest.id + '\\')">Kirim WhatsApp</button>'
+    ? '<button class="primary" onclick="callGuestWhatsApp(\'' + guest.id + '\')">Kirim WhatsApp</button>'
     : '';
 
   const cancelActions = canCancel
