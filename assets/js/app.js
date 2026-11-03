@@ -6,7 +6,7 @@ const todayKey=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year
 const fmtTime=t=>new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit'}).format(new Date(t));
 const fmtDate=d=>new Intl.DateTimeFormat('id-ID',{timeZone:'UTC',weekday:'long',day:'numeric',month:'long'}).format(new Date(d+'T00:00:00Z'));
 const fmtElapsed=ms=>{let m=Math.max(0,Math.floor(ms/60000));return m<60?m+' menit':Math.floor(m/60)+'j '+m%60+'m'};
-const uid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
+const uid=()=>window.crypto?.randomUUID ? window.crypto.randomUUID() : 'g-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,10);
 // Keep this key stable so existing demo data in the browser is preserved.
 const key='waitlist_frontend_demo_v1';
 let state=loadState(),activeFilter='waiting',sheetGuest=null,toastTimer;
@@ -52,8 +52,17 @@ function seed() {
   };
 }
 
+let remoteSaveQueue = Promise.resolve();
 function save() {
-  localStorage.setItem(key, JSON.stringify(state));
+  if (!window.GuestOpsService || !window.GuestOpsService.isReady()) return;
+  remoteSaveQueue = remoteSaveQueue
+    .then(() => window.GuestOpsService.persist(state))
+    .catch(error => {
+      console.error('Guest Operations database save failed:', error);
+      toast('Data belum tersimpan ke database. Periksa koneksi lalu coba lagi.');
+      throw error;
+    });
+  return remoteSaveQueue;
 }
 
 
@@ -557,11 +566,11 @@ function chooseInitial(status) {
     200
   );
 }
-function saveGuest(e){
+async function saveGuest(e){
  e.preventDefault();
  const day=todayKey(),now=Date.now(),status=$('initialStatus').value;
  const g={
-  id:uid(),ticket:nextTicket(day),day,
+  id:uid(),ticket:'',day,
   name:$('guestName').value.trim(),
   pack:Number($('guestPack').value),
   phone:$('guestPhone').value.trim(),
@@ -570,9 +579,16 @@ function saveGuest(e){
   audit:[{at:now,label:'Terdaftar',detail:$('guestPack').value+' pack'}]
  };
  if(status==='seated')g.audit.push({at:now,label:'Langsung Duduk'});
- state.guests.push(g);
- save();closeSheet();renderAll();
- toast('Tamu berhasil ditambahkan · '+g.ticket);
+ try {
+  g.ticket = await window.GuestOpsService.nextTicket(day);
+  state.guests.push(g);
+  await save();
+  closeSheet();renderAll();
+  toast('Tamu berhasil ditambahkan · '+g.ticket);
+ } catch (error) {
+  console.error(error);
+  toast('Tamu belum berhasil disimpan. Coba lagi.');
+ }
 }
 /* =========================================================
    4. WAITING LIST: STATUS, CARDS, AND DASHBOARD RENDERING
@@ -1325,7 +1341,7 @@ function applyReservationTime() {
   closeReservationTimePicker();
 }
 
-function saveReservation(e) {
+async function saveReservation(e) {
   e.preventDefault();
 
   const name = $('rName').value.trim();
@@ -1357,7 +1373,7 @@ function saveReservation(e) {
 
   const reservation = {
     id: uid(),
-    code: reservationCode(date),
+    code: '',
     name,
     pack,
     date,
@@ -1370,8 +1386,15 @@ function saveReservation(e) {
     guestId: null
   };
 
-  state.reservations.push(reservation);
-  save();
+  try {
+    reservation.code = await window.GuestOpsService.nextReservationCode(date);
+    state.reservations.push(reservation);
+    await save();
+  } catch (error) {
+    console.error(error);
+    toast('Reservasi belum berhasil disimpan. Coba lagi.');
+    return;
+  }
   reservationMonth = date.slice(0, 7);
   reservationDate = date;
   closeSheet();
@@ -1411,7 +1434,7 @@ function seatReservation(id) {
   );
 }
 
-function confirmSeatReservation(event, id) {
+async function confirmSeatReservation(event, id) {
   event.preventDefault();
 
   const reservation = state.reservations.find(item => item.id === id);
@@ -1421,7 +1444,7 @@ function confirmSeatReservation(event, id) {
   const now = Date.now();
   const guest = {
     id: uid(),
-    ticket: nextTicket(todayKey()),
+    ticket: '',
     day: todayKey(),
     name: reservation.name,
     pack: reservation.pack,
@@ -1441,13 +1464,29 @@ function confirmSeatReservation(event, id) {
     }]
   };
 
+  try {
+    guest.ticket = await window.GuestOpsService.nextTicket(todayKey());
+  } catch (error) {
+    console.error(error);
+    toast('Nomor antrean belum berhasil dibuat. Coba lagi.');
+    return;
+  }
+
   state.guests.push(guest);
   reservation.status = 'seated';
   reservation.guestId = guest.id;
   reservation.table = table;
   reservation.seatedAt = now;
 
-  save();
+  try {
+    await save();
+  } catch (error) {
+    state.guests = state.guests.filter(item => item.id !== guest.id);
+    reservation.status = 'pending';
+    reservation.guestId = null;
+    reservation.table = '';
+    throw error;
+  }
   closeSheet();
   renderAll();
   toast('Tamu masuk ke catatan operasional · ' + guest.ticket);
@@ -1555,7 +1594,7 @@ function editGuest(id) {
   openSheet(`<div class="sheet-head"><h2>Koreksi data tamu</h2><button class="close" onclick="openDetail('${id}')">✕</button></div><form onsubmit="saveEdit(event,'${id}')"><div class="field"><label>Nama tamu *</label><input id="editName" required value="${esc(guest.name)}"></div><div class="field"><label>Jumlah pack *</label><input id="editPack" type="number" min="1" max="30" required value="${guest.pack}"></div><div class="field"><label>WhatsApp</label><input id="editPhone" value="${esc(guest.phone)}"></div><div class="field"><label>Alasan koreksi *</label><textarea id="editReason" required placeholder="Tuliskan alasan perubahan data..."></textarea></div><div class="sheet-actions"><button type="button" class="secondary" onclick="openDetail('${id}')">Kembali</button><button class="primary">Simpan koreksi</button></div></form>`);
 }
 
-function saveEdit(event, id) {
+async function saveEdit(event, id) {
   event.preventDefault();
 
   const guest = state.guests.find(item => item.id === id);
@@ -1572,10 +1611,16 @@ function saveEdit(event, id) {
   guest.pack = Number($('editPack').value);
   guest.phone = $('editPhone').value.trim();
 
-  save();
-  renderAll();
-  openDetail(id);
-  toast('Koreksi berhasil disimpan');
+  try {
+    await window.GuestOpsService.appendGuestAudit(id, guest.audit[guest.audit.length - 1]);
+    await save();
+    renderAll();
+    openDetail(id);
+    toast('Koreksi berhasil disimpan');
+  } catch (error) {
+    console.error(error);
+    toast('Koreksi belum berhasil disimpan ke database');
+  }
 }
 
 // Protect text cells from spreadsheet formula interpretation during export only.
@@ -1630,15 +1675,40 @@ function exportCSV() {
 }
 
 /* =========================================================
-   8. APP STARTUP AND LIGHTWEIGHT LIVE UPDATES
+   8. APP STARTUP: LOAD OPERATIONAL DATA FROM SUPABASE
    ========================================================= */
 $('historyDate').value = todayKey();
 updateHistoryDateLabel();
-syncSeatingSettingInput();
-renderAll();
 
-setInterval(() => {
-  renderAll();
-}, 30000);
+let appDataReady = false;
+window.addEventListener('app:auth-ready', async function (event) {
+  if (appDataReady) return;
+  try {
+    const remoteState = await window.GuestOpsService.initialize(
+      window.AppAuth.getClient(),
+      event.detail.workspaceId
+    );
+    state = remoteState;
+    syncSeatingSettingInput();
+    renderAll();
+    appDataReady = true;
 
-setInterval(updateSeatingCountdowns, 1000);
+    setInterval(async () => {
+      try {
+        const refreshed = await window.GuestOpsService.load();
+        state.guests = refreshed.guests;
+        state.reservations = refreshed.reservations;
+        state.counters = refreshed.counters;
+        state.reservationCounters = refreshed.reservationCounters;
+        state.settings = refreshed.settings;
+        renderAll();
+      } catch (error) {
+        console.error('Guest Operations refresh failed:', error);
+      }
+    }, 30000);
+    setInterval(updateSeatingCountdowns, 1000);
+  } catch (error) {
+    console.error('Guest Operations initialization failed:', error);
+    toast('Data operasional gagal dimuat dari database. Muat ulang halaman.');
+  }
+});
