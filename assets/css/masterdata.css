@@ -417,3 +417,89 @@
 .md-supply-toggle b { font-size:10px; }
 .md-supply-toggle small { color:var(--muted); font-size:9px; line-height:1.4; }
 .md-supply-chip { display:inline-flex; width:max-content; margin-top:7px; padding:3px 8px; border-radius:20px; background:#f0eff9; color:#625b92; font-size:9px; font-weight:800; }
+
+
+/* Simplified Master Barang entry form */
+.md-sheet-simple { gap: 18px; }
+.md-sheet-simple form { display: grid; gap: 16px; }
+.md-sheet-simple .md-sheet-heading { margin-bottom: 2px; }
+.md-sheet-simple .md-sheet-heading h2 { font-size: 22px; }
+.md-sheet-simple .md-close { width: 44px; height: 44px; flex: 0 0 44px; }
+.md-sheet-simple .md-field { gap: 8px; font-size: 14px; }
+.md-sheet-simple .md-field input,
+.md-sheet-simple .md-field select {
+  height: 52px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 16px;
+}
+.md-sheet-simple .md-field i { color: #d96a19; }
+.md-sheet-simple .md-supply-toggle {
+  min-height: 60px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fbfbf8;
+}
+.md-sheet-simple .md-supply-toggle input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+.md-sheet-simple .md-supply-toggle b { font-size: 13px; }
+.md-sheet-simple .md-supply-toggle small { font-size: 12px; }
+.md-advanced {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.md-advanced summary {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+.md-advanced summary::-webkit-details-marker { display: none; }
+.md-advanced summary>span:first-child { display: grid; gap: 4px; }
+.md-advanced summary b { color: var(--ink); font-size: 14px; }
+.md-advanced summary small { color: var(--muted); font-size: 12px; line-height: 1.4; }
+.md-advanced-mark {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 9px;
+  background: #f0f0eb;
+  color: var(--ink);
+  font-size: 20px;
+  transition: transform .18s ease;
+}
+.md-advanced[open] .md-advanced-mark { transform: rotate(45deg); }
+.md-advanced-content { display: grid; gap: 12px; padding: 0 0 14px; }
+.md-advanced-content .md-section-heading { align-items: center; }
+.md-advanced-content .md-add-unit { min-height: 40px; font-size: 12px; }
+.md-advanced-content .md-field { font-size: 12px; }
+.md-advanced-content .md-field input { height: 44px; font-size: 16px; }
+.md-sheet-simple .md-price-result {
+  padding: 12px 14px;
+  border-radius: 12px;
+}
+.md-sheet-simple .md-price-result span { font-size: 12px; }
+.md-sheet-simple .md-price-result strong { font-size: 16px; }
+.md-sheet-simple .md-price-result strong.is-muted { font-size: 12px; }
+.md-sheet-simple .md-form-note { margin-top: -8px; font-size: 12px; line-height: 1.5; }
+.md-sheet-actions-simple { margin-top: 2px; }
+.md-sheet-actions-simple .md-save {
+  width: 100%;
+  min-height: 54px;
+  border-radius: 13px;
+  background: #ed7418;
+  font-size: 16px;
+}
+@media (max-width: 390px) {
+  .md-sheet-simple form { gap: 14px; }
+  .md-sheet-simple .md-sheet-heading h2 { font-size: 21px; }
+}
