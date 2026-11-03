@@ -246,3 +246,27 @@ test('Master Data can be loaded again after a page refresh', () => {
   assert.equal(items.length, 1);
   assert.equal(items[0].nama_barang, 'Beans Espresso');
 });
+
+test('Master Barang stores and preserves the supply classification', () => {
+  const { runtime } = createRuntime();
+  const item = runtime.MasterDataService.saveItem({
+    nama_barang: 'Paper Cup',
+    satuan_dasar: 'PCS',
+    konversi_satuan: [],
+    harga_referensi: '500',
+    satuan_harga: 'PCS',
+    is_supply: true
+  });
+  assert.equal(item.is_supply, true);
+
+  const updated = runtime.MasterDataService.saveItem({
+    id: item.id,
+    nama_barang: 'Paper Cup',
+    satuan_dasar: 'PCS',
+    konversi_satuan: [],
+    harga_referensi: '550',
+    satuan_harga: 'PCS',
+    is_supply: true
+  });
+  assert.equal(updated.is_supply, true);
+});
