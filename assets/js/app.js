@@ -177,6 +177,9 @@ function go(page) {
   if (page === 'dashboard') dashboardCountUpPending = true;
 
   renderAll();
+  if (window.MasterDataUI && page === 'master-items') window.MasterDataUI.renderPage(page);
+  if (window.WipUI && page === 'wips') window.WipUI.renderPage(page);
+  if (window.MenuUI && page === 'menus') window.MenuUI.renderPage(page);
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
 

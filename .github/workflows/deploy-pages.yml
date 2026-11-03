@@ -3,28 +3,52 @@ name: Deploy Waiting List preview
 on:
   push:
     branches: ["main"]
+  pull_request:
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Check JavaScript syntax
-        run: node --check assets/js/app.js
+        run: |
+          node --check assets/js/app.js
+          node --check assets/js/masterdata-store.js
+          node --check assets/js/masterdata-service.js
+          node --check assets/js/masterdata-ui.js
+          node --check assets/js/wip-service.js
+          node --check assets/js/wip-ui.js
+          node --check assets/js/menu-service.js
+          node --check assets/js/menu-ui.js
+      - name: Test frontend logic
+        run: |
+          node --test tests/masterdata-phase1.test.js
+          node --test tests/wip-phase2.test.js
+          node --test tests/menu-phase3.test.js
+
+  deploy:
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: "pages"
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
