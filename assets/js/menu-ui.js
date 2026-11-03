@@ -76,12 +76,19 @@ function findComponent(type, id) {
     const selected = findComponent(type, selectedId);
     const selectedName = selected ? (type === 'wip' ? selected.nama_wip : selected.nama_barang) : '';
     return '<div class="menu-recipe-row" data-menu-recipe-row>' +
-      '<div class="menu-row-top"><label class="menu-field menu-type-field"><select data-menu-type aria-label="Jenis komponen"><option value="material" ' + (type === 'material' ? 'selected' : '') + '>Master Barang</option><option value="wip" ' + (type === 'wip' ? 'selected' : '') + '>WIP</option></select></label>' +
-      '<div class="menu-field menu-component-search"><input type="search" data-menu-component-search autocomplete="off" placeholder="Cari bahan..." value="' + escapeHtml(selectedName) + '" aria-label="Cari bahan"><select data-menu-component hidden>' + componentOptions(type, selectedId) + '</select><div class="menu-component-options" data-menu-component-options hidden></div></div></div>' +
-      '<div class="menu-row-bottom"><label class="menu-field"><span>Jumlah per porsi</span><input data-menu-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="1" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
-      '<label class="menu-field"><span>Satuan</span><select data-menu-unit>' + unitOptions(type, selectedId, line && line.unit_input || '') + '</select></label></div>' +
+      '<label class="menu-field"><select data-menu-type aria-label="Jenis item"><option value="material" ' + (type === 'material' ? 'selected' : '') + '>Master</option><option value="wip" ' + (type === 'wip' ? 'selected' : '') + '>WIP</option></select></label>' +
+      '<div class="menu-field menu-component-search"><input type="search" data-menu-component-search autocomplete="off" placeholder="Cari item" value="' + escapeHtml(selectedName) + '" aria-label="Cari item"><select data-menu-component hidden>' + componentOptions(type, selectedId) + '</select><div class="menu-component-options" data-menu-component-options hidden></div></div>' +
+      '<label class="menu-field"><input data-menu-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Jumlah" aria-label="Jumlah per porsi" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
+      '<label class="menu-field"><select data-menu-unit aria-label="Satuan">' + unitOptions(type, selectedId, line && line.unit_input || '') + '</select></label>' +
       '<button type="button" class="menu-remove-row" data-menu-action="remove-row" aria-label="Hapus komponen">×</button></div>';
   }
+
+  function initialRecipeRows(lines) {
+    const rows = Array.isArray(lines) ? lines.slice() : [];
+    while (rows.length < 25) rows.push(null);
+    return rows.map(recipeRowHtml).join('');
+  }
+
   function getRecipeRows() {
     return Array.from(root.document.querySelectorAll('[data-menu-recipe-row]')).map(function (row) {
       const type = row.querySelector('[data-menu-type]').value;
@@ -93,6 +100,8 @@ function findComponent(type, id) {
         qty_input: row.querySelector('[data-menu-qty]').value,
         unit_input: row.querySelector('[data-menu-unit]').value
       };
+    }).filter(function (line) {
+      return Boolean(line.item_id || line.component_wip_id || String(line.qty_input || '').trim());
     });
   }
 
@@ -111,8 +120,10 @@ function findComponent(type, id) {
       '<form id="menuForm" novalidate><input type="hidden" name="menuId" value="' + escapeHtml(existing ? existing.id : '') + '">' +
       '<label class="menu-field"><span>Nama menu <i>*</i></span><input name="menuName" type="text" maxlength="120" required placeholder="Contoh: Iced Latte" value="' + escapeHtml(existing ? existing.nama_menu : '') + '"></label>' +
       '<label class="menu-field"><span>Harga jual per porsi <i>*</i></span><input name="menuSellingPrice" type="number" min="0" step="any" inputmode="decimal" required placeholder="28000" value="' + escapeHtml(existing ? existing.harga_jual : '') + '"></label>' +
-      '<section class="menu-recipe-section"><div class="menu-recipe-heading"><div><b>Komposisi per porsi</b><small>Gunakan bahan langsung atau WIP yang sudah dibuat.</small></div><button type="button" class="menu-add-row" data-menu-action="add-row">+ Komponen</button></div>' +
-      '<div id="menuRecipeRows">' + (lines.length ? lines.map(recipeRowHtml).join('') : recipeRowHtml(null)) + '</div></section>' +
+      '<section class="menu-recipe-section"><div class="menu-recipe-heading"><div><b>Komposisi per porsi</b><small>Isi jenis item, nama item, jumlah, dan satuannya.</small></div></div>' +
+      '<div class="menu-recipe-labels"><span>JENIS ITEM</span><span>ITEM</span><span>JUMLAH</span><span>SATUAN</span><span></span></div>' +
+      '<div id="menuRecipeRows">' + initialRecipeRows(lines) + '</div>' +
+      '<button type="button" class="menu-add-row" data-menu-action="add-row">+ Tambah baris</button></section>'
       '<p class="menu-form-note">HPP menu adalah total biaya seluruh komponen dalam satu porsi. Margin dihitung dari harga jual dibanding HPP.</p>' +
       '<div class="menu-sheet-actions"><button type="button" class="menu-cancel" data-menu-action="close">Batal</button><button type="submit" class="menu-save">Simpan menu</button></div></form></div>';
     if (typeof root.openSheet !== 'function') return notify('Komponen popup belum tersedia.');
