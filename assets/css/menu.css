@@ -236,3 +236,10 @@
 .menu-recipe-row .menu-field select,.menu-recipe-row .menu-field input,.menu-component-search input { font-size:11px; padding:0 5px; }
 .menu-recipe-row .menu-field select { text-overflow:ellipsis; }
 .menu-component-option { font-size:11px; }
+
+/* Three compact actions share one bottom row */
+.menu-recipe-actions { display:grid; grid-template-columns:1.2fr 1fr .78fr; gap:7px; margin-top:8px; }
+.menu-recipe-actions button { min-width:0; min-height:44px; height:44px; padding:0 5px; border-radius:9px; font-size:11px; font-weight:700; white-space:nowrap; }
+.menu-recipe-actions .menu-add-row { width:auto; min-height:44px; height:44px; margin:0; border:1px solid #dedbed; background:#f2f0f8; color:#625b92; box-shadow:none; }
+.menu-recipe-actions .menu-save { background:var(--ink); color:#fff; }
+.menu-recipe-actions .menu-cancel { border:1px solid var(--line); background:#fff; color:var(--ink); }
