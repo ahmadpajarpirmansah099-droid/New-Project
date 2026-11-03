@@ -90,16 +90,21 @@ test('CSV serialization quotes fields, escapes quotes, and preserves commas and 
   );
 });
 
-test('CSV serialization protects WhatsApp +62 without mutating source rows', () => {
+test('CSV serialization preserves WhatsApp numbers as text without mutating source rows', () => {
   const rows = [
     ['Nomor antrean', 'WhatsApp', 'Pack'],
-    ['WL-001', '+628123456789', 2]
+    ['WL-001', '082119503702', 2],
+    ['WL-002', '+628123456789', 4],
+    ['WL-003', '628987654321', 3]
   ];
   const original = JSON.stringify(rows);
 
-  const csv = runtime.serializeCSVRows(rows);
+  const csv = runtime.serializeCSVRows(rows, [1]);
 
-  assert.equal(csv, `"Nomor antrean","WhatsApp","Pack"\n"WL-001","'+628123456789","2"`);
+  assert.equal(
+    csv,
+    `"Nomor antrean","WhatsApp","Pack"\n"WL-001","'082119503702","2"\n"WL-002","'+628123456789","4"\n"WL-003","'628987654321","3"`
+  );
   assert.equal(JSON.stringify(rows), original);
 });
 
