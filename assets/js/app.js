@@ -1512,10 +1512,14 @@ async function callGuestWhatsApp(id){
   toast('Nomor WhatsApp belum diisi atau formatnya belum valid');
   return;
  }
- const message='Halo Kak '+guest.name+', nomor antrean '+guest.ticket+' sudah dipanggil. Mohon menuju area greeter kami. Terima kasih.';
+ const isSeated = guest.status === 'seated';
+ const message = isSeated
+  ? 'Halo Kak '+guest.name+', reservasi '+(guest.reservationCode || '')+' sudah kami tempatkan. Terima kasih.'
+  : 'Halo Kak '+guest.name+', nomor antrean '+guest.ticket+' sudah dipanggil. Mohon menuju area greeter kami. Terima kasih.';
  const waUrl='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
  window.open(waUrl,'_blank','noopener,noreferrer');
- await setGuestStatus(id,'called');
+ // Mengirim WhatsApp tidak boleh mengubah status tamu yang sudah duduk.
+ if (guest.status === 'waiting') await setGuestStatus(id,'called');
 }
 
 function openDetail(id) {
