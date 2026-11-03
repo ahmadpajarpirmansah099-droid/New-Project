@@ -228,3 +228,11 @@
 .wip-component-empty { padding:9px 7px; color:#85838f; font-size:11px; }
 .wip-recipe-row .wip-remove-row { width:44px; height:44px; min-height:44px; padding:0; border:1px solid #f1dfe2; border-radius:8px; background:#fff5f5; color:#a95d67; font-size:17px; }
 .wip-add-row { width:100%; min-height:44px; margin-top:6px; border:1px solid #dedbed; border-radius:9px; background:#f2f0f8; color:#625b92; font-size:12px; font-weight:700; }
+
+/* Keep the backing select hidden; the search field is the only item picker */
+.wip-recipe-row [data-wip-component][hidden] { display:none !important; }
+.wip-recipe-row { grid-template-columns:minmax(68px,.82fr) minmax(0,1.65fr) minmax(52px,.72fr) minmax(58px,.78fr); gap:5px; }
+.wip-recipe-labels { grid-template-columns:minmax(68px,.82fr) minmax(0,1.65fr) minmax(52px,.72fr) minmax(58px,.78fr); gap:5px; font-size:8px; letter-spacing:0; }
+.wip-recipe-row .wip-field select,.wip-recipe-row .wip-field input,.wip-component-search input { font-size:11px; padding:0 5px; }
+.wip-recipe-row .wip-field select { text-overflow:ellipsis; }
+.wip-component-option { font-size:11px; }
