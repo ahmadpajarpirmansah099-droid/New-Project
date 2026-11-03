@@ -116,7 +116,9 @@
       status: input.status === INACTIVE || (existing && existing.status === INACTIVE && input.status == null)
         ? INACTIVE
         : ACTIVE,
-      is_supply: existing ? Boolean(existing.is_supply) : false,
+      is_supply: input.is_supply == null
+        ? (existing ? Boolean(existing.is_supply) : false)
+        : Boolean(input.is_supply),
       created_at: existing ? existing.created_at : now,
       updated_at: now
     };
