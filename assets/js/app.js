@@ -1691,6 +1691,10 @@ let appDataReady = false;
 window.addEventListener('app:auth-ready', async function (event) {
   if (appDataReady) return;
   try {
+    await window.MasterDataStore.initialize(
+      window.AppAuth.getClient(),
+      event.detail.workspaceId
+    );
     const remoteState = await window.GuestOpsService.initialize(
       window.AppAuth.getClient(),
       event.detail.workspaceId
