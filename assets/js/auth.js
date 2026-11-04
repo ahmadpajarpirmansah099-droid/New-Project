@@ -23,6 +23,8 @@
   }
 
   function showLogin(message) {
+    const emailInput = $('authEmail');
+    if (emailInput) emailInput.value = '';
     activeUserId = null;
     authContext = null;
     window.dispatchEvent(new CustomEvent('app:auth-signed-out'));
@@ -169,6 +171,8 @@
   }
 
   function init() {
+    const emailInput = $('authEmail');
+    if (emailInput) emailInput.value = '';
     $('authLoginForm').addEventListener('submit', handleLogin);
     if (!window.supabase || typeof window.supabase.createClient !== 'function') {
       setMessage('Layanan autentikasi belum termuat. Periksa koneksi internet lalu muat ulang halaman.');
