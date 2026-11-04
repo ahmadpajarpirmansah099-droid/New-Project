@@ -990,3 +990,236 @@
     transition: none !important;
   }
 }
+
+
+/* =========================================================
+   DESKTOP SIDEBAR — GROUPED NAVIGATION
+   Uses the existing system green (#15966a).
+   All rules are isolated from mobile layouts.
+   ========================================================= */
+.desktop-sidebar-nav { display: none; }
+
+@media (min-width: 900px) {
+  :root {
+    --desktop-nav-green: #15966a;
+    --desktop-nav-green-dark: #117e59;
+    --desktop-nav-green-soft: #eaf7f1;
+    --desktop-nav-green-line: #dcefe5;
+  }
+
+  /* Replace the legacy flat icon rail only on desktop. */
+  #menuDrawer > .drawer-nav {
+    display: none !important;
+  }
+  #menuDrawer > .desktop-sidebar-nav {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 18px;
+    width: 100%;
+    min-height: 0;
+    margin: 0;
+    padding: 2px 0 14px !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #dbe9e1 transparent;
+  }
+  #menuDrawer > .desktop-sidebar-nav::-webkit-scrollbar { width: 5px; }
+  #menuDrawer > .desktop-sidebar-nav::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background: #dbe9e1;
+  }
+
+  .desktop-nav-group {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    padding: 0 0 13px;
+    border-bottom: 1px solid #edf2ef;
+  }
+  .desktop-nav-group[hidden] { display: none !important; }
+  .desktop-nav-group-heading {
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start !important;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 2px 7px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: transparent !important;
+    color: var(--desktop-nav-green-dark) !important;
+    box-shadow: none !important;
+    text-align: left;
+    font: 800 10px Manrope, 'DM Sans', sans-serif !important;
+    letter-spacing: .105em;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .16s ease, color .16s ease;
+  }
+  .desktop-nav-group-heading:hover {
+    background: #f3faf6 !important;
+    color: var(--desktop-nav-green-dark) !important;
+  }
+  .desktop-nav-group-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--desktop-nav-green-line);
+    border-radius: 10px;
+    background: var(--desktop-nav-green-soft);
+    color: var(--desktop-nav-green);
+  }
+  .desktop-nav-group-icon svg {
+    display: block;
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .desktop-nav-group-heading-action {
+    margin: 0;
+    cursor: pointer;
+  }
+  .desktop-nav-children {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+    padding-left: 39px;
+  }
+  .desktop-nav-item.drawer-item,
+  body:not(:has(#menuDrawer.show)) #menuDrawer .desktop-nav-item.drawer-item {
+    position: relative;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 9px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 37px !important;
+    height: 37px !important;
+    padding: 0 10px !important;
+    border: 0 !important;
+    border-radius: 9px !important;
+    background: transparent !important;
+    color: #66758a !important;
+    box-shadow: none !important;
+    text-align: left;
+    text-decoration: none;
+    transition: background .16s ease, color .16s ease, transform .16s ease;
+  }
+  .desktop-nav-item .desktop-nav-icon {
+    display: block !important;
+    flex: 0 0 16px;
+    width: 16px !important;
+    height: 16px !important;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    color: #91a397;
+    transition: color .16s ease;
+  }
+  .desktop-nav-item > span {
+    display: block !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0;
+    overflow: hidden;
+    opacity: 1 !important;
+    transform: none !important;
+    color: inherit !important;
+    font: 600 11.5px 'DM Sans', sans-serif !important;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .desktop-nav-item:hover {
+    background: #f2f9f5 !important;
+    color: var(--desktop-nav-green-dark) !important;
+    transform: translateX(2px);
+  }
+  .desktop-nav-item:hover .desktop-nav-icon { color: var(--desktop-nav-green); }
+  .desktop-nav-item.active,
+  body:not(:has(#menuDrawer.show)) #menuDrawer .desktop-nav-item.active,
+  .desktop-nav-item[aria-current="page"] {
+    background: var(--desktop-nav-green-soft) !important;
+    color: var(--desktop-nav-green-dark) !important;
+    box-shadow: inset 3px 0 var(--desktop-nav-green) !important;
+  }
+  .desktop-nav-item.active .desktop-nav-icon,
+  .desktop-nav-item[aria-current="page"] .desktop-nav-icon {
+    color: var(--desktop-nav-green) !important;
+  }
+  .desktop-nav-item:focus-visible,
+  .desktop-nav-group-heading:focus-visible {
+    outline: 3px solid rgba(21,150,106,.22) !important;
+    outline-offset: 2px;
+  }
+  .desktop-nav-settings {
+    flex: 0 0 auto;
+    min-height: 42px !important;
+    margin: 0 0 2px !important;
+    padding: 0 12px !important;
+    border: 1px solid var(--desktop-nav-green-line) !important;
+    border-radius: 11px !important;
+    background: #f7fbf8 !important;
+    color: var(--desktop-nav-green-dark) !important;
+  }
+  .desktop-nav-settings .desktop-nav-settings-icon {
+    color: var(--desktop-nav-green) !important;
+  }
+  .desktop-nav-settings:hover {
+    border-color: #c6e6d4 !important;
+    background: var(--desktop-nav-green-soft) !important;
+  }
+
+  /* Remove the floating quick-action button and its layer from desktop only. */
+  #fab,
+  .fab,
+  #quickMenu,
+  .quick-menu,
+  #quickMenuBackdrop,
+  .quick-menu-backdrop {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  #menuDrawer > .desktop-sidebar-nav { gap: 14px; }
+  .desktop-nav-group { padding-bottom: 10px; }
+  .desktop-nav-group-heading { font-size: 9px !important; gap: 8px; }
+  .desktop-nav-group-icon { flex-basis: 30px; width: 30px; height: 30px; }
+  .desktop-nav-children { padding-left: 34px; }
+  .desktop-nav-item.drawer-item,
+  body:not(:has(#menuDrawer.show)) #menuDrawer .desktop-nav-item.drawer-item {
+    gap: 7px !important;
+    padding-right: 7px !important;
+    padding-left: 8px !important;
+  }
+}
+
+@media (min-width: 900px) and (prefers-reduced-motion: reduce) {
+  .desktop-nav-group-heading,
+  .desktop-nav-item,
+  .desktop-nav-item .desktop-nav-icon {
+    transition: none !important;
+  }
+}
