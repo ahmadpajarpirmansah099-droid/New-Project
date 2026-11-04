@@ -6523,3 +6523,81 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     left: 176px;
   }
 }
+/* Desktop sidebar alignment refinement — mobile rules are not affected. */
+@media (min-width: 900px) {
+  .top {
+    width: 264px;
+    padding: 24px 18px 22px;
+    gap: 18px;
+    border-radius: 0 20px 20px 0;
+  }
+  .brand { display:flex; width:100%; min-height:46px; align-items:center; gap:11px; }
+  .brandname,.brandmeta { display:block; }
+  .workspace-scope-switcher { display:grid; }
+  .menu-toggle { top:22px; left:208px; }
+  .menu-drawer {
+    top:145px; left:0; right:auto; bottom:86px; width:264px;
+    max-height:calc(100dvh - 235px); padding:0 12px; overflow-y:auto;
+    border:0; border-radius:0; background:transparent; box-shadow:none;
+  }
+  .menu-drawer.show { width:264px; }
+  .drawer-nav { gap:8px; padding:0; }
+  .drawer-item {
+    width:100%; min-width:0; min-height:46px; height:46px;
+    justify-content:flex-start; gap:12px; padding:0 13px; border-radius:12px;
+  }
+  .drawer-item > span { width:auto; max-width:180px; opacity:1; transform:none; }
+  .drawer-item .drawer-chevron { width:16px; height:16px; margin-left:auto; opacity:.7; }
+
+  body:not(:has(#menuDrawer.show)) .top {
+    width:76px; padding:20px 16px 22px; align-items:center;
+    border-radius:0 18px 18px 0;
+  }
+  body:not(:has(#menuDrawer.show)) .brand {
+    display:flex !important; width:44px; min-height:44px; justify-content:center; margin:0;
+  }
+  body:not(:has(#menuDrawer.show)) .brandmark {
+    width:42px; height:42px; flex:0 0 42px; border-radius:13px;
+  }
+  body:not(:has(#menuDrawer.show)) .brandname,
+  body:not(:has(#menuDrawer.show)) .brandmeta,
+  body:not(:has(#menuDrawer.show)) .workspace-scope-switcher { display:none !important; }
+  body:not(:has(#menuDrawer.show)) .top-actions {
+    position:absolute; inset:auto 0 20px; display:flex; width:100%;
+    justify-content:center; padding:0; border:0; pointer-events:auto;
+  }
+  body:not(:has(#menuDrawer.show)) .top-actions .profile { display:none !important; }
+  body:not(:has(#menuDrawer.show)) .top-actions .auth-logout-button {
+    position:static; display:grid; width:40px; height:40px; flex:0 0 40px;
+    pointer-events:auto;
+  }
+  body:not(:has(#menuDrawer.show)) .menu-toggle { top:78px; left:18px; }
+  body:not(:has(#menuDrawer.show)) .menu-drawer {
+    top:50%; left:7px; right:auto; bottom:auto; width:62px; height:auto;
+    max-height:calc(100dvh - 250px); padding:8px 6px; overflow:visible;
+    border:1px solid #ececf0; border-radius:16px; background:#fff;
+    box-shadow:0 4px 14px rgba(17,18,37,.06); transform:translateY(-50%);
+  }
+  body:not(:has(#menuDrawer.show)) .drawer-nav { align-items:center; gap:8px; }
+  body:not(:has(#menuDrawer.show)) .drawer-item {
+    position:relative; display:grid; width:44px; min-width:44px; height:44px;
+    min-height:44px; place-items:center; padding:0; border-radius:12px;
+    background:transparent; color:#747789; box-shadow:none;
+  }
+  body:not(:has(#menuDrawer.show)) .drawer-item.active { background:#edf3ff; color:#2457d7; }
+  body:not(:has(#menuDrawer.show)) .drawer-item.active::before {
+    content:""; position:absolute; top:8px; bottom:8px; left:-7px; width:3px;
+    border-radius:0 4px 4px 0; background:#2457d7;
+  }
+  body:not(:has(#menuDrawer.show)) .drawer-item > span,
+  body:not(:has(#menuDrawer.show)) .drawer-item .drawer-chevron { display:none !important; }
+  body:not(:has(#menuDrawer.show)) .drawer-item > svg:first-child { width:19px; height:19px; }
+  .content { padding-left:82px; transition:padding-left .26s cubic-bezier(.2,.75,.25,1); }
+  body:has(#menuDrawer.show) .content { padding-left:286px; }
+  body:has(#menuDrawer.show) .menu-toggle { left:208px; }
+}
+@media (min-width:900px) and (max-width:1100px) {
+  .top,.menu-drawer.show { width:232px; }
+  .menu-toggle { left:176px; }
+  body:has(#menuDrawer.show) .content { padding-left:254px; }
+}
