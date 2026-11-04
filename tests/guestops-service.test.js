@@ -122,6 +122,43 @@ test('Guest Operations write queue recovers after a failed database write', asyn
   assert.equal(rows.reservations.length, 1);
 });
 
+test('Guest Operations writes only records that changed after the first save', async () => {
+  const { runtime, client, calls } = createRuntime();
+  await runtime.GuestOpsService.initialize(client, 'workspace-1');
+
+  const state = {
+    guests: [{
+      id: 'guest-1',
+      ticket: 'WL-001',
+      day: '2026-11-03',
+      name: 'Tamu Uji',
+      pack: 2,
+      status: 'waiting',
+      created: 1793700000000
+    }],
+    reservations: [{
+      id: 'reservation-1',
+      code: 'RSV-001',
+      date: '2026-11-04',
+      time: '19:00',
+      name: 'Tamu Reservasi',
+      pack: 3,
+      status: 'pending',
+      created: 1793700000000
+    }],
+    settings: { seatingDurationMinutes: 90 }
+  };
+
+  await runtime.GuestOpsService.persist(state);
+  state.guests[0].status = 'called';
+  await runtime.GuestOpsService.persist(state);
+  await runtime.GuestOpsService.persist(state);
+
+  assert.equal(calls.filter(call => call.table === 'guests' && call.operation === 'upsert').length, 2);
+  assert.equal(calls.filter(call => call.table === 'reservations' && call.operation === 'upsert').length, 1);
+  assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 1);
+});
+
 test('Guest status correction audit is appended to the history table', async () => {
   const { runtime, client, calls } = createRuntime();
   await runtime.GuestOpsService.initialize(client, 'workspace-1');
