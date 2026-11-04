@@ -94,7 +94,7 @@ function openDetail(id) {
     '<div class="sheet-actions"><button class="secondary" data-app-action="editGuest" data-app-id="' + esc(guest.id) + '">Koreksi data</button>' +
       whatsappButton + '</div>' + cancelActions + finishAction +
     '<div class="detail-history-heading">Riwayat perubahan</div>' +
-    '<div class="timeline">' + timeline + '</div>'
+    '<div class="timeline" id="guestDetailTimeline">' + (timeline || '<div class="timeline-loading">Memuat riwayat...</div>') + '</div>'
   );
 
   if (window.GuestOpsService?.loadGuestAudit) {
