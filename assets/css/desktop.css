@@ -160,6 +160,8 @@
 
   /* Header uses the existing workspace selectors and account actions. */
   .top {
+    visibility: visible !important;
+    pointer-events: auto !important;
     position: fixed !important;
     z-index: 90 !important;
     top: 0;
@@ -221,6 +223,7 @@
   .scope-trigger svg { width: 14px; height: 14px; }
   .top-actions {
     display: flex !important;
+    pointer-events: auto !important;
     align-items: center;
     gap: 10px;
     padding: 0 !important;
