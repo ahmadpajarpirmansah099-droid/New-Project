@@ -10,6 +10,8 @@
   let activationGeneration = 0;
   let activeProfile = null;
   let workspaceSwitchBusy = false;
+  // Keep activation errors visible even if a delayed SIGNED_OUT event arrives.
+  let persistentLoginMessage = '';
 
   function setMessage(message, type) {
     const element = $('authMessage');
@@ -26,6 +28,8 @@
   }
 
   function showLogin(message) {
+    if (message) persistentLoginMessage = message;
+    const visibleMessage = persistentLoginMessage || message || '';
     const emailInput = $('authEmail');
     if (emailInput) emailInput.value = '';
     activationGeneration += 1;
@@ -36,7 +40,7 @@
     document.body.classList.remove('auth-ready', 'workspace-switching');
     document.body.classList.add('auth-locked');
     setLoading(false);
-    setMessage(message || '');
+    setMessage(visibleMessage);
   }
 
   async function buildWorkspaceContext(userId, email, profile, workspaces, selectedWorkspaceId, divisionSelection, isCurrent) {
@@ -244,6 +248,7 @@
       return;
     }
     isSubmitting = true;
+    persistentLoginMessage = '';
     setLoading(true);
     setMessage('');
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
