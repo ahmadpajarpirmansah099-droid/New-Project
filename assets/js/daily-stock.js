@@ -314,6 +314,7 @@
   }
 
   async function postTransaction(type, form) {
+    if (state.data?.count?.status === 'closed') throw new Error('Daily SO tanggal ini sudah ditutup. Catat transaksi pada tanggal operasional berikutnya.');
     const lines = buildTransactionLines(type, form);
     if (!lines.length) throw new Error('Transaksi tidak memiliki pergerakan stok.');
     const txType = type === 'production' ? 'wip_production' : type === 'sale' ? 'sale' :
@@ -357,7 +358,7 @@
     target.innerHTML = rows.map((row) => {
       const line = state.data.countLines.find((entry) => stockKey(entry.stock_kind, entry.stock_kind === 'wip' ? entry.wip_recipe_id : entry.item_id) === row.key);
       if (!line) return '';
-      const physical = line.physical_closing_quantity == null ? '' : number(line.physical_closing_quantity);
+      const physical = line.physical_closing_quantity == null ? '' : String(line.physical_closing_quantity);
       const variance = line.variance_quantity == null ? '—' : number(line.variance_quantity);
       return '<article class="ds-stock-row"><div class="ds-stock-top"><div><span class="ds-kind">' + rowLabel(row.kind) + '</span><strong>' + escapeHtml(row.name) + '</strong><small>Satuan: ' + escapeHtml(row.unit) + '</small></div><span class="ds-expected">' + number(line.expected_closing_quantity) + ' ' + escapeHtml(row.unit) + '</span></div><div class="ds-stock-math"><span>Awal <b>' + number(line.opening_quantity) + '</b></span><span>Masuk <b>' + number(line.inbound_quantity) + '</b></span><span>Keluar <b>' + number(line.outbound_quantity) + '</b></span><span>Selisih <b>' + variance + '</b></span></div><label class="ds-physical">Stok fisik<input data-physical data-line-id="' + line.id + '" inputmode="decimal" placeholder="0" value="' + physical + '" ' + (state.data.count.status === 'closed' ? 'disabled' : '') + '></label></article>';
     }).join('');
@@ -605,6 +606,8 @@
         return;
       }
       if (typeof originalToggle==='function') originalToggle();
+      const heading=$('quickMenu')?.querySelector('.quick-menu-heading');
+      if (heading) heading.textContent=['master-items','wips','menus'].some((page)=>$('page-'+page)?.classList.contains('active'))?'MASTER BARANG':'GUEST OPERATIONAL';
     };
 
     const originalRun = root.runQuickAction;
