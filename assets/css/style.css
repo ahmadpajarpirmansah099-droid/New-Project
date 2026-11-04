@@ -7158,3 +7158,73 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     height: 0;
   }
 }
+
+
+/* Desktop: place logout and menu controls inside the sidebar footer area. */
+@media (min-width: 900px) {
+  .top {
+    position: fixed !important;
+    z-index: 110 !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: 76px !important;
+    left: 18px !important;
+    display: flex !important;
+    width: 304px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    overflow: visible !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    pointer-events: none;
+  }
+
+  .top .menu-toggle,
+  .top-actions .auth-logout-button {
+    position: static !important;
+    display: grid !important;
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    flex: 0 0 42px !important;
+    margin: 0 !important;
+    pointer-events: auto !important;
+  }
+
+  .top .menu-toggle {
+    order: 1;
+  }
+
+  .top-actions {
+    position: static !important;
+    display: flex !important;
+    width: auto !important;
+    height: 42px !important;
+    margin: 0 0 0 10px !important;
+    padding: 0 !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    border: 0 !important;
+    pointer-events: none;
+  }
+
+  .top-actions .profile {
+    display: none !important;
+  }
+
+  .top-actions .auth-logout-button {
+    order: 0;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1200px) {
+  .top {
+    width: 264px !important;
+  }
+}
