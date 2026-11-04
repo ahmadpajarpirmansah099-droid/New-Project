@@ -79,6 +79,9 @@ test('Guest Operations initializes from an empty Supabase workspace', async () =
   assert.deepEqual(Array.from(state.guests), []);
   assert.deepEqual(Array.from(state.reservations), []);
   assert.equal(state.settings.seatingDurationMinutes, 90);
+
+  const reservationSelect = calls.find(call => call.table === 'reservations' && call.operation === 'select');
+  assert.equal(reservationSelect.columns.includes('seated_at'), false);
 });
 
 test('Guest audit history is fetched only when a guest detail is requested', async () => {

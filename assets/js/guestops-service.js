@@ -135,7 +135,7 @@
         .eq('workspace_id', workspaceId)
         .order('created_at', { ascending: true }),
       client.from('reservations')
-        .select('id,code,reservation_date,reservation_time,guest_name,pack,phone,smoking,note,table_label,status,created_at,seated_at')
+        .select('id,code,reservation_date,reservation_time,guest_name,pack,phone,smoking,note,table_label,status,created_at')
         .eq('workspace_id', workspaceId)
         .order('reservation_date', { ascending: true })
         .order('reservation_time', { ascending: true }),
