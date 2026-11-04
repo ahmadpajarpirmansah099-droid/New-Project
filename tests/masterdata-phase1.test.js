@@ -58,14 +58,14 @@ function validItem(overrides) {
   }, overrides || {});
 }
 
-test('Master Data uses a separate localStorage key and preserves Guest Operations data', () => {
+test('Master Data does not create browser demo storage', () => {
   const values = new Map([['waitlist_frontend_demo_v1', 'existing-guest-data']]);
   const { runtime } = createRuntime(values);
 
   const data = runtime.MasterDataStore.load();
 
   assert.equal(values.get('waitlist_frontend_demo_v1'), 'existing-guest-data');
-  assert.ok(values.has('guestops_masterdata_demo_v1'));
+  assert.equal(values.has('guestops_masterdata_demo_v1'), false);
   assert.equal(data.active_scope_id, 'scope-demo-default');
   assert.deepEqual(Array.from(Object.keys(data)).sort(), [
     'active_scope_id', 'masterItems', 'menuRecipeLines', 'menus',
@@ -235,13 +235,12 @@ test('Deactivation preserves the item record and makes its status inactive', () 
   assert.equal(runtime.MasterDataService.listItems({ status: 'inactive' }).length, 1);
 });
 
-test('Master Data can be loaded again after a page refresh', () => {
+test('Master Data state remains available in the isolated test runtime', () => {
   const values = new Map();
   const first = createRuntime(values);
   first.runtime.MasterDataService.saveItem(validItem({ nama_barang: 'Beans Espresso' }));
 
-  const second = createRuntime(values);
-  const items = second.runtime.MasterDataService.listItems({ status: 'all' });
+  const items = first.runtime.MasterDataService.listItems({ status: 'all' });
 
   assert.equal(items.length, 1);
   assert.equal(items[0].nama_barang, 'Beans Espresso');
