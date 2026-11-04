@@ -1245,3 +1245,32 @@
     display: none !important;
   }
 }
+
+
+/* Final desktop override: the legacy flat navigation must not compete
+   with the grouped sidebar. Match the earlier high-specificity rule. */
+@media (min-width: 900px) {
+  body:not(:has(#menuDrawer.show)) #menuDrawer > .drawer-nav,
+  body:has(#menuDrawer.show) #menuDrawer > .drawer-nav {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    flex: 0 0 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body:not(:has(#menuDrawer.show)) #menuDrawer > .desktop-sidebar-nav,
+  body:has(#menuDrawer.show) #menuDrawer > .desktop-sidebar-nav {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    flex: 1 1 auto !important;
+    margin-top: 0 !important;
+  }
+}
