@@ -132,7 +132,7 @@ function returnToGuestOperational() {
 }
 
 function setWorkspaceHeader(page) {
-  const isMasterWorkspace = ['master-items', 'wips', 'menus'].includes(page);
+  const isMasterWorkspace = ['master-items', 'wips', 'menus', 'all-divisions', 'daily-stock'].includes(page);
   const mark = $('workspaceBrandmark');
   const name = $('workspaceBrandname');
   const meta = $('workspaceBrandmeta');
@@ -142,14 +142,16 @@ function setWorkspaceHeader(page) {
     mark.classList.add('is-master');
     mark.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M4 7.5 12 12l8-4.5M12 12v9M8 5.3l8 4.5"/></svg>';
     name.textContent = 'MASTER BARANG';
-    meta.textContent = 'MASTER DATA WORKSPACE';
+    const context = window.AppAuth?.getContext();
+    meta.textContent = context?.isGlobalDeveloper ? (context.workspaceName || 'OUTLET') + (context.divisionMode === 'all' ? ' · SEMUA DIVISI' : ' · ' + (context.activeDivisionName || '')) : 'MASTER DATA WORKSPACE';
     return;
   }
 
   mark.classList.remove('is-master');
   mark.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
   name.textContent = 'GUEST OPERATIONS';
-  meta.textContent = 'ADMIN WORKSPACE';
+  const context = window.AppAuth?.getContext();
+  meta.textContent = context?.isGlobalDeveloper ? (context.workspaceName || 'OUTLET') + (context.divisionMode === 'all' ? ' · SEMUA DIVISI' : ' · ' + (context.activeDivisionName || '')) : 'ADMIN WORKSPACE';
 }
 
 function canAccessGuestOperations() {
@@ -170,6 +172,12 @@ function applyRoleNavigation() {
 }
 
 function go(page) {
+  const currentContext = window.AppAuth?.getContext();
+  if (currentContext?.isGlobalDeveloper && currentContext.divisionMode === 'all' && ['master-items','wips','menus','daily-stock'].includes(page)) {
+    page = 'all-divisions';
+    toast('Pilih satu divisi untuk membuka dan mengubah data modul.');
+  }
+  document.body.dataset.divisionMode = currentContext?.divisionMode || 'single';
   if (!canAccessGuestOperations() && ['dashboard', 'waiting', 'history', 'reservations', 'settings'].includes(page)) {
     toast('Guest Operational hanya tersedia untuk akun Service.');
     page = 'master-items';
@@ -187,6 +195,7 @@ function go(page) {
 
   if (page === 'settings') syncSeatingSettingInput();
   if (page === 'dashboard') dashboardCountUpPending = true;
+  if (page === 'all-divisions') loadAllDivisionsOverview();
 
   renderAll();
   if (window.MasterDataUI && page === 'master-items') window.MasterDataUI.renderPage(page);
@@ -198,7 +207,7 @@ function go(page) {
 function toggleQuickMenu() {
   const menu = $('quickMenu');
   const open = !menu.classList.contains('show');
-  const context = ['master-items', 'wips', 'menus'].some(page => $('page-' + page).classList.contains('active')) ? 'master' : 'guest';
+  const context = window.AppAuth?.getContext()?.divisionMode === 'all' ? 'guest' : (['master-items','wips','menus'].some(page => $('page-' + page).classList.contains('active')) ? 'master' : 'guest');
 
   if (open && $('menuDrawer').classList.contains('show')) {
     closeMenu();
@@ -1744,68 +1753,94 @@ window.addEventListener('app:auth-signed-out', function () {
   closeSheet();
 });
 
-window.addEventListener('app:auth-ready', async function (event) {
+async function initializeWorkspace(event, switchingContext) {
+  if (switchingContext) {
+    appSessionGeneration += 1; appInitializationGeneration += 1; appDataReady = false; appInitializing = false;
+    clearSessionIntervals();
+    state = {schemaVersion:3,guests:[],counters:{},reservations:[],reservationCounters:{},settings:{seatingDurationMinutes:90}};
+    remoteSaveQueue = Promise.resolve();
+    window.GuestOpsService?.reset(); window.MasterDataStore?.reset();
+    closeQuickMenu(); closeMenu(); closeSheet();
+  }
   if (appDataReady || appInitializing) return;
   appInitializing = true;
-  const sessionGeneration = appSessionGeneration;
-  const initializationGeneration = ++appInitializationGeneration;
-  const isCurrent = () =>
-    sessionGeneration === appSessionGeneration &&
-    initializationGeneration === appInitializationGeneration;
-
+  const sessionGeneration=appSessionGeneration, initializationGeneration=++appInitializationGeneration;
+  const isCurrent=()=>sessionGeneration===appSessionGeneration && initializationGeneration===appInitializationGeneration;
   try {
-    const authContext = event.detail;
-    const supabaseClient = window.AppAuth.getClient();
-    await window.MasterDataStore.initialize(supabaseClient, authContext.workspaceId, authContext.activeDivisionId);
-    if (!isCurrent()) return;
+    const authContext=event.detail, supabaseClient=window.AppAuth.getClient();
+    await window.MasterDataStore.initialize(supabaseClient,authContext.workspaceId,authContext.activeDivisionId);
+    if(!isCurrent()) return;
     await window.MasterDataStore.assertSession();
-    if (!isCurrent()) return;
+    if(!isCurrent()) return;
     applyRoleNavigation();
-
-    if (canAccessGuestOperations()) {
-      const remoteState = await window.GuestOpsService.initialize(supabaseClient, authContext.workspaceId);
-      if (!isCurrent()) return;
-      state = remoteState;
-      syncSeatingSettingInput();
-      go(authContext.workspaceRole === 'service' ? 'master-items' : 'dashboard');
-
-      guestRefreshInterval = window.setInterval(async () => {
-        if (!isCurrent()) return;
+    if(canAccessGuestOperations()) {
+      const remoteState=await window.GuestOpsService.initialize(supabaseClient,authContext.workspaceId);
+      if(!isCurrent()) return;
+      state=remoteState; syncSeatingSettingInput();
+      go(authContext.divisionMode==='all'?'all-divisions':(authContext.workspaceRole==='service'?'master-items':'dashboard'));
+      guestRefreshInterval=window.setInterval(async()=>{
+        if(!isCurrent()) return;
         try {
-          const refreshed = await window.GuestOpsService.load();
-          if (!isCurrent()) return;
-          state.guests = refreshed.guests;
-          state.reservations = refreshed.reservations;
-          state.counters = refreshed.counters;
-          state.reservationCounters = refreshed.reservationCounters;
-          state.settings = refreshed.settings;
-          renderAll();
-        } catch (error) {
-          if (isCurrent()) console.error('Guest Operations refresh failed:', error);
-        }
-      }, 30000);
-      seatingCountdownInterval = window.setInterval(() => {
-        if (isCurrent()) updateSeatingCountdowns();
-      }, 1000);
-    } else {
-      if (!isCurrent()) return;
-      go('master-items');
-    }
-
-    if (!isCurrent()) return;
-    const revealed = await window.AppAuth.markReady(authContext.userId, authContext.workspaceId);
-    if (!isCurrent()) return;
-    if (!revealed) throw new Error('Sesi akun berubah sebelum workspace selesai dimuat.');
-    appDataReady = true;
-    appInitializing = false;
-  } catch (error) {
-    if (!isCurrent()) return;
-    console.error('Workspace initialization failed:', error);
-    appInitializing = false;
-    clearSessionIntervals();
+          const refreshed=await window.GuestOpsService.load();
+          if(!isCurrent()) return;
+          state.guests=refreshed.guests; state.reservations=refreshed.reservations;
+          state.counters=refreshed.counters; state.reservationCounters=refreshed.reservationCounters;
+          state.settings=refreshed.settings; renderAll();
+        } catch(error) { if(isCurrent()) console.error('Guest Operations refresh failed:',error); }
+      },30000);
+      seatingCountdownInterval=window.setInterval(()=>{if(isCurrent()) updateSeatingCountdowns();},1000);
+    } else { if(!isCurrent()) return; go('master-items'); }
+    if(!isCurrent()) return;
+    const revealed=await window.AppAuth.markReady(authContext.userId,authContext.workspaceId);
+    if(!isCurrent()) return;
+    if(!revealed) throw new Error('Sesi akun berubah sebelum workspace selesai dimuat.');
+    appDataReady=true; appInitializing=false;
+  } catch(error) {
+    if(!isCurrent()) return;
+    console.error('Workspace initialization failed:',error); appInitializing=false; clearSessionIntervals();
     await window.AppAuth.failActivation('Data workspace gagal dimuat. Silakan masuk kembali.');
   }
-});
+}
+
+async function loadAllDivisionsOverview() {
+  const context=window.AppAuth?.getContext(), host=$('allDivisionsRoot'), subtitle=$('allDivisionsSubtitle');
+  if(!host || !context?.isGlobalDeveloper || context.divisionMode!=='all') return;
+  if(subtitle) subtitle.textContent='Ringkasan data per divisi · '+context.workspaceName;
+  host.innerHTML='<div class="division-overview-loading">Memuat ringkasan divisi...</div>';
+  try {
+    const client=window.AppAuth.getClient(), ids=context.divisions.map((division)=>division.id);
+    const [moduleResult,stockResult]=await Promise.all([
+      client.from('workspace_module_state').select('division_id,payload').eq('workspace_id',context.workspaceId).in('division_id',ids),
+      client.from('daily_stock_counts').select('division_id,status').eq('workspace_id',context.workspaceId).in('division_id',ids)
+    ]);
+    if(moduleResult.error) throw moduleResult.error;
+    if(stockResult.error) throw stockResult.error;
+    const latest=window.AppAuth.getContext();
+    if(!latest || latest.workspaceId!==context.workspaceId || latest.divisionMode!=='all') return;
+    const summaries=context.divisions.map((division)=>{
+      const rows=(moduleResult.data||[]).filter((row)=>row.division_id===division.id);
+      const payload=rows.reduce((combined,row)=>Object.assign(combined,row.payload||{}),{});
+      return {name:division.name,items:Array.isArray(payload.masterItems)?payload.masterItems.length:0,
+        wips:Array.isArray(payload.wips)?payload.wips.length:0,menus:Array.isArray(payload.menus)?payload.menus.length:0,
+        stock:(stockResult.data||[]).filter((row)=>row.division_id===division.id).length};
+    });
+    const totals=summaries.reduce((sum,item)=>({items:sum.items+item.items,wips:sum.wips+item.wips,menus:sum.menus+item.menus,stock:sum.stock+item.stock}),{items:0,wips:0,menus:0,stock:0});
+    host.innerHTML='<article class="division-overview-card"><h2>Total outlet</h2><div class="division-overview-metrics">'+
+      '<div><span>Master Barang</span><strong>'+totals.items+'</strong></div><div><span>Resep WIP</span><strong>'+totals.wips+'</strong></div>'+
+      '<div><span>Menu</span><strong>'+totals.menus+'</strong></div><div><span>Daily SO</span><strong>'+totals.stock+'</strong></div></div></article>'+
+      summaries.map((item)=>'<article class="division-overview-card"><h2>'+escapeHtmlText(item.name)+'</h2><div class="division-overview-metrics">'+
+      '<div><span>Master Barang</span><strong>'+item.items+'</strong></div><div><span>Resep WIP</span><strong>'+item.wips+'</strong></div>'+
+      '<div><span>Menu</span><strong>'+item.menus+'</strong></div><div><span>Daily SO</span><strong>'+item.stock+'</strong></div></div></article>').join('');
+  } catch(error) {
+    console.error('All divisions overview failed:',error);
+    host.innerHTML='<div class="division-overview-error">Ringkasan belum dapat dimuat. Periksa koneksi lalu tekan Muat ulang.</div>';
+  }
+}
+function escapeHtmlText(value) {
+  return String(value==null?'':value).replace(/[&<>"']/g,(char)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+}
+window.addEventListener('app:auth-ready',(event)=>initializeWorkspace(event,false));
+window.addEventListener('app:workspace-context-changed',(event)=>initializeWorkspace(event,true));
 
 
 /* Delegasi interaksi untuk elemen statis di index.html. */
