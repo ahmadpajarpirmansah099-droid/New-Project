@@ -4824,7 +4824,7 @@ body.auth-ready .auth-screen{display:none}
 .workspace-scope-switcher[hidden]{display:none!important}
 .workspace-scope-switcher .scope-field{display:grid;gap:3px;flex:1 1 0;min-width:0}
 .workspace-scope-switcher .scope-field>span{padding-left:7px;color:#8993a4;font-size:8px;font-weight:800;letter-spacing:.09em}
-.scope-trigger{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;max-width:142px;height:34px;padding:0 10px;border:1px solid transparent;border-radius:9px;background:#f5f7fa;color:#24334d;text-align:left;font:700 11px/1.2 inherit;cursor:pointer;transition:background .18s ease,border-color .18s ease,box-shadow .18s ease}
+.scope-trigger{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;max-width:142px;height:34px;padding:0 10px;border:1px solid transparent;border-radius:9px;background:#f5f7fa;color:#24334d;text-align:left;font-family:inherit;font-size:11px;font-weight:700;line-height:1.2;cursor:pointer;transition:background .18s ease,border-color .18s ease,box-shadow .18s ease}
 .scope-trigger>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .scope-trigger svg{flex:0 0 15px;width:15px;height:15px;color:#68758a;transition:transform .18s ease}
 .scope-trigger[aria-expanded="true"]{border-color:#d7deea;background:#fff;box-shadow:0 0 0 3px rgba(93,112,150,.09)}
