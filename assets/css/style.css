@@ -4747,3 +4747,11 @@ body.auth-ready .auth-screen{display:none}
     font-size: 18px;
   }
 }
+
+
+/* Status aktif pada halaman pengaturan. */
+.settings-status-active {
+  color: #15966a;
+  font-size: 10px;
+  font-weight: 800;
+}
