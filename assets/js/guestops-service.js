@@ -72,9 +72,12 @@
     if (authError || !authData?.user?.id) throw new Error('Sesi akun tidak valid. Silakan masuk kembali.');
     const context = root.AppAuth?.getContext?.();
     if (!context || context.userId !== authData.user.id || context.workspaceId !== currentWorkspaceId) throw new Error('Identitas akun dan workspace tidak cocok. Operasi diblokir.');
-    const { data: membership, error: membershipError } = await currentClient.from('workspace_memberships').select('workspace_id').eq('user_id', authData.user.id).eq('workspace_id', currentWorkspaceId).maybeSingle();
-    if (expectedGeneration !== serviceGeneration || currentClient !== client || currentWorkspaceId !== workspaceId) throw new Error('Sesi workspace berubah. Operasi dibatalkan.');
-    if (membershipError || !membership) throw new Error('Akses ditolak: akun bukan anggota workspace aktif.');
+    if (context.role !== 'developer') {
+      const { data: membership, error: membershipError } = await currentClient.from('workspace_memberships')
+        .select('workspace_id').eq('user_id', authData.user.id).eq('workspace_id', currentWorkspaceId).maybeSingle();
+      if (expectedGeneration !== serviceGeneration || currentClient !== client || currentWorkspaceId !== workspaceId) throw new Error('Sesi workspace berubah. Operasi dibatalkan.');
+      if (membershipError || !membership) throw new Error('Akses ditolak: akun bukan anggota workspace aktif.');
+    }
     return { workspaceId: currentWorkspaceId, generation: expectedGeneration };
   }
 
