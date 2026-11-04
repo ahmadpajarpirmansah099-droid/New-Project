@@ -625,7 +625,15 @@
       actions.forEach(([action,label,path], index) => {
         const button = document.createElement('button');
         button.type='button'; button.className='quick-menu-item ds-fab-action'; button.dataset.quickContext='stock';
-        button.dataset.action='runQuickAction'; button.dataset.actionArgs=JSON.stringify([action]); button.dataset.stockAction=action;
+        button.dataset.stockAction=action;
+        button.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const menu=$('quickMenu'),backdrop=$('quickMenuBackdrop'),fab=$('fab');
+          menu?.classList.remove('show'); backdrop?.classList.remove('show'); fab?.classList.remove('is-open');
+          menu?.setAttribute('aria-hidden','true'); backdrop?.setAttribute('aria-hidden','true'); fab?.setAttribute('aria-expanded','false');
+          runAction(action);
+        });
         button.style.right='-15px';
         button.style.bottom=(index * 58)+'px';
         button.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + path + '"/></svg><span>' + label + '</span>';
