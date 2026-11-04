@@ -18,7 +18,10 @@ function createRuntime() {
     select() { this.operation = 'select'; return this; }
     eq() { return this; }
     order() { return this; }
-    maybeSingle() { return Promise.resolve({ data: null, error: null }); }
+    maybeSingle() {
+      const data = this.table === 'workspace_memberships' ? { workspace_id: 'workspace-1' } : null;
+      return Promise.resolve({ data, error: null });
+    }
     single() {
       return Promise.resolve({ data: { workspace_id: 'workspace-1' }, error: null });
     }
@@ -44,6 +47,7 @@ function createRuntime() {
   }
 
   const client = {
+    auth: { async getUser() { return { data: { user: { id: 'user-1' } }, error: null }; } },
     from(table) { return new Query(table); },
     async rpc(name) {
       calls.push({ rpc: name });
@@ -53,6 +57,7 @@ function createRuntime() {
 
   const runtime = { console, Date, Math, Promise, Error, Array, Number, String, JSON };
   runtime.window = runtime;
+  runtime.AppAuth = { getContext() { return { userId: 'user-1', workspaceId: 'workspace-1', role: 'developer' }; } };
   vm.createContext(runtime);
   vm.runInContext(fs.readFileSync(servicePath, 'utf8'), runtime, { filename: 'guestops-service.js' });
 
@@ -130,4 +135,10 @@ test('Guest status correction audit is appended to the history table', async () 
   });
 
   assert.equal(calls.some(call => call.table === 'guest_status_history' && call.operation === 'insert'), true);
+});
+
+test('Guest Operations blocks initialization when auth context points to another workspace', async () => {
+  const { runtime, client } = createRuntime();
+  await assert.rejects(runtime.GuestOpsService.initialize(client, 'workspace-2'), /Identitas akun dan workspace tidak cocok/);
+  assert.equal(runtime.GuestOpsService.isReady(), false);
 });
