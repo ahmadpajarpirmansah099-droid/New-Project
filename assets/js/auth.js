@@ -24,6 +24,8 @@
 
   function showLogin(message) {
     activeUserId = null;
+    authContext = null;
+    window.dispatchEvent(new CustomEvent('app:auth-signed-out'));
     document.body.classList.remove('auth-ready');
     document.body.classList.add('auth-locked');
     setLoading(false);
@@ -37,6 +39,7 @@
       return;
     }
     const userId = session.user.id;
+    if (activeUserId && activeUserId !== userId) showLogin('');
     if (activeUserId === userId && document.body.classList.contains('auth-ready')) return;
     document.body.classList.remove('auth-ready');
     document.body.classList.add('auth-locked');
