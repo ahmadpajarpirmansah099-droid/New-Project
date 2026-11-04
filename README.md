@@ -18,64 +18,61 @@ Aplikasi mobile-first untuk mengelola kedatangan tamu, antrean, dan reservasi se
 
 ```
 index.html
-  Kerangka halaman dan komponen antarmuka.
-  - #page-dashboard: ringkasan Guest Operational.
-  - #page-waiting: daftar Waiting List.
-  - #page-history: daftar dan pemilih tanggal riwayat.
-  - #page-reservations: kalender dan daftar reservasi.
-  - #page-settings: pengaturan operasional.
-  - Bagian bawah file: menu cepat, drawer, bottom sheet, dan dialog kalender/jam.
+  Kerangka halaman, komponen antarmuka, dan urutan pemanggilan file fitur.
 
 assets/
   css/
-    masterdata.css
-      Tampilan mobile-first untuk modul Master Barang dengan design tokens Guest Operations.
-    wip.css
-      Tampilan mobile-first untuk modul Resep WIP.
-    menu.css
-      Tampilan mobile-first untuk modul Menu dan COGS.
     style.css
-      Semua aturan tampilan dan animasi.
-      - .page-back: tombol kembali halaman fitur.
-      - .operational-filter-*: filter status detail operasional.
-      - .quick-menu-*: menu cepat model kipas.
-      - .reservation-day dan .reservation-list.is-changing: gerak kalender reservasi.
-      - .seating-settings-* dan .seating-stepper: pengaturan Seating Time di HP.
-      - #sheet .seg.is-switching: animasi pilihan status awal tamu.
+      Gaya umum Guest Operations, navigasi, autentikasi, popup, dan komponen bersama.
+    masterdata.css
+      Tampilan Master Barang.
+    wip.css
+      Tampilan Resep WIP.
+    menu.css
+      Tampilan Menu dan COGS.
+    daily-stock.css
+      Tampilan Daily SO.
 
   js/
-    masterdata-store.js
-      Penyimpanan Master Data terpisah dari data Guest Operational.
-    masterdata-service.js
-      Validasi Master Barang, konversi satuan, dan kalkulasi harga referensi.
-    masterdata-ui.js
-      Daftar, pencarian, filter, form, dan preview Master Barang.
-    wip-service.js
-      Validasi komposisi WIP, pencegahan siklus, dan kalkulasi HPP bertingkat.
-    wip-ui.js
-      Daftar, pencarian, filter, form komposisi, dan ringkasan HPP WIP.
-    menu-service.js
-      Validasi komposisi per porsi, kalkulasi HPP Menu, dan margin.
-    menu-ui.js
-      Daftar, pencarian, filter, form komposisi Menu, HPP, dan margin.
+    auth.js
+      Login, sesi, role, pemilihan outlet, dan divisi.
     app.js
-      Logika, penyimpanan demo, dan interaksi.
-      - Bagian 1: utilitas, tanggal/jam, dan penyimpanan lokal.
-      - Bagian 2: navigasi, popup, dan bottom sheet.
-      - Bagian 3–4: tambah tamu, status antrean, dan tampilan daftar.
-      - Bagian 5: detail operasional dari dashboard.
-      - Bagian 6 (History): filter tanggal dan riwayat.
-      - Bagian Reservations: kalender, formulir, dan proses duduk.
-      - Bagian 7: detail tamu, koreksi, ekspor, dan reset demo.
-      - Bagian 8: proses awal aplikasi dan pembaruan berkala.
+      Utilitas bersama, status aplikasi, navigasi, dan kontrol popup/bottom sheet.
+    guestops-queue.js
+      Tambah tamu, nomor antrean, status, kartu tamu, dan tampilan dashboard Guest Operations.
+    guestops-operational.js
+      Detail operasional dashboard, filter status, dan grafik.
+    guestops-history.js
+      Filter tanggal dan daftar riwayat tamu.
+    guestops-reservations.js
+      Kalender, formulir, waktu reservasi, pembatalan, dan proses duduk tamu.
+    guestops-detail.js
+      Detail tamu, koreksi data, status tamu, WhatsApp, dan ekspor CSV.
+    app-startup.js
+      Inisialisasi workspace, pemuatan data, dan pembaruan berkala.
+    guestops-service.js
+      Komunikasi dan penyimpanan data Guest Operations ke Supabase.
+    masterdata-store.js
+      Penyimpanan Master Data dan pemeriksaan sesi workspace.
+    masterdata-service.js / masterdata-ui.js
+      Aturan dan tampilan Master Barang.
+    wip-service.js / wip-ui.js
+      Aturan dan tampilan Resep WIP.
+    menu-service.js / menu-ui.js
+      Aturan dan tampilan Menu.
+    daily-stock-service.js
+      Validasi sesi, pemuatan data, hitungan stok, dan transaksi Daily SO.
+    daily-stock-ui.js
+      Tampilan, formulir, tab, halaman Pengeluaran, dan navigasi Daily SO.
 
-.github/
-  workflows/
-    deploy-pages.yml
-      Pemeriksaan sintaks JavaScript dan deployment GitHub Pages.
+tests/
+  Pengujian otomatis untuk Guest Operations, Master Data, WIP, Menu, Daily SO, ekspor CSV, dan sesi workspace.
 
-.editorconfig
-  Aturan dasar konsistensi file.
+supabase/migrations/
+  Riwayat perubahan database dan aturan akses.
+
+.github/workflows/
+  Pemeriksaan JavaScript, tes frontend, dan deployment GitHub Pages.
 ```
 
 ## Master Data frontend

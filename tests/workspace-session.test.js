@@ -8,7 +8,8 @@ const vm = require('node:vm');
 
 const rootDir = path.resolve(__dirname, '..');
 const storePath = path.join(rootDir, 'assets/js/masterdata-store.js');
-const dailyPath = path.join(rootDir, 'assets/js/daily-stock.js');
+const dailyServicePath = path.join(rootDir, 'assets/js/daily-stock-service.js');
+const dailyUiPath = path.join(rootDir, 'assets/js/daily-stock-ui.js');
 
 function createStoreRuntime(options = {}) {
   const calls = [];
@@ -60,7 +61,9 @@ function createDailyRuntime(options = {}) {
   };
   runtime.window = runtime;
   vm.createContext(runtime);
-  vm.runInContext(fs.readFileSync(dailyPath, 'utf8'), runtime, { filename: 'daily-stock.js' });
+  // Load the Daily SO service first so the UI test uses the same public entry point as the app.
+  vm.runInContext(fs.readFileSync(dailyServicePath, 'utf8'), runtime, { filename: 'daily-stock-service.js' });
+  vm.runInContext(fs.readFileSync(dailyUiPath, 'utf8'), runtime, { filename: 'daily-stock-ui.js' });
   return { runtime, fireSignedOut() { listeners['app:auth-signed-out']?.(); } };
 }
 
