@@ -1,3 +1,6 @@
+/* Desktop-only navigation additions stay hidden on mobile. */
+.desktop-nav-label, .desktop-only-nav { display: none !important; }
+
 /* =========================================================
    NEW PROJECT — DESKTOP WORKSPACE
    Desktop-only overrides. Mobile styles and interaction flow
@@ -85,6 +88,17 @@
     letter-spacing: .14em;
   }
   .desktop-nav-label:first-child { margin-top: 0; }
+  .desktop-only-nav { display: flex !important; }
+  .nav-dashboard { order: 1; }
+  .nav-label-workspace { order: 0; }
+  .nav-label-master { order: 2; }
+  .nav-master { order: 3; }
+  .nav-wip { order: 4; }
+  .nav-menu { order: 5; }
+  .nav-label-operational { order: 6; }
+  .nav-daily { order: 7; }
+  .nav-label-preferences { order: 8; }
+  .nav-settings { order: 9; }
   .drawer-item {
     display: flex !important;
     align-items: center;
@@ -445,9 +459,7 @@
 }
 
 @media (min-width: 1440px) {
-  @media (min-width: 900px) {
-    :root { --desktop-sidebar: 276px; --desktop-gutter: clamp(36px, 3.2vw, 64px); }
-  }
+  :root { --desktop-sidebar: 276px; --desktop-gutter: clamp(36px, 3.2vw, 64px); }
 }
 
 @media (min-width: 900px) and (max-width: 1199px) {
@@ -461,11 +473,9 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  @media (min-width: 900px) {
-    .drawer-item, .guest, .reservation-card, .md-item-card, .wip-card, .menu-card {
-      transition: none !important;
-      animation: none !important;
-    }
+@media (min-width: 900px) and (prefers-reduced-motion: reduce) {
+  .drawer-item, .guest, .reservation-card, .md-item-card, .wip-card, .menu-card {
+    transition: none !important;
+    animation: none !important;
   }
 }
