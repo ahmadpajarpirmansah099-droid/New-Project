@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6f6f1">
 <title>Guest Operations — Admin</title>
-<link rel="stylesheet" href="assets/css/style.css?v=20261104-dev-scope-p4">
+<link rel="stylesheet" href="assets/css/style.css?v=20261104-custom-scope-p1">
 <link rel="stylesheet" href="assets/css/masterdata.css?v=20261103-price-card-type-p3">
 <link rel="stylesheet" href="assets/css/wip.css?v=20261103-unit-flat-p1">
 <link rel="stylesheet" href="assets/css/menu.css?v=20261103-unit-flat-p1">
@@ -42,9 +42,34 @@
     </div>
   </div>
   <div class="workspace-scope-switcher" id="workspaceScopeSwitcher" hidden aria-label="Pemilihan outlet dan divisi">
-    <label><span>OUTLET</span><select id="workspaceOutletSelect" aria-label="Pilih outlet"></select></label>
-    <label><span>DIVISI</span><select id="workspaceDivisionSelect" aria-label="Pilih divisi"></select></label>
+    <label class="scope-field">
+      <span>OUTLET</span>
+      <button class="scope-trigger" id="workspaceOutletTrigger" type="button" data-scope-type="outlet" aria-haspopup="dialog" aria-expanded="false">
+        <span data-scope-value>Memuat outlet</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <select class="scope-native-select" id="workspaceOutletSelect" aria-label="Pilih outlet" tabindex="-1" aria-hidden="true"></select>
+    </label>
+    <label class="scope-field">
+      <span>DIVISI</span>
+      <button class="scope-trigger" id="workspaceDivisionTrigger" type="button" data-scope-type="division" aria-haspopup="dialog" aria-expanded="false">
+        <span data-scope-value>Memuat divisi</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <select class="scope-native-select" id="workspaceDivisionSelect" aria-label="Pilih divisi" tabindex="-1" aria-hidden="true"></select>
+    </label>
   </div>
+  <div class="scope-picker-backdrop" id="workspaceScopeBackdrop" hidden></div>
+  <section class="scope-picker-sheet" id="workspaceScopeMenu" role="dialog" aria-modal="true" aria-labelledby="workspaceScopeMenuTitle" hidden>
+    <div class="scope-picker-grab" aria-hidden="true"></div>
+    <div class="scope-picker-header">
+      <div><span class="scope-picker-eyebrow">PENGATURAN WORKSPACE</span><h2 id="workspaceScopeMenuTitle">Pilih outlet</h2></div>
+      <button class="scope-picker-close" id="workspaceScopeClose" type="button" aria-label="Tutup pilihan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="scope-picker-options" id="workspaceScopeOptions"></div>
+  </section>
   <div class="top-actions"><button class="profile" id="authProfileButton" type="button" aria-label="Keluar dari akun" title="Keluar dari akun">AP</button><button class="auth-logout-button" id="authLogoutButton" type="button" aria-label="Keluar" title="Keluar dari akun"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg></button><button class="menu-toggle" id="menuToggle" type="button" data-action="toggleMenu" aria-label="Buka menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
 </header>
 <main class="content">
@@ -277,7 +302,7 @@
 <button class="drawer-item" data-page="settings" data-action="navigateFromMenu" data-action-args='["settings"]'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg><span>Pengaturan</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
 <button class="drawer-item" type="button" data-page="master-items" data-md-action="nav" aria-label="Master Barang"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M4 7.5 12 12l8-4.5M12 12v9M8 5.3l8 4.5"/></svg><span>Master Barang</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button><button class="drawer-item" type="button" data-page="daily-stock" data-action="navigateFromMenu" data-action-args='["daily-stock"]' aria-label="Daily SO"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3.5h6M9 9h6M9 13h6M9 17h3"/></svg><span>Daily SO</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></nav><div class="drawer-foot">ADMIN WORKSPACE</div></aside><div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="assets/js/auth.js?v=20261104-dev-scope-p4" defer></script>
+<script src="assets/js/auth.js?v=20261104-custom-scope-p1" defer></script>
 <script src="assets/js/masterdata-store.js?v=20261104-workspace-guard-v1" defer></script>
 <script src="assets/js/masterdata-service.js?v=20261103-p4" defer></script>
 <script src="assets/js/masterdata-ui.js?v=20261103-remove-guest-back-p1" defer></script>
@@ -286,7 +311,7 @@
 <script src="assets/js/menu-service.js?v=20261103-p4" defer></script>
 <script src="assets/js/menu-ui.js?v=20261104-code-tidy-p1" defer></script>
 <script src="assets/js/guestops-service.js?v=20261104-workspace-guard-v2" defer></script>
-<script src="assets/js/app.js?v=20261104-dev-scope-p4" defer></script>
+<script src="assets/js/app.js?v=20261104-custom-scope-p1" defer></script>
 <script src="assets/js/daily-stock.js?v=20261104-workspace-guard-v1" defer></script>
 </body>
 </html>
