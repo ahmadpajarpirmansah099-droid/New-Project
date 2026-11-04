@@ -61,6 +61,7 @@ function createDailyRuntime(options = {}) {
   };
   runtime.window = runtime;
   vm.createContext(runtime);
+  // Load the Daily SO service first so the UI test uses the same public entry point as the app.
   vm.runInContext(fs.readFileSync(dailyServicePath, 'utf8'), runtime, { filename: 'daily-stock-service.js' });
   vm.runInContext(fs.readFileSync(dailyUiPath, 'utf8'), runtime, { filename: 'daily-stock-ui.js' });
   return { runtime, fireSignedOut() { listeners['app:auth-signed-out']?.(); } };
