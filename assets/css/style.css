@@ -7228,3 +7228,34 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     width: 264px !important;
   }
 }
+
+
+/* Desktop sidebar: keep logout only; hamburger is not needed for fixed navigation. */
+@media (min-width: 900px) {
+  .top .menu-toggle,
+  .top-actions .menu-toggle,
+  #menuToggle {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  .top {
+    width: 264px !important;
+    justify-content: flex-start !important;
+  }
+
+  .top-actions {
+    margin-left: 0 !important;
+  }
+
+  .top-actions .auth-logout-button {
+    margin-left: 0 !important;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1200px) {
+  .top {
+    width: 264px !important;
+  }
+}
