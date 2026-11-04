@@ -562,3 +562,13 @@ function initSheetBodySwipe(){
   sheet.addEventListener('touchcancel',finishBodySwipe,{passive:true});
 }
 
+/* Keep the collapsed desktop icon rail available to assistive technology. */
+function syncDesktopMenuAccessibility() {
+  const drawer = $('menuDrawer');
+  if (!drawer) return;
+  const isDesktop = window.matchMedia('(min-width: 900px)').matches;
+  const isOpen = drawer.classList.contains('show');
+  drawer.setAttribute('aria-hidden', String(!isDesktop && !isOpen));
+}
+window.addEventListener('resize', syncDesktopMenuAccessibility, { passive: true });
+syncDesktopMenuAccessibility();
