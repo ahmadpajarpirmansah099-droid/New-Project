@@ -60,6 +60,7 @@
       previousLines:previousLinesResult.data || [],
       history:historyResult.data || [], date:state.date
     };
+    if (state.data.count?.status === 'draft') await refreshDraftCountSnapshot();
     return state.data;
   }
 
@@ -70,7 +71,7 @@
       cost:Number(item.harga_beli_terakhir_per_satuan_dasar || item.harga_per_satuan_dasar || 0),
       active:item.status === 'active'
     }));
-    const wips = state.catalog.wips.map((item) => ({
+    const wips = (divisionIsService() ? [] : state.catalog.wips).map((item) => ({
       key:stockKey('wip', item.id), kind:'wip', id:item.id,
       name:item.nama_wip, unit:item.satuan_hasil, factor:1,
       cost:Number(root.WipService?.calculateHpp(item.id)?.hpp_per_yield || 0),
@@ -91,6 +92,56 @@
       });
     });
     return map;
+  }
+
+  async function refreshDraftCountSnapshot() {
+    if (!state.data?.count || state.data.count.status !== 'draft') return;
+    const movements = movementsByKey();
+    const previous = new Map(state.data.previousLines.map((line) => [
+      stockKey(line.stock_kind, line.stock_kind === 'wip' ? line.wip_recipe_id : line.item_id),
+      Number(line.physical_closing_quantity || 0)
+    ]));
+    const existing = new Map(state.data.countLines.map((line) => [
+      stockKey(line.stock_kind, line.stock_kind === 'wip' ? line.wip_recipe_id : line.item_id), line
+    ]));
+    const inserts = [];
+    const updates = [];
+    catalogRows().forEach((row) => {
+      const movement = movements.get(row.key) || { inbound:0, outbound:0 };
+      const snapshot = {
+        opening_quantity:previous.has(row.key) ? previous.get(row.key) : 0,
+        inbound_quantity:movement.inbound,
+        outbound_quantity:movement.outbound
+      };
+      const line = existing.get(row.key);
+      if (!line) {
+        inserts.push({
+          count_id:state.data.count.id, workspace_id:state.context.workspaceId,
+          count_division_id:state.context.activeDivisionId, stock_division_id:state.context.activeDivisionId,
+          stock_kind:row.kind, item_id:row.kind === 'wip' ? null : row.id,
+          wip_recipe_id:row.kind === 'wip' ? row.id : null,
+          unit_name_snapshot:row.unit, ...snapshot, unit_cost_snapshot:row.cost || null
+        });
+      } else if (
+        Number(line.opening_quantity) !== snapshot.opening_quantity ||
+        Number(line.inbound_quantity) !== snapshot.inbound_quantity ||
+        Number(line.outbound_quantity) !== snapshot.outbound_quantity
+      ) {
+        updates.push(state.client.from('daily_stock_count_lines').update(snapshot).eq('id',line.id));
+      }
+    });
+    const results = await Promise.all(updates);
+    const failed = results.find((result) => result.error);
+    if (failed) throw failed.error;
+    if (inserts.length) {
+      const result = await state.client.from('daily_stock_count_lines').insert(inserts);
+      if (result.error) throw result.error;
+    }
+    if (updates.length || inserts.length) {
+      const refreshed = await state.client.from('daily_stock_count_lines').select('*').eq('count_id',state.data.count.id).order('created_at');
+      if (refreshed.error) throw refreshed.error;
+      state.data.countLines = refreshed.data || [];
+    }
   }
 
   function buildRows() {
