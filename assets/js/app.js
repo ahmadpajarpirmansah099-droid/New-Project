@@ -131,6 +131,15 @@ function returnToGuestOperational() {
   go('dashboard');
 }
 
+function openDashboardQueue() {
+  go('dashboard');
+  const page = $('page-dashboard');
+  if (!page || !page.classList.contains('active')) return;
+  const queueHeading = page.querySelector('.section-head');
+  const queueList = $('dashboardList');
+  (queueHeading || queueList)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function setWorkspaceHeader(page) {
   const isMasterWorkspace = ['master-items', 'wips', 'menus', 'all-divisions', 'daily-stock'].includes(page);
   const mark = $('workspaceBrandmark');
@@ -190,6 +199,9 @@ function applyRoleNavigation() {
   });
   document.querySelectorAll('.quick-menu-item[data-quick-context="guest"]').forEach(item => {
     item.style.display = canUseGuestOps ? '' : 'none';
+  });
+  document.querySelectorAll('[data-desktop-nav-role="guest"]').forEach(group => {
+    group.hidden = !canUseGuestOps;
   });
 }
 
