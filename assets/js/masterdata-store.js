@@ -1,12 +1,14 @@
 (function (root) {
   'use strict';
 
-  const MODULE_KEY = 'master_data';
+  const MODULE_KEY_PREFIX = 'master_data:';
   const TEST_KEY = 'guestops_masterdata_demo_v1';
   const SCHEMA_VERSION = 1;
   const ARRAY_FIELDS = ['masterItems', 'wips', 'wipRecipeLines', 'menus', 'menuRecipeLines'];
   let client = null;
   let workspaceId = null;
+  let divisionId = null;
+  let moduleKey = null;
   let cache = createEmpty();
   let ready = false;
   let writeQueue = Promise.resolve();
@@ -43,19 +45,26 @@
     return normalized;
   }
 
-  async function initialize(supabaseClient, selectedWorkspaceId) {
-    if (!supabaseClient || !selectedWorkspaceId) throw new Error('Koneksi Master Data belum siap.');
+  async function initialize(supabaseClient, selectedWorkspaceId, selectedDivisionId) {
+    if (!supabaseClient || !selectedWorkspaceId || !selectedDivisionId) {
+      throw new Error('Workspace atau divisi Master Data belum siap.');
+    }
     client = supabaseClient;
     workspaceId = selectedWorkspaceId;
+    divisionId = selectedDivisionId;
+    moduleKey = MODULE_KEY_PREFIX + divisionId;
+
     try {
       if (root.document && root.localStorage) root.localStorage.removeItem(TEST_KEY);
     } catch (error) {
       console.warn('Legacy Master Data browser data could not be cleared:', error);
     }
+
     const result = await client.from('workspace_module_state')
       .select('payload')
       .eq('workspace_id', workspaceId)
-      .eq('module_key', MODULE_KEY)
+      .eq('module_key', moduleKey)
+      .eq('division_id', divisionId)
       .maybeSingle();
     if (result.error) throw result.error;
     cache = result.data ? normalizeData(result.data.payload) : createEmpty();
@@ -65,7 +74,7 @@
 
   function load() {
     if (!ready && !root.document && root.localStorage) {
-      let raw = root.localStorage.getItem(TEST_KEY);
+      const raw = root.localStorage.getItem(TEST_KEY);
       if (raw === null) {
         const empty = createEmpty();
         root.localStorage.setItem(TEST_KEY, JSON.stringify(empty));
@@ -89,17 +98,23 @@
       root.localStorage.setItem(TEST_KEY, JSON.stringify(normalized));
       return normalized;
     }
-    if (!ready || !client || !workspaceId) {
+    if (!ready || !client || !workspaceId || !divisionId || !moduleKey) {
       throw new Error('Master Data belum tersambung ke database. Muat ulang halaman.');
     }
-    if (root.AppAuth?.getContext()?.role === 'service') {
+
+    const authContext = root.AppAuth?.getContext();
+    if (authContext?.role === 'service') {
       throw new Error('Role Service hanya dapat melihat Master Data.');
     }
+    if (authContext?.activeDivisionId !== divisionId) {
+      throw new Error('Divisi aktif berubah. Muat ulang halaman sebelum menyimpan.');
+    }
 
-    writeQueue = writeQueue.then(async function () {
+    writeQueue = writeQueue.catch(() => undefined).then(async function () {
       const result = await client.from('workspace_module_state').upsert({
         workspace_id: workspaceId,
-        module_key: MODULE_KEY,
+        module_key: moduleKey,
+        division_id: divisionId,
         payload: normalized,
         updated_at: normalized.updated_at
       }, { onConflict: 'workspace_id,module_key' });
@@ -123,7 +138,7 @@
   }
 
   root.MasterDataStore = {
-    key: MODULE_KEY,
+    key: () => moduleKey,
     schemaVersion: SCHEMA_VERSION,
     createEmpty,
     initialize,
@@ -131,6 +146,7 @@
     save,
     flush,
     createId,
-    isReady: () => ready
+    isReady: () => ready,
+    divisionId: () => divisionId
   };
 })(window);
