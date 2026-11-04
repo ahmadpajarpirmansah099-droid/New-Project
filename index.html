@@ -40,13 +40,13 @@
       <div class="brandmeta" id="workspaceBrandmeta">ADMIN WORKSPACE</div>
     </div>
   </div>
-  <div class="top-actions"><button class="profile" id="authProfileButton" type="button" aria-label="Keluar dari akun" title="Keluar dari akun">AP</button><button class="auth-logout-button" id="authLogoutButton" type="button" aria-label="Keluar" title="Keluar dari akun"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg></button><button class="menu-toggle" id="menuToggle" type="button" onclick="toggleMenu()" aria-label="Buka menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
+  <div class="top-actions"><button class="profile" id="authProfileButton" type="button" aria-label="Keluar dari akun" title="Keluar dari akun">AP</button><button class="auth-logout-button" id="authLogoutButton" type="button" aria-label="Keluar" title="Keluar dari akun"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg></button><button class="menu-toggle" id="menuToggle" type="button" data-action="toggleMenu" aria-label="Buka menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
 </header>
 <main class="content">
   <section class="page active" id="page-dashboard">
     <div class="greeting"><div><div class="eyebrow">Admin</div><h1>Selamat datang.</h1></div><div class="date" id="dateLabel">Hari ini</div></div>
-    <button class="history-date operational-date-trigger" type="button" onclick="openHistoryDatePicker()" aria-label="Pilih tanggal operasional"><span class="history-date-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span><span class="history-date-copy"><small>Tanggal operasional</small><strong id="dashboardDateLabel">Pilih tanggal</strong></span><span class="history-date-chevron">⌄</span></button>
-    <div class="hero hero-detail-trigger" role="button" tabindex="0" aria-label="Buka detail operasional hari ini" onclick="openOperationalDetail()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openOperationalDetail()}"><div class="hero-head"><span class="hero-label">Total tamu pada tanggal dipilih</span><span class="hero-action" aria-hidden="true">↗</span></div><div class="hero-total" id="totalCount">0</div><div class="hero-foot"><span><b id="packCount">0</b> total pack</span><span><b id="avgWait">—</b> rata-rata tunggu</span></div></div>
+    <button class="history-date operational-date-trigger" type="button" data-action="openHistoryDatePicker" aria-label="Pilih tanggal operasional"><span class="history-date-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span><span class="history-date-copy"><small>Tanggal operasional</small><strong id="dashboardDateLabel">Pilih tanggal</strong></span><span class="history-date-chevron">⌄</span></button>
+    <div class="hero hero-detail-trigger" role="button" tabindex="0" aria-label="Buka detail operasional hari ini" data-action="openOperationalDetail" data-keydown-action="openOperationalDetail"><div class="hero-head"><span class="hero-label">Total tamu pada tanggal dipilih</span><span class="hero-action" aria-hidden="true">↗</span></div><div class="hero-total" id="totalCount">0</div><div class="hero-foot"><span><b id="packCount">0</b> total pack</span><span><b id="avgWait">—</b> rata-rata tunggu</span></div></div>
     <div class="metrics">
       <div class="metric"><div class="metric-top"><span class="eyebrow">Menunggu</span><span class="metric-icon i-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div><strong id="waitingCount">0</strong><small>Antrean aktif</small></div>
       <div class="metric"><div class="metric-top"><span class="eyebrow">Selesai</span><span class="metric-icon i-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg></span></div><strong id="doneCount">0</strong><small>Kunjungan selesai</small></div>
@@ -54,54 +54,54 @@
     </div>
     
     <div id="pendingWrap"></div>
-    <div class="section-head"><h2>Antrean aktif</h2><button class="text-btn" onclick="go('waiting')">Lihat semua →</button></div>
+    <div class="section-head"><h2>Antrean aktif</h2><button class="text-btn" data-action="go" data-action-args='["waiting"]'>Lihat semua →</button></div>
     <div class="queue-list" id="dashboardList"></div>
   </section>
   <section class="page" id="page-waiting">
-    <button class="page-back" type="button" onclick="returnToGuestOperational()" aria-label="Kembali ke Guest Operational"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>
+    <button class="page-back" type="button" data-action="returnToGuestOperational" aria-label="Kembali ke Guest Operational"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>
     <div class="page-title">Waiting List</div><p class="page-sub">Kelola tamu dan status antrean pada tanggal dipilih.</p>
-    <button class="history-date operational-date-trigger" type="button" onclick="openHistoryDatePicker()" aria-label="Pilih tanggal antrean"><span class="history-date-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span><span class="history-date-copy"><small>Tanggal antrean</small><strong id="queueDateLabel">Pilih tanggal</strong></span><span class="history-date-chevron">⌄</span></button>
-    <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input id="queueSearch" placeholder="Cari nama atau nomor antrean..." oninput="renderQueue()"></div>
-    <div class="filters" id="queueFilters"><button class="filter active" data-filter="waiting" onclick="setFilter('waiting')">Menunggu</button><button class="filter" data-filter="seated" onclick="setFilter('seated')">Duduk</button><button class="filter" data-filter="done" onclick="setFilter('done')">Selesai</button><button class="filter" data-filter="cancelled" onclick="setFilter('cancelled')">Batal</button></div>
+    <button class="history-date operational-date-trigger" type="button" data-action="openHistoryDatePicker" aria-label="Pilih tanggal antrean"><span class="history-date-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span><span class="history-date-copy"><small>Tanggal antrean</small><strong id="queueDateLabel">Pilih tanggal</strong></span><span class="history-date-chevron">⌄</span></button>
+    <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input id="queueSearch" placeholder="Cari nama atau nomor antrean..." data-input-action="renderQueue"></div>
+    <div class="filters" id="queueFilters"><button class="filter active" data-filter="waiting" data-action="setFilter" data-action-args='["waiting"]'>Menunggu</button><button class="filter" data-filter="seated" data-action="setFilter" data-action-args='["seated"]'>Duduk</button><button class="filter" data-filter="done" data-action="setFilter" data-action-args='["done"]'>Selesai</button><button class="filter" data-filter="cancelled" data-action="setFilter" data-action-args='["cancelled"]'>Batal</button></div>
     <div class="queue-list" id="queueList"></div>
   </section>
   <section class="page" id="page-history">
-    <button class="page-back" type="button" onclick="returnToGuestOperational()" aria-label="Kembali ke Guest Operational"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>
+    <button class="page-back" type="button" data-action="returnToGuestOperational" aria-label="Kembali ke Guest Operational"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>
     <div class="page-title">Riwayat</div><p class="page-sub">Semua antrean berdasarkan tanggal pendaftaran.</p>
-    <button class="history-date" id="historyDateDisplay" type="button" onclick="openHistoryDatePicker()" aria-label="Pilih tanggal riwayat">
+    <button class="history-date" id="historyDateDisplay" type="button" data-action="openHistoryDatePicker" aria-label="Pilih tanggal riwayat">
       <span class="history-date-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span>
       <span class="history-date-copy"><small>Tanggal riwayat</small><strong id="historyDateLabel">Pilih tanggal</strong></span>
       <svg class="history-date-chevron" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
     </button>
     <input id="historyDate" type="hidden">
-    <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input id="historySearch" placeholder="Cari nama tamu..." oninput="renderHistory()"></div>
+    <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input id="historySearch" placeholder="Cari nama tamu..." data-input-action="renderHistory"></div>
     <div class="queue-list" id="historyList"></div>
   </section>
   <section class="page" id="page-reservations">
-    <button class="page-back" type="button" onclick="returnToGuestOperational()" aria-label="Kembali ke Guest Operational"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>
+    <button class="page-back" type="button" data-action="returnToGuestOperational" aria-label="Kembali ke Guest Operational"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>
     <div class="page-title">Reservasi</div><p class="page-sub">Kelola jadwal kedatangan dan tamu yang sudah memesan.</p>
     <div class="reservation-toolbar">
       <div class="reservation-toolbar-heading">
         <span class="eyebrow">KALENDER RESERVASI</span>
-        <button class="reservation-today-button" type="button" onclick="goReservationToday()">Hari ini</button>
+        <button class="reservation-today-button" type="button" data-action="goReservationToday">Hari ini</button>
       </div>
       <div class="reservation-toolbar-month">
         <strong id="reservationMonthLabel"></strong>
         <div class="reservation-month-nav">
-          <button type="button" onclick="changeReservationMonth(-1)" aria-label="Bulan sebelumnya">‹</button>
-          <button type="button" onclick="changeReservationMonth(1)" aria-label="Bulan berikutnya">›</button>
+          <button type="button" data-action="changeReservationMonth" data-action-args='[-1]' aria-label="Bulan sebelumnya">‹</button>
+          <button type="button" data-action="changeReservationMonth" data-action-args='[1]' aria-label="Bulan berikutnya">›</button>
         </div>
       </div>
     </div>
     <div class="reservation-legend"><span><i class="r-dot waiting"></i> Menunggu</span><span><i class="r-dot seated"></i> Duduk</span><span><i class="r-dot cancelled"></i> Batal</span></div>
     <div class="reservation-calendar" id="reservationCalendar"></div>
-    <div class="reservation-day-head"><div><h2 id="reservationDateLabel"></h2><p id="reservationCount"></p></div><button class="primary" onclick="openReservationForm()">+ Reservasi</button></div>
+    <div class="reservation-day-head"><div><h2 id="reservationDateLabel"></h2><p id="reservationCount"></p></div><button class="primary" data-action="openReservationForm">+ Reservasi</button></div>
     <div class="reservation-list" id="reservationList"></div>
   </section>
   <section class="page" id="page-settings">
     <div class="page-title">Pengaturan</div><p class="page-sub">Informasi outlet dan preferensi operasional.</p>
     <div class="settings-card">
-      <div class="setting-row"><div class="setting-icon">⌖</div><div class="setting-copy"><b>Outlet aktif</b><small>Outlet utama · Satu outlet</small></div><span style="font-size:10px;color:#15966a;font-weight:800">AKTIF</span></div>
+      <div class="setting-row"><div class="setting-icon">⌖</div><div class="setting-copy"><b>Outlet aktif</b><small>Outlet utama · Satu outlet</small></div><span class="settings-status-active">AKTIF</span></div>
       <div class="setting-row"><div class="setting-icon">◷</div><div class="setting-copy"><b>Reset nomor antrean</b><small>Otomatis setiap pukul 00.00 WIB</small></div></div>
       <div class="setting-row"><div class="setting-icon">#</div><div class="setting-copy"><b>Format nomor</b><small>WL-001, WL-002, WL-003...</small></div></div>
     </div>
@@ -112,18 +112,18 @@
           <b>Durasi Seating Time</b>
           <div class="seating-setting-control">
             <div class="seating-stepper" role="group" aria-label="Atur durasi Seating Time">
-              <button class="seating-step-button" type="button" onclick="adjustSeatingDuration(-1)" aria-label="Kurangi satu menit">−</button>
+              <button class="seating-step-button" type="button" data-action="adjustSeatingDuration" data-action-args='[-1]' aria-label="Kurangi satu menit">−</button>
               <input id="seatingDurationInput" type="text" inputmode="none" value="30" readonly aria-label="Durasi Seating Time dalam menit">
-              <button class="seating-step-button" type="button" onclick="adjustSeatingDuration(1)" aria-label="Tambah satu menit">+</button>
+              <button class="seating-step-button" type="button" data-action="adjustSeatingDuration" data-action-args='[1]' aria-label="Tambah satu menit">+</button>
             </div>
             <span>menit</span>
-            <button type="button" onclick="saveSeatingDuration()">Simpan</button>
+            <button type="button" data-action="saveSeatingDuration">Simpan</button>
           </div>
         </div>
       </div>
     </div>
     <div class="settings-card">
-      <div class="setting-row"><div class="setting-icon">⇩</div><div class="setting-copy"><b>Ekspor data</b><small>Unduh data antrean hari ini dalam CSV</small></div><button onclick="exportCSV()">Ekspor</button></div>
+      <div class="setting-row"><div class="setting-icon">⇩</div><div class="setting-copy"><b>Ekspor data</b><small>Unduh data antrean hari ini dalam CSV</small></div><button data-action="exportCSV">Ekspor</button></div>
     </div>
     <div class="empty"><div class="empty-icon">✦</div><h3>Penyimpanan workspace</h3><p>Data Guest Operations, Master Barang, WIP, dan Menu disimpan di workspace Supabase dan mengikuti izin akun.</p></div>
   </section>
@@ -138,97 +138,97 @@
     <div id="menuDataRoot"></div>
   </section>
 </main>
-<button class="fab" id="fab" type="button" onclick="toggleQuickMenu()" aria-label="Buka menu cepat" aria-expanded="false" aria-controls="quickMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<button class="fab" id="fab" type="button" data-action="toggleQuickMenu" aria-label="Buka menu cepat" aria-expanded="false" aria-controls="quickMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 
 </div>
 <!-- Quick actions use Lucide Icons. Keep all future interface icons from Lucide. -->
-<div class="quick-menu-backdrop" id="quickMenuBackdrop" onclick="closeQuickMenu()" aria-hidden="true"></div>
+<div class="quick-menu-backdrop" id="quickMenuBackdrop" data-action="closeQuickMenu" aria-hidden="true"></div>
 <nav class="quick-menu" id="quickMenu" aria-label="Guest Operational" aria-hidden="true">
   <div class="quick-menu-heading">GUEST OPERATIONAL</div>
-  <button class="quick-menu-item" data-quick-context="guest" type="button" onclick="runQuickAction('waiting')">
+  <button class="quick-menu-item" data-quick-context="guest" type="button" data-action="runQuickAction" data-action-args='["waiting"]'>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg>
     <span>Antrean</span>
     <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
   </button>
-  <button class="quick-menu-item" data-quick-context="guest" type="button" onclick="runQuickAction('history')">
+  <button class="quick-menu-item" data-quick-context="guest" type="button" data-action="runQuickAction" data-action-args='["history"]'>
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
     <span>Riwayat</span>
     <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
   </button>
-  <button class="quick-menu-item" data-quick-context="guest" type="button" onclick="runQuickAction('reservations')">
+  <button class="quick-menu-item" data-quick-context="guest" type="button" data-action="runQuickAction" data-action-args='["reservations"]'>
     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18M8 15h.01M12 15h.01M16 15h.01M8 18h.01M12 18h.01"/></svg>
     <span>Reservasi</span>
     <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
   </button>
-  <button class="quick-menu-item" data-quick-context="guest" type="button" onclick="runQuickAction('add')">
+  <button class="quick-menu-item" data-quick-context="guest" type="button" data-action="runQuickAction" data-action-args='["add"]'>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>
     <span>Tambah Tamu</span>
     <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
   </button>
-  <button class="quick-menu-item" data-quick-context="master" type="button" onclick="runQuickAction('wips')">
+  <button class="quick-menu-item" data-quick-context="master" type="button" data-action="runQuickAction" data-action-args='["wips"]'>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 8 4-8 4-8-4 8-4Z"/><path d="m4 10 8 4 8-4"/><path d="m4 14 8 4 8-4"/></svg>
     <span>Resep WIP</span>
     <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
   </button>
-  <button class="quick-menu-item" data-quick-context="master" type="button" onclick="runQuickAction('menus')">
+  <button class="quick-menu-item" data-quick-context="master" type="button" data-action="runQuickAction" data-action-args='["menus"]'>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 2v7a4 4 0 0 0 4 4v9"/><path d="M7 2v7"/><path d="M11 2v7a4 4 0 0 1-4 4"/><path d="M17 2v20"/><path d="M17 2a4 4 0 0 1 4 4v5h-4"/></svg>
     <span>Menu</span>
     <svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
   </button>
 </nav>
-<div class="sheet-backdrop" id="backdrop" onclick="closeSheet()"></div>
+<div class="sheet-backdrop" id="backdrop" data-action="closeSheet"></div>
 <div class="sheet" id="sheet"><div class="sheet-handle-row"><button class="handle" id="sheetHandle" type="button" aria-label="Tarik ke bawah untuk menutup"></button></div><div id="sheetContent"></div></div>
-<div class="calendar-backdrop" id="calendarBackdrop" onclick="closeHistoryDatePicker()"></div>
+<div class="calendar-backdrop" id="calendarBackdrop" data-action="closeHistoryDatePicker"></div>
 <section class="calendar-dialog" id="historyCalendarDialog" role="dialog" aria-modal="true" aria-labelledby="calendarTitle">
   <div class="calendar-dialog-head">
     <div><span class="calendar-eyebrow">FILTER OPERASIONAL</span><h2 id="calendarTitle">Pilih tanggal operasional</h2></div>
-    <button class="calendar-close" type="button" onclick="closeHistoryDatePicker()" aria-label="Tutup kalender">×</button>
+    <button class="calendar-close" type="button" data-action="closeHistoryDatePicker" aria-label="Tutup kalender">×</button>
   </div>
   <div class="calendar-selected">
     <small>Tanggal dipilih</small>
     <strong id="calendarSelectedLabel">1 November 2026</strong>
   </div>
   <div class="calendar-monthbar">
-    <button type="button" onclick="changeHistoryCalendarMonth(-1)" aria-label="Bulan sebelumnya"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+    <button type="button" data-action="changeHistoryCalendarMonth" data-action-args='[-1]' aria-label="Bulan sebelumnya"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
     <strong id="calendarMonthLabel">November 2026</strong>
-    <button type="button" onclick="changeHistoryCalendarMonth(1)" aria-label="Bulan berikutnya"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+    <button type="button" data-action="changeHistoryCalendarMonth" data-action-args='[1]' aria-label="Bulan berikutnya"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
   </div>
   <div class="calendar-weekdays"><span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span></div>
   <div class="calendar-days" id="historyCalendarDays"></div>
   <div class="calendar-dialog-actions">
-    <button class="calendar-today" type="button" onclick="selectTodayInHistoryCalendar()">Hari ini</button>
-    <button class="calendar-apply" type="button" onclick="applyHistoryCalendarDate()">Terapkan tanggal</button>
+    <button class="calendar-today" type="button" data-action="selectTodayInHistoryCalendar">Hari ini</button>
+    <button class="calendar-apply" type="button" data-action="applyHistoryCalendarDate">Terapkan tanggal</button>
   </div>
 </section>
 
-<div class="calendar-backdrop" id="reservationDateBackdrop" onclick="closeReservationDatePicker()"></div>
+<div class="calendar-backdrop" id="reservationDateBackdrop" data-action="closeReservationDatePicker"></div>
 <section class="calendar-dialog reservation-date-dialog" id="reservationDateDialog" role="dialog" aria-modal="true" aria-labelledby="reservationDatePickerTitle">
   <div class="calendar-dialog-head">
     <div><span class="calendar-eyebrow">RESERVASI</span><h2 id="reservationDatePickerTitle">Pilih tanggal</h2></div>
-    <button class="calendar-close" type="button" onclick="closeReservationDatePicker()" aria-label="Tutup kalender">×</button>
+    <button class="calendar-close" type="button" data-action="closeReservationDatePicker" aria-label="Tutup kalender">×</button>
   </div>
   <div class="calendar-selected">
     <small>Tanggal dipilih</small>
     <strong id="reservationDateSelectedLabel"></strong>
   </div>
   <div class="calendar-monthbar">
-    <button type="button" id="reservationDatePrev" onclick="changeReservationDatePickerMonth(-1)" aria-label="Bulan sebelumnya"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+    <button type="button" id="reservationDatePrev" data-action="changeReservationDatePickerMonth" data-action-args='[-1]' aria-label="Bulan sebelumnya"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
     <strong id="reservationDateMonthLabel"></strong>
-    <button type="button" onclick="changeReservationDatePickerMonth(1)" aria-label="Bulan berikutnya"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+    <button type="button" data-action="changeReservationDatePickerMonth" data-action-args='[1]' aria-label="Bulan berikutnya"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
   </div>
   <div class="calendar-weekdays"><span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span></div>
   <div class="calendar-days" id="reservationDatePickerDays"></div>
   <div class="calendar-dialog-actions">
-    <button class="calendar-today" type="button" onclick="selectTodayForReservation()">Hari ini</button>
-    <button class="calendar-apply" type="button" onclick="applyReservationDate()">Pilih tanggal</button>
+    <button class="calendar-today" type="button" data-action="selectTodayForReservation">Hari ini</button>
+    <button class="calendar-apply" type="button" data-action="applyReservationDate">Pilih tanggal</button>
   </div>
 </section>
 
-<div class="calendar-backdrop" id="reservationTimeBackdrop" onclick="closeReservationTimePicker()"></div>
+<div class="calendar-backdrop" id="reservationTimeBackdrop" data-action="closeReservationTimePicker"></div>
 <section class="calendar-dialog reservation-time-dialog" id="reservationTimeDialog" role="dialog" aria-modal="true" aria-labelledby="reservationTimePickerTitle">
   <div class="calendar-dialog-head">
     <div><span class="calendar-eyebrow">RESERVASI</span><h2 id="reservationTimePickerTitle">Pilih jam</h2></div>
-    <button class="calendar-close" type="button" onclick="closeReservationTimePicker()" aria-label="Tutup pemilih jam">×</button>
+    <button class="calendar-close" type="button" data-action="closeReservationTimePicker" aria-label="Tutup pemilih jam">×</button>
   </div>
   <div class="reservation-time-display">
     <small>WAKTU KEDATANGAN</small>
@@ -238,30 +238,30 @@
   <div class="reservation-time-controls">
     <div class="reservation-time-unit">
       <label for="reservationTimeHour">Jam</label>
-      <button type="button" onclick="adjustReservationTime('hour',1)" aria-label="Tambah jam">+</button>
-      <input id="reservationTimeHour" type="text" inputmode="numeric" maxlength="2" value="19" oninput="syncReservationTimePreview()" aria-label="Jam">
-      <button type="button" onclick="adjustReservationTime('hour',-1)" aria-label="Kurangi jam">−</button>
+      <button type="button" data-action="adjustReservationTime" data-action-args='["hour",1]' aria-label="Tambah jam">+</button>
+      <input id="reservationTimeHour" type="text" inputmode="numeric" maxlength="2" value="19" data-input-action="syncReservationTimePreview" aria-label="Jam">
+      <button type="button" data-action="adjustReservationTime" data-action-args='["hour",-1]' aria-label="Kurangi jam">−</button>
     </div>
     <div class="reservation-time-unit">
       <label for="reservationTimeMinute">Menit</label>
-      <button type="button" onclick="adjustReservationTime('minute',1)" aria-label="Tambah lima menit">+</button>
-      <input id="reservationTimeMinute" type="text" inputmode="numeric" maxlength="2" value="00" oninput="syncReservationTimePreview()" aria-label="Menit">
-      <button type="button" onclick="adjustReservationTime('minute',-1)" aria-label="Kurangi lima menit">−</button>
+      <button type="button" data-action="adjustReservationTime" data-action-args='["minute",1]' aria-label="Tambah lima menit">+</button>
+      <input id="reservationTimeMinute" type="text" inputmode="numeric" maxlength="2" value="00" data-input-action="syncReservationTimePreview" aria-label="Menit">
+      <button type="button" data-action="adjustReservationTime" data-action-args='["minute",-1]' aria-label="Kurangi lima menit">−</button>
     </div>
   </div>
   <div class="calendar-dialog-actions">
-    <button class="calendar-today" type="button" onclick="closeReservationTimePicker()">Batal</button>
-    <button class="calendar-apply" type="button" onclick="applyReservationTime()">Gunakan jam</button>
+    <button class="calendar-today" type="button" data-action="closeReservationTimePicker">Batal</button>
+    <button class="calendar-apply" type="button" data-action="applyReservationTime">Gunakan jam</button>
   </div>
 </section>
 
 <!-- Navigation icons: Lucide Icons (https://lucide.dev). Use Lucide for every new icon. -->
-<div class="menu-backdrop" id="menuBackdrop" onclick="closeMenu()"></div>
+<div class="menu-backdrop" id="menuBackdrop" data-action="closeMenu"></div>
 <aside class="menu-drawer" id="menuDrawer" aria-label="Navigasi utama" aria-hidden="true">
-<div class="drawer-head"><div><span class="drawer-kicker">MENU UTAMA</span><strong>Guest Operations</strong></div><button type="button" class="drawer-close" onclick="closeMenu()" aria-label="Tutup menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+<div class="drawer-head"><div><span class="drawer-kicker">MENU UTAMA</span><strong>Guest Operations</strong></div><button type="button" class="drawer-close" data-action="closeMenu" aria-label="Tutup menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
 <nav class="drawer-nav">
-<button class="drawer-item active" data-page="dashboard" onclick="navigateFromMenu('dashboard')" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Guest Operational</span></button>
-<button class="drawer-item" data-page="settings" onclick="navigateFromMenu('settings')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg><span>Pengaturan</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+<button class="drawer-item active" data-page="dashboard" data-action="navigateFromMenu" data-action-args='["dashboard"]' aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Guest Operational</span></button>
+<button class="drawer-item" data-page="settings" data-action="navigateFromMenu" data-action-args='["settings"]'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg><span>Pengaturan</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
 <button class="drawer-item" type="button" data-page="master-items" data-md-action="nav" aria-label="Master Barang"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M4 7.5 12 12l8-4.5M12 12v9M8 5.3l8 4.5"/></svg><span>Master Barang</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></nav><div class="drawer-foot">ADMIN WORKSPACE</div></aside><div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="assets/js/auth.js?v=20261103-auth-login-p1" defer></script>
