@@ -1,7 +1,7 @@
 (function (root) {
   'use strict';
   const MODULE_KEY_PREFIX = 'master_data:';
-  const TEST_KEY = 'guestops_masterdata_demo_v1';
+  const LEGACY_TEST_KEY = 'guestops_masterdata_demo_v1';
   const SCHEMA_VERSION = 1;
   const ARRAY_FIELDS = ['masterItems', 'wips', 'wipRecipeLines', 'menus', 'menuRecipeLines'];
   let client = null, workspaceId = null, divisionId = null, moduleKey = null;
@@ -100,7 +100,7 @@
     cache = createEmpty();
 
     try {
-      if (root.document && root.localStorage) root.localStorage.removeItem(TEST_KEY);
+      if (root.document && root.localStorage) root.localStorage.removeItem(LEGACY_TEST_KEY);
     } catch (error) {
       console.warn('Legacy Master Data browser data could not be cleared:', error);
     }
@@ -122,26 +122,14 @@
   }
 
   function load() {
-    if (!ready && !root.document && root.localStorage) {
-      const raw = root.localStorage.getItem(TEST_KEY);
-      if (raw === null) {
-        const empty = createEmpty();
-        root.localStorage.setItem(TEST_KEY, JSON.stringify(empty));
-        return cache = empty;
-      }
-      try { return cache = normalizeData(JSON.parse(raw)); }
-      catch (error) { throw new Error('Data Master Data tidak bisa dibaca. Data lama tidak dihapus.'); }
-    }
     return cache;
   }
 
   function save(value) {
     const normalized = normalizeData(value);
     normalized.updated_at = new Date().toISOString();
-    if (!ready && !root.document && root.localStorage) {
-      root.localStorage.setItem(TEST_KEY, JSON.stringify(normalized));
-      return cache = normalized;
-    }
+    // Non-browser runtime is used only by isolated unit tests; keep its state in memory.
+    if (!ready && !root.document) return cache = normalized;
     if (!ready || !client || !workspaceId || !divisionId || !moduleKey) {
       throw new Error('Master Data belum tersambung ke database. Muat ulang halaman.');
     }
