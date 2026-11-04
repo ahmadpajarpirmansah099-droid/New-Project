@@ -6,7 +6,7 @@
   const number = (value) => new Intl.NumberFormat('id-ID', { maximumFractionDigits: 3 }).format(Number(value) || 0);
   const escapeHtml = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
   const dateKey = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-  const state = { client:null, context:null, catalog:null, date:dateKey(), tab:'overview', data:null, busy:false, initialized:false };
+  const state = { client:null, context:null, catalog:null, date:dateKey(), expenseDate:dateKey(), tab:'overview', data:null, busy:false, initialized:false };
 
   function stockKey(kind, id) { return kind + ':' + id; }
   function itemKind(item) { return item.is_supply ? 'supply' : 'material'; }
@@ -332,6 +332,7 @@
     const header = await state.client.from('inventory_transactions').insert({
       workspace_id:state.context.workspaceId, division_id:state.context.activeDivisionId,
       transaction_date:state.date, transaction_type:txType, reference_code:form.reference || null,
+      expense_category:type === 'expense' ? (form.category || null) : null,
       notes:form.notes || null
     }).select('*').single();
     if (header.error) throw header.error;
@@ -451,7 +452,7 @@
   }
 
   function syncUnitOptions() {
-    const form = $('dsTransactionForm');
+    const form = $('dsTransactionForm') || $('dsExpenseForm');
     if (!form) return;
     const item = getItem(form.elements.itemId?.value);
     const select = form.querySelector('[data-unit-select]');
@@ -460,10 +461,54 @@
     select.value = item.satuan_dasar;
   }
 
+  async function goToExpensePage() {
+    if (!state.initialized && !(await initialize())) { root.toast?.('Data divisi belum siap. Muat ulang halaman.'); return; }
+    state.catalog = root.MasterDataStore?.isReady() ? root.MasterDataStore.load() : state.catalog;
+    state.date = dateKey();
+    await load(state.date);
+    root.go('daily-expense');
+  }
+
+  async function renderExpensePage() {
+    const target = $('dailyExpenseRoot');
+    if (!target || !state.initialized) return;
+    const items = state.catalog.masterItems.filter((item) => item.status === 'active' && !item.is_supply);
+    const options = items.map((item) => '<option value="' + item.id + '">' + escapeHtml(item.nama_barang) + '</option>').join('');
+    const categories = ['Kalibrasi','Waste','QC','R&D','MOVE','SUPLIES','LAINNYA'];
+    const categoryOptions = categories.map((category) => '<option value="' + category + '">' + category + '</option>').join('');
+    target.innerHTML = '<div class="ds-page ds-expense-page"><div class="ds-expense-intro"><button type="button" class="ds-light ds-expense-back" data-ds-action="back-daily-stock">Kembali ke Daily SO</button><span class="ds-eyebrow">STOCK OPERATIONS</span><h1>Pengeluaran</h1><p>Catat pemakaian bahan dan telusuri riwayat pengeluaran.</p></div><section class="ds-panel"><div class="ds-section-title"><div><h2>Input pengeluaran</h2><p>Tanggal transaksi otomatis mengikuti hari ini.</p></div></div><form id="dsExpenseForm" data-type="expense"><label>Kategori<select name="category" required><option value="">Pilih kategori</option>' + categoryOptions + '</select></label><label>Barang<select name="itemId" required><option value="">Pilih bahan</option>' + options + '</select></label><label>Jumlah<input name="quantity" type="number" min="0.000001" step="any" inputmode="decimal" required placeholder="Masukkan jumlah"></label><label>Satuan<select name="unit" data-unit-select required><option value="">Pilih barang dulu</option></select></label><label>Referensi <span>(opsional)</span><input name="reference" maxlength="80" placeholder="Nomor nota / keterangan"></label><label>Catatan <span>(opsional)</span><textarea name="notes" rows="3" placeholder="Tambahkan keterangan jika perlu"></textarea></label><div class="ds-form-actions"><button type="submit" class="ds-primary">Simpan pengeluaran</button></div></form></section><section class="ds-panel"><div class="ds-section-title"><div><h2>Riwayat pengeluaran</h2><p>Otomatis menampilkan transaksi hari ini. Ubah tanggal untuk mencari riwayat lain.</p></div></div><label class="ds-date">Filter tanggal<input id="dailyExpenseDate" type="date" value="' + state.expenseDate + '"></label><div id="dailyExpenseHistory" class="ds-history-list ds-expense-history"><div class="ds-empty">Memuat riwayat...</div></div></section></div>';
+    const itemSelect = $('dsExpenseForm')?.querySelector('[name="itemId"]');
+    if (itemSelect) itemSelect.addEventListener('change', syncUnitOptions);
+    syncUnitOptions();
+    await loadExpenseHistory();
+  }
+
+  async function loadExpenseHistory() {
+    const target = $('dailyExpenseHistory');
+    if (!target) return;
+    target.innerHTML = '<div class="ds-empty">Memuat riwayat...</div>';
+    const result = await state.client.from('inventory_transactions').select('*')
+      .eq('workspace_id', state.context.workspaceId).eq('division_id', state.context.activeDivisionId)
+      .eq('transaction_type', 'expense').eq('transaction_date', state.expenseDate)
+      .neq('status', 'void').order('created_at', { ascending:false });
+    if (result.error) throw result.error;
+    const transactions = result.data || [];
+    if (!transactions.length) { target.innerHTML = '<div class="ds-empty">Belum ada pengeluaran pada tanggal ini.</div>'; return; }
+    const ids = transactions.map((tx) => tx.id);
+    const linesResult = await state.client.from('inventory_transaction_lines').select('*').in('transaction_id', ids);
+    if (linesResult.error) throw linesResult.error;
+    const linesByTransaction = new Map();
+    (linesResult.data || []).forEach((line) => { const rows = linesByTransaction.get(line.transaction_id) || []; rows.push(line); linesByTransaction.set(line.transaction_id, rows); });
+    target.innerHTML = transactions.map((tx) => {
+      const details = (linesByTransaction.get(tx.id) || []).map((line) => '<div class="ds-expense-line"><strong>' + escapeHtml(getItem(line.item_id)?.nama_barang || 'Barang tidak ditemukan') + '</strong><span>' + number(line.quantity) + ' ' + escapeHtml(line.unit_name_snapshot) + '</span></div>').join('');
+      return '<article class="ds-expense-history-card"><div class="ds-expense-history-head"><div><span class="ds-expense-category">' + escapeHtml(tx.expense_category || 'Belum dikategorikan') + '</span><strong>' + new Date(tx.created_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}) + '</strong></div><span class="ds-state ' + tx.status + '">' + (tx.status === 'posted' ? 'Tercatat' : 'Draft') + '</span></div><div class="ds-expense-lines">' + details + '</div>' + (tx.reference_code ? '<small>Referensi: ' + escapeHtml(tx.reference_code) + '</small>' : '') + (tx.notes ? '<p>' + escapeHtml(tx.notes) + '</p>' : '') + '</article>';
+    }).join('');
+  }
+
   async function runAction(action) {
     if (action === 'daily-stock') { await goToPage(); return; }
     if (action === 'stock-in') { await goToPage(); renderForm('purchase'); return; }
-    if (action === 'stock-out') { await goToPage(); renderForm('expense'); return; }
+    if (action === 'stock-out') { await goToExpensePage(); return; }
     if (action === 'stock-supplies') { await goToPage(); renderForm('supply'); return; }
     if (action === 'stock-production' && canUseSales()) { await goToPage(); renderForm('production'); return; }
     if (action === 'stock-sale' && canUseSales()) { await goToPage(); renderForm('sale'); return; }
@@ -487,7 +532,8 @@
     if (!button) return;
     const action = button.dataset.dsAction;
     try {
-      if (action === 'tab') { state.tab = button.dataset.tab || 'overview'; render(); }
+      if (action === 'back-daily-stock') { root.go('daily-stock'); }
+      else if (action === 'tab') { state.tab = button.dataset.tab || 'overview'; render(); }
       else if (action === 'start-count') { await createCount(); state.tab='count'; render(); }
       else if (action === 'save-count') { await savePhysicalCounts(); render(); root.toast?.('Hitungan fisik tersimpan.'); }
       else if (action === 'close-count') {
@@ -504,7 +550,7 @@
   }
 
   async function handleSubmit(event) {
-    const form = event.target.closest('#dsTransactionForm');
+    const form = event.target.closest('#dsTransactionForm, #dsExpenseForm');
     if (!form) return;
     event.preventDefault();
     if (state.busy) return;
@@ -515,8 +561,8 @@
       const data = new FormData(form);
       const values = Object.fromEntries(data.entries());
       await postTransaction(form.dataset.type, values);
-      $('dailyStockModal').innerHTML='';
-      state.tab='transactions'; render();
+      if (form.id === 'dsExpenseForm') { await renderExpensePage(); }
+      else { $('dailyStockModal').innerHTML=''; state.tab='transactions'; render(); }
       root.toast?.('Transaksi stok berhasil dicatat.');
     } catch (error) {
       console.error('Daily SO transaction failed:', error);
@@ -540,6 +586,7 @@
       } catch (error) { root.toast?.(error.message || 'Divisi tidak bisa diganti.'); }
       return;
     }
+    if (event.target.id === 'dailyExpenseDate') { try { state.expenseDate = event.target.value || dateKey(); await loadExpenseHistory(); } catch (error) { root.toast?.(error.message || 'Riwayat tidak bisa dimuat.'); } return; }
     if (event.target.id !== 'dailyStockDate') return;
     try { state.date = event.target.value || dateKey(); await load(state.date); render(); }
     catch (error) { root.toast?.(error.message || 'Tanggal tidak bisa dimuat.'); }
@@ -560,6 +607,11 @@
     page.id = 'page-daily-stock';
     page.innerHTML = '<div id="dailyStockRoot"></div>';
     main.appendChild(page);
+    const expensePage = document.createElement('section');
+    expensePage.className = 'page';
+    expensePage.id = 'page-daily-expense';
+    expensePage.innerHTML = '<div id="dailyExpenseRoot"></div>';
+    main.appendChild(expensePage);
 
     const quickMenu = $('quickMenu');
     if (quickMenu) {
@@ -583,6 +635,16 @@
 
     const originalGo = root.go;
     root.go = function (targetPage) {
+      if (targetPage === 'daily-expense') {
+        document.querySelectorAll('.page').forEach((element) => element.classList.remove('active'));
+        $('page-daily-expense')?.classList.add('active');
+        document.querySelectorAll('.drawer-item').forEach((item) => item.classList.remove('active'));
+        $('fab').style.display = 'grid';
+        root.setWorkspaceHeader?.('daily-expense');
+        root.scrollTo({ top:0, behavior:'auto' });
+        renderExpensePage();
+        return;
+      }
       if (targetPage === 'daily-stock') {
         if (typeof originalGo === 'function') originalGo(targetPage);
         root.setWorkspaceHeader?.('daily-stock');
@@ -595,6 +657,11 @@
 
     const originalHeader = root.setWorkspaceHeader;
     root.setWorkspaceHeader = function (targetPage) {
+      if (targetPage === 'daily-expense') {
+        const mark=$('workspaceBrandmark'), name=$('workspaceBrandname'), meta=$('workspaceBrandmeta');
+        if (mark && name && meta) { mark.classList.add('is-master'); mark.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 8h14M7 8l-3 9h8L7 8zm10 0-4 9h8l-4-9z"/></svg>'; name.textContent='PENGELUARAN'; meta.textContent='STOCK OPERATIONS'; }
+        return;
+      }
       if (targetPage === 'daily-stock') {
         const mark=$('workspaceBrandmark'), name=$('workspaceBrandname'), meta=$('workspaceBrandmeta');
         if (mark && name && meta) {
