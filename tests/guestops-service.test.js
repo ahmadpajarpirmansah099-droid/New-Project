@@ -15,7 +15,7 @@ function createRuntime() {
 
   class Query {
     constructor(table) { this.table = table; this.operation = 'select'; this.values = null; }
-    select() { this.operation = 'select'; return this; }
+    select(columns) { this.operation = 'select'; calls.push({ table: this.table, operation: this.operation, columns }); return this; }
     eq() { return this; }
     order() { return this; }
     maybeSingle() {
@@ -79,6 +79,18 @@ test('Guest Operations initializes from an empty Supabase workspace', async () =
   assert.deepEqual(Array.from(state.guests), []);
   assert.deepEqual(Array.from(state.reservations), []);
   assert.equal(state.settings.seatingDurationMinutes, 90);
+});
+
+test('Guest audit history is fetched only when a guest detail is requested', async () => {
+  const { runtime, client, calls } = createRuntime();
+  await runtime.GuestOpsService.initialize(client, 'workspace-1');
+
+  const guestSelect = calls.find(call => call.table === 'guests' && call.operation === 'select');
+  assert.equal(guestSelect.columns.includes('guest_status_history'), false);
+
+  const audit = await runtime.GuestOpsService.loadGuestAudit('guest-1');
+  assert.deepEqual(Array.from(audit), []);
+  assert.equal(calls.some(call => call.table === 'guest_status_history' && call.operation === 'select'), true);
 });
 
 test('Ticket and reservation numbers are requested from database RPCs', async () => {
