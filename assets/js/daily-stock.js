@@ -176,7 +176,7 @@
         Number(line.inbound_quantity) !== snapshot.inbound_quantity ||
         Number(line.outbound_quantity) !== snapshot.outbound_quantity
       ) {
-        updates.push(dailyQuery('daily_stock_count_lines').update(snapshot).eq('id',line.id));
+        updates.push(dailyQuery('daily_stock_count_lines', guard.generation).update(snapshot).eq('id',line.id));
       }
     });
     await verifyDailySession(guard.generation);
@@ -252,7 +252,12 @@
     await verifyDailySession(guard.generation);
     const inserted = await dailyQuery('daily_stock_count_lines', guard.generation).insert(lines);
     if (inserted.error) {
-      await dailyQuery('daily_stock_counts').delete().eq('id', data.id);
+      try {
+        await verifyDailySession(guard.generation);
+        await dailyQuery('daily_stock_counts', guard.generation).delete().eq('id', data.id);
+      } catch (sessionError) {
+        console.warn('Daily SO draft cleanup skipped after workspace session change.');
+      }
       throw inserted.error;
     }
     await load(state.date);
@@ -408,7 +413,12 @@
     await verifyDailySession(guard.generation);
     const inserted = await dailyQuery('inventory_transaction_lines', guard.generation).insert(rows);
     if (inserted.error) {
-      await dailyQuery('inventory_transactions').delete().eq('id',header.data.id);
+      try {
+        await verifyDailySession(guard.generation);
+        await dailyQuery('inventory_transactions', guard.generation).delete().eq('id',header.data.id);
+      } catch (sessionError) {
+        console.warn('Transaction cleanup skipped after workspace session change.');
+      }
       throw inserted.error;
     }
     await verifyDailySession(guard.generation);
