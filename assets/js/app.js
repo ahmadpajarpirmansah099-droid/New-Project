@@ -159,10 +159,14 @@ const GUEST_OPERATION_PAGES = ['dashboard', 'waiting', 'history', 'reservations'
 function canAccessGuestOperations() {
   const context = window.AppAuth?.getContext();
   if (!context) return false;
-  if (context.isGlobalDeveloper) return true;
+
+  // Developer follows the selected division, with an all-divisions overview allowed.
   const activeDivision = (context.divisions || []).find(item => item.id === context.activeDivisionId);
-  return context.workspaceRole === 'service' &&
+  const isServiceDivision =
     String(activeDivision?.name || context.activeDivisionName || '').trim().toLowerCase() === 'service';
+
+  if (context.isGlobalDeveloper) return context.divisionMode === 'all' || isServiceDivision;
+  return context.workspaceRole === 'service' && isServiceDivision;
 }
 
 function applyRoleNavigation() {
