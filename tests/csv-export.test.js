@@ -15,7 +15,7 @@ if (helperStart < 0 || exportStart < 0) {
   throw new Error('CSV export helpers were not found in assets/js/guestops-detail.js');
 }
 
-const helperSource = appSource.slice(helperStart, exportStart);
+const helperSource = detailSource.slice(helperStart, exportStart);
 const runtime = vm.createContext({});
 vm.runInContext(helperSource, runtime, { filename: 'guestops-detail.js#csv-export-helpers' });
 
