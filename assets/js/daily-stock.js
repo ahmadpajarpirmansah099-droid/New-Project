@@ -400,8 +400,37 @@
     const totalExpected = rows.reduce((sum,row) => sum + row.expected * (row.cost || 0),0);
     const status = state.data.count?.status || 'not-started';
     const divisionOptions = (state.context.divisions || []).map((division) => '<option value="' + division.id + '" ' + (division.id === state.context.activeDivisionId ? 'selected' : '') + '>' + escapeHtml(division.name) + '</option>').join('');
-    const divisionPicker = (state.context.divisions || []).length > 1 ? '<label class="ds-division">Divisi aktif<select id="dailyStockDivision">' + divisionOptions + '</select></label>' : '';
+    const divisionPicker = (state.context.divisions || []).length > 1 ? '<label class="ds-division">Divisi aktif<div class="ds-division-picker" id="dsDivisionPicker"><select id="dailyStockDivision" class="ds-native-select" tabindex="-1" aria-hidden="true">' + divisionOptions + '</select><button type="button" class="ds-division-trigger" aria-haspopup="listbox" aria-expanded="false"><span>' + escapeHtml(state.context.activeDivisionName) + '</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="ds-division-options" role="listbox" aria-label="Pilih divisi" hidden>' + (state.context.divisions || []).map((division) => '<button type="button" role="option" class="ds-division-option ' + (division.id === state.context.activeDivisionId ? 'active' : '') + '" data-division-id="' + escapeHtml(division.id) + '">' + escapeHtml(division.name) + '</button>').join('') + '</div></div></label>' : '';
     rootEl.innerHTML = '<div class="ds-page"><div class="ds-heading"><div><span class="ds-eyebrow">STOK OPERASIONAL</span><h1>Daily SO</h1><p>' + escapeHtml(state.context.activeDivisionName) + ' · ' + escapeHtml(state.context.workspaceRole) + '</p></div><span class="ds-status ' + status + '">' + (status === 'closed' ? 'Ditutup' : status === 'draft' ? 'Draft' : 'Belum dimulai') + '</span></div>' + divisionPicker + '<label class="ds-date">Tanggal operasional<input id="dailyStockDate" type="date" value="' + state.date + '"></label><div class="ds-summary"><div><small>Bahan</small><strong>' + counts.material + '</strong></div><div><small>WIP</small><strong>' + counts.wip + '</strong></div><div><small>Supplies</small><strong>' + counts.supply + '</strong></div></div><div class="ds-value-card"><small>Estimasi nilai stok sesuai saldo hitungan</small><strong>' + money(totalExpected) + '</strong><span>Nilai perkiraan dari harga Master Barang dan HPP WIP.</span></div><div class="ds-tabs"><button data-ds-action="tab" data-tab="overview" class="' + (state.tab === 'overview' ? 'active' : '') + '">Ringkasan</button><button data-ds-action="tab" data-tab="count" class="' + (state.tab === 'count' ? 'active' : '') + '">Hitung stok</button><button data-ds-action="tab" data-tab="transactions" class="' + (state.tab === 'transactions' ? 'active' : '') + '">Transaksi</button><button data-ds-action="tab" data-tab="history" class="' + (state.tab === 'history' ? 'active' : '') + '">Riwayat</button></div><section class="ds-panel" id="dsTabPanel">' + renderTabContent() + '</section><div id="dailyStockModal"></div></div>';
+    const divisionPickerElement = $('dsDivisionPicker');
+    if (divisionPickerElement) {
+      const trigger = divisionPickerElement.querySelector('.ds-division-trigger');
+      const panel = divisionPickerElement.querySelector('.ds-division-options');
+      const nativeSelect = divisionPickerElement.querySelector('#dailyStockDivision');
+      trigger?.addEventListener('click', () => {
+        const open = panel.hidden;
+        panel.hidden = !open;
+        trigger.setAttribute('aria-expanded', String(open));
+        divisionPickerElement.classList.toggle('is-open', open);
+      });
+      divisionPickerElement.querySelectorAll('[data-division-id]').forEach((option) => {
+        option.addEventListener('click', () => {
+          panel.hidden = true;
+          trigger.setAttribute('aria-expanded', 'false');
+          divisionPickerElement.classList.remove('is-open');
+          nativeSelect.value = option.dataset.divisionId;
+          nativeSelect.dispatchEvent(new Event('change', { bubbles:true }));
+        });
+      });
+      divisionPickerElement.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          panel.hidden = true;
+          trigger.setAttribute('aria-expanded', 'false');
+          divisionPickerElement.classList.remove('is-open');
+          trigger.focus();
+        }
+      });
+    }
     if (state.tab === 'count') renderRows();
     if (state.tab === 'transactions') renderTransactions();
     if (state.tab === 'history') renderHistory();
