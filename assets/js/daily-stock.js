@@ -486,7 +486,21 @@
     if (!form) return;
     const item = getItem(form.elements.itemId?.value);
     const select = form.querySelector('[data-unit-select]');
-    if (!select || !item) { if (select) select.innerHTML = '<option value="">Pilih barang dulu</option>'; return; }
+    if (!select || !item) {
+      if (select) select.innerHTML = '<option value="">Pilih barang dulu</option>';
+      const picker = form.querySelector('#dsExpenseUnitPicker');
+      if (picker) {
+        const trigger = picker.querySelector('.ds-unit-trigger');
+        const panel = picker.querySelector('.ds-unit-options');
+        trigger.disabled = true;
+        trigger.querySelector('span').textContent = 'Pilih barang dulu';
+        panel.innerHTML = '';
+        panel.hidden = true;
+        trigger.setAttribute('aria-expanded', 'false');
+        picker.classList.remove('is-open');
+      }
+      return;
+    }
     select.innerHTML = (item.konversi_satuan || []).map((unit) => '<option value="' + escapeHtml(unit.unit) + '">' + escapeHtml(unit.unit) + '</option>').join('');
     select.value = item.satuan_dasar;
     const picker = form.querySelector('#dsExpenseUnitPicker');
