@@ -6593,3 +6593,268 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   .menu-toggle { left:176px; }
   body:has(#menuDrawer.show) .content { padding-left:254px; }
 }
+
+
+/* =========================================================
+   DESKTOP SIDEBAR — PERMANENT LEFT NAVIGATION
+   Desktop only. Mobile drawer behavior remains unchanged.
+   ========================================================= */
+@media (min-width: 900px) {
+  .app {
+    width: 100%;
+    max-width: none;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .top {
+    position: relative;
+    z-index: 30;
+    width: calc(100% - 264px);
+    height: auto;
+    min-height: 86px;
+    margin: 0 0 0 264px;
+    padding: 18px clamp(24px, 3vw, 48px);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    animation: none;
+  }
+
+  .top > .brand,
+  .top .menu-toggle {
+    display: none !important;
+  }
+
+  .workspace-scope-switcher {
+    display: grid;
+    width: min(520px, 100%);
+    margin: 0 auto 0 0;
+  }
+
+  .top-actions {
+    position: static;
+    display: flex;
+    width: auto;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    pointer-events: auto;
+  }
+
+  .top-actions .profile,
+  .top-actions .auth-logout-button {
+    position: static;
+    display: grid;
+  }
+
+  .menu-backdrop {
+    display: none !important;
+  }
+
+  .menu-drawer,
+  .menu-drawer.show {
+    position: fixed;
+    z-index: 80;
+    inset: 0 auto 0 0;
+    display: flex;
+    flex-direction: column;
+    width: 264px;
+    height: 100dvh;
+    max-height: none;
+    padding: 24px 18px 22px;
+    overflow: hidden;
+    border: 0;
+    border-right: 1px solid #eeedf0;
+    border-radius: 0 22px 22px 0;
+    background: #fff;
+    box-shadow: 5px 0 24px rgba(17,18,37,.055);
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+    transition: none;
+  }
+
+  .drawer-head {
+    display: flex !important;
+    min-height: 126px;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 20px 4px 24px;
+    border-bottom: 1px solid #eeedf0;
+  }
+
+  .drawer-head > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .drawer-kicker {
+    color: #a0a0aa;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .14em;
+  }
+
+  .drawer-head strong {
+    color: #171725;
+    font: 800 27px/1.15 Manrope, sans-serif;
+    letter-spacing: -.045em;
+  }
+
+  .drawer-close {
+    display: none !important;
+  }
+
+  .drawer-nav {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    min-height: 0;
+    padding: 28px 0 20px;
+    overflow-y: auto;
+  }
+
+  .drawer-item,
+  body:not(:has(#menuDrawer.show)) .drawer-item {
+    position: relative;
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    height: 58px;
+    min-height: 58px;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 19px;
+    background: transparent;
+    color: #777783;
+    box-shadow: none;
+    text-align: left;
+    white-space: nowrap;
+    transition: background-color .18s ease, color .18s ease;
+  }
+
+  .drawer-item:hover {
+    background: #f7f7f4;
+  }
+
+  .drawer-item.active,
+  body:not(:has(#menuDrawer.show)) .drawer-item.active {
+    background: #eef7c7;
+    color: #171725;
+    box-shadow: none;
+  }
+
+  .drawer-item.active::before,
+  body:not(:has(#menuDrawer.show)) .drawer-item.active::before {
+    display: none;
+  }
+
+  .drawer-item > svg:first-child,
+  body:not(:has(#menuDrawer.show)) .drawer-item > svg:first-child {
+    display: block;
+    width: 23px;
+    height: 23px;
+    flex: 0 0 23px;
+    stroke: currentColor;
+    stroke-width: 1.9;
+  }
+
+  .drawer-item > span,
+  body:not(:has(#menuDrawer.show)) .drawer-item > span {
+    display: block;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    overflow: visible;
+    opacity: 1;
+    color: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    transform: none;
+  }
+
+  .drawer-item .drawer-chevron,
+  body:not(:has(#menuDrawer.show)) .drawer-item .drawer-chevron {
+    display: block;
+    width: 17px;
+    height: 17px;
+    margin-left: auto;
+    opacity: .65;
+  }
+
+  .drawer-foot {
+    display: block !important;
+    flex: 0 0 auto;
+    margin-top: auto;
+    padding: 25px 7px 3px;
+    border-top: 1px solid #eeedf0;
+    color: #a0a0aa;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .14em;
+  }
+
+  .content,
+  body:has(#menuDrawer.show) .content {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    padding: 28px clamp(28px, 4vw, 64px) 64px 300px;
+    box-sizing: border-box;
+    transition: none;
+  }
+
+  .sheet,
+  .ds-modal,
+  body:has(#menuDrawer.show) .sheet,
+  body:has(#menuDrawer.show) .ds-modal {
+    left: calc(264px + (100vw - 264px) / 2);
+    width: min(920px, calc(100vw - 320px));
+  }
+
+  .fab {
+    right: 34px;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1100px) {
+  .top {
+    width: calc(100% - 244px);
+    margin-left: 244px;
+  }
+
+  .menu-drawer,
+  .menu-drawer.show {
+    width: 244px;
+  }
+
+  .content,
+  body:has(#menuDrawer.show) .content {
+    padding-left: 280px;
+  }
+
+  .sheet,
+  .ds-modal,
+  body:has(#menuDrawer.show) .sheet,
+  body:has(#menuDrawer.show) .ds-modal {
+    left: calc(244px + (100vw - 244px) / 2);
+    width: min(760px, calc(100vw - 300px));
+  }
+}
