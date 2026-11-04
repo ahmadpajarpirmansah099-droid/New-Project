@@ -209,24 +209,33 @@
 .ds-transaction-form .ds-unit-options[hidden]{display:none}
 @media(prefers-reduced-motion:reduce){.ds-direction-picker button{transition:none}}
 
-/* Produksi WIP — input beberapa produk dalam satu transaksi */
+/* Produksi WIP — daftar otomatis seluruh WIP aktif */
 .ds-production-batch-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 10px}
-.ds-production-batch-head>div{display:grid;gap:3px}
+.ds-production-batch-head>div{display:grid;gap:3px;min-width:0}
 .ds-production-batch-head strong{color:var(--ink);font-size:12px}
-.ds-production-batch-head small,.ds-production-batch-head>span{color:var(--muted);font-size:10px}
-.ds-production-rows{display:grid;gap:10px}
-.ds-production-row{display:grid;gap:9px;padding:12px;border:1px solid var(--line);border-radius:13px;background:#fff}
-.ds-production-row-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.ds-production-row-head strong{color:var(--ink);font-size:11px}
-.ds-production-remove{min-height:30px;padding:5px 9px;border:0;border-radius:8px;background:#fff0ef;color:#a64b45;font:700 10px 'DM Sans',sans-serif}
-.ds-production-row label{display:grid;gap:6px;color:var(--ink);font-size:10px;font-weight:800}
-.ds-production-row input[type="search"],.ds-production-row input[type="number"]{width:100%;min-height:42px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fbfcfe;color:var(--ink);font:500 12px 'DM Sans',sans-serif}
-.ds-production-row input:focus{outline:none;border-color:#b9c7dc;box-shadow:0 0 0 3px rgba(55,83,125,.08)}
-.ds-production-row .ds-item-search{position:relative}
-.ds-production-row .ds-item-search-results{position:absolute;z-index:46;top:calc(100% + 5px);left:0;right:0;max-height:190px;overflow:auto;padding:6px;border:1px solid rgba(20,20,38,.08);border-radius:12px;background:#fff;box-shadow:0 12px 28px rgba(17,18,37,.14)}
-.ds-production-row .ds-item-search-results[hidden]{display:none}
-.ds-production-row .ds-item-search-selected{display:block;color:#62718b;font-size:9px}
-.ds-production-yield{margin:0;padding:9px 10px;border-radius:9px;background:#f4f6f9;color:var(--muted);font-size:10px}
-.ds-production-yield strong{color:var(--ink)}
-.ds-production-add{width:100%;margin-top:8px;border:1px dashed #cbd4e2;background:#f8f9fb}
-.ds-production-add:disabled{opacity:.45}
+.ds-production-batch-head small,.ds-production-batch-head>span{color:var(--muted);font-size:10px;line-height:1.4}
+.ds-production-list-head,.ds-production-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(82px,.72fr) minmax(88px,.8fr);gap:7px;align-items:center}
+.ds-production-list-head{padding:0 3px 6px;color:#85838f;font-size:8px;font-weight:800;letter-spacing:.02em}
+.ds-production-list-head span{min-width:0}
+.ds-production-rows{display:grid;gap:0}
+.ds-production-row{min-width:0;padding:8px 3px;border-bottom:1px solid #eeedf0;background:#fff}
+.ds-production-row:last-child{border-bottom:0}
+.ds-production-item{display:flex;min-width:0;align-items:center;gap:7px}
+.ds-production-index{width:25px;height:25px;flex:none;display:grid;place-items:center;border-radius:8px;background:#f1f2f5;color:#676b79;font-size:9px;font-weight:800}
+.ds-production-item-copy{display:grid;min-width:0;gap:3px}
+.ds-production-item-copy strong{color:var(--ink);font-size:11px;line-height:1.25;overflow-wrap:anywhere}
+.ds-production-item-copy small{color:var(--muted);font-size:9px;line-height:1.3;overflow-wrap:anywhere}
+.ds-production-quantity{display:grid;min-width:0;gap:4px;color:var(--muted);font-size:8px;font-weight:700}
+.ds-production-quantity input{box-sizing:border-box;width:100%;min-width:0;min-height:42px;padding:0 7px;border:1px solid var(--line);border-radius:9px;background:#fbfcfe;color:var(--ink);font:500 12px 'DM Sans',sans-serif}
+.ds-production-quantity input:focus{outline:none;border-color:#b9c7dc;box-shadow:0 0 0 3px rgba(55,83,125,.08)}
+.ds-production-yield{display:grid;min-width:0;gap:4px;padding:0 3px;background:transparent;color:var(--muted);font-size:8px}
+.ds-production-yield strong{color:var(--ink);font-size:10px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.ds-field-help{margin:9px 0 0;padding:10px 11px;border-radius:10px;background:#f4f6f9;color:var(--muted);font-size:10px;line-height:1.5}
+@media(max-width:390px){
+ .ds-production-list-head,.ds-production-row{grid-template-columns:minmax(0,1.25fr) minmax(70px,.7fr) minmax(74px,.75fr);gap:5px}
+ .ds-production-item{gap:5px}
+ .ds-production-index{width:22px;height:22px}
+ .ds-production-item-copy strong{font-size:10px}
+ .ds-production-quantity input{min-height:40px;padding:0 5px;font-size:11px}
+ .ds-production-yield strong{font-size:9px}
+}
