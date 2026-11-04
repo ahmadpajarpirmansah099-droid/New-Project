@@ -161,6 +161,7 @@
       p_service_date: day
     });
     if (error) throw error;
+    await assertWorkspaceSession(guard.generation);
     return data;
   }
 
@@ -172,6 +173,7 @@
       p_service_date: day
     });
     if (error) throw error;
+    await assertWorkspaceSession(guard.generation);
     return data;
   }
 
