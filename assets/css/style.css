@@ -6469,3 +6469,57 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 }
 
+/* =========================================================
+   DESKTOP SIDEBAR CLICK + TOP HAMBURGER FIX
+   Keep mobile navigation untouched.
+   ========================================================= */
+@media (min-width: 900px) {
+  /* The parent action group is decorative while collapsed;
+     explicitly restore pointer input for the hamburger itself. */
+  .top-actions {
+    pointer-events: none;
+  }
+
+  .top-actions .menu-toggle {
+    position: fixed;
+    z-index: 90;
+    display: grid !important;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  /* Collapsed rail: hamburger at the top, feature icons centered,
+     and logout anchored at the bottom. */
+  body:not(:has(#menuDrawer.show)) .menu-toggle {
+    top: 22px;
+    left: 18px;
+  }
+
+  body:not(:has(#menuDrawer.show)) .top-actions .auth-logout-button {
+    top: auto;
+    right: auto;
+    bottom: 22px;
+    left: 18px;
+    z-index: 80;
+    pointer-events: auto;
+  }
+
+  /* Expanded rail: hamburger stays at the top edge of the wide panel. */
+  body:has(#menuDrawer.show) .menu-toggle {
+    top: 22px;
+    left: 208px;
+  }
+}
+
+@media (min-width: 1440px) {
+  body:has(#menuDrawer.show) .menu-toggle {
+    left: 224px;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1100px) {
+  body:has(#menuDrawer.show) .menu-toggle {
+    left: 176px;
+  }
+}
