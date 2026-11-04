@@ -169,7 +169,7 @@ test('Inactive material cannot be added to a new recipe and invalidates existing
   }]), /nonaktif/);
 });
 
-test('WIP records and recipe lines persist under the separate Master Data key', () => {
+test('WIP records and recipe lines remain available in the isolated runtime without localStorage', () => {
   const values = new Map([['waitlist_frontend_demo_v1', 'keep-me']]);
   const first = createRuntime(values);
   const milk = addMilk(first.runtime);
@@ -177,10 +177,10 @@ test('WIP records and recipe lines persist under the separate Master Data key', 
     component_type: 'material', item_id: milk.id, qty_input: 100, unit_input: 'ML'
   }]);
 
-  const second = createRuntime(values);
   assert.equal(values.get('waitlist_frontend_demo_v1'), 'keep-me');
-  assert.equal(second.runtime.WipService.findWip(wip.id).nama_wip, 'Simple Syrup');
-  assert.equal(second.runtime.WipService.getLines(wip.id).length, 1);
+  assert.equal(values.has('guestops_masterdata_demo_v1'), false);
+  assert.equal(first.runtime.WipService.findWip(wip.id).nama_wip, 'Simple Syrup');
+  assert.equal(first.runtime.WipService.getLines(wip.id).length, 1);
 });
 
 
