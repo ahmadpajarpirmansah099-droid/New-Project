@@ -71,7 +71,7 @@ function createRuntime() {
 }
 
 test('Guest Operations initializes from an empty Supabase workspace', async () => {
-  const { runtime, client } = createRuntime();
+  const { runtime, client, calls } = createRuntime();
   const state = await runtime.GuestOpsService.initialize(client, 'workspace-1');
 
   assert.equal(runtime.GuestOpsService.isReady(), true);
