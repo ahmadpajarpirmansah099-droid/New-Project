@@ -627,6 +627,11 @@
     document.addEventListener('change',(event)=>{ if (event.target.matches('#dsTransactionForm [name="itemId"]')) syncUnitOptions(); });
   }
 
+  root.addEventListener('app:auth-signed-out', function () {
+    state.client=null; state.context=null; state.catalog=null; state.data=null;
+    state.initialized=false; state.busy=false; state.tab='overview'; state.date=dateKey();
+  });
+
   root.DailyStockUI = { initialize, renderPage, render, runAction };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',installNavigation,{once:true});
   else installNavigation();
