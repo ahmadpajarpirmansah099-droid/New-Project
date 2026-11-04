@@ -444,6 +444,7 @@
       title = 'Penjualan';
       fields = '<label>Menu<select name="menuId" required><option value="">Pilih menu</option>' + activeMenus().map((item) => '<option value="' + item.id + '">' + escapeHtml(item.nama_menu) + '</option>').join('') + '</select></label><label>Jumlah porsi<input name="quantity" type="number" min="1" step="1" required></label><p class="ds-field-help">Pemakaian bahan dan WIP dihitung dari komposisi menu.</p>';
     }
+    $('fab').style.display = 'none';
     modal.innerHTML = '<div class="ds-modal-backdrop" data-ds-action="close-form"></div><section class="ds-modal"><div class="ds-modal-head"><div><span class="ds-eyebrow">CATAT STOK</span><h2>' + title + '</h2></div><button type="button" data-ds-action="close-form" aria-label="Tutup">×</button></div><form id="dsTransactionForm" data-type="' + type + '">' + fields + '<label>Referensi <span>(opsional)</span><input name="reference" maxlength="80" placeholder="Nomor nota / keterangan"></label><label>Catatan <span>(opsional)</span><textarea name="notes" rows="2"></textarea></label><div class="ds-form-actions"><button type="button" class="ds-light" data-ds-action="close-form">Batal</button><button type="submit" class="ds-primary">Simpan transaksi</button></div></form></section>';
     const form = $('dsTransactionForm');
     const itemSelect = form?.querySelector('[name="itemId"]');
@@ -568,7 +569,7 @@
       else if (action === 'close-count') {
         if (!root.confirm('Tutup Daily SO? Setelah ditutup, hitungan tidak bisa diedit.')) return;
         await closeCount(); render(); root.toast?.('Daily SO berhasil ditutup.');
-      } else if (action === 'close-form') { $('dailyStockModal').innerHTML=''; }
+      } else if (action === 'close-form') { $('dailyStockModal').innerHTML=''; $('fab').style.display='grid'; }
       else if (action === 'open-history-date') {
         state.date = button.dataset.date; state.tab='count'; await load(state.date); render();
       }
@@ -596,7 +597,7 @@
       const values = Object.fromEntries(data.entries());
       await postTransaction(form.dataset.type, values);
       if (form.id === 'dsExpenseForm') { await renderExpensePage(); }
-      else { $('dailyStockModal').innerHTML=''; state.tab='transactions'; render(); }
+      else { $('dailyStockModal').innerHTML=''; $('fab').style.display='grid'; state.tab='transactions'; render(); }
       root.toast?.('Transaksi stok berhasil dicatat.');
     } catch (error) {
       console.error('Daily SO transaction failed:', error);
@@ -686,7 +687,7 @@
         if (typeof originalGo === 'function') originalGo(targetPage);
         root.setWorkspaceHeader?.('daily-stock');
         root.closeQuickMenu?.();
-        $('fab').style.display = 'none';
+        $('fab').style.display = 'grid';
         $('quickMenuBackdrop')?.classList.remove('show');
         $('quickMenu')?.classList.remove('show');
         if (root.MasterDataStore?.isReady()) state.catalog = root.MasterDataStore.load();
