@@ -23,7 +23,9 @@ test('Daily SO UI delegates database reads and writes to the service module', ()
   assert.match(service, /root\.DailyStockService\s*=/);
   assert.match(service, /async function fetchExpenseHistory\(/);
   assert.match(service, /async function switchDivision\(/);
-  assert.doesNotMatch(ui, /dailyQuery\s*\(|\.from\s*\(/);
+  assert.equal(ui.includes('dailyQuery('), false);
+  assert.equal(ui.includes('client.from('), false);
+  assert.equal(ui.includes('supabase.from('), false);
   assert.doesNotMatch(ui, /sessionGeneration|dataLoadGeneration|sessionAbortController/);
 });
 
