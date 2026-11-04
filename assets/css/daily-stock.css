@@ -147,3 +147,14 @@
 .ds-division-option{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;padding:10px 12px;border:0;border-radius:9px;background:transparent;color:var(--ink);font:600 12px 'DM Sans',sans-serif;text-align:left}
 .ds-division-option.active,.ds-division-option:active,.ds-division-option:focus-visible{outline:none;background:#f1f3f8}
 .ds-division-option.active:after{content:'✓';color:#566b8d;font-weight:800}
+
+/* Searchable item field on Daily SO expense page */
+.ds-item-search{position:relative;width:100%}
+.ds-item-search input[type="search"]{width:100%;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:13px;background:#fbfcfe;color:var(--ink);font:500 13px 'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(25,35,55,.055)}
+.ds-item-search input[type="search"]:focus{outline:none;border-color:#b9c7dc;box-shadow:0 0 0 3px rgba(55,83,125,.08)}
+.ds-item-search-results{position:absolute;z-index:45;top:calc(100% + 6px);left:0;right:0;max-height:240px;overflow:auto;padding:6px;border:1px solid rgba(20,20,38,.08);border-radius:13px;background:#fff;box-shadow:0 14px 34px rgba(17,18,37,.15);animation:dsCategoryIn .16s ease both}
+.ds-item-search-results[hidden]{display:none}
+.ds-item-search-option{display:block;width:100%;min-height:42px;padding:10px 12px;border:0;border-radius:8px;background:transparent;color:var(--ink);font:600 12px 'DM Sans',sans-serif;text-align:left}
+.ds-item-search-option:active,.ds-item-search-option:focus-visible{outline:none;background:#f1f3f8}
+.ds-item-search-empty{padding:12px;color:var(--muted);font-size:12px}
+.ds-item-search-selected{display:block;min-height:0;margin-top:5px;color:#62718b;font-size:10px}
