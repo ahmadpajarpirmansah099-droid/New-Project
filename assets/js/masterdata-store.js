@@ -137,8 +137,19 @@
     return 'md-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
   }
 
+  function reset() {
+    client = null;
+    workspaceId = null;
+    divisionId = null;
+    moduleKey = null;
+    cache = createEmpty();
+    ready = false;
+    writeQueue = Promise.resolve();
+  }
+
   root.MasterDataStore = {
     key: () => moduleKey,
+    reset,
     schemaVersion: SCHEMA_VERSION,
     createEmpty,
     initialize,
