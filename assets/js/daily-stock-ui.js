@@ -368,10 +368,6 @@
   async function goToTransactionPage(type) {
     const config = TRANSACTION_PAGES[type];
     if (!config) return;
-    if ((type === 'production' || type === 'sale') && !canUseSales()) {
-      root.toast?.('Fitur ini tidak tersedia untuk divisi Service.');
-      return;
-    }
     if (!state.initialized && !(await initialize())) {
       root.toast?.('Data divisi belum siap. Muat ulang halaman.');
       return;
@@ -589,8 +585,8 @@
     if (action === 'stock-in') { await goToTransactionPage('purchase'); return; }
     if (action === 'stock-out') { await goToExpensePage(); return; }
     if (action === 'stock-supplies') { await goToTransactionPage('supplies'); return; }
-    if (action === 'stock-production' && canUseSales()) { await goToTransactionPage('production'); return; }
-    if (action === 'stock-sale' && canUseSales()) { await goToTransactionPage('sale'); return; }
+    if (action === 'stock-production') { await goToTransactionPage('production'); return; }
+    if (action === 'stock-sale') { await goToTransactionPage('sale'); return; }
     if (action === 'stock-history') { await goToPage(); state.tab='history'; render(); return; }
   }
 
@@ -846,9 +842,8 @@
         const open=!menu.classList.contains('show');
         menu.querySelectorAll('.quick-menu-item').forEach((item)=>{
           const isStockAction=item.classList.contains('ds-fab-action');
-          const unavailable=isStockAction && divisionIsService() && ['stock-sale','stock-production'].includes(item.dataset.stockAction);
-          item.hidden=!isStockAction || unavailable;
-          item.style.display=!isStockAction || unavailable?'none':'flex';
+          item.hidden=!isStockAction;
+          item.style.display=isStockAction?'flex':'none';
         });
         const heading=menu.querySelector('.quick-menu-heading'); if(heading) heading.textContent='DAILY STOCK';
         menu.setAttribute('aria-label','Daily Stock');
