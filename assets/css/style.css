@@ -7228,3 +7228,11 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     width: 264px !important;
   }
 }
+
+
+/* Keep desktop sidebar actions clearly above the ADMIN WORKSPACE footer. */
+@media (min-width: 900px) {
+  .top {
+    bottom: 138px !important;
+  }
+}
