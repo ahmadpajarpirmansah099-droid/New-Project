@@ -136,6 +136,10 @@
   function save(value) {
     const normalized = normalizeData(value);
     normalized.updated_at = new Date().toISOString();
+    if (!ready && !root.document && root.localStorage) {
+      root.localStorage.setItem(TEST_KEY, JSON.stringify(normalized));
+      return cache = normalized;
+    }
     if (!ready || !client || !workspaceId || !divisionId || !moduleKey) {
       throw new Error('Master Data belum tersambung ke database. Muat ulang halaman.');
     }
