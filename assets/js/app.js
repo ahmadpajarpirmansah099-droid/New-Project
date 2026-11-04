@@ -141,7 +141,7 @@ function setWorkspaceHeader(page) {
   if (isMasterWorkspace) {
     mark.classList.add('is-master');
     mark.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M4 7.5 12 12l8-4.5M12 12v9M8 5.3l8 4.5"/></svg>';
-    name.textContent = 'MASTER BARANG';
+    name.textContent = page === 'all-divisions' ? 'RINGKASAN DIVISI' : 'MASTER BARANG';
     const context = window.AppAuth?.getContext();
     meta.textContent = context?.isGlobalDeveloper ? (context.workspaceName || 'OUTLET') + (context.divisionMode === 'all' ? ' · SEMUA DIVISI' : ' · ' + (context.activeDivisionName || '')) : 'MASTER DATA WORKSPACE';
     return;
@@ -173,7 +173,7 @@ function applyRoleNavigation() {
 
 function go(page) {
   const currentContext = window.AppAuth?.getContext();
-  if (currentContext?.isGlobalDeveloper && currentContext.divisionMode === 'all' && ['master-items','wips','menus','daily-stock'].includes(page)) {
+  if (currentContext?.isGlobalDeveloper && currentContext.divisionMode === 'all' && page !== 'all-divisions') {
     page = 'all-divisions';
     toast('Pilih satu divisi untuk membuka dan mengubah data modul.');
   }
@@ -191,7 +191,7 @@ function go(page) {
     item.classList.toggle('active', item.dataset.page === page);
   });
 
-  $('fab').style.display = page === 'settings' ? 'none' : 'grid';
+  $('fab').style.display = ['settings', 'all-divisions'].includes(page) ? 'none' : 'grid';
 
   if (page === 'settings') syncSeatingSettingInput();
   if (page === 'dashboard') dashboardCountUpPending = true;
