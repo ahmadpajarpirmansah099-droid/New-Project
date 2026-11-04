@@ -5618,3 +5618,246 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 }
 
+/* =========================================================
+   DESKTOP SIDEBAR — ICON RAIL + EXPAND
+   Closed: keep navigation icons visible.
+   Open: expand labels with a light motion.
+   Mobile styles remain untouched.
+   ========================================================= */
+@media (min-width: 900px) {
+  .menu-drawer {
+    top: 132px;
+    right: auto;
+    bottom: auto;
+    left: 8px;
+    width: 58px;
+    height: auto;
+    max-height: calc(100dvh - 156px);
+    padding: 8px 7px;
+    overflow: hidden;
+    border: 1px solid rgba(225, 226, 234, .9);
+    border-radius: 16px;
+    background: rgba(255,255,255,.97);
+    box-shadow: 0 4px 14px rgba(17,18,37,.07), 0 1px 3px rgba(17,18,37,.04);
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+    transition:
+      width .24s cubic-bezier(.2,.75,.25,1),
+      box-shadow .24s ease,
+      border-radius .24s ease;
+  }
+
+  .menu-drawer.show {
+    width: 246px;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+    box-shadow: 0 10px 28px rgba(17,18,37,.11), 0 2px 7px rgba(17,18,37,.05);
+  }
+
+  .drawer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding-top: 0;
+  }
+
+  .drawer-item {
+    width: 42px;
+    min-width: 42px;
+    height: 43px;
+    min-height: 43px;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition:
+      width .22s ease,
+      min-width .22s ease,
+      padding .22s ease,
+      background-color .18s ease,
+      color .18s ease;
+  }
+
+  .drawer-item > svg:first-child {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 17px;
+  }
+
+  .drawer-item > span {
+    width: 0;
+    max-width: 0;
+    margin: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateX(-5px);
+    transition:
+      max-width .2s ease,
+      opacity .14s ease,
+      transform .2s ease;
+  }
+
+  .drawer-item .drawer-chevron {
+    width: 0;
+    height: 16px;
+    margin-left: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity .14s ease;
+  }
+
+  .menu-drawer.show .drawer-item {
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 0 13px;
+  }
+
+  .menu-drawer.show .drawer-item > span {
+    width: auto;
+    max-width: 170px;
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .menu-drawer.show .drawer-item .drawer-chevron {
+    width: 16px;
+    margin-left: auto;
+    opacity: 1;
+  }
+
+  .menu-drawer.show .drawer-head,
+  .menu-drawer.show .drawer-foot {
+    display: none;
+  }
+
+  .menu-toggle {
+    transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+  }
+
+  .menu-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 13px rgba(17,18,37,.16);
+  }
+}
+
+@media (min-width: 1440px) {
+  .menu-drawer.show {
+    width: 260px;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1100px) {
+  .menu-drawer.show {
+    width: 216px;
+  }
+}
+
+/* =========================================================
+   DESKTOP GUEST WORKSPACE — ADAPTIVE WIDTH
+   Reclaim the empty left workspace while the navigation rail
+   is collapsed; smoothly make room when the menu expands.
+   ========================================================= */
+@media (min-width: 900px) {
+  .app {
+    grid-template-columns: 250px minmax(0, 1fr);
+    grid-template-rows: 150px minmax(0, 1fr);
+  }
+
+  .content {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    padding: 38px clamp(30px, 4vw, 72px) 64px 82px;
+    box-sizing: border-box;
+    transition: padding-left .28s cubic-bezier(.2,.75,.25,1);
+  }
+
+  body:has(#menuDrawer.show) .content {
+    padding-left: 264px;
+  }
+
+  .page#page-dashboard {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    grid-template-columns: minmax(0, 1.2fr) minmax(300px, .8fr);
+    transition: width .28s ease;
+  }
+
+  #page-dashboard .metrics {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #page-dashboard .hero,
+  #page-dashboard .metric,
+  #page-dashboard .guest,
+  #page-dashboard .empty {
+    min-width: 0;
+    transition:
+      box-shadow .24s ease,
+      transform .24s ease,
+      border-radius .24s ease;
+  }
+
+  #page-dashboard .hero {
+    box-shadow: 0 8px 24px rgba(17, 18, 37, .075);
+  }
+
+  #page-dashboard .metric,
+  #page-dashboard .guest,
+  #page-dashboard .empty {
+    box-shadow: 0 5px 18px rgba(17, 18, 37, .06);
+  }
+
+  #page-dashboard .metric:hover,
+  #page-dashboard .guest:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 11px 24px rgba(17, 18, 37, .10);
+  }
+}
+
+@media (min-width: 1440px) {
+  body:has(#menuDrawer.show) .content {
+    padding-left: 280px;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1100px) {
+  .content {
+    padding-left: 78px;
+  }
+
+  body:has(#menuDrawer.show) .content {
+    padding-left: 232px;
+  }
+
+  .page#page-dashboard {
+    grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content,
+  .page#page-dashboard,
+  #page-dashboard .hero,
+  #page-dashboard .metric,
+  #page-dashboard .guest,
+  #page-dashboard .empty {
+    transition: none !important;
+  }
+}
+
