@@ -69,12 +69,12 @@ function findComponent(type, id) {
     const selectedName = selected ? (type === 'wip' ? selected.nama_wip : selected.nama_barang) : '';
     return '<div class="menu-recipe-row" data-menu-recipe-row>' +
       '<input type="hidden" data-menu-type value="' + type + '">' + '<div class="menu-recipe-type" data-menu-recipe-type>' + (type === 'wip' ? 'WIP' : 'Barang') + '</div>' +
-      '<div class="menu-field menu-component-search"><input type="search" data-menu-component-search autocomplete="off" placeholder="Cari item" value="' + escapeHtml(selectedName) + '" aria-label="Cari item"><select data-menu-component hidden style="display:none!important" aria-hidden="true" tabindex="-1">' + componentOptions(type, selectedId) + '</select><div class="menu-component-options" data-menu-component-options hidden></div></div>' +
+      '<div class="menu-field menu-component-search"><input type="search" data-menu-component-search autocomplete="off" placeholder="Cari item" value="' + escapeHtml(selectedName) + '" aria-label="Cari item"><select data-menu-component hidden aria-hidden="true" tabindex="-1">' + componentOptions(type, selectedId) + '</select><div class="menu-component-options" data-menu-component-options hidden></div></div>' +
       '<label class="menu-field"><input data-menu-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Jumlah" aria-label="Jumlah per porsi" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
       '<input type="hidden" data-menu-unit value="' + escapeHtml(getComponentUnit(type, selectedId)) + '">' + '<div class="menu-unit-display" data-menu-unit-display>' + escapeHtml(getComponentUnit(type, selectedId) || '—') + '</div></div>';
   }
 
-    function initialRecipeRows(lines) {
+  function initialRecipeRows(lines) {
     const rows = Array.isArray(lines) ? lines.slice() : [];
     while (rows.length < 25) rows.push(null);
     return rows.map(recipeRowHtml).join('');
