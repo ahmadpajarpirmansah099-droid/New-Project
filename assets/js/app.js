@@ -154,17 +154,21 @@ function setWorkspaceHeader(page) {
   meta.textContent = context?.isGlobalDeveloper ? (context.workspaceName || 'OUTLET') + (context.divisionMode === 'all' ? ' · SEMUA DIVISI' : ' · ' + (context.activeDivisionName || '')) : 'ADMIN WORKSPACE';
 }
 
+const GUEST_OPERATION_PAGES = ['dashboard', 'waiting', 'history', 'reservations', 'settings'];
+
 function canAccessGuestOperations() {
   const context = window.AppAuth?.getContext();
-  return Boolean(context && (context.isGlobalDeveloper || context.workspaceRole === 'service'));
+  if (!context) return false;
+  if (context.isGlobalDeveloper) return true;
+  const activeDivision = (context.divisions || []).find(item => item.id === context.activeDivisionId);
+  return context.workspaceRole === 'service' &&
+    String(activeDivision?.name || context.activeDivisionName || '').trim().toLowerCase() === 'service';
 }
 
 function applyRoleNavigation() {
   const canUseGuestOps = canAccessGuestOperations();
-  const guestPages = ['dashboard', 'waiting', 'history', 'reservations', 'settings'];
-
   document.querySelectorAll('.drawer-item[data-page]').forEach(item => {
-    if (guestPages.includes(item.dataset.page)) item.style.display = canUseGuestOps ? '' : 'none';
+    if (GUEST_OPERATION_PAGES.includes(item.dataset.page)) item.style.display = canUseGuestOps ? '' : 'none';
   });
   document.querySelectorAll('.quick-menu-item[data-quick-context="guest"]').forEach(item => {
     item.style.display = canUseGuestOps ? '' : 'none';
@@ -173,12 +177,13 @@ function applyRoleNavigation() {
 
 function go(page) {
   const currentContext = window.AppAuth?.getContext();
-  if (currentContext?.isGlobalDeveloper && currentContext.divisionMode === 'all' && page !== 'all-divisions') {
+  const isDeveloperGuestPage = Boolean(currentContext?.isGlobalDeveloper && GUEST_OPERATION_PAGES.includes(page));
+  if (currentContext?.isGlobalDeveloper && currentContext.divisionMode === 'all' && page !== 'all-divisions' && !isDeveloperGuestPage) {
     page = 'all-divisions';
     toast('Pilih satu divisi untuk membuka dan mengubah data modul.');
   }
   document.body.dataset.divisionMode = currentContext?.divisionMode || 'single';
-  if (!canAccessGuestOperations() && ['dashboard', 'waiting', 'history', 'reservations', 'settings'].includes(page)) {
+  if (!canAccessGuestOperations() && GUEST_OPERATION_PAGES.includes(page)) {
     toast('Guest Operational hanya tersedia untuk akun Service.');
     page = 'master-items';
   }
@@ -1777,7 +1782,7 @@ async function initializeWorkspace(event, switchingContext) {
       const remoteState=await window.GuestOpsService.initialize(supabaseClient,authContext.workspaceId);
       if(!isCurrent()) return;
       state=remoteState; syncSeatingSettingInput();
-      go(authContext.divisionMode==='all'?'all-divisions':(authContext.workspaceRole==='service'?'master-items':'dashboard'));
+      go(authContext.divisionMode==='all'?'all-divisions':(authContext.workspaceRole==='service'?'dashboard':'dashboard'));
       guestRefreshInterval=window.setInterval(async()=>{
         if(!isCurrent()) return;
         try {
