@@ -76,12 +76,7 @@ function openDetail(id) {
     ? '<div class="sheet-actions"><button class="primary" data-app-action="setGuestStatus" data-app-id="' + esc(guest.id) + '" data-app-value="done">Selesaikan kunjungan</button></div>'
     : '';
 
-  const timeline = guest.audit.slice().reverse().map(item =>
-    '<div class="timeline-item"><b>' + esc(item.label) + '</b><small>' +
-    new Date(item.at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) +
-    (item.detail ? ' · ' + esc(item.detail) : '') +
-    (item.reason ? ' · Alasan: ' + esc(item.reason) : '') + '</small></div>'
-  ).join('');
+  const timeline = renderGuestAuditTimeline(guest.audit || []);
 
   openSheet(
     '<div class="sheet-head"><h2>Detail tamu</h2><button class="close" data-app-action="closeSheet">✕</button></div>' +
@@ -101,7 +96,31 @@ function openDetail(id) {
     '<div class="detail-history-heading">Riwayat perubahan</div>' +
     '<div class="timeline">' + timeline + '</div>'
   );
+
+  if (window.GuestOpsService?.loadGuestAudit) {
+    window.GuestOpsService.loadGuestAudit(id).then(audit => {
+      if (sheetGuest !== id || !$('sheet').classList.contains('show')) return;
+      guest.audit = audit;
+      const timelineElement = $('guestDetailTimeline');
+      if (timelineElement) timelineElement.innerHTML = renderGuestAuditTimeline(audit);
+    }).catch(error => {
+      console.error('Guest audit history failed to load:', error);
+      if (sheetGuest !== id || !$('sheet').classList.contains('show')) return;
+      const timelineElement = $('guestDetailTimeline');
+      if (timelineElement) timelineElement.textContent = 'Riwayat belum dapat dimuat.';
+    });
+  }
 }
+
+function renderGuestAuditTimeline(audit) {
+  return (audit || []).slice().reverse().map(item =>
+    '<div class="timeline-item"><b>' + esc(item.label) + '</b><small>' +
+    new Date(item.at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) +
+    (item.detail ? ' · ' + esc(item.detail) : '') +
+    (item.reason ? ' · Alasan: ' + esc(item.reason) : '') + '</small></div>'
+  ).join('') || '<div class="timeline-empty">Belum ada riwayat perubahan.</div>';
+}
+
 function editGuest(id) {
   const guest = state.guests.find(item => item.id === id);
   if (!guest) return;
