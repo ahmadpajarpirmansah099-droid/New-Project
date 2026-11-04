@@ -7140,3 +7140,21 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     width: min(800px, calc(100vw - 350px));
   }
 }
+
+
+/* Hide the native scrollbar gutter shadow in desktop-mode mobile viewports.
+   Scrolling remains available through touch, wheel, and trackpad input. */
+@media (min-width: 900px) and (max-width: 1200px) {
+  html,
+  body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
