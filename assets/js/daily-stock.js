@@ -554,7 +554,6 @@
     const quickMenu = $('quickMenu');
     if (quickMenu) {
       const actions = [
-        ['daily-stock','Daily SO','M12 3v18M3 12h18'],
         ['stock-in','Barang Masuk','M12 5v14m-7-7h14'],
         ['stock-out','Pengeluaran','M5 12h14'],
         ['stock-production','Produksi WIP','m12 3 9 5-9 5-9-5 9-5zm-9 9 9 5 9-5m-18 5 9 5 9-5'],
@@ -573,7 +572,7 @@
         const entry=document.createElement('button');
         entry.type='button'; entry.className='quick-menu-item'; entry.dataset.quickContext=contextName;
         entry.dataset.action='runQuickAction'; entry.dataset.actionArgs='["daily-stock"]';
-        entry.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h4"/></svg><span>Daily SO</span><svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
+        entry.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14H4V6a2 2 0 0 1 2-2h2M8 11h8M8 15h6"/></svg><span>Daily SO</span><svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
         quickMenu.appendChild(entry);
       });
     }
