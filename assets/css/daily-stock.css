@@ -230,7 +230,7 @@
 .ds-production-quantity input:focus{outline:none;border-color:#b9c7dc;box-shadow:0 0 0 3px rgba(55,83,125,.08)}
 .ds-production-yield{display:grid;min-width:0;gap:4px;padding:0 3px;background:transparent;color:var(--muted);font-size:8px}
 .ds-production-yield strong{color:var(--ink);font-size:10px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
-.ds-field-help{margin:9px 0 0;padding:10px 11px;border-radius:10px;background:#f4f6f9;color:var(--muted);font-size:10px;line-height:1.5}
+.ds-production-note{margin:9px 0 0;padding:10px 11px;border-radius:10px;background:#f4f6f9;color:var(--muted);font-size:10px;line-height:1.5}
 @media(max-width:390px){
  .ds-production-list-head,.ds-production-row{grid-template-columns:minmax(0,1.25fr) minmax(70px,.7fr) minmax(74px,.75fr);gap:5px}
  .ds-production-item{gap:5px}
