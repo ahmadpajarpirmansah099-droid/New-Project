@@ -698,3 +698,295 @@
     transition: none !important;
   }
 }
+
+
+/* =========================================================
+   DESKTOP CONTROL LABELS AND HEADER ALIGNMENT
+   Neutralize the legacy collapsed-rail rules on desktop.
+   Mobile navigation continues to use the existing drawer.
+   ========================================================= */
+@media (min-width: 900px) {
+  /* Restore the full desktop sidebar even while the drawer is not toggled. */
+  body:not(:has(#menuDrawer.show)) .menu-drawer {
+    position: fixed !important;
+    z-index: 100 !important;
+    inset: 0 auto 0 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: var(--desktop-sidebar) !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    padding: 26px 18px 18px !important;
+    overflow: hidden !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    border: 0 !important;
+    border-right: 1px solid #e8edf4 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: 8px 0 28px rgba(20,35,63,.025) !important;
+  }
+  #menuDrawer > .drawer-head,
+  #menuDrawer > .drawer-nav,
+  #menuDrawer > .drawer-foot {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  #menuDrawer > .drawer-head {
+    flex: 0 0 auto;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100%;
+  }
+  body:not(:has(#menuDrawer.show)) #menuDrawer .drawer-nav {
+    display: flex !important;
+    flex: 1 1 auto;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 5px !important;
+    width: 100%;
+    min-height: 0;
+    padding: 0 !important;
+    overflow-y: auto;
+  }
+  body:not(:has(#menuDrawer.show)) #menuDrawer .drawer-item {
+    display: flex !important;
+    position: relative;
+    place-items: initial !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    gap: 12px !important;
+    padding: 0 12px !important;
+    border-radius: 11px !important;
+    background: transparent !important;
+    color: #68768c !important;
+    box-shadow: none !important;
+  }
+  body:not(:has(#menuDrawer.show)) #menuDrawer .drawer-item > span {
+    display: block !important;
+    visibility: visible !important;
+    width: auto !important;
+    max-width: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    color: inherit !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.35;
+    white-space: nowrap;
+  }
+  body:not(:has(#menuDrawer.show)) #menuDrawer .drawer-item > svg:first-child {
+    display: block !important;
+    flex: 0 0 19px;
+    width: 19px !important;
+    height: 19px !important;
+  }
+  body:not(:has(#menuDrawer.show)) #menuDrawer .drawer-item .drawer-chevron {
+    display: none !important;
+  }
+  body:not(:has(#menuDrawer.show)) #menuDrawer .desktop-nav-label {
+    display: block !important;
+    visibility: visible !important;
+    width: auto;
+    margin: 19px 10px 7px;
+    color: #98a3b5;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .14em;
+    line-height: 1.3;
+  }
+  body:not(:has(#menuDrawer.show)) #menuDrawer .desktop-nav-label:first-child {
+    margin-top: 0;
+  }
+  body:not(:has(#menuDrawer.show)) #menuDrawer .desktop-only-nav {
+    display: flex !important;
+  }
+  body:not(:has(#menuDrawer.show)) #menuDrawer .drawer-item:hover {
+    background: #f4f7fc !important;
+    color: #2457d7 !important;
+  }
+  body:not(:has(#menuDrawer.show)) #menuDrawer .drawer-item.active,
+  body:not(:has(#menuDrawer.show)) #menuDrawer .drawer-item[aria-current="page"] {
+    background: #edf3ff !important;
+    color: #2457d7 !important;
+    box-shadow: inset 3px 0 #356df3 !important;
+  }
+  body:not(:has(#menuDrawer.show)) #menuDrawer .drawer-foot {
+    display: block !important;
+    flex: 0 0 auto;
+    margin-top: auto;
+    padding: 16px 8px 4px;
+    border-top: 1px solid #edf0f5;
+    color: #98a3b5;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .12em;
+  }
+
+  /* Use a proper horizontal top bar; legacy CSS collapsed it to a 76px rail. */
+  body:not(:has(#menuDrawer.show)) .top {
+    position: fixed !important;
+    z-index: 110 !important;
+    inset: 0 0 auto var(--desktop-sidebar) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: auto !important;
+    height: var(--desktop-header) !important;
+    min-height: var(--desktop-header) !important;
+    padding: 0 var(--desktop-gutter) !important;
+    gap: 20px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #e8edf4 !important;
+    border-radius: 0 !important;
+    background: rgba(255,255,255,.97) !important;
+    box-shadow: 0 3px 16px rgba(20,35,63,.025) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+  body:not(:has(#menuDrawer.show)) .top .brand {
+    display: none !important;
+  }
+  body:not(:has(#menuDrawer.show)) .top .workspace-scope-switcher:not([hidden]) {
+    display: flex !important;
+    position: static !important;
+    flex: 1 1 auto;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    width: auto !important;
+    margin: 0 auto 0 0 !important;
+    padding: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+  body:not(:has(#menuDrawer.show)) .top .workspace-scope-switcher[hidden] {
+    display: none !important;
+  }
+  body:not(:has(#menuDrawer.show)) .top .scope-field {
+    display: grid !important;
+    flex: 0 1 220px;
+    gap: 5px;
+    min-width: 150px;
+  }
+  body:not(:has(#menuDrawer.show)) .top .scope-field > span {
+    display: block !important;
+    color: #8490a5;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .13em;
+  }
+  body:not(:has(#menuDrawer.show)) .top .scope-trigger {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-width: 0;
+    min-height: 38px;
+    padding: 0 12px;
+    border: 1px solid #e8edf4;
+    border-radius: 10px;
+    background: #fff;
+    color: #14233f;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  body:not(:has(#menuDrawer.show)) .top .top-actions {
+    position: static !important;
+    display: flex !important;
+    flex: 0 0 auto;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    pointer-events: auto !important;
+  }
+  body:not(:has(#menuDrawer.show)) .top .top-actions .profile {
+    display: grid !important;
+    position: static !important;
+    width: 38px !important;
+    height: 38px !important;
+    flex: 0 0 38px;
+    border: 1px solid #dce6fa;
+    border-radius: 50%;
+    background: #edf3ff;
+    color: #2457bd;
+    box-shadow: none;
+    pointer-events: auto !important;
+  }
+  body:not(:has(#menuDrawer.show)) .top .top-actions .auth-logout-button {
+    display: grid !important;
+    position: static !important;
+    width: 36px !important;
+    height: 36px !important;
+    flex: 0 0 36px;
+    border: 1px solid #e8edf4;
+    border-radius: 10px;
+    background: #fff;
+    color: #6f7c90;
+    pointer-events: auto !important;
+  }
+  body:not(:has(#menuDrawer.show)) .top .top-actions .menu-toggle {
+    display: none !important;
+  }
+
+  /* Date control should be a clear, compact field, not a full-width floating bar. */
+  #page-dashboard > .operational-date-trigger {
+    width: min(100%, 380px) !important;
+    min-width: 0 !important;
+    margin: 0 0 14px auto !important;
+    justify-self: end;
+  }
+  #page-dashboard > .operational-date-trigger .history-date-copy {
+    text-align: left;
+  }
+  #page-dashboard > .operational-date-trigger .history-date-copy small {
+    display: block;
+    color: #8490a5;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  #page-dashboard > .operational-date-trigger .history-date-copy strong {
+    display: block;
+    color: #14233f;
+    font-size: 12px;
+    font-weight: 800;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  body:not(:has(#menuDrawer.show)) .top {
+    padding-right: 24px !important;
+    padding-left: 24px !important;
+  }
+  body:not(:has(#menuDrawer.show)) .top .scope-field {
+    flex-basis: 180px;
+    min-width: 130px;
+  }
+  #page-dashboard > .operational-date-trigger {
+    width: min(100%, 340px) !important;
+  }
+}
+
+@media (min-width: 900px) and (prefers-reduced-motion: reduce) {
+  body:not(:has(#menuDrawer.show)) #menuDrawer .drawer-item {
+    transition: none !important;
+  }
+}
