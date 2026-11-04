@@ -208,6 +208,7 @@ function applyRoleNavigation() {
 }
 
 function go(page) {
+  const previousPage = document.querySelector('.page.active')?.id.replace(/^page-/, '') || '';
   const currentContext = window.AppAuth?.getContext();
   document.body.dataset.divisionMode = currentContext?.divisionMode || 'single';
   if (!canAccessGuestOperations() && GUEST_OPERATION_PAGES.includes(page)) {
@@ -230,6 +231,9 @@ function go(page) {
   if (page === 'all-divisions') loadAllDivisionsOverview();
 
   renderAll();
+  if (GUEST_OPERATION_PAGES.includes(page) && !GUEST_OPERATION_PAGES.includes(previousPage)) {
+    window.dispatchEvent(new Event('app:guestops-resume'));
+  }
   if (window.MasterDataUI && page === 'master-items') window.MasterDataUI.renderPage(page);
   if (window.WipUI && page === 'wips') window.WipUI.renderPage(page);
   if (window.MenuUI && page === 'menus') window.MenuUI.renderPage(page);
