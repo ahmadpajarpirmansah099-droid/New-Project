@@ -763,7 +763,9 @@
       if (transactionConfig) {
         document.querySelectorAll('.page').forEach((element) => element.classList.remove('active'));
         $('page-' + transactionConfig.page)?.classList.add('active');
-        document.querySelectorAll('.drawer-item').forEach((item) => item.classList.remove('active'));
+        document.querySelectorAll('.drawer-item[data-page]').forEach((item) => {
+          item.classList.toggle('active', item.dataset.page === targetPage);
+        });
         root.closeQuickMenu?.();
         $('fab').style.display = 'none';
         $('quickMenuBackdrop')?.classList.remove('show');
@@ -776,7 +778,9 @@
       if (targetPage === 'daily-expense') {
         document.querySelectorAll('.page').forEach((element) => element.classList.remove('active'));
         $('page-daily-expense')?.classList.add('active');
-        document.querySelectorAll('.drawer-item').forEach((item) => item.classList.remove('active'));
+        document.querySelectorAll('.drawer-item[data-page]').forEach((item) => {
+          item.classList.toggle('active', item.dataset.page === targetPage);
+        });
         root.closeQuickMenu?.();
         $('fab').style.display = 'none';
         $('quickMenuBackdrop')?.classList.remove('show');
