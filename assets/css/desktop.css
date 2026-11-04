@@ -482,3 +482,219 @@
     animation: none !important;
   }
 }
+
+
+/* =========================================================
+   DESKTOP LAYOUT REPAIR — page visibility, dashboard and
+   reservation composition. Kept behind the desktop breakpoint.
+   ========================================================= */
+@media (min-width: 900px) {
+  /* Only the selected workspace page may occupy the content area. */
+  .page:not(.active) {
+    display: none !important;
+  }
+  .page.active {
+    display: block !important;
+    min-width: 0;
+  }
+  #page-reservations:not(.active) {
+    display: none !important;
+  }
+  #page-reservations.active {
+    display: grid !important;
+  }
+
+  /* Dashboard: compact two-column summary, then full-width work queue. */
+  #page-dashboard.active {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.45fr) minmax(230px, .8fr);
+    column-gap: 18px;
+    row-gap: 0;
+    align-content: start;
+  }
+  #page-dashboard > .greeting,
+  #page-dashboard > .metrics,
+  #page-dashboard > #pendingWrap,
+  #page-dashboard > .section-head,
+  #page-dashboard > #dashboardList {
+    grid-column: 1 / -1;
+  }
+  #page-dashboard > .greeting { grid-row: 1; }
+  #page-dashboard > .hero {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: stretch;
+    min-width: 0;
+    min-height: 184px;
+    margin: 0;
+  }
+  #page-dashboard > .operational-date-trigger {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+  #page-dashboard > .metrics {
+    grid-row: 3;
+    margin-top: 18px;
+  }
+  #page-dashboard > #pendingWrap { grid-row: 4; }
+  #page-dashboard > .section-head { grid-row: 5; }
+  #page-dashboard > #dashboardList { grid-row: 6; }
+  #dashboardList.queue-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+  #dashboardList .empty,
+  #dashboardList .empty-state {
+    grid-column: 1 / -1;
+  }
+
+  /* Reservation page: no overlapping implicit grid rows. */
+  #page-reservations.active {
+    grid-template-columns: minmax(0, 1.12fr) minmax(320px, .88fr);
+    grid-template-areas:
+      "back back"
+      "title title"
+      "sub sub"
+      "toolbar toolbar"
+      "legend legend"
+      "calendar dayhead"
+      "calendar list";
+    grid-template-rows: auto auto auto auto auto auto minmax(0, 1fr);
+    align-items: start;
+    column-gap: 22px;
+    row-gap: 12px;
+  }
+  #page-reservations > .page-back { grid-area: back; }
+  #page-reservations > .page-title { grid-area: title; }
+  #page-reservations > .page-sub { grid-area: sub; }
+  #page-reservations > .reservation-toolbar { grid-area: toolbar; }
+  #page-reservations > .reservation-legend { grid-area: legend; }
+  #page-reservations > .reservation-calendar {
+    grid-area: calendar;
+    width: 100%;
+    min-width: 0;
+    align-self: stretch;
+    padding: 18px;
+  }
+  #page-reservations > .reservation-day-head {
+    grid-area: dayhead;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 4px 0 8px;
+  }
+  #page-reservations > .reservation-list {
+    grid-area: list;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+  }
+  #page-reservations .reservation-card { min-width: 0; }
+  #page-reservations .reservation-toolbar {
+    width: 100%;
+    min-width: 0;
+    min-height: 72px;
+    margin: 4px 0 0;
+    padding: 16px 20px;
+  }
+  #page-reservations .reservation-toolbar-heading,
+  #page-reservations .reservation-toolbar-month { min-width: 0; }
+  #page-reservations .reservation-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin: 0;
+  }
+
+  /* The guest-entry sheet must remain off-canvas until opened. */
+  .sheet:not(.show) {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translate(-50%, calc(-50% + 110vh)) !important;
+  }
+  .sheet.show {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translate(-50%, -50%) !important;
+  }
+  .sheet-backdrop:not(.show) {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* Keep the desktop page frame and feature workspaces aligned. */
+  .content { padding-top: calc(var(--desktop-header) + 38px) !important; }
+  .md-page, .wip-page, .menu-page, .ds-page {
+    width: 100%;
+    max-width: 1600px;
+    margin-inline: auto;
+  }
+  .md-page-heading, .wip-page-heading, .menu-page-heading, .ds-heading {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .md-page-heading .md-primary,
+  .wip-page-heading .wip-primary,
+  .menu-page-heading .menu-primary { width: auto; }
+  .md-item-list, .wip-list, .menu-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+  .md-item-card, .wip-card, .menu-card { min-width: 0; }
+  .ds-summary, .ds-overview-grid, .md-count-grid, .wip-count-grid, .menu-count-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .ds-panel, .settings-card, .division-overview-card { min-width: 0; }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  #page-dashboard.active {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #page-dashboard > .hero,
+  #page-dashboard > .operational-date-trigger {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  #page-dashboard > .operational-date-trigger {
+    width: min(100%, 420px);
+    margin: 0 0 14px auto;
+  }
+  #page-dashboard > .hero { grid-row: auto; }
+  #page-dashboard > .metrics { grid-row: auto; }
+  #page-dashboard > #pendingWrap,
+  #page-dashboard > .section-head,
+  #page-dashboard > #dashboardList { grid-row: auto; }
+  #dashboardList.queue-list { grid-template-columns: minmax(0, 1fr); }
+  #page-reservations.active {
+    grid-template-columns: minmax(0, 1fr) minmax(270px, .9fr);
+    column-gap: 16px;
+  }
+  #page-reservations .reservation-calendar { padding: 12px; }
+}
+
+@media (min-width: 1200px) {
+  #page-dashboard > .metrics { margin-bottom: 26px; }
+  #dashboardList.queue-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 900px) and (prefers-reduced-motion: reduce) {
+  #page-dashboard.active, #page-reservations.active,
+  .sheet, .md-item-card, .wip-card, .menu-card {
+    animation: none !important;
+    transition: none !important;
+  }
+}
