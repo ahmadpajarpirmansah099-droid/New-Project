@@ -55,6 +55,20 @@ test('Service role can open Guest Operations only in Service division', () => {
   assert.equal(canAccess(context), false);
 });
 
+
+test('Developer access follows the active division ID, not the first listed division', () => {
+  assert.equal(canAccess({
+    isGlobalDeveloper: true,
+    divisionMode: 'single',
+    activeDivisionId: 'service-id',
+    activeDivisionName: 'Service',
+    divisions: [
+      { id: 'bar-id', name: 'Bar' },
+      { id: 'service-id', name: 'Service' }
+    ]
+  }), true);
+});
+
 test('Admin role cannot open Guest Operations even in Service division', () => {
   assert.equal(canAccess({
     isGlobalDeveloper: false,
