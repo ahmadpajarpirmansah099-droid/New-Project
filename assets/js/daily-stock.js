@@ -506,7 +506,7 @@
     const options = items.map((item) => '<option value="' + item.id + '">' + escapeHtml(item.nama_barang) + '</option>').join('');
     const categories = ['Kalibrasi','Waste','QC','R&D','MOVE','SUPLIES','LAINNYA'];
     const categoryOptions = categories.map((category) => '<option value="' + category + '">' + category + '</option>').join('');
-    target.innerHTML = '<div class="ds-page ds-expense-page"><div class="ds-expense-intro"><button class="page-back" type="button" data-ds-action="back-daily-stock" aria-label="Kembali ke Daily SO"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Daily SO</span></button><h1>Pengeluaran</h1><p>Catat pemakaian bahan dan telusuri riwayat pengeluaran.</p></div><section class="ds-panel"><div class="ds-section-title"><div><h2>Input pengeluaran</h2><p>Tanggal transaksi otomatis mengikuti hari ini.</p></div></div><form id="dsExpenseForm" data-type="expense"><label>Kategori<div class="ds-category-picker" id="dsExpenseCategory"><input type="hidden" name="category" value=""><button type="button" class="ds-category-trigger" aria-haspopup="listbox" aria-expanded="false"><span>Pilih kategori</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="ds-category-options" role="listbox" aria-label="Kategori pengeluaran" hidden>' + categories.map((category) => '<button type="button" class="ds-category-option" role="option" data-category-value="' + escapeHtml(category) + '">' + escapeHtml(category) + '</button>').join('') + '</div></div></label><label>Barang<select name="itemId" required><option value="">Pilih bahan</option>' + options + '</select></label><label>Jumlah<input name="quantity" type="number" min="0.000001" step="any" inputmode="decimal" required placeholder="Masukkan jumlah"></label><label>Satuan<select name="unit" data-unit-select required><option value="">Pilih barang dulu</option></select></label><label>Referensi <span>(opsional)</span><input name="reference" maxlength="80" placeholder="Nomor nota / keterangan"></label><label>Catatan <span>(opsional)</span><textarea name="notes" rows="3" placeholder="Tambahkan keterangan jika perlu"></textarea></label><div class="ds-form-actions"><button type="submit" class="ds-primary">Simpan pengeluaran</button></div></form></section><section class="ds-panel"><div class="ds-section-title"><div><h2>Riwayat pengeluaran</h2><p>Otomatis menampilkan transaksi hari ini. Ubah tanggal untuk mencari riwayat lain.</p></div></div><label class="ds-date">Filter tanggal<input id="dailyExpenseDate" type="date" value="' + state.expenseDate + '"></label><div id="dailyExpenseHistory" class="ds-history-list ds-expense-history"><div class="ds-empty">Memuat riwayat...</div></div></section></div>';
+    target.innerHTML = '<div class="ds-page ds-expense-page"><div class="ds-expense-intro"><button class="page-back" type="button" data-ds-action="back-daily-stock" aria-label="Kembali ke Daily SO"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Daily SO</span></button><h1>Pengeluaran</h1><p>Catat pemakaian bahan dan telusuri riwayat pengeluaran.</p></div><section class="ds-panel"><div class="ds-section-title"><div><h2>Input pengeluaran</h2><p>Tanggal transaksi otomatis mengikuti hari ini.</p></div></div><form id="dsExpenseForm" data-type="expense"><label>Kategori<div class="ds-category-picker" id="dsExpenseCategory"><input type="hidden" name="category" value=""><button type="button" class="ds-category-trigger" aria-haspopup="listbox" aria-expanded="false"><span>Pilih kategori</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="ds-category-options" role="listbox" aria-label="Kategori pengeluaran" hidden>' + categories.map((category) => '<button type="button" class="ds-category-option" role="option" data-category-value="' + escapeHtml(category) + '">' + escapeHtml(category) + '</button>').join('') + '</div></div></label><label>Barang<div class="ds-item-search" id="dsExpenseItemSearch"><input type="hidden" name="itemId" value=""><input type="search" name="itemSearch" autocomplete="off" placeholder="Cari nama bahan..." aria-label="Cari nama bahan"><div class="ds-item-search-results" role="listbox" aria-label="Hasil pencarian bahan" hidden>' + items.map((item) => '<button type="button" class="ds-item-search-option" role="option" data-item-id="' + escapeHtml(item.id) + '" data-item-name="' + escapeHtml(item.nama_barang) + '">' + escapeHtml(item.nama_barang) + '</button>').join('') + '</div><small class="ds-item-search-selected" aria-live="polite"></small></div></label><label>Jumlah<input name="quantity" type="number" min="0.000001" step="any" inputmode="decimal" required placeholder="Masukkan jumlah"></label><label>Satuan<select name="unit" data-unit-select required><option value="">Pilih barang dulu</option></select></label><label>Referensi <span>(opsional)</span><input name="reference" maxlength="80" placeholder="Nomor nota / keterangan"></label><label>Catatan <span>(opsional)</span><textarea name="notes" rows="3" placeholder="Tambahkan keterangan jika perlu"></textarea></label><div class="ds-form-actions"><button type="submit" class="ds-primary">Simpan pengeluaran</button></div></form></section><section class="ds-panel"><div class="ds-section-title"><div><h2>Riwayat pengeluaran</h2><p>Otomatis menampilkan transaksi hari ini. Ubah tanggal untuk mencari riwayat lain.</p></div></div><label class="ds-date">Filter tanggal<input id="dailyExpenseDate" type="date" value="' + state.expenseDate + '"></label><div id="dailyExpenseHistory" class="ds-history-list ds-expense-history"><div class="ds-empty">Memuat riwayat...</div></div></section></div>';
     const categoryPicker = $('dsExpenseCategory');
     if (categoryPicker) {
       const trigger = categoryPicker.querySelector('.ds-category-trigger');
@@ -536,8 +536,50 @@
         }
       });
     }
-    const itemSelect = $('dsExpenseForm')?.querySelector('[name="itemId"]');
-    if (itemSelect) itemSelect.addEventListener('change', syncUnitOptions);
+    const itemSearch = $('dsExpenseItemSearch');
+    if (itemSearch) {
+      const input = itemSearch.querySelector('[name="itemSearch"]');
+      const hidden = itemSearch.querySelector('[name="itemId"]');
+      const results = itemSearch.querySelector('.ds-item-search-results');
+      const selectedLabel = itemSearch.querySelector('.ds-item-search-selected');
+      const allItems = items;
+      const showResults = (query) => {
+        const normalized = query.trim().toLocaleLowerCase('id');
+        const matches = allItems.filter((item) => !normalized || String(item.nama_barang || '').toLocaleLowerCase('id').includes(normalized)).slice(0, 30);
+        results.innerHTML = matches.length ? matches.map((item) => '<button type="button" class="ds-item-search-option" role="option" data-item-id="' + escapeHtml(item.id) + '" data-item-name="' + escapeHtml(item.nama_barang) + '">' + escapeHtml(item.nama_barang) + '</button>').join('') : '<div class="ds-item-search-empty">Barang tidak ditemukan</div>';
+        results.hidden = false;
+        itemSearch.classList.add('is-open');
+      };
+      input.addEventListener('focus', () => showResults(input.value));
+      input.addEventListener('input', () => {
+        hidden.value = '';
+        selectedLabel.textContent = '';
+        syncUnitOptions();
+        showResults(input.value);
+      });
+      results.addEventListener('click', (event) => {
+        const option = event.target.closest('[data-item-id]');
+        if (!option) return;
+        hidden.value = option.dataset.itemId;
+        input.value = option.dataset.itemName;
+        selectedLabel.textContent = 'Dipilih: ' + option.dataset.itemName;
+        results.hidden = true;
+        itemSearch.classList.remove('is-open');
+        syncUnitOptions();
+      });
+      document.addEventListener('click', (event) => {
+        if (!itemSearch.contains(event.target)) {
+          results.hidden = true;
+          itemSearch.classList.remove('is-open');
+        }
+      }, { once: true });
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          results.hidden = true;
+          itemSearch.classList.remove('is-open');
+        }
+      });
+    }
     syncUnitOptions();
     await loadExpenseHistory();
   }
@@ -615,6 +657,11 @@
     if (form.id === 'dsExpenseForm' && !form.elements.category.value) {
       root.toast?.('Pilih kategori pengeluaran dulu.');
       form.querySelector('.ds-category-trigger')?.focus();
+      return;
+    }
+    if (form.id === 'dsExpenseForm' && !form.elements.itemId.value) {
+      root.toast?.('Cari lalu pilih barang yang akan dikeluarkan.');
+      form.querySelector('[name="itemSearch"]')?.focus();
       return;
     }
     if (state.busy) return;
