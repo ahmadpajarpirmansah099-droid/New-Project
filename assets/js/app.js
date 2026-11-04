@@ -1716,3 +1716,36 @@ window.addEventListener('app:auth-ready', async function (event) {
     toast('Data operasional gagal dimuat dari database. Muat ulang halaman.');
   }
 });
+
+
+/* Delegasi interaksi untuk elemen statis di index.html. */
+document.addEventListener('click', function (event) {
+  const target = event.target.closest('[data-action]');
+  if (!target) return;
+  const action = target.dataset.action;
+  const handler = window[action];
+  if (typeof handler !== 'function') return;
+  let args = [];
+  try {
+    args = JSON.parse(target.dataset.actionArgs || '[]');
+  } catch (error) {
+    console.error('Argumen aksi tidak valid:', action, error);
+    return;
+  }
+  handler.apply(target, args);
+});
+
+document.addEventListener('input', function (event) {
+  const target = event.target.closest('[data-input-action]');
+  if (!target) return;
+  const handler = window[target.dataset.inputAction];
+  if (typeof handler === 'function') handler.call(target);
+});
+
+document.addEventListener('keydown', function (event) {
+  const target = event.target.closest('[data-keydown-action]');
+  if (!target || (event.key !== 'Enter' && event.key !== ' ')) return;
+  event.preventDefault();
+  const handler = window[target.dataset.keydownAction];
+  if (typeof handler === 'function') handler.call(target);
+});
