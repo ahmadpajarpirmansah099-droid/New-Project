@@ -63,7 +63,7 @@ assets/
     daily-stock-service.js
       Validasi sesi, pemuatan data, hitungan stok, dan transaksi Daily SO.
     daily-stock-ui.js
-      Tampilan, formulir, tab, halaman Pengeluaran, dan navigasi Daily SO.
+      Tampilan Daily SO serta halaman terpisah Pengeluaran, Produksi WIP, Sales, Barang Masuk, dan Supplies.
 
 tests/
   Pengujian otomatis untuk Guest Operations, Master Data, WIP, Menu, Daily SO, ekspor CSV, dan sesi workspace.
