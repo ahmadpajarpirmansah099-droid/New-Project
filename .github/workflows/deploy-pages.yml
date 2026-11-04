@@ -21,6 +21,12 @@ jobs:
           node --check assets/js/auth.js
           node --check assets/js/guestops-service.js
           node --check assets/js/app.js
+          node --check assets/js/guestops-queue.js
+          node --check assets/js/guestops-operational.js
+          node --check assets/js/guestops-history.js
+          node --check assets/js/guestops-reservations.js
+          node --check assets/js/guestops-detail.js
+          node --check assets/js/app-startup.js
           node --check assets/js/masterdata-store.js
           node --check assets/js/daily-stock.js
           node --check assets/js/masterdata-service.js
