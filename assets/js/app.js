@@ -1705,8 +1705,30 @@ updateHistoryDateLabel();
 updateOperationalDateLabels();
 
 let appDataReady = false;
+let appSessionGeneration = 0;
+
+window.addEventListener('app:auth-signed-out', function () {
+  appSessionGeneration += 1;
+  appDataReady = false;
+  state = {
+    schemaVersion: 3,
+    guests: [],
+    counters: {},
+    reservations: [],
+    reservationCounters: {},
+    settings: { seatingDurationMinutes: 90 }
+  };
+  remoteSaveQueue = Promise.resolve();
+  window.GuestOpsService?.reset();
+  window.MasterDataStore?.reset();
+  closeQuickMenu();
+  closeMenu();
+  closeSheet();
+});
+
 window.addEventListener('app:auth-ready', async function (event) {
   if (appDataReady) return;
+  const sessionGeneration = appSessionGeneration;
   try {
     const authContext = event.detail;
     await window.MasterDataStore.initialize(
@@ -1714,6 +1736,7 @@ window.addEventListener('app:auth-ready', async function (event) {
       authContext.workspaceId,
       authContext.activeDivisionId
     );
+    if (sessionGeneration !== appSessionGeneration) return;
     applyRoleNavigation();
 
     if (canAccessGuestOperations()) {
@@ -1721,9 +1744,10 @@ window.addEventListener('app:auth-ready', async function (event) {
         window.AppAuth.getClient(),
         authContext.workspaceId
       );
+      if (sessionGeneration !== appSessionGeneration) return;
       state = remoteState;
       syncSeatingSettingInput();
-      renderAll();
+      go('dashboard');
 
       setInterval(async () => {
         try {
@@ -1740,12 +1764,14 @@ window.addEventListener('app:auth-ready', async function (event) {
       }, 30000);
       setInterval(updateSeatingCountdowns, 1000);
     } else {
+      if (sessionGeneration !== appSessionGeneration) return;
       go('master-items');
     }
     appDataReady = true;
   } catch (error) {
-    console.error('Guest Operations initialization failed:', error);
-    toast('Data operasional gagal dimuat dari database. Muat ulang halaman.');
+    if (sessionGeneration !== appSessionGeneration) return;
+    console.error('Workspace initialization failed:', error);
+    toast('Data workspace gagal dimuat dari database. Muat ulang halaman.');
   }
 });
 
