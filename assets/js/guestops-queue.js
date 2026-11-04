@@ -140,55 +140,58 @@ function setDashboardCounter(id,targetValue,animate=false){
   requestAnimationFrame(step);
 }
 function renderAll() {
-  const day = selectedOperationalDate;
-  const todayGuests = state.guests.filter(guest => guest.day === day);
-  const waitingGuests = todayGuests.filter(guest => ['waiting', 'called'].includes(guest.status));
-  const doneGuests = todayGuests.filter(guest => guest.status === 'done');
-  const cancelledGuests = todayGuests.filter(guest => guest.status === 'cancelled');
-
-  $('dateLabel').textContent = historyDateLabel(day, { day: 'numeric', month: 'short', year: 'numeric' });
+  $('dateLabel').textContent = historyDateLabel(selectedOperationalDate, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
   updateOperationalDateLabels();
 
-  const animateCounts =
-    dashboardCountUpPending && $('page-dashboard')?.classList.contains('active');
-  dashboardCountUpPending = false;
+  if ($('page-dashboard')?.classList.contains('active')) {
+    const todayGuests = state.guests.filter(guest => guest.day === selectedOperationalDate);
+    const waitingGuests = todayGuests.filter(guest => ['waiting', 'called'].includes(guest.status));
+    const doneGuests = todayGuests.filter(guest => guest.status === 'done');
+    const cancelledGuests = todayGuests.filter(guest => guest.status === 'cancelled');
+    const animateCounts = dashboardCountUpPending;
+    dashboardCountUpPending = false;
 
-  setDashboardCounter('totalCount', todayGuests.length, animateCounts);
-  setDashboardCounter(
-    'packCount',
-    todayGuests.reduce((total, guest) => total + guest.pack, 0),
-    animateCounts
-  );
-  setDashboardCounter('waitingCount', waitingGuests.length, animateCounts);
-  setDashboardCounter('doneCount', doneGuests.length, animateCounts);
-  setDashboardCounter('cancelCount', cancelledGuests.length, animateCounts);
+    setDashboardCounter('totalCount', todayGuests.length, animateCounts);
+    setDashboardCounter(
+      'packCount',
+      todayGuests.reduce((total, guest) => total + guest.pack, 0),
+      animateCounts
+    );
+    setDashboardCounter('waitingCount', waitingGuests.length, animateCounts);
+    setDashboardCounter('doneCount', doneGuests.length, animateCounts);
+    setDashboardCounter('cancelCount', cancelledGuests.length, animateCounts);
 
-  const resolvedGuests = todayGuests.filter(guest => guest.resolved);
-  $('avgWait').textContent = resolvedGuests.length
-    ? fmtElapsed(
-        resolvedGuests.reduce((total, guest) => total + guest.resolved - guest.created, 0) /
-          resolvedGuests.length
-      )
-    : '—';
+    const resolvedGuests = todayGuests.filter(guest => guest.resolved);
+    $('avgWait').textContent = resolvedGuests.length
+      ? fmtElapsed(
+          resolvedGuests.reduce((total, guest) => total + guest.resolved - guest.created, 0) /
+            resolvedGuests.length
+        )
+      : '—';
 
-  const pendingGuests = state.guests.filter(
-    guest => guest.day !== day && ['waiting', 'called'].includes(guest.status)
-  );
+    const pendingGuests = state.guests.filter(
+      guest => guest.day !== selectedOperationalDate && ['waiting', 'called'].includes(guest.status)
+    );
 
-  $('pendingWrap').innerHTML = pendingGuests.length
-    ? `<div class="pending"><h3>⚠ ${pendingGuests.length} tugas tertunda dari hari sebelumnya</h3><p>Periksa tamu yang belum diselesaikan. Data tidak dihapus otomatis.</p>${pendingGuests.map(guest => `<div class="pending-guest-row"><span><b>${guest.ticket}</b> · ${esc(guest.name)}</span><button class="mini green" data-app-action="openDetail" data-app-id="${guest.id}">Periksa</button></div>`).join('')}</div>`
-    : '';
+    $('pendingWrap').innerHTML = pendingGuests.length
+      ? `<div class="pending"><h3>⚠ ${pendingGuests.length} tugas tertunda dari hari sebelumnya</h3><p>Periksa tamu yang belum diselesaikan. Data tidak dihapus otomatis.</p>${pendingGuests.map(guest => `<div class="pending-guest-row"><span><b>${guest.ticket}</b> · ${esc(guest.name)}</span><button class="mini green" data-app-action="openDetail" data-app-id="${guest.id}">Periksa</button></div>`).join('')}</div>`
+      : '';
 
-  $('dashboardList').innerHTML = waitingGuests.length
-    ? waitingGuests
-        .sort((a, b) => a.created - b.created)
-        .map(guestCard)
-        .join('')
-    : `<div class="empty"><div class="empty-icon">✓</div><h3>Belum ada antrean aktif</h3><p>Tambahkan tamu baru untuk mulai mengelola antrean.</p></div>`;
+    $('dashboardList').innerHTML = waitingGuests.length
+      ? waitingGuests
+          .sort((a, b) => a.created - b.created)
+          .map(guestCard)
+          .join('')
+      : `<div class="empty"><div class="empty-icon">✓</div><h3>Belum ada antrean aktif</h3><p>Tambahkan tamu baru untuk mulai mengelola antrean.</p></div>`;
+  }
 
-  renderQueue();
-  renderHistory();
-  renderReservations();
+  if ($('page-waiting')?.classList.contains('active')) renderQueue();
+  if ($('page-history')?.classList.contains('active')) renderHistory();
+  if ($('page-reservations')?.classList.contains('active')) renderReservations();
 }
 function setFilter(f){activeFilter=f;document.querySelectorAll('#queueFilters .filter').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));renderQueue()}
 function renderQueue(){
