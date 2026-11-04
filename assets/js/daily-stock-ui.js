@@ -430,7 +430,7 @@
       fields = '<div class="ds-production-batch-head"><div><strong>Daftar WIP aktif</strong><small>Semua WIP tampil otomatis. Isi jumlah batch pada produk yang dibuat.</small></div><span>' + active.length + ' WIP</span></div>' +
         '<div class="ds-production-list-head"><span>PRODUK WIP</span><span>JUMLAH BATCH</span><span>HASIL JADI</span></div>' +
         '<div id="dsProductionRows" class="ds-production-rows"></div>' +
-        '<p class="ds-field-help">Biarkan jumlah batch kosong untuk WIP yang tidak diproduksi. Hasil jadi dihitung otomatis dari resep.</p>';
+        '<p class="ds-production-note">Biarkan jumlah batch kosong untuk WIP yang tidak diproduksi. Hasil jadi dihitung otomatis dari resep.</p>';
     } else if (config.field === 'menu') {
       fields = transactionSearchField('Menu', 'menuId', 'Cari nama menu...', activeMenus(), 'id', 'nama_menu') +
         '<label>Jumlah porsi<input name="quantity" type="number" min="1" step="1" inputmode="numeric" required placeholder="Masukkan jumlah porsi"></label>' +
