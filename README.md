@@ -75,21 +75,20 @@ supabase/migrations/
   Pemeriksaan JavaScript, tes frontend, dan deployment GitHub Pages.
 ```
 
-## Master Data frontend
+## Master Data dan Guest Operations
 
-- Master Barang menyimpan data pada localStorage key `guestops_masterdata_demo_v1`.
-- Data Master Data dipisahkan dari `waitlist_frontend_demo_v1`; data antrean, riwayat, reservasi, dan pengaturan Guest Operational tidak dipakai atau ditulis oleh modul ini.
+- Master Barang, Resep WIP, dan Menu menggunakan `MasterDataStore` untuk membaca serta menyimpan payload ke tabel Supabase `workspace_module_state`.
+- Data Master Data dipisahkan berdasarkan workspace dan divisi aktif.
+- Guest Operational membaca dan menyimpan tamu, riwayat status, reservasi, serta pengaturan melalui layanan Supabase.
+- Tidak ada penyimpanan data operasional demo di `localStorage`. Penyimpanan lokal demo lama hanya dibersihkan saat aplikasi memulai sesi.
 - Struktur Master Data menggunakan array terpisah `masterItems`, `wips`, `wipRecipeLines`, `menus`, dan `menuRecipeLines`.
-- Phase 1 menggunakan `masterItems` untuk Master Barang. Phase 2 menggunakan `wips` dan `wipRecipeLines` untuk Resep WIP.
 - Master Barang menyediakan penanda supply agar jenis barang dapat dibedakan tanpa membuat modul inventory tambahan.
 - HPP WIP dihitung dari kuantitas dasar bahan dikali harga per satuan dasar. WIP turunan dihitung secara rekursif berdasarkan HPP per satuan hasilnya.
 - Harga beli terakhir menjadi sumber utama; jika belum tersedia, harga referensi digunakan dan hasil HPP diberi tanda estimasi. Jika harga tidak tersedia, HPP ditandai tidak valid, bukan dianggap nol.
 - Perubahan satuan Master Barang memperbarui kuantitas dasar pada resep WIP yang terkait. Perubahan satuan hasil WIP diblokir jika masih dipakai oleh resep induk dengan satuan lama.
-- Phase 3 menggunakan `menus` dan `menuRecipeLines` untuk komposisi per porsi. HPP Menu menjumlahkan biaya komponen tanpa membagi ulang hasil batch WIP.
+- Menu menggunakan `menus` dan `menuRecipeLines` untuk komposisi per porsi. HPP Menu menjumlahkan biaya komponen tanpa membagi ulang hasil batch WIP.
 - Margin nominal dihitung dari harga jual dikurangi HPP; persentase margin dihitung terhadap harga jual. Harga jual nol membuat hasil margin tidak valid.
 - Perubahan satuan hasil WIP diblokir jika satuan lama masih dipakai oleh resep WIP induk atau Menu.
-- Scope awal memakai `scope-demo-default`; model menyimpan `scope_id` agar dapat dikembangkan ke multi-outlet/divisi.
-- Aplikasi belum terhubung ke Supabase atau backend. Tidak ada data produksi Barapp yang disalin.
 
 ## Menjalankan aplikasi
 
@@ -97,18 +96,14 @@ Buka `index.html` melalui browser atau gunakan alamat GitHub Pages repository in
 
 ## Penyimpanan dan batasan
 
-- Data demo tersimpan di `localStorage` pada browser perangkat yang digunakan.
-- Data belum tersinkron otomatis antarperangkat dan belum menggunakan backend/database.
-- Pengaturan Seating Time tersimpan bersama data demo di browser yang sama.
+- Data operasional disimpan di Supabase dan mengikuti workspace/divisi serta aturan akses akun.
 - Ekspor tersedia dalam format CSV.
 - Repository ini berdiri sendiri dan tidak terhubung dengan Barapp.
 
 ## Aturan saat mengembangkan
 
-- Pertahankan kunci `localStorage` `waitlist_frontend_demo_v1` agar data demo yang sudah ada tetap terbaca.
-- Jangan menghapus atau mengubah data pengguna maupun struktur penyimpanan tanpa persetujuan.
+- Jangan menghapus atau mengubah data pengguna maupun struktur database tanpa persetujuan.
 - Pertahankan pemisahan fitur: Guest Operational adalah halaman utama; Antrean, Riwayat, Reservasi, dan Tambah Tamu diakses dari tombol `+`.
 - Semua ikon antarmuka baru harus berasal dari Lucide Icons.
 - Jaga tampilan mobile sebagai prioritas dan hindari mengubah alur fitur yang tidak diminta.
 - Perubahan JavaScript harus melewati pemeriksaan sintaks dan tes Master Barang, Resep WIP, dan Menu di GitHub Actions.
-- Jangan mengganti key `guestops_masterdata_demo_v1` atau bentuk data tersimpan tanpa rencana migrasi dan persetujuan.
