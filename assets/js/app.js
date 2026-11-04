@@ -152,7 +152,28 @@ function setWorkspaceHeader(page) {
   meta.textContent = 'ADMIN WORKSPACE';
 }
 
+function canAccessGuestOperations() {
+  const context = window.AppAuth?.getContext();
+  return Boolean(context && (context.isGlobalDeveloper || context.workspaceRole === 'service'));
+}
+
+function applyRoleNavigation() {
+  const canUseGuestOps = canAccessGuestOperations();
+  const guestPages = ['dashboard', 'waiting', 'history', 'reservations', 'settings'];
+
+  document.querySelectorAll('.drawer-item[data-page]').forEach(item => {
+    if (guestPages.includes(item.dataset.page)) item.style.display = canUseGuestOps ? '' : 'none';
+  });
+  document.querySelectorAll('.quick-menu-item[data-quick-context="guest"]').forEach(item => {
+    item.style.display = canUseGuestOps ? '' : 'none';
+  });
+}
+
 function go(page) {
+  if (!canAccessGuestOperations() && ['dashboard', 'waiting', 'history', 'reservations', 'settings'].includes(page)) {
+    toast('Guest Operational hanya tersedia untuk akun Service.');
+    page = 'master-items';
+  }
   setWorkspaceHeader(page);
   closeQuickMenu();
   document.querySelectorAll('.page').forEach(element => element.classList.remove('active'));
@@ -1687,33 +1708,41 @@ let appDataReady = false;
 window.addEventListener('app:auth-ready', async function (event) {
   if (appDataReady) return;
   try {
+    const authContext = event.detail;
     await window.MasterDataStore.initialize(
       window.AppAuth.getClient(),
-      event.detail.workspaceId
+      authContext.workspaceId,
+      authContext.activeDivisionId
     );
-    const remoteState = await window.GuestOpsService.initialize(
-      window.AppAuth.getClient(),
-      event.detail.workspaceId
-    );
-    state = remoteState;
-    syncSeatingSettingInput();
-    renderAll();
-    appDataReady = true;
+    applyRoleNavigation();
 
-    setInterval(async () => {
-      try {
-        const refreshed = await window.GuestOpsService.load();
-        state.guests = refreshed.guests;
-        state.reservations = refreshed.reservations;
-        state.counters = refreshed.counters;
-        state.reservationCounters = refreshed.reservationCounters;
-        state.settings = refreshed.settings;
-        renderAll();
-      } catch (error) {
-        console.error('Guest Operations refresh failed:', error);
-      }
-    }, 30000);
-    setInterval(updateSeatingCountdowns, 1000);
+    if (canAccessGuestOperations()) {
+      const remoteState = await window.GuestOpsService.initialize(
+        window.AppAuth.getClient(),
+        authContext.workspaceId
+      );
+      state = remoteState;
+      syncSeatingSettingInput();
+      renderAll();
+
+      setInterval(async () => {
+        try {
+          const refreshed = await window.GuestOpsService.load();
+          state.guests = refreshed.guests;
+          state.reservations = refreshed.reservations;
+          state.counters = refreshed.counters;
+          state.reservationCounters = refreshed.reservationCounters;
+          state.settings = refreshed.settings;
+          renderAll();
+        } catch (error) {
+          console.error('Guest Operations refresh failed:', error);
+        }
+      }, 30000);
+      setInterval(updateSeatingCountdowns, 1000);
+    } else {
+      go('master-items');
+    }
+    appDataReady = true;
   } catch (error) {
     console.error('Guest Operations initialization failed:', error);
     toast('Data operasional gagal dimuat dari database. Muat ulang halaman.');
