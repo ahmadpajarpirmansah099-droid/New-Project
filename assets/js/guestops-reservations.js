@@ -415,19 +415,25 @@ async function saveReservation(e) {
     guestId: null
   };
 
+  reservationMonth = date.slice(0, 7);
+  reservationDate = date;
+  closeSheet();
+
   try {
     reservation.code = await window.GuestOpsService.nextReservationCode(date);
     state.reservations.push(reservation);
-    if (await save() === false) { state.reservations = state.reservations.filter(item => item.id !== reservation.id); return; }
+    renderAll();
+    if (await save() === false) {
+      state.reservations = state.reservations.filter(item => item.id !== reservation.id);
+      renderAll();
+      toast('Reservasi belum tersimpan. Coba lagi.');
+      return;
+    }
   } catch (error) {
     console.error(error);
     toast('Reservasi belum berhasil disimpan. Coba lagi.');
     return;
   }
-  reservationMonth = date.slice(0, 7);
-  reservationDate = date;
-  closeSheet();
-  renderAll();
   toast('Reservasi tersimpan · ' + reservation.code);
 }
 
@@ -499,31 +505,38 @@ async function confirmSeatReservation(event, id) {
     }]
   };
 
+  const previousReservation = {
+    status: reservation.status,
+    guestId: reservation.guestId,
+    table: reservation.table,
+    seatedAt: reservation.seatedAt
+  };
+  closeSheet();
+
   try {
     guest.ticket = await window.GuestOpsService.nextTicket(todayKey());
-  } catch (error) {
-    console.error(error);
-    toast('Nomor antrean belum berhasil dibuat. Coba lagi.');
-    return;
-  }
+    state.guests.push(guest);
+    reservation.status = 'seated';
+    reservation.guestId = guest.id;
+    reservation.table = table;
+    reservation.seatedAt = now;
+    renderAll();
 
-  state.guests.push(guest);
-  reservation.status = 'seated';
-  reservation.guestId = guest.id;
-  reservation.table = table;
-  reservation.seatedAt = now;
-
-  try {
-    if (await save() === false) throw new Error('Database menolak penyimpanan');
+    if (await save() === false) {
+      state.guests = state.guests.filter(item => item.id !== guest.id);
+      Object.assign(reservation, previousReservation);
+      renderAll();
+      toast('Tamu belum berhasil didudukkan. Coba lagi.');
+      return;
+    }
   } catch (error) {
     state.guests = state.guests.filter(item => item.id !== guest.id);
-    reservation.status = 'pending';
-    reservation.guestId = null;
-    reservation.table = '';
-    throw error;
+    Object.assign(reservation, previousReservation);
+    renderAll();
+    console.error(error);
+    toast('Tamu belum berhasil didudukkan. Coba lagi.');
+    return;
   }
-  closeSheet();
-  renderAll();
   toast('Tamu masuk ke catatan operasional · ' + guest.ticket);
 }
 

@@ -15,7 +15,7 @@ function createRuntime() {
 
   class Query {
     constructor(table) { this.table = table; this.operation = 'select'; this.values = null; }
-    select() { this.operation = 'select'; return this; }
+    select(columns) { this.operation = 'select'; calls.push({ table: this.table, operation: this.operation, columns }); return this; }
     eq() { return this; }
     order() { return this; }
     maybeSingle() {
@@ -81,6 +81,18 @@ test('Guest Operations initializes from an empty Supabase workspace', async () =
   assert.equal(state.settings.seatingDurationMinutes, 90);
 });
 
+test('Guest audit history is fetched only when a guest detail is requested', async () => {
+  const { runtime, client, calls } = createRuntime();
+  await runtime.GuestOpsService.initialize(client, 'workspace-1');
+
+  const guestSelect = calls.find(call => call.table === 'guests' && call.operation === 'select');
+  assert.equal(guestSelect.columns.includes('guest_status_history'), false);
+
+  const audit = await runtime.GuestOpsService.loadGuestAudit('guest-1');
+  assert.deepEqual(Array.from(audit), []);
+  assert.equal(calls.some(call => call.table === 'guest_status_history' && call.operation === 'select'), true);
+});
+
 test('Ticket and reservation numbers are requested from database RPCs', async () => {
   const { runtime, client, calls } = createRuntime();
   await runtime.GuestOpsService.initialize(client, 'workspace-1');
@@ -120,6 +132,43 @@ test('Guest Operations write queue recovers after a failed database write', asyn
   await assert.rejects(runtime.GuestOpsService.persist(state), /temporary database failure/);
   await runtime.GuestOpsService.persist(state);
   assert.equal(rows.reservations.length, 1);
+});
+
+test('Guest Operations writes only records that changed after the first save', async () => {
+  const { runtime, client, calls } = createRuntime();
+  await runtime.GuestOpsService.initialize(client, 'workspace-1');
+
+  const state = {
+    guests: [{
+      id: 'guest-1',
+      ticket: 'WL-001',
+      day: '2026-11-03',
+      name: 'Tamu Uji',
+      pack: 2,
+      status: 'waiting',
+      created: 1793700000000
+    }],
+    reservations: [{
+      id: 'reservation-1',
+      code: 'RSV-001',
+      date: '2026-11-04',
+      time: '19:00',
+      name: 'Tamu Reservasi',
+      pack: 3,
+      status: 'pending',
+      created: 1793700000000
+    }],
+    settings: { seatingDurationMinutes: 90 }
+  };
+
+  await runtime.GuestOpsService.persist(state);
+  state.guests[0].status = 'called';
+  await runtime.GuestOpsService.persist(state);
+  await runtime.GuestOpsService.persist(state);
+
+  assert.equal(calls.filter(call => call.table === 'guests' && call.operation === 'upsert').length, 2);
+  assert.equal(calls.filter(call => call.table === 'reservations' && call.operation === 'upsert').length, 1);
+  assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 1);
 });
 
 test('Guest status correction audit is appended to the history table', async () => {
