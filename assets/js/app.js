@@ -267,6 +267,7 @@ function runQuickAction(action) {
 
 function toggleMenu() {
   const open = !$('menuDrawer').classList.contains('show');
+  const isDesktop = window.matchMedia('(min-width: 900px)').matches;
 
   if (open) closeQuickMenu();
 
@@ -274,7 +275,8 @@ function toggleMenu() {
   $('menuBackdrop').classList.toggle('show', open);
   $('menuDrawer').setAttribute('aria-hidden', String(!open));
   $('menuToggle').setAttribute('aria-expanded', String(open));
-  document.body.style.overflow = open ? 'hidden' : '';
+  $('menuToggle').setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
+  document.body.style.overflow = open && !isDesktop ? 'hidden' : '';
 }
 
 function closeMenu() {
@@ -282,6 +284,7 @@ function closeMenu() {
   $('menuBackdrop').classList.remove('show');
   $('menuDrawer').setAttribute('aria-hidden', 'true');
   $('menuToggle').setAttribute('aria-expanded', 'false');
+  $('menuToggle').setAttribute('aria-label', 'Buka menu');
   document.body.style.overflow = '';
 }
 
