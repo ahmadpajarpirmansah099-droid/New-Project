@@ -859,7 +859,7 @@
   body:not(:has(#menuDrawer.show)) .top .brand {
     display: none !important;
   }
-  body:not(:has(#menuDrawer.show)) .top .workspace-scope-switcher {
+  body:not(:has(#menuDrawer.show)) .top .workspace-scope-switcher:not([hidden]) {
     display: flex !important;
     position: static !important;
     flex: 1 1 auto;
@@ -872,6 +872,9 @@
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
+  }
+  body:not(:has(#menuDrawer.show)) .top .workspace-scope-switcher[hidden] {
+    display: none !important;
   }
   body:not(:has(#menuDrawer.show)) .top .scope-field {
     display: grid !important;
