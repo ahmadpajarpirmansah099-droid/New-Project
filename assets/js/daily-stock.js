@@ -485,10 +485,10 @@
     const form = $('dsTransactionForm') || $('dsExpenseForm');
     if (!form) return;
     const item = getItem(form.elements.itemId?.value);
-    const select = form.querySelector('[data-unit-select]');
-    if (!select || !item) {
-      if (select) select.innerHTML = '<option value="">Pilih barang dulu</option>';
-      const picker = form.querySelector('#dsExpenseUnitPicker');
+    const unitField = form.querySelector('[data-unit-select]');
+    const picker = form.querySelector('#dsExpenseUnitPicker');
+    if (!unitField || !item) {
+      if (unitField) unitField.value = '';
       if (picker) {
         const trigger = picker.querySelector('.ds-unit-trigger');
         const panel = picker.querySelector('.ds-unit-options');
@@ -501,17 +501,19 @@
       }
       return;
     }
-    select.innerHTML = (item.konversi_satuan || []).map((unit) => '<option value="' + escapeHtml(unit.unit) + '">' + escapeHtml(unit.unit) + '</option>').join('');
-    select.value = item.satuan_dasar;
-    const picker = form.querySelector('#dsExpenseUnitPicker');
+    const units = (item.konversi_satuan || []).map((unit) => unit.unit).filter(Boolean);
+    const defaultUnit = units.includes(item.satuan_dasar) ? item.satuan_dasar : (units[0] || '');
     if (picker) {
+      unitField.value = defaultUnit;
       const trigger = picker.querySelector('.ds-unit-trigger');
       const panel = picker.querySelector('.ds-unit-options');
-      const units = Array.from(select.options).map((option) => option.value).filter(Boolean);
       trigger.disabled = units.length === 0;
-      trigger.querySelector('span').textContent = select.value || 'Pilih barang dulu';
-      panel.innerHTML = units.map((unit) => '<button type="button" role="option" class="ds-unit-option ' + (unit === select.value ? 'active' : '') + '" data-unit-value="' + escapeHtml(unit) + '">' + escapeHtml(unit) + '</button>').join('');
+      trigger.querySelector('span').textContent = defaultUnit || 'Pilih barang dulu';
+      panel.innerHTML = units.map((unit) => '<button type="button" role="option" class="ds-unit-option ' + (unit === defaultUnit ? 'active' : '') + '" data-unit-value="' + escapeHtml(unit) + '">' + escapeHtml(unit) + '</button>').join('');
+      return;
     }
+    unitField.innerHTML = units.map((unit) => '<option value="' + escapeHtml(unit) + '">' + escapeHtml(unit) + '</option>').join('');
+    unitField.value = defaultUnit;
   }
 
   async function goToExpensePage() {
@@ -529,7 +531,7 @@
     const options = items.map((item) => '<option value="' + item.id + '">' + escapeHtml(item.nama_barang) + '</option>').join('');
     const categories = ['Kalibrasi','Waste','QC','R&D','MOVE','SUPLIES','LAINNYA'];
     const categoryOptions = categories.map((category) => '<option value="' + category + '">' + category + '</option>').join('');
-    target.innerHTML = '<div class="ds-page ds-expense-page"><div class="ds-expense-intro"><button class="page-back" type="button" data-ds-action="back-daily-stock" aria-label="Kembali ke Daily SO"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Daily SO</span></button><h1>Pengeluaran</h1><p>Catat pemakaian bahan dan telusuri riwayat pengeluaran.</p></div><section class="ds-panel"><div class="ds-section-title"><div><h2>Input pengeluaran</h2><p>Tanggal transaksi otomatis mengikuti hari ini.</p></div></div><form id="dsExpenseForm" data-type="expense"><label>Kategori<div class="ds-category-picker" id="dsExpenseCategory"><input type="hidden" name="category" value=""><button type="button" class="ds-category-trigger" aria-haspopup="listbox" aria-expanded="false"><span>Pilih kategori</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="ds-category-options" role="listbox" aria-label="Kategori pengeluaran" hidden>' + categories.map((category) => '<button type="button" class="ds-category-option" role="option" data-category-value="' + escapeHtml(category) + '">' + escapeHtml(category) + '</button>').join('') + '</div></div></label><label>Barang<div class="ds-item-search" id="dsExpenseItemSearch"><input type="hidden" name="itemId" value=""><input type="search" name="itemSearch" autocomplete="off" placeholder="Cari nama bahan..." aria-label="Cari nama bahan"><div class="ds-item-search-results" role="listbox" aria-label="Hasil pencarian bahan" hidden>' + items.map((item) => '<button type="button" class="ds-item-search-option" role="option" data-item-id="' + escapeHtml(item.id) + '" data-item-name="' + escapeHtml(item.nama_barang) + '">' + escapeHtml(item.nama_barang) + '</button>').join('') + '</div><small class="ds-item-search-selected" aria-live="polite"></small></div></label><label>Jumlah<input name="quantity" type="number" min="0.000001" step="any" inputmode="decimal" required placeholder="Masukkan jumlah"></label><label>Satuan<div class="ds-unit-picker" id="dsExpenseUnitPicker"><select name="unit" data-unit-select class="ds-native-select" tabindex="-1" aria-hidden="true" required><option value="">Pilih barang dulu</option></select><button type="button" class="ds-unit-trigger" aria-haspopup="listbox" aria-expanded="false" disabled><span>Pilih barang dulu</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="ds-unit-options" role="listbox" aria-label="Pilih satuan" hidden></div></div></label><label>Referensi <span>(opsional)</span><input name="reference" maxlength="80" placeholder="Nomor nota / keterangan"></label><label>Catatan <span>(opsional)</span><textarea name="notes" rows="3" placeholder="Tambahkan keterangan jika perlu"></textarea></label><div class="ds-form-actions"><button type="submit" class="ds-primary">Simpan pengeluaran</button></div></form></section><section class="ds-panel"><div class="ds-section-title"><div><h2>Riwayat pengeluaran</h2><p>Otomatis menampilkan transaksi hari ini. Ubah tanggal untuk mencari riwayat lain.</p></div></div><label class="ds-date">Filter tanggal<input id="dailyExpenseDate" type="date" value="' + state.expenseDate + '"></label><div id="dailyExpenseHistory" class="ds-history-list ds-expense-history"><div class="ds-empty">Memuat riwayat...</div></div></section></div>';
+    target.innerHTML = '<div class="ds-page ds-expense-page"><div class="ds-expense-intro"><button class="page-back" type="button" data-ds-action="back-daily-stock" aria-label="Kembali ke Daily SO"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Daily SO</span></button><h1>Pengeluaran</h1><p>Catat pemakaian bahan dan telusuri riwayat pengeluaran.</p></div><section class="ds-panel"><div class="ds-section-title"><div><h2>Input pengeluaran</h2><p>Tanggal transaksi otomatis mengikuti hari ini.</p></div></div><form id="dsExpenseForm" data-type="expense"><label>Kategori<div class="ds-category-picker" id="dsExpenseCategory"><input type="hidden" name="category" value=""><button type="button" class="ds-category-trigger" aria-haspopup="listbox" aria-expanded="false"><span>Pilih kategori</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="ds-category-options" role="listbox" aria-label="Kategori pengeluaran" hidden>' + categories.map((category) => '<button type="button" class="ds-category-option" role="option" data-category-value="' + escapeHtml(category) + '">' + escapeHtml(category) + '</button>').join('') + '</div></div></label><label>Barang<div class="ds-item-search" id="dsExpenseItemSearch"><input type="hidden" name="itemId" value=""><input type="search" name="itemSearch" autocomplete="off" placeholder="Cari nama bahan..." aria-label="Cari nama bahan"><div class="ds-item-search-results" role="listbox" aria-label="Hasil pencarian bahan" hidden>' + items.map((item) => '<button type="button" class="ds-item-search-option" role="option" data-item-id="' + escapeHtml(item.id) + '" data-item-name="' + escapeHtml(item.nama_barang) + '">' + escapeHtml(item.nama_barang) + '</button>').join('') + '</div><small class="ds-item-search-selected" aria-live="polite"></small></div></label><label>Jumlah<input name="quantity" type="number" min="0.000001" step="any" inputmode="decimal" required placeholder="Masukkan jumlah"></label><label>Satuan<div class="ds-unit-picker" id="dsExpenseUnitPicker"><input type="hidden" name="unit" data-unit-select value=""><button type="button" class="ds-unit-trigger" aria-haspopup="listbox" aria-expanded="false" disabled><span>Pilih barang dulu</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="ds-unit-options" role="listbox" aria-label="Pilih satuan" hidden></div></div></label><label>Referensi <span>(opsional)</span><input name="reference" maxlength="80" placeholder="Nomor nota / keterangan"></label><label>Catatan <span>(opsional)</span><textarea name="notes" rows="3" placeholder="Tambahkan keterangan jika perlu"></textarea></label><div class="ds-form-actions"><button type="submit" class="ds-primary">Simpan pengeluaran</button></div></form></section><section class="ds-panel"><div class="ds-section-title"><div><h2>Riwayat pengeluaran</h2><p>Otomatis menampilkan transaksi hari ini. Ubah tanggal untuk mencari riwayat lain.</p></div></div><label class="ds-date">Filter tanggal<input id="dailyExpenseDate" type="date" value="' + state.expenseDate + '"></label><div id="dailyExpenseHistory" class="ds-history-list ds-expense-history"><div class="ds-empty">Memuat riwayat...</div></div></section></div>';
     const categoryPicker = $('dsExpenseCategory');
     if (categoryPicker) {
       const trigger = categoryPicker.querySelector('.ds-category-trigger');
@@ -723,6 +725,11 @@
     if (form.id === 'dsExpenseForm' && !form.elements.itemId.value) {
       root.toast?.('Cari lalu pilih barang yang akan dikeluarkan.');
       form.querySelector('[name="itemSearch"]')?.focus();
+      return;
+    }
+    if (form.id === 'dsExpenseForm' && !form.elements.unit.value) {
+      root.toast?.('Pilih satuan barang terlebih dahulu.');
+      form.querySelector('.ds-unit-trigger')?.focus();
       return;
     }
     if (state.busy) return;
