@@ -1223,3 +1223,17 @@
     transition: none !important;
   }
 }
+
+
+@media (min-width: 900px) {
+  .desktop-nav-group-heading-action.active,
+  .desktop-nav-group-heading-action.active:hover {
+    background: var(--desktop-nav-green-soft) !important;
+    color: var(--desktop-nav-green-dark) !important;
+  }
+  .desktop-nav-group-heading-action.active .desktop-nav-group-icon {
+    border-color: #c6e6d4;
+    background: #e1f3e9;
+    color: var(--desktop-nav-green-dark);
+  }
+}
