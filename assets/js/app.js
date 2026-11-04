@@ -613,7 +613,7 @@ function guestCard(g, i, history = false) {
     ? '<div class="ticket reservation-ticket"><strong>' + esc(reservation.code) + '</strong><small>' + esc(g.ticket) + '</small></div>'
     : '<div class="ticket">' + esc(g.ticket) + '</div>';
 
-  return '<article class="guest' + (isReservation ? ' guest-reservation' : '') + '" style="animation-delay:' + Math.min(i, 7) * .035 + 's">' +
+  return '<article class="guest' + (isReservation ? ' guest-reservation' : '') + '" data-stagger-index="' + Math.min(i, 7) + '">' +
     '<div class="guest-row" data-app-action="openDetail" data-app-id="' + esc(g.id) + '">' + ticketMarkup +
       '<div class="guest-main"><div class="guest-name">' + esc(g.name) + '</div>' +
       '<div class="guest-meta"><span>' + g.pack + ' pack</span><span>·</span><span>' + fmtTime(g.created) + '</span></div></div>' +
@@ -789,8 +789,11 @@ function renderOperationalChart(guests) {
   const max = Math.max(1, ...slots.map(slot => slot.value));
   chart.innerHTML = slots.map(slot => {
     const height = slot.value ? Math.max(9, Math.round((slot.value / max) * 100)) : 3;
-    return '<div class="operational-bar-column"><b>' + slot.value + '</b><div class="operational-bar-track"><i style="height:' + height + '%"></i></div><small>' + String(slot.hour).padStart(2, '0') + '.00</small></div>';
+    return '<div class="operational-bar-column"><b>' + slot.value + '</b><div class="operational-bar-track"><i data-bar-height="' + height + '"></i></div><small>' + String(slot.hour).padStart(2, '0') + '.00</small></div>';
   }).join('');
+  chart.querySelectorAll('[data-bar-height]').forEach(bar => {
+    bar.style.height = Number(bar.dataset.barHeight) + '%';
+  });
 }
 function operationalGuestRow(guest) {
   const status = statusLabel(guest.status);
