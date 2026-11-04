@@ -8,7 +8,7 @@ Aplikasi mobile-first untuk mengelola kedatangan tamu, antrean, dan reservasi se
 - **Antrean** — tambah tamu, nomor antrean otomatis, panggil lewat WhatsApp, ubah status, lihat detail, dan koreksi data.
 - **Riwayat** — cari catatan tamu berdasarkan tanggal.
 - **Reservasi** — kalender bulanan, pembuatan kode reservasi, detail, pembatalan, dan proses mendudukkan tamu.
-- **Pengaturan** — durasi Seating Time, ekspor CSV, dan reset data demo.
+- **Pengaturan** — durasi Seating Time dan ekspor CSV.
 - **Master Barang** — sumber bahan, satuan dasar, konversi satuan, harga referensi, status aktif/nonaktif, dan penanda barang supply.
 - **Resep WIP** — komposisi bahan/WIP turunan, hasil per batch, kalkulasi HPP rekursif, dan validasi resep.
 - **Menu** — komposisi bahan/WIP per porsi, HPP per porsi, harga jual, dan margin.
