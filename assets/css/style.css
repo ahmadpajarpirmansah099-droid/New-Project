@@ -5565,3 +5565,56 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     width: min(760px, calc(100vw - 270px));
   }
 }
+
+/* =========================================================
+   DESKTOP COLLAPSIBLE SIDEBAR
+   Tombol menu di bagian atas; menu tertutup saat halaman dimuat.
+   Mobile tetap memakai posisi dan perilaku menu sebelumnya.
+   ========================================================= */
+@media (min-width: 900px) {
+  .menu-toggle {
+    position: fixed;
+    z-index: 70;
+    top: 22px;
+    left: 208px;
+    display: grid !important;
+    width: 38px;
+    height: 38px;
+    margin: 0;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(17,18,37,.12);
+  }
+
+  .menu-drawer {
+    z-index: 45;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-7px);
+    transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+  }
+
+  .menu-drawer.show {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .menu-backdrop {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1440px) {
+  .menu-toggle {
+    left: 224px;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1100px) {
+  .menu-toggle {
+    left: 176px;
+  }
+}
+
