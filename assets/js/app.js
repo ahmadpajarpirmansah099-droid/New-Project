@@ -150,7 +150,7 @@ function setWorkspaceHeader(page) {
     };
     name.textContent = pageTitles[page] || 'MASTER BARANG';
     const context = window.AppAuth?.getContext();
-    meta.textContent = context?.isGlobalDeveloper ? (context.workspaceName || 'OUTLET') + (context.divisionMode === 'all' ? ' · SEMUA DIVISI' : ' · ' + (context.activeDivisionName || '')) : 'MASTER DATA WORKSPACE';
+    meta.textContent = context?.isGlobalDeveloper ? (context.workspaceName || 'OUTLET') + ' · ' + (context.activeDivisionName || '') : 'MASTER DATA WORKSPACE';
     return;
   }
 
@@ -165,7 +165,7 @@ function setWorkspaceHeader(page) {
   };
   name.textContent = pageTitles[page] || 'GUEST OPERATIONAL';
   const context = window.AppAuth?.getContext();
-  meta.textContent = context?.isGlobalDeveloper ? (context.workspaceName || 'OUTLET') + (context.divisionMode === 'all' ? ' · SEMUA DIVISI' : ' · ' + (context.activeDivisionName || '')) : 'ADMIN WORKSPACE';
+  meta.textContent = context?.isGlobalDeveloper ? (context.workspaceName || 'OUTLET') + ' · ' + (context.activeDivisionName || '') : 'ADMIN WORKSPACE';
 }
 
 const GUEST_OPERATION_PAGES = ['dashboard', 'waiting', 'history', 'reservations', 'settings'];
@@ -174,12 +174,12 @@ function canAccessGuestOperations() {
   const context = window.AppAuth?.getContext();
   if (!context) return false;
 
-  // Developer follows the selected division, with an all-divisions overview allowed.
+  // Guest Operational is available only while the active division is Service.
   const activeDivision = (context.divisions || []).find(item => item.id === context.activeDivisionId);
   const isServiceDivision =
     String(activeDivision?.name || context.activeDivisionName || '').trim().toLowerCase() === 'service';
 
-  if (context.isGlobalDeveloper) return context.divisionMode === 'all' || isServiceDivision;
+  if (context.isGlobalDeveloper) return isServiceDivision;
   return context.workspaceRole === 'service' && isServiceDivision;
 }
 
@@ -195,11 +195,6 @@ function applyRoleNavigation() {
 
 function go(page) {
   const currentContext = window.AppAuth?.getContext();
-  const isDeveloperGuestPage = Boolean(currentContext?.isGlobalDeveloper && GUEST_OPERATION_PAGES.includes(page));
-  if (currentContext?.isGlobalDeveloper && currentContext.divisionMode === 'all' && page !== 'all-divisions' && !isDeveloperGuestPage) {
-    page = 'all-divisions';
-    toast('Pilih satu divisi untuk membuka dan mengubah data modul.');
-  }
   document.body.dataset.divisionMode = currentContext?.divisionMode || 'single';
   if (!canAccessGuestOperations() && GUEST_OPERATION_PAGES.includes(page)) {
     toast('Guest Operational hanya tersedia untuk akun Service.');
@@ -214,7 +209,7 @@ function go(page) {
     item.classList.toggle('active', item.dataset.page === page);
   });
 
-  $('fab').style.display = ['settings', 'all-divisions'].includes(page) ? 'none' : 'grid';
+  $('fab').style.display = page === 'settings' ? 'none' : 'grid';
 
   if (page === 'settings') syncSeatingSettingInput();
   if (page === 'dashboard') dashboardCountUpPending = true;
@@ -230,7 +225,7 @@ function go(page) {
 function toggleQuickMenu() {
   const menu = $('quickMenu');
   const open = !menu.classList.contains('show');
-  const context = window.AppAuth?.getContext()?.divisionMode === 'all' ? 'guest' : (['master-items','wips','menus'].some(page => $('page-' + page).classList.contains('active')) ? 'master' : 'guest');
+  const context = ['master-items','wips','menus'].some(page => $('page-' + page).classList.contains('active')) ? 'master' : 'guest';
 
   if (open && $('menuDrawer').classList.contains('show')) {
     closeMenu();
