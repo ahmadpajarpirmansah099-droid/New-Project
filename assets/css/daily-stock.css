@@ -100,3 +100,25 @@
   box-shadow: 0 0 0 3px rgba(55, 83, 125, .08), 0 2px 8px rgba(25, 35, 55, .06);
   outline: none;
 }
+
+/* Halaman khusus Pengeluaran */
+.ds-expense-page{gap:14px}
+.ds-expense-intro h1{margin:5px 0 3px;color:var(--ink);font:800 25px Manrope,sans-serif;letter-spacing:-.04em}
+.ds-expense-intro p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
+#dsExpenseForm{display:grid;gap:12px}
+#dsExpenseForm label{display:grid;gap:6px;color:var(--ink);font-size:11px;font-weight:800}
+#dsExpenseForm label span{color:var(--muted);font-weight:500}
+#dsExpenseForm input,#dsExpenseForm select,#dsExpenseForm textarea{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fbfcfe;color:var(--ink);font:500 13px 'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(25,35,55,.055)}
+#dsExpenseForm textarea{resize:vertical}
+#dsExpenseForm input:focus,#dsExpenseForm select:focus,#dsExpenseForm textarea:focus{outline:none;border-color:#b9c7dc;box-shadow:0 0 0 3px rgba(55,83,125,.08),0 2px 8px rgba(25,35,55,.06)}
+.ds-expense-history{margin-top:12px}
+.ds-expense-history-card{display:grid;gap:9px;padding:13px;border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:0 2px 8px rgba(25,35,55,.055)}
+.ds-expense-history-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ds-expense-history-head>div{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ds-expense-history-head strong{font-size:10px;color:var(--muted)}
+.ds-expense-category{padding:5px 8px;border-radius:8px;background:#f0eff9;color:#6d6598;font-size:9px;font-weight:800}
+.ds-expense-lines{display:grid;gap:6px}
+.ds-expense-line{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px}
+.ds-expense-line strong{color:var(--ink);font-weight:700}
+.ds-expense-line span{color:var(--muted);font-weight:700;white-space:nowrap}
+.ds-expense-history-card>small,.ds-expense-history-card>p{margin:0;color:var(--muted);font-size:10px;line-height:1.45}
