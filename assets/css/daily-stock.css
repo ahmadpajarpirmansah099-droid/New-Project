@@ -7,7 +7,7 @@
 .ds-status,.ds-state{display:inline-flex;align-items:center;padding:6px 9px;border-radius:20px;font-size:10px;font-weight:800;background:#f0eff9;color:#6c639e}
 .ds-status.closed,.ds-state.closed,.ds-state.posted{background:#e9f5ed;color:#34734a}
 .ds-status.draft,.ds-state.draft{background:#fff3df;color:#9b6a1c}
-.ds-date{display:grid;gap:7px;color:var(--muted);font-size:10px;font-weight:700}
+.ds-division{display:grid;gap:7px;color:var(--muted);font-size:10px;font-weight:700}.ds-division select{width:100%;min-height:42px;padding:0 12px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);font:700 12px 'DM Sans',sans-serif}.ds-date{display:grid;gap:7px;color:var(--muted);font-size:10px;font-weight:700}
 .ds-date input{width:100%;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);font:700 12px 'DM Sans',sans-serif}
 .ds-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .ds-summary>div,.ds-overview-grid>div{padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:var(--shadow)}
