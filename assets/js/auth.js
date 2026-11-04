@@ -65,13 +65,52 @@
       return;
     }
 
+    const { data: workspaceDivisions, error: divisionsError } = await supabaseClient
+      .from('divisions')
+      .select('id, name')
+      .eq('workspace_id', membership.workspace_id)
+      .eq('is_active', true)
+      .order('name');
+    if (divisionsError) {
+      await supabaseClient.auth.signOut();
+      showLogin('Daftar divisi belum dapat dimuat. Hubungi Developer.');
+      return;
+    }
+
+    let assignedDivisions = workspaceDivisions || [];
+    if (profile.role !== 'developer' && membership.role !== 'admin') {
+      const { data: divisionLinks, error: divisionError } = await supabaseClient
+        .from('workspace_division_memberships')
+        .select('division_id')
+        .eq('workspace_id', membership.workspace_id)
+        .eq('user_id', userId);
+      if (divisionError || !divisionLinks || !divisionLinks.length) {
+        await supabaseClient.auth.signOut();
+        showLogin('Akun belum ditugaskan ke divisi. Hubungi Developer.');
+        return;
+      }
+      const allowedIds = new Set(divisionLinks.map((link) => link.division_id));
+      assignedDivisions = assignedDivisions.filter((division) => allowedIds.has(division.id));
+    }
+
+    if (!assignedDivisions.length) {
+      await supabaseClient.auth.signOut();
+      showLogin('Akun belum memiliki divisi aktif. Hubungi Developer.');
+      return;
+    }
+
+    const activeDivision = assignedDivisions.find((division) => division.name.toLowerCase() === 'bar') || assignedDivisions[0];
     activeUserId = userId;
     authContext = {
       userId,
       email: session.user.email || '',
       role: profile.role,
       workspaceId: membership.workspace_id,
-      workspaceRole: membership.role
+      workspaceRole: membership.role,
+      divisions: assignedDivisions,
+      activeDivisionId: activeDivision.id,
+      activeDivisionName: activeDivision.name,
+      isGlobalDeveloper: profile.role === 'developer'
     };
     const displayName = profile.display_name || session.user.email || 'User';
     const initials = displayName.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
