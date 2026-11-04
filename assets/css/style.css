@@ -4818,3 +4818,25 @@ body.auth-ready .auth-screen{display:none}
 .guest[data-stagger-index="7"] {
   animation-delay: 0.24500000000000002s;
 }
+
+/* DEVELOPER OUTLET / DIVISION SWITCHER */
+.workspace-scope-switcher{display:flex;align-items:center;gap:8px;min-width:0;margin-left:auto;padding:5px;border:1px solid #e6eaf0;border-radius:13px;background:rgba(255,255,255,.88)}
+.workspace-scope-switcher[hidden]{display:none!important}
+.workspace-scope-switcher label{display:grid;gap:2px;min-width:0}
+.workspace-scope-switcher label span{padding-left:7px;color:#8993a4;font-size:8px;font-weight:800;letter-spacing:.09em}
+.workspace-scope-switcher select{width:100%;min-width:0;max-width:142px;height:30px;padding:0 22px 0 7px;border:0;border-radius:7px;background:#f5f7fa;color:#24334d;font-size:11px;font-weight:700}
+.workspace-scope-switcher select:disabled{opacity:.6}
+.division-overview-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}
+.division-overview-heading .page-title{margin-top:4px}
+.division-overview-refresh{min-height:38px;padding:0 12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:#43536d;font-size:11px;font-weight:700}
+.division-overview-list{display:grid;gap:12px}
+.division-overview-card{padding:16px;border:1px solid #e8edf3;border-radius:17px;background:#fff;box-shadow:0 5px 18px rgba(25,42,70,.035)}
+.division-overview-card h2{margin:0 0 12px;color:#1b2b46;font-size:15px;font-weight:800}
+.division-overview-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.division-overview-metrics div{min-width:0;padding:10px 7px;border-radius:10px;background:#f6f8fb}
+.division-overview-metrics span{display:block;overflow:hidden;color:#8993a4;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+.division-overview-metrics strong{display:block;margin-top:4px;color:#263752;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+.division-overview-note{margin:15px 2px;color:#7c8798;font-size:11px;line-height:1.6}
+.division-overview-loading,.division-overview-error{padding:22px 16px;border:1px dashed #dce3ec;border-radius:14px;color:#7c8798;font-size:12px;text-align:center}
+@media(max-width:520px){.top{flex-wrap:wrap;gap:9px}.brand{flex:1 1 auto;min-width:125px}.workspace-scope-switcher{order:3;width:100%;margin:0;justify-content:stretch}.workspace-scope-switcher label{flex:1 1 50%}.workspace-scope-switcher select{max-width:none;height:34px;font-size:12px}.top-actions{margin-left:auto}}
+@media(max-width:360px){.division-overview-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
