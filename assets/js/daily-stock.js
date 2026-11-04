@@ -360,7 +360,7 @@
       if (!line) return '';
       const physical = line.physical_closing_quantity == null ? '' : String(line.physical_closing_quantity);
       const variance = line.variance_quantity == null ? '—' : number(line.variance_quantity);
-      return '<article class="ds-stock-row"><div class="ds-stock-top"><div><span class="ds-kind">' + rowLabel(row.kind) + '</span><strong>' + escapeHtml(row.name) + '</strong><small>Satuan: ' + escapeHtml(row.unit) + '</small></div><span class="ds-expected">' + number(line.expected_closing_quantity) + ' ' + escapeHtml(row.unit) + '</span></div><div class="ds-stock-math"><span>Awal <b>' + number(line.opening_quantity) + '</b></span><span>Masuk <b>' + number(line.inbound_quantity) + '</b></span><span>Keluar <b>' + number(line.outbound_quantity) + '</b></span><span>Selisih <b>' + variance + '</b></span></div><label class="ds-physical">Stok fisik<input data-physical data-line-id="' + line.id + '" inputmode="decimal" placeholder="0" value="' + physical + '" ' + (state.data.count.status === 'closed' ? 'disabled' : '') + '></label></article>';
+      return '<article class="ds-stock-row"><div class="ds-stock-top"><div><span class="ds-kind">' + rowLabel(row.kind) + '</span><strong>' + escapeHtml(row.name) + '</strong><small>Satuan: ' + escapeHtml(line.unit_name_snapshot) + '</small></div><span class="ds-expected">' + number(line.expected_closing_quantity) + ' ' + escapeHtml(line.unit_name_snapshot) + '</span></div><div class="ds-stock-math"><span>Awal <b>' + number(line.opening_quantity) + '</b></span><span>Masuk <b>' + number(line.inbound_quantity) + '</b></span><span>Keluar <b>' + number(line.outbound_quantity) + '</b></span><span>Selisih <b>' + variance + '</b></span></div><label class="ds-physical">Stok fisik<input data-physical data-line-id="' + line.id + '" inputmode="decimal" placeholder="0" value="' + physical + '" ' + (state.data.count.status === 'closed' ? 'disabled' : '') + '></label></article>';
     }).join('');
   }
 
@@ -388,7 +388,9 @@
     const counts = { material:rows.filter((row) => row.kind === 'material').length, supply:rows.filter((row) => row.kind === 'supply').length, wip:rows.filter((row) => row.kind === 'wip').length };
     const totalExpected = rows.reduce((sum,row) => sum + row.expected * (row.cost || 0),0);
     const status = state.data.count?.status || 'not-started';
-    rootEl.innerHTML = '<div class="ds-page"><div class="ds-heading"><div><span class="ds-eyebrow">STOK OPERASIONAL</span><h1>Daily SO</h1><p>' + escapeHtml(state.context.activeDivisionName) + ' · ' + escapeHtml(state.context.workspaceRole) + '</p></div><span class="ds-status ' + status + '">' + (status === 'closed' ? 'Ditutup' : status === 'draft' ? 'Draft' : 'Belum dimulai') + '</span></div><label class="ds-date">Tanggal operasional<input id="dailyStockDate" type="date" value="' + state.date + '"></label><div class="ds-summary"><div><small>Bahan</small><strong>' + counts.material + '</strong></div><div><small>WIP</small><strong>' + counts.wip + '</strong></div><div><small>Supplies</small><strong>' + counts.supply + '</strong></div></div><div class="ds-value-card"><small>Estimasi nilai stok sesuai saldo hitungan</small><strong>' + money(totalExpected) + '</strong><span>Nilai perkiraan dari harga Master Barang dan HPP WIP.</span></div><div class="ds-tabs"><button data-ds-action="tab" data-tab="overview" class="' + (state.tab === 'overview' ? 'active' : '') + '">Ringkasan</button><button data-ds-action="tab" data-tab="count" class="' + (state.tab === 'count' ? 'active' : '') + '">Hitung stok</button><button data-ds-action="tab" data-tab="transactions" class="' + (state.tab === 'transactions' ? 'active' : '') + '">Transaksi</button><button data-ds-action="tab" data-tab="history" class="' + (state.tab === 'history' ? 'active' : '') + '">Riwayat</button></div><section class="ds-panel" id="dsTabPanel">' + renderTabContent() + '</section><div id="dailyStockModal"></div></div>';
+    const divisionOptions = (state.context.divisions || []).map((division) => '<option value="' + division.id + '" ' + (division.id === state.context.activeDivisionId ? 'selected' : '') + '>' + escapeHtml(division.name) + '</option>').join('');
+    const divisionPicker = (state.context.divisions || []).length > 1 ? '<label class="ds-division">Divisi aktif<select id="dailyStockDivision">' + divisionOptions + '</select></label>' : '';
+    rootEl.innerHTML = '<div class="ds-page"><div class="ds-heading"><div><span class="ds-eyebrow">STOK OPERASIONAL</span><h1>Daily SO</h1><p>' + escapeHtml(state.context.activeDivisionName) + ' · ' + escapeHtml(state.context.workspaceRole) + '</p></div><span class="ds-status ' + status + '">' + (status === 'closed' ? 'Ditutup' : status === 'draft' ? 'Draft' : 'Belum dimulai') + '</span></div>' + divisionPicker + '<label class="ds-date">Tanggal operasional<input id="dailyStockDate" type="date" value="' + state.date + '"></label><div class="ds-summary"><div><small>Bahan</small><strong>' + counts.material + '</strong></div><div><small>WIP</small><strong>' + counts.wip + '</strong></div><div><small>Supplies</small><strong>' + counts.supply + '</strong></div></div><div class="ds-value-card"><small>Estimasi nilai stok sesuai saldo hitungan</small><strong>' + money(totalExpected) + '</strong><span>Nilai perkiraan dari harga Master Barang dan HPP WIP.</span></div><div class="ds-tabs"><button data-ds-action="tab" data-tab="overview" class="' + (state.tab === 'overview' ? 'active' : '') + '">Ringkasan</button><button data-ds-action="tab" data-tab="count" class="' + (state.tab === 'count' ? 'active' : '') + '">Hitung stok</button><button data-ds-action="tab" data-tab="transactions" class="' + (state.tab === 'transactions' ? 'active' : '') + '">Transaksi</button><button data-ds-action="tab" data-tab="history" class="' + (state.tab === 'history' ? 'active' : '') + '">Riwayat</button></div><section class="ds-panel" id="dsTabPanel">' + renderTabContent() + '</section><div id="dailyStockModal"></div></div>';
     if (state.tab === 'count') renderRows();
     if (state.tab === 'transactions') renderTransactions();
     if (state.tab === 'history') renderHistory();
@@ -514,6 +516,20 @@
   }
 
   async function handleDateChange(event) {
+    if (event.target.id === 'dailyStockDivision') {
+      const division = (state.context.divisions || []).find((item) => item.id === event.target.value);
+      if (!division || division.id === state.context.activeDivisionId) return;
+      try {
+        state.context.activeDivisionId = division.id;
+        state.context.activeDivisionName = division.name;
+        await root.MasterDataStore.initialize(state.client,state.context.workspaceId,division.id);
+        state.catalog = root.MasterDataStore.load();
+        state.data = null;
+        await load(state.date);
+        render();
+      } catch (error) { root.toast?.(error.message || 'Divisi tidak bisa diganti.'); }
+      return;
+    }
     if (event.target.id !== 'dailyStockDate') return;
     try { state.date = event.target.value || dateKey(); await load(state.date); render(); }
     catch (error) { root.toast?.(error.message || 'Tanggal tidak bisa dimuat.'); }
