@@ -32,8 +32,8 @@ test('Developer can open Guest Operations in Service division', () => {
   assert.equal(canAccess(developer('Service')), true);
 });
 
-test('Developer can open Guest Operations in all-divisions mode', () => {
-  assert.equal(canAccess(developer('Bar', 'all')), true);
+test('Developer cannot open Guest Operations in all-divisions mode', () => {
+  assert.equal(canAccess(developer('Bar', 'all')), false);
 });
 
 for (const division of ['Bar', 'Kitchen', 'Pastry']) {
