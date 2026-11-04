@@ -1274,3 +1274,160 @@
     margin-top: 0 !important;
   }
 }
+
+
+/* =========================================================
+   DESKTOP WORKSPACE CONTROLS — SIDEBAR FOOTER
+   Visually relocates outlet/division and account actions into
+   the lower-left sidebar. Mobile layout is intentionally untouched.
+   ========================================================= */
+@media (min-width: 900px) {
+  body .top .workspace-scope-switcher:not([hidden]) {
+    position: fixed !important;
+    z-index: 88 !important;
+    left: 14px !important;
+    right: auto !important;
+    bottom: 88px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 9px !important;
+    width: 236px !important;
+    max-width: calc(100vw - 28px) !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    border: 1px solid #e5eee8 !important;
+    border-radius: 15px !important;
+    background: rgba(255,255,255,.98) !important;
+    box-shadow: 0 8px 24px rgba(20,39,71,.08) !important;
+    box-sizing: border-box !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  body .top .workspace-scope-switcher:not([hidden])::before {
+    content: "WORKSPACE";
+    display: block;
+    margin: 0 0 1px 2px;
+    color: #8490a5;
+    font: 800 9px Manrope, 'DM Sans', sans-serif;
+    letter-spacing: .13em;
+  }
+
+  body .top .workspace-scope-switcher .scope-field {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: 4px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body .top .workspace-scope-switcher .scope-field > span {
+    display: block !important;
+    color: #8490a5 !important;
+    font-size: 8px !important;
+    font-weight: 800 !important;
+    letter-spacing: .12em !important;
+  }
+
+  body .top .workspace-scope-switcher .scope-trigger {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    padding: 0 10px !important;
+    border: 1px solid #e8edf4 !important;
+    border-radius: 9px !important;
+    background: #f9fbf9 !important;
+    color: #14233f !important;
+    font: 700 11px 'DM Sans', sans-serif !important;
+    text-align: left !important;
+  }
+
+  body .top .workspace-scope-switcher .scope-trigger:hover {
+    border-color: #c6e6d4 !important;
+    background: #f2f9f5 !important;
+  }
+
+  body .top .top-actions {
+    position: fixed !important;
+    z-index: 89 !important;
+    left: 14px !important;
+    right: auto !important;
+    bottom: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 9px !important;
+    width: 236px !important;
+    max-width: calc(100vw - 28px) !important;
+    min-height: 58px !important;
+    margin: 0 !important;
+    padding: 9px 12px !important;
+    border: 1px solid #e5eee8 !important;
+    border-radius: 15px !important;
+    background: rgba(255,255,255,.98) !important;
+    box-shadow: 0 8px 24px rgba(20,39,71,.08) !important;
+    box-sizing: border-box !important;
+    pointer-events: auto !important;
+  }
+
+  body .top .top-actions .profile {
+    position: static !important;
+    display: grid !important;
+    flex: 0 0 38px !important;
+    width: 38px !important;
+    height: 38px !important;
+    border: 1px solid #dcefe5 !important;
+    border-radius: 50% !important;
+    background: #eaf7f1 !important;
+    color: #117e59 !important;
+    box-shadow: none !important;
+    pointer-events: auto !important;
+  }
+
+  body .top .top-actions .auth-logout-button {
+    position: static !important;
+    display: grid !important;
+    flex: 0 0 38px !important;
+    width: 38px !important;
+    height: 38px !important;
+    border: 1px solid #e8edf4 !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+    color: #66758a !important;
+    box-shadow: none !important;
+    pointer-events: auto !important;
+  }
+
+  body .top .top-actions .auth-logout-button:hover {
+    border-color: #f0cfd2 !important;
+    background: #fff7f7 !important;
+    color: #c34f5a !important;
+  }
+
+  /* Keep the navigation toggle in its existing top position. */
+  body .top .top-actions .menu-toggle {
+    position: fixed !important;
+    z-index: 91 !important;
+    top: 22px !important;
+    left: 208px !important;
+    right: auto !important;
+    bottom: auto !important;
+  }
+
+  @media (max-width: 1199px) {
+    body .top .workspace-scope-switcher:not([hidden]),
+    body .top .top-actions {
+      left: 10px !important;
+      width: 212px !important;
+      max-width: calc(100vw - 20px) !important;
+    }
+    body .top .top-actions .menu-toggle {
+      left: 174px !important;
+    }
+  }
+}
