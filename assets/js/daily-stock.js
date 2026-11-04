@@ -58,7 +58,7 @@
       countLines:countLinesResult.data || [],
       previous:previousResult.data || null,
       previousLines:previousLinesResult.data || [],
-      history:historyResult.data || []
+      history:historyResult.data || [], date:state.date
     };
     return state.data;
   }
@@ -470,6 +470,7 @@
   function renderPage(page) {
     if (page !== 'daily-stock') return;
     if (!state.initialized) initialize().then(() => load(state.date)).then(render).catch((error) => root.toast?.(error.message));
+    else if (state.data && state.data.date === state.date) render();
     else load(state.date).then(render).catch((error) => root.toast?.(error.message));
   }
 
@@ -496,10 +497,16 @@
       actions.forEach(([action,label,path]) => {
         const button = document.createElement('button');
         button.type='button'; button.className='quick-menu-item'; button.dataset.quickContext='stock';
-        button.dataset.action='runQuickAction'; button.dataset.actionArgs=JSON.stringify([action]);
+        button.dataset.action='runQuickAction'; button.dataset.actionArgs=JSON.stringify([action]); button.dataset.stockAction=action;
         button.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + path + '"/></svg><span>' + label + '</span><svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
-        if ((action==='stock-sale' || action==='stock-production') && divisionIsService()) button.hidden=true;
         quickMenu.appendChild(button);
+      });
+      ['guest','master'].forEach((contextName) => {
+        const entry=document.createElement('button');
+        entry.type='button'; entry.className='quick-menu-item'; entry.dataset.quickContext=contextName;
+        entry.dataset.action='runQuickAction'; entry.dataset.actionArgs='["daily-stock"]';
+        entry.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h4"/></svg><span>Daily SO</span><svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
+        quickMenu.appendChild(entry);
       });
     }
 
@@ -534,7 +541,11 @@
       if ($('page-daily-stock')?.classList.contains('active')) {
         const menu=$('quickMenu'), backdrop=$('quickMenuBackdrop'), fab=$('fab');
         const open=!menu.classList.contains('show');
-        menu.querySelectorAll('.quick-menu-item[data-quick-context]').forEach((item)=>{ item.style.display=item.dataset.quickContext==='stock' && !(item.hidden) ? 'flex':'none'; });
+        menu.querySelectorAll('.quick-menu-item[data-quick-context="stock"]').forEach((item)=>{
+          const unavailable=divisionIsService() && ['stock-sale','stock-production'].includes(item.dataset.stockAction);
+          item.hidden=unavailable; item.style.display=unavailable?'none':'flex';
+        });
+        const heading=menu.querySelector('.quick-menu-heading'); if(heading) heading.textContent='DAILY STOCK';
         menu.setAttribute('aria-label','Daily Stock');
         menu.classList.toggle('show',open); backdrop.classList.toggle('show',open);
         menu.setAttribute('aria-hidden',String(!open)); backdrop.setAttribute('aria-hidden',String(!open));
