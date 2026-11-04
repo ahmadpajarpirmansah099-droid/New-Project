@@ -62,3 +62,12 @@ test('Daily SO transaction history uses workspace and division scoped service qu
   assert.match(service, /\.in\('transaction_type', types\)/);
   assert.match(ui, /fetchTransactionHistory\(state\.expenseDate/);
 });
+
+
+test('Daily SO sales and WIP production are available in every division', () => {
+  assert.ok(service.includes('function canUseSales() { return true; }'));
+  assert.equal(ui.includes('Fitur ini tidak tersedia untuk divisi Service.'), false);
+  assert.ok(ui.includes("if (action === 'stock-production') { await goToTransactionPage('production'); return; }"));
+  assert.ok(ui.includes("if (action === 'stock-sale') { await goToTransactionPage('sale'); return; }"));
+  assert.equal(ui.includes("divisionIsService() && ['stock-sale','stock-production']"), false);
+});
