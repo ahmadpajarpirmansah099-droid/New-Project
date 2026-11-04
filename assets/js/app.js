@@ -203,6 +203,11 @@ function applyRoleNavigation() {
   document.querySelectorAll('[data-desktop-nav-role="guest"]').forEach(group => {
     group.hidden = !canUseGuestOps;
   });
+  const canUseDailySales = window.DailyStockService?.canUseSales?.() !== false;
+  document.querySelectorAll('[data-desktop-nav-sales-only]').forEach(item => {
+    item.hidden = !canUseDailySales;
+    item.style.display = canUseDailySales ? '' : 'none';
+  });
 }
 
 function go(page) {
