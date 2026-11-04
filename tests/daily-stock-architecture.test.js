@@ -39,3 +39,26 @@ test('Daily SO keeps its authentication reset in the service lifecycle', () => {
   assert.match(service, /app:auth-signed-out/);
   assert.match(ui, /root\.DailyStockUI\s*=/);
 });
+
+
+test('Daily SO production, sales, purchase, and supplies use separate pages', () => {
+  for (const pageId of ['dailyProductionRoot', 'dailySaleRoot', 'dailyPurchaseRoot', 'dailySuppliesRoot']) {
+    assert.ok(ui.includes(pageId), pageId + ' must have its own page container');
+  }
+  assert.match(ui, /function renderTransactionPage\(type\)/);
+  assert.match(ui, /id="dsStandaloneTransactionForm"/);
+  assert.match(ui, /data-ds-transaction-date/);
+});
+
+test('Daily SO standalone pages use custom pickers instead of native dropdowns', () => {
+  assert.match(ui, /data-ds-search-picker/);
+  assert.match(ui, /dsTransactionUnitPicker/);
+  assert.match(ui, /ds-direction-picker/);
+  assert.doesNotMatch(ui, /function renderForm\(type\)/);
+});
+
+test('Daily SO transaction history uses workspace and division scoped service queries', () => {
+  assert.match(service, /async function fetchTransactionHistory\(date, transactionTypes\)/);
+  assert.match(service, /\.in\('transaction_type', types\)/);
+  assert.match(ui, /fetchTransactionHistory\(state\.expenseDate/);
+});
