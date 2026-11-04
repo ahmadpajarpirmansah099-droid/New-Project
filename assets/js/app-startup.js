@@ -11,6 +11,8 @@ let appSessionGeneration = 0;
 let appInitializationGeneration = 0;
 let guestRefreshInterval = null;
 let seatingCountdownInterval = null;
+let guestRefreshBusy = false;
+let guestRefreshToken = 0;
 
 function clearSessionIntervals() {
   if (guestRefreshInterval !== null) {
@@ -21,7 +23,61 @@ function clearSessionIntervals() {
     window.clearInterval(seatingCountdownInterval);
     seatingCountdownInterval = null;
   }
+  guestRefreshToken += 1;
+  guestRefreshBusy = false;
 }
+
+function isGuestOperationalPageActive() {
+  const activePage = document.querySelector('.page.active')?.id || '';
+  return GUEST_OPERATION_PAGES.includes(activePage.replace(/^page-/, ''));
+}
+
+async function refreshGuestOperationalData() {
+  if (!appDataReady || guestRefreshBusy || document.visibilityState !== 'visible' ||
+      !isGuestOperationalPageActive() || !canAccessGuestOperations() ||
+      !window.GuestOpsService?.isReady()) return;
+
+  guestRefreshBusy = true;
+  const refreshToken = ++guestRefreshToken;
+  const sessionGeneration = appSessionGeneration;
+
+  try {
+    const refreshed = await window.GuestOpsService.load();
+    if (refreshToken !== guestRefreshToken || sessionGeneration !== appSessionGeneration ||
+        !appDataReady || document.visibilityState !== 'visible' ||
+        !isGuestOperationalPageActive() || !canAccessGuestOperations()) return;
+
+    const currentSnapshot = JSON.stringify({
+      guests: state.guests || [],
+      reservations: state.reservations || [],
+      settings: state.settings || {}
+    });
+    const refreshedSnapshot = JSON.stringify({
+      guests: refreshed.guests || [],
+      reservations: refreshed.reservations || [],
+      settings: refreshed.settings || {}
+    });
+
+    state.guests = refreshed.guests;
+    state.reservations = refreshed.reservations;
+    state.counters = refreshed.counters;
+    state.reservationCounters = refreshed.reservationCounters;
+    state.settings = refreshed.settings;
+
+    if (currentSnapshot !== refreshedSnapshot) renderAll();
+  } catch (error) {
+    if (refreshToken === guestRefreshToken && sessionGeneration === appSessionGeneration) {
+      console.error('Guest Operations refresh failed:', error);
+    }
+  } finally {
+    if (refreshToken === guestRefreshToken) guestRefreshBusy = false;
+  }
+}
+
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState === 'visible') refreshGuestOperationalData();
+});
+window.addEventListener('app:guestops-resume', refreshGuestOperationalData);
 
 window.addEventListener('app:auth-signed-out', function () {
   appSessionGeneration += 1;
@@ -70,16 +126,7 @@ async function initializeWorkspace(event, switchingContext) {
       if(!isCurrent()) return;
       state=remoteState; syncSeatingSettingInput();
       go('dashboard');
-      guestRefreshInterval=window.setInterval(async()=>{
-        if(!isCurrent()) return;
-        try {
-          const refreshed=await window.GuestOpsService.load();
-          if(!isCurrent()) return;
-          state.guests=refreshed.guests; state.reservations=refreshed.reservations;
-          state.counters=refreshed.counters; state.reservationCounters=refreshed.reservationCounters;
-          state.settings=refreshed.settings; renderAll();
-        } catch(error) { if(isCurrent()) console.error('Guest Operations refresh failed:',error); }
-      },30000);
+      guestRefreshInterval=window.setInterval(refreshGuestOperationalData,30000);
       seatingCountdownInterval=window.setInterval(()=>{if(isCurrent()) updateSeatingCountdowns();},1000);
     } else { if(!isCurrent()) return; go('master-items'); }
     if(!isCurrent()) return;
