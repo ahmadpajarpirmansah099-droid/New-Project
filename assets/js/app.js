@@ -508,7 +508,7 @@ function initSheetBodySwipe(){
 /* =========================================================
     3. WAITING LIST: ADD GUEST AND QUEUE NUMBER
     ========================================================= */
-function openAdd(){sheetGuest=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><form onsubmit="saveGuest(event)"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" onclick="changePack(-1)">−</button><strong id="packValue">2</strong><button type="button" onclick="changePack(1)">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span style="color:#9aa5b8;font-weight:500">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg" data-selected="waiting"><button type="button" class="selected" id="segWait" onclick="chooseInitial('waiting')">Menunggu</button><button type="button" id="segSeated" onclick="chooseInitial('seated')">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`)}
+function openAdd(){sheetGuest=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" onclick="closeSheet()">✕</button></div><form onsubmit="saveGuest(event)"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" onclick="changePack(-1)">−</button><strong id="packValue">2</strong><button type="button" onclick="changePack(1)">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span class="text-muted-note">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg" data-selected="waiting"><button type="button" class="selected" id="segWait" onclick="chooseInitial('waiting')">Menunggu</button><button type="button" id="segSeated" onclick="chooseInitial('seated')">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="sheet-actions"><button type="button" class="secondary" onclick="closeSheet()">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`)}
 function changePack(d){
   let v=Math.max(1,Math.min(30,Number($('guestPack').value)+d));
   $('guestPack').value=v;
@@ -683,7 +683,7 @@ function renderAll() {
   );
 
   $('pendingWrap').innerHTML = pendingGuests.length
-    ? `<div class="pending"><h3>⚠ ${pendingGuests.length} tugas tertunda dari hari sebelumnya</h3><p>Periksa tamu yang belum diselesaikan. Data tidak dihapus otomatis.</p>${pendingGuests.map(guest => `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #f3e5d0;font-size:11px"><span><b>${guest.ticket}</b> · ${esc(guest.name)}</span><button class="mini green" onclick="openDetail('${guest.id}')">Periksa</button></div>`).join('')}</div>`
+    ? `<div class="pending"><h3>⚠ ${pendingGuests.length} tugas tertunda dari hari sebelumnya</h3><p>Periksa tamu yang belum diselesaikan. Data tidak dihapus otomatis.</p>${pendingGuests.map(guest => `<div class="pending-guest-row"><span><b>${guest.ticket}</b> · ${esc(guest.name)}</span><button class="mini green" onclick="openDetail('${guest.id}')">Periksa</button></div>`).join('')}</div>`
     : '';
 
   $('dashboardList').innerHTML = waitingGuests.length
@@ -1384,7 +1384,7 @@ async function saveReservation(e) {
   toast('Reservasi tersimpan · ' + reservation.code);
 }
 
-function openReservationDetail(id){const r=state.reservations.find(x=>x.id===id);if(!r)return;openSheet('<div class="sheet-head"><h2>Detail reservasi</h2><button class="close" onclick="closeSheet()">✕</button></div><div class="detail-ticket"><small>KODE RESERVASI</small><strong>'+esc(r.code)+'</strong><small>'+esc(reservationDateText(r.date))+'</small></div><div style="font:800 18px Manrope">'+esc(r.name)+'</div><div class="detail-grid"><div class="detail-cell"><small>Jam reservasi</small><b>'+esc(r.time)+' WIB</b></div><div class="detail-cell"><small>Jumlah pack</small><b>'+r.pack+' pack</b></div><div class="detail-cell"><small>Status</small><b>'+reservationStatusLabel(r.status)+'</b></div><div class="detail-cell"><small>Smoking</small><b>'+esc(r.smoking)+'</b></div><div class="detail-cell" style="grid-column:1/-1"><small>WhatsApp</small><b>'+esc(r.phone||'—')+'</b></div><div class="detail-cell" style="grid-column:1/-1"><small>Catatan</small><b>'+esc(r.note||'—')+'</b></div></div><div class="sheet-actions"><button class="secondary" onclick="closeSheet()">Tutup</button></div>')}
+function openReservationDetail(id){const r=state.reservations.find(x=>x.id===id);if(!r)return;openSheet('<div class="sheet-head"><h2>Detail reservasi</h2><button class="close" onclick="closeSheet()">✕</button></div><div class="detail-ticket"><small>KODE RESERVASI</small><strong>'+esc(r.code)+'</strong><small>'+esc(reservationDateText(r.date))+'</small></div><div class="detail-name">'+esc(r.name)+'</div><div class="detail-grid"><div class="detail-cell"><small>Jam reservasi</small><b>'+esc(r.time)+' WIB</b></div><div class="detail-cell"><small>Jumlah pack</small><b>'+r.pack+' pack</b></div><div class="detail-cell"><small>Status</small><b>'+reservationStatusLabel(r.status)+'</b></div><div class="detail-cell"><small>Smoking</small><b>'+esc(r.smoking)+'</b></div><div class="detail-cell detail-cell-full"><small>WhatsApp</small><b>'+esc(r.phone||'—')+'</b></div><div class="detail-cell detail-cell-full"><small>Catatan</small><b>'+esc(r.note||'—')+'</b></div></div><div class="sheet-actions"><button class="secondary" onclick="closeSheet()">Tutup</button></div>')}
 async function cancelReservation(id) {
   const reservation = state.reservations.find(item => item.id === id);
   if (!reservation || reservation.status !== 'pending') return;
@@ -1568,7 +1568,7 @@ function openDetail(id) {
   openSheet(
     '<div class="sheet-head"><h2>Detail tamu</h2><button class="close" onclick="closeSheet()">✕</button></div>' +
     ticketPanel +
-    '<div style="font:800 18px Manrope">' + esc(guest.name) + '</div>' +
+    '<div class="detail-name">' + esc(guest.name) + '</div>' +
     '<div class="detail-grid">' +
       '<div class="detail-cell"><small>Jumlah pack</small><b>' + guest.pack + ' orang</b></div>' +
       '<div class="detail-cell"><small>Status</small><b>' + statusLabel(guest.status) + '</b></div>' +
@@ -1576,11 +1576,11 @@ function openDetail(id) {
       '<div class="detail-cell"><small>' + (guest.status === 'seated' ? 'Seating time' : 'Waiting time') + '</small><b>' +
       (guest.status === 'seated' ? '<span data-seating-countdown="' + esc(guest.id) + '">' + seatingCountdownText(guest) + '</span>' : duration(guest)) +
       '</b></div>' + tableCell +
-      '<div class="detail-cell" style="grid-column:1/-1"><small>WhatsApp</small><b>' +
+      '<div class="detail-cell detail-cell-full"><small>WhatsApp</small><b>' +
       esc(guest.phone || 'Tidak diisi') + '</b></div></div>' +
     '<div class="sheet-actions"><button class="secondary" onclick="editGuest(\'' + guest.id + '\')">Koreksi data</button>' +
       whatsappButton + '</div>' + cancelActions + finishAction +
-    '<div style="margin-top:20px;font:800 13px Manrope">Riwayat perubahan</div>' +
+    '<div class="detail-history-heading">Riwayat perubahan</div>' +
     '<div class="timeline">' + timeline + '</div>'
   );
 }
