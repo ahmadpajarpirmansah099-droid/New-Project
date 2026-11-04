@@ -445,6 +445,23 @@
     return '<div class="ds-section-title"><div><h2>Ringkasan stok</h2><p>Saldo dipisah antara bahan, WIP, dan Supplies.</p></div></div><div class="ds-overview-grid"><div><span>Bahan</span><strong>' + rowsCount('material') + '</strong></div><div><span>WIP</span><strong>' + rowsCount('wip') + '</strong></div><div><span>Supplies</span><strong>' + rowsCount('supply') + '</strong></div></div><div class="ds-note">' + (state.data.count ? 'Lembar Daily SO tanggal ini ' + (state.data.count.status === 'closed' ? 'sudah ditutup.' : 'masih dalam draft.') : 'Belum ada lembar hitung. Catat transaksi stok terlebih dahulu, lalu mulai Daily SO.') + '</div><button class="ds-primary ds-wide" data-ds-action="tab" data-tab="count">Buka hitung stok</button>';
   }
 
+  function renderTabPanel() {
+    const panel = $('dsTabPanel');
+    if (!panel) return;
+    panel.classList.remove('ds-tab-enter');
+    panel.innerHTML = renderTabContent();
+    void panel.offsetWidth;
+    panel.classList.add('ds-tab-enter');
+    document.querySelectorAll('#dailyStockRoot .ds-tabs [data-ds-action="tab"]').forEach((tabButton) => {
+      const active = tabButton.dataset.tab === state.tab;
+      tabButton.classList.toggle('active', active);
+      tabButton.setAttribute('aria-selected', String(active));
+    });
+    if (state.tab === 'count') renderRows();
+    if (state.tab === 'transactions') renderTransactions();
+    if (state.tab === 'history') renderHistory();
+  }
+
   function rowsCount(kind) { return catalogRows().filter((row) => row.kind === kind).length; }
 
   function renderForm(type) {
@@ -697,7 +714,7 @@
     const action = button.dataset.dsAction;
     try {
       if (action === 'back-daily-stock') { root.go('daily-stock'); }
-      else if (action === 'tab') { state.tab = button.dataset.tab || 'overview'; render(); }
+      else if (action === 'tab') { state.tab = button.dataset.tab || 'overview'; renderTabPanel(); }
       else if (action === 'start-count') { await createCount(); state.tab='count'; render(); }
       else if (action === 'save-count') { await savePhysicalCounts(); render(); root.toast?.('Hitungan fisik tersimpan.'); }
       else if (action === 'close-count') {
