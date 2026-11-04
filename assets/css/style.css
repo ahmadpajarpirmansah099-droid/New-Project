@@ -7259,3 +7259,31 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     width: 264px !important;
   }
 }
+
+
+/* Desktop sidebar footer: logout is the only remaining account/action control. */
+@media (min-width: 900px) {
+  .top .menu-toggle,
+  .top-actions .menu-toggle,
+  .top-actions .profile,
+  #menuToggle,
+  #authProfileButton {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  .top-actions {
+    display: flex !important;
+    width: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    justify-content: flex-start !important;
+  }
+
+  .top-actions .auth-logout-button {
+    display: grid !important;
+    margin: 0 !important;
+  }
+}
