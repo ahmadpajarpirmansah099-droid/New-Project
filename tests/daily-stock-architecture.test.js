@@ -65,9 +65,9 @@ test('Daily SO transaction history uses workspace and division scoped service qu
 
 
 test('Daily SO sales and WIP production are available in every division', () => {
-  assert.match(service, /function canUseSales\\(\\) \\{ return true; \\}/);
-  assert.doesNotMatch(ui, /Fitur ini tidak tersedia untuk divisi Service/);
-  assert.match(ui, /if \\(action === 'stock-production'\\) \\{ await goToTransactionPage\\('production'\\); return; \\}/);
-  assert.match(ui, /if \\(action === 'stock-sale'\\) \\{ await goToTransactionPage\\('sale'\\); return; \\}/);
-  assert.doesNotMatch(ui, /divisionIsService\\(\\) && \\['stock-sale','stock-production'\\]/);
+  assert.ok(service.includes('function canUseSales() { return true; }'));
+  assert.equal(ui.includes('Fitur ini tidak tersedia untuk divisi Service.'), false);
+  assert.ok(ui.includes("if (action === 'stock-production') { await goToTransactionPage('production'); return; }"));
+  assert.ok(ui.includes("if (action === 'stock-sale') { await goToTransactionPage('sale'); return; }"));
+  assert.equal(ui.includes("divisionIsService() && ['stock-sale','stock-production']"), false);
 });
