@@ -66,3 +66,37 @@
 #dsTransactionForm textarea{resize:vertical}
 .ds-field-help{margin:0;padding:10px;border-radius:10px;background:#f4f6f9;color:var(--muted);font-size:10px;line-height:1.45}
 @media(min-width:480px){.ds-page{gap:16px}.ds-panel{padding:17px}.ds-stock-row{padding:14px}}
+
+
+/* DAILY SO — bayangan tipis untuk kartu dan kolom input */
+.ds-page .ds-summary>div,
+.ds-page .ds-overview-grid>div,
+.ds-page .ds-panel,
+.ds-page .ds-stock-row,
+.ds-page .ds-history-row,
+.ds-page .ds-note,
+.ds-page .ds-tabs,
+.ds-page .ds-division select,
+.ds-page .ds-date input,
+.ds-page .ds-physical input,
+.ds-page #dsTransactionForm input,
+.ds-page #dsTransactionForm select,
+.ds-page #dsTransactionForm textarea,
+.ds-modal #dsTransactionForm input,
+.ds-modal #dsTransactionForm select,
+.ds-modal #dsTransactionForm textarea {
+  box-shadow: 0 2px 8px rgba(25, 35, 55, .055);
+}
+
+.ds-page .ds-division select:focus,
+.ds-page .ds-date input:focus,
+.ds-page .ds-physical input:focus,
+.ds-page #dsTransactionForm input:focus,
+.ds-page #dsTransactionForm select:focus,
+.ds-page #dsTransactionForm textarea:focus,
+.ds-modal #dsTransactionForm input:focus,
+.ds-modal #dsTransactionForm select:focus,
+.ds-modal #dsTransactionForm textarea:focus {
+  box-shadow: 0 0 0 3px rgba(55, 83, 125, .08), 0 2px 8px rgba(25, 35, 55, .06);
+  outline: none;
+}
