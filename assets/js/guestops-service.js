@@ -6,6 +6,9 @@
   let ready = false;
   let writeQueue = Promise.resolve();
   let serviceGeneration = 0;
+  let persistedGuestRows = new Map();
+  let persistedReservationRows = new Map();
+  let persistedSettingsFingerprint = null;
 
   const toIso = value => new Date(Number(value) || Date.now()).toISOString();
   const toMs = value => value ? new Date(value).getTime() : null;
@@ -63,6 +66,44 @@
     };
   }
 
+  function guestRecord(item) {
+    return {
+      id: item.id,
+      workspace_id: workspaceId,
+      reservation_id: item.reservationId || null,
+      ticket: item.ticket,
+      service_date: item.day,
+      guest_name: item.name,
+      pack: item.pack,
+      phone: item.phone || null,
+      status: item.status,
+      created_at: toIso(item.created),
+      seated_at: item.seatedAt ? toIso(item.seatedAt) : null,
+      resolved_at: item.resolved ? toIso(item.resolved) : null
+    };
+  }
+
+  function reservationRecord(item) {
+    return {
+      id: item.id,
+      workspace_id: workspaceId,
+      code: item.code,
+      reservation_date: item.date,
+      reservation_time: item.time,
+      guest_name: item.name,
+      pack: item.pack,
+      phone: item.phone || null,
+      smoking: item.smoking || null,
+      note: item.note || null,
+      table_label: item.table || null,
+      status: item.status
+    };
+  }
+
+  function recordFingerprint(record) {
+    return JSON.stringify(Object.keys(record).filter(key => key !== 'workspace_id').map(key => record[key]));
+  }
+
   async function assertWorkspaceSession(expectedGeneration = serviceGeneration) {
     if (!client || !workspaceId || expectedGeneration !== serviceGeneration) throw new Error('Sesi workspace berubah. Operasi dibatalkan.');
     const currentClient = client;
@@ -99,11 +140,11 @@
     const guard = await assertWorkspaceSession();
     const [guestResult, reservationResult, settingResult] = await Promise.all([
       client.from('guests')
-        .select('*, guest_status_history(*)')
+        .select('id,ticket,service_date,guest_name,pack,phone,status,created_at,resolved_at,seated_at,reservation_id,guest_status_history(changed_at,label,detail,reason)')
         .eq('workspace_id', workspaceId)
         .order('created_at', { ascending: true }),
       client.from('reservations')
-        .select('*')
+        .select('id,code,reservation_date,reservation_time,guest_name,pack,phone,smoking,note,table_label,status,created_at,seated_at')
         .eq('workspace_id', workspaceId)
         .order('reservation_date', { ascending: true })
         .order('reservation_time', { ascending: true }),
@@ -121,17 +162,29 @@
 
     const guests = (guestResult.data || []).map(mapGuest);
     const reservations = (reservationResult.data || []).map(mapReservation);
+    const reservationsById = new Map(reservations.map(reservation => [reservation.id, reservation]));
 
     guests.forEach(guest => {
-      if (guest.reservationId) {
-        const reservation = reservations.find(item => item.id === guest.reservationId);
-        if (reservation) {
-          guest.reservationCode = reservation.code;
-          guest.reservationTable = reservation.table;
-          reservation.guestId = guest.id;
-        }
-      }
+      if (!guest.reservationId) return;
+      const reservation = reservationsById.get(guest.reservationId);
+      if (!reservation) return;
+      guest.reservationCode = reservation.code;
+      guest.reservationTable = reservation.table;
+      reservation.guestId = guest.id;
     });
+
+    persistedGuestRows = new Map(guests.map(guest => {
+      const record = guestRecord(guest);
+      return [guest.id, recordFingerprint(record)];
+    }));
+    persistedReservationRows = new Map(reservations.map(reservation => {
+      const record = reservationRecord(reservation);
+      return [reservation.id, recordFingerprint(record)];
+    }));
+    const loadedSettings = settingResult.data?.setting_value;
+    persistedSettingsFingerprint = settingResult.data
+      ? JSON.stringify({ seatingDurationMinutes: Number(loadedSettings?.seatingDurationMinutes) || 90 })
+      : null;
 
     const counters = {};
     guests.forEach(guest => {
@@ -185,57 +238,44 @@
     const requestedGeneration = serviceGeneration;
     const run = async () => {
       const guard = await assertWorkspaceSession(requestedGeneration);
-      const reservations = (state.reservations || []).map(item => ({
-        id: item.id,
-        workspace_id: workspaceId,
-        code: item.code,
-        reservation_date: item.date,
-        reservation_time: item.time,
-        guest_name: item.name,
-        pack: item.pack,
-        phone: item.phone || null,
-        smoking: item.smoking || null,
-        note: item.note || null,
-        table_label: item.table || null,
-        status: item.status
-      }));
-      const guests = (state.guests || []).map(item => ({
-        id: item.id,
-        workspace_id: workspaceId,
-        reservation_id: item.reservationId || null,
-        ticket: item.ticket,
-        service_date: item.day,
-        guest_name: item.name,
-        pack: item.pack,
-        phone: item.phone || null,
-        status: item.status,
-        created_at: toIso(item.created),
-        seated_at: item.seatedAt ? toIso(item.seatedAt) : null,
-        resolved_at: item.resolved ? toIso(item.resolved) : null,
-        updated_at: new Date().toISOString()
-      }));
+      const reservations = (state.reservations || []).map(reservationRecord);
+      const guests = (state.guests || []).map(guestRecord);
+      const changedReservations = reservations.filter(record =>
+        persistedReservationRows.get(record.id) !== recordFingerprint(record)
+      );
+      const changedGuests = guests.filter(record =>
+        persistedGuestRows.get(record.id) !== recordFingerprint(record)
+      );
 
       await assertWorkspaceSession(guard.generation);
-      if (reservations.length) {
-        const result = await client.from('reservations').upsert(reservations, { onConflict: 'id' });
+      if (changedReservations.length) {
+        const result = await client.from('reservations').upsert(changedReservations, { onConflict: 'id' });
         if (result.error) throw result.error;
+        changedReservations.forEach(record => persistedReservationRows.set(record.id, recordFingerprint(record)));
       }
       await assertWorkspaceSession(guard.generation);
-      if (guests.length) {
-        const result = await client.from('guests').upsert(guests, { onConflict: 'id' });
+      if (changedGuests.length) {
+        const rows = changedGuests.map(record => ({ ...record, updated_at: new Date().toISOString() }));
+        const result = await client.from('guests').upsert(rows, { onConflict: 'id' });
         if (result.error) throw result.error;
+        changedGuests.forEach(record => persistedGuestRows.set(record.id, recordFingerprint(record)));
       }
       await assertWorkspaceSession(guard.generation);
       if (root.AppAuth?.getContext()?.role !== 'service') {
-        const setting = await client.from('workspace_settings').upsert({
-          workspace_id: workspaceId,
-          setting_key: 'guest_operations',
-          setting_value: {
-            seatingDurationMinutes: Number(state.settings?.seatingDurationMinutes) || 90
-          },
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'workspace_id,setting_key' });
-        if (setting.error) throw setting.error;
+        const settingValue = {
+          seatingDurationMinutes: Number(state.settings?.seatingDurationMinutes) || 90
+        };
+        const settingFingerprint = JSON.stringify(settingValue);
+        if (settingFingerprint !== persistedSettingsFingerprint) {
+          const setting = await client.from('workspace_settings').upsert({
+            workspace_id: workspaceId,
+            setting_key: 'guest_operations',
+            setting_value: settingValue,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'workspace_id,setting_key' });
+          if (setting.error) throw setting.error;
+          persistedSettingsFingerprint = settingFingerprint;
+        }
       }
     };
 
@@ -269,6 +309,9 @@
     workspaceId = null;
     ready = false;
     writeQueue = Promise.resolve();
+    persistedGuestRows = new Map();
+    persistedReservationRows = new Map();
+    persistedSettingsFingerprint = null;
   }
 
   root.GuestOpsService = {
