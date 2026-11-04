@@ -1782,7 +1782,7 @@ async function initializeWorkspace(event, switchingContext) {
       const remoteState=await window.GuestOpsService.initialize(supabaseClient,authContext.workspaceId);
       if(!isCurrent()) return;
       state=remoteState; syncSeatingSettingInput();
-      go(authContext.divisionMode==='all'?'all-divisions':(authContext.workspaceRole==='service'?'dashboard':'dashboard'));
+      go(authContext.divisionMode==='all'?'all-divisions':'dashboard');
       guestRefreshInterval=window.setInterval(async()=>{
         if(!isCurrent()) return;
         try {
