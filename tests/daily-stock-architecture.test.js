@@ -10,12 +10,14 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const service = fs.readFileSync(path.join(root, 'assets/js/daily-stock-service.js'), 'utf8');
 const ui = fs.readFileSync(path.join(root, 'assets/js/daily-stock-ui.js'), 'utf8');
 
-test('Daily SO loads its service before its UI and no longer loads the monolithic file', () => {
-  const serviceIndex = html.indexOf('assets/js/daily-stock-service.js');
-  const uiIndex = html.indexOf('assets/js/daily-stock-ui.js');
+const app = fs.readFileSync(path.join(root, 'assets/js/app.js'), 'utf8');
 
-  assert.ok(serviceIndex >= 0, 'daily-stock-service.js must be loaded');
-  assert.ok(uiIndex > serviceIndex, 'daily-stock-ui.js must load after the service');
+test('Daily SO assets load on demand in dependency order', () => {
+  assert.doesNotMatch(html, /<link[^>]+daily-stock\.css/i);
+  assert.doesNotMatch(html, /<script[^>]+daily-stock-(?:service|ui)\.js/i);
+  assert.match(app, /function loadDailyStockFeature\(/);
+  assert.match(app, /loadStyle[\s\S]*?daily-stock-service\.js[\s\S]*?daily-stock-ui\.js/);
+  assert.match(app, /page === 'daily-stock'[\s\S]*?loadDailyStockFeature\([\s\S]*?\.then\(\(\) => go\(page\)\)/);
   assert.doesNotMatch(html, /assets\/js\/daily-stock\.js(?:\?|["'])/);
 });
 

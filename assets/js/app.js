@@ -207,7 +207,50 @@ function applyRoleNavigation() {
   });
 }
 
+let dailyStockFeaturePromise = null;
+
+function loadDailyStockFeature() {
+  if (window.DailyStockUI) return Promise.resolve();
+  if (dailyStockFeaturePromise) return dailyStockFeaturePromise;
+
+  const loadStyle = new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'assets/css/daily-stock.css?v=20261105-lazy-p1';
+    link.onload = resolve;
+    link.onerror = () => reject(new Error('Gagal memuat tampilan Daily SO.'));
+    document.head.appendChild(link);
+  });
+
+  const loadScript = (src) => new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error('Gagal memuat fitur Daily SO.'));
+    document.body.appendChild(script);
+  });
+
+  dailyStockFeaturePromise = loadStyle
+    .then(() => loadScript('assets/js/daily-stock-service.js?v=20261105-lazy-p1'))
+    .then(() => loadScript('assets/js/daily-stock-ui.js?v=20261105-lazy-p1'))
+    .catch((error) => {
+      dailyStockFeaturePromise = null;
+      throw error;
+    });
+
+  return dailyStockFeaturePromise;
+}
+
 function go(page) {
+  if (page === 'daily-stock' && !window.DailyStockUI) {
+    loadDailyStockFeature()
+      .then(() => go(page))
+      .catch((error) => {
+        console.error('Daily SO gagal dimuat:', error);
+        toast('Daily SO gagal dimuat. Coba buka lagi.');
+      });
+    return;
+  }
   const previousPage = document.querySelector('.page.active')?.id.replace(/^page-/, '') || '';
   const currentContext = window.AppAuth?.getContext();
   document.body.dataset.divisionMode = currentContext?.divisionMode || 'single';
