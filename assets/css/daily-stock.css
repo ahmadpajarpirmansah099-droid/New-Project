@@ -158,3 +158,17 @@
 .ds-item-search-option:active,.ds-item-search-option:focus-visible{outline:none;background:#f1f3f8}
 .ds-item-search-empty{padding:12px;color:var(--muted);font-size:12px}
 .ds-item-search-selected{display:block;min-height:0;margin-top:5px;color:#62718b;font-size:10px}
+
+/* Custom web picker for expense unit */
+.ds-unit-picker{position:relative;width:100%}
+.ds-unit-picker .ds-native-select{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.ds-unit-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fbfcfe;color:var(--ink);font:500 13px 'DM Sans',sans-serif;text-align:left;box-shadow:0 2px 8px rgba(25,35,55,.055);transition:border-color .18s,box-shadow .18s}
+.ds-unit-trigger:disabled{color:#9298a4;opacity:1}
+.ds-unit-trigger svg{width:17px;height:17px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s}
+.ds-unit-picker.is-open .ds-unit-trigger{border-color:#b9c7dc;box-shadow:0 0 0 3px rgba(55,83,125,.08)}
+.ds-unit-picker.is-open .ds-unit-trigger svg{transform:rotate(180deg)}
+.ds-unit-options{position:absolute;z-index:45;top:calc(100% + 6px);left:0;right:0;max-height:220px;overflow:auto;padding:6px;border:1px solid rgba(20,20,38,.08);border-radius:13px;background:#fff;box-shadow:0 14px 34px rgba(17,18,37,.15);animation:dsCategoryIn .16s ease both}
+.ds-unit-options[hidden]{display:none}
+.ds-unit-option{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:42px;padding:10px 12px;border:0;border-radius:8px;background:transparent;color:var(--ink);font:600 12px 'DM Sans',sans-serif;text-align:left}
+.ds-unit-option.active,.ds-unit-option:active,.ds-unit-option:focus-visible{outline:none;background:#f1f3f8}
+.ds-unit-option.active:after{content:'✓';color:#566b8d;font-weight:800}
