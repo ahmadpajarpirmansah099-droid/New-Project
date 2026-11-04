@@ -5618,3 +5618,144 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 }
 
+/* =========================================================
+   DESKTOP SIDEBAR — ICON RAIL + EXPAND
+   Closed: keep navigation icons visible.
+   Open: expand labels with a light motion.
+   Mobile styles remain untouched.
+   ========================================================= */
+@media (min-width: 900px) {
+  .menu-drawer {
+    top: 132px;
+    right: auto;
+    bottom: auto;
+    left: 8px;
+    width: 58px;
+    height: auto;
+    max-height: calc(100dvh - 156px);
+    padding: 8px 7px;
+    overflow: hidden;
+    border: 1px solid rgba(225, 226, 234, .9);
+    border-radius: 16px;
+    background: rgba(255,255,255,.97);
+    box-shadow: 0 4px 14px rgba(17,18,37,.07), 0 1px 3px rgba(17,18,37,.04);
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+    transition:
+      width .24s cubic-bezier(.2,.75,.25,1),
+      box-shadow .24s ease,
+      border-radius .24s ease;
+  }
+
+  .menu-drawer.show {
+    width: 246px;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+    box-shadow: 0 10px 28px rgba(17,18,37,.11), 0 2px 7px rgba(17,18,37,.05);
+  }
+
+  .drawer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding-top: 0;
+  }
+
+  .drawer-item {
+    width: 42px;
+    min-width: 42px;
+    height: 43px;
+    min-height: 43px;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition:
+      width .22s ease,
+      min-width .22s ease,
+      padding .22s ease,
+      background-color .18s ease,
+      color .18s ease;
+  }
+
+  .drawer-item > svg:first-child {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 17px;
+  }
+
+  .drawer-item > span {
+    width: 0;
+    max-width: 0;
+    margin: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateX(-5px);
+    transition:
+      max-width .2s ease,
+      opacity .14s ease,
+      transform .2s ease;
+  }
+
+  .drawer-item .drawer-chevron {
+    width: 0;
+    height: 16px;
+    margin-left: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity .14s ease;
+  }
+
+  .menu-drawer.show .drawer-item {
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 0 13px;
+  }
+
+  .menu-drawer.show .drawer-item > span {
+    width: auto;
+    max-width: 170px;
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .menu-drawer.show .drawer-item .drawer-chevron {
+    width: 16px;
+    margin-left: auto;
+    opacity: 1;
+  }
+
+  .menu-drawer.show .drawer-head,
+  .menu-drawer.show .drawer-foot {
+    display: none;
+  }
+
+  .menu-toggle {
+    transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+  }
+
+  .menu-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 13px rgba(17,18,37,.16);
+  }
+}
+
+@media (min-width: 1440px) {
+  .menu-drawer.show {
+    width: 260px;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1100px) {
+  .menu-drawer.show {
+    width: 216px;
+  }
+}
+
