@@ -220,11 +220,13 @@
   }
 
   async function failActivation(message) {
-    showLogin(message || 'Workspace gagal dimuat. Silakan masuk kembali.');
+    // Let Supabase finish signing out before showing the reason; SIGNED_OUT
+    // also calls showLogin('') and would otherwise erase the error immediately.
     if (supabaseClient) {
       try { await supabaseClient.auth.signOut(); }
       catch (error) { console.error('Failed to close invalid session:', error); }
     }
+    showLogin(message || 'Workspace gagal dimuat. Silakan masuk kembali.');
   }
 
   // Sign in with Supabase Auth; the role is read from the protected profiles table.

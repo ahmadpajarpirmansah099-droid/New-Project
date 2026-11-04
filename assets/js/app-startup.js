@@ -90,7 +90,11 @@ async function initializeWorkspace(event, switchingContext) {
   } catch(error) {
     if(!isCurrent()) return;
     console.error('Workspace initialization failed:',error); appInitializing=false; clearSessionIntervals();
-    await window.AppAuth.failActivation('Data workspace gagal dimuat. Silakan masuk kembali.');
+    const detail = String(error?.message || '').trim().slice(0, 180);
+    const message = detail
+      ? 'Workspace gagal dimuat: ' + detail + '. Silakan masuk kembali.'
+      : 'Data workspace gagal dimuat. Silakan masuk kembali.';
+    await window.AppAuth.failActivation(message);
   }
 }
 
