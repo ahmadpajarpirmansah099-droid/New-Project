@@ -550,12 +550,18 @@
         results.hidden = false;
         itemSearch.classList.add('is-open');
       };
-      input.addEventListener('focus', () => showResults(input.value));
+      input.addEventListener('focus', () => {
+        if (input.value.trim()) showResults(input.value);
+      });
       input.addEventListener('input', () => {
         hidden.value = '';
         selectedLabel.textContent = '';
         syncUnitOptions();
-        showResults(input.value);
+        if (input.value.trim()) showResults(input.value);
+        else {
+          results.hidden = true;
+          itemSearch.classList.remove('is-open');
+        }
       });
       results.addEventListener('click', (event) => {
         const option = event.target.closest('[data-item-id]');
