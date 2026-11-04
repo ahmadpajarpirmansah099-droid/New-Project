@@ -759,6 +759,12 @@
 
     const originalGo = root.go;
     root.go = function (targetPage) {
+      const isDailyWorkspacePage = targetPage === 'daily-stock' ||
+        targetPage === 'daily-expense' ||
+        Object.values(TRANSACTION_PAGES).some((config) => config.page === targetPage);
+      document.querySelectorAll('.desktop-nav-group-heading-action').forEach((button) => {
+        button.classList.toggle('active', isDailyWorkspacePage);
+      });
       const transactionConfig = Object.values(TRANSACTION_PAGES).find((config) => config.page === targetPage);
       if (transactionConfig) {
         document.querySelectorAll('.page').forEach((element) => element.classList.remove('active'));
