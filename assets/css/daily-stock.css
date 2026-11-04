@@ -208,3 +208,25 @@
 .ds-transaction-form .ds-item-search-results[hidden],
 .ds-transaction-form .ds-unit-options[hidden]{display:none}
 @media(prefers-reduced-motion:reduce){.ds-direction-picker button{transition:none}}
+
+/* Produksi WIP — input beberapa produk dalam satu transaksi */
+.ds-production-batch-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 10px}
+.ds-production-batch-head>div{display:grid;gap:3px}
+.ds-production-batch-head strong{color:var(--ink);font-size:12px}
+.ds-production-batch-head small,.ds-production-batch-head>span{color:var(--muted);font-size:10px}
+.ds-production-rows{display:grid;gap:10px}
+.ds-production-row{display:grid;gap:9px;padding:12px;border:1px solid var(--line);border-radius:13px;background:#fff}
+.ds-production-row-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ds-production-row-head strong{color:var(--ink);font-size:11px}
+.ds-production-remove{min-height:30px;padding:5px 9px;border:0;border-radius:8px;background:#fff0ef;color:#a64b45;font:700 10px 'DM Sans',sans-serif}
+.ds-production-row label{display:grid;gap:6px;color:var(--ink);font-size:10px;font-weight:800}
+.ds-production-row input[type="search"],.ds-production-row input[type="number"]{width:100%;min-height:42px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fbfcfe;color:var(--ink);font:500 12px 'DM Sans',sans-serif}
+.ds-production-row input:focus{outline:none;border-color:#b9c7dc;box-shadow:0 0 0 3px rgba(55,83,125,.08)}
+.ds-production-row .ds-item-search{position:relative}
+.ds-production-row .ds-item-search-results{position:absolute;z-index:46;top:calc(100% + 5px);left:0;right:0;max-height:190px;overflow:auto;padding:6px;border:1px solid rgba(20,20,38,.08);border-radius:12px;background:#fff;box-shadow:0 12px 28px rgba(17,18,37,.14)}
+.ds-production-row .ds-item-search-results[hidden]{display:none}
+.ds-production-row .ds-item-search-selected{display:block;color:#62718b;font-size:9px}
+.ds-production-yield{margin:0;padding:9px 10px;border-radius:9px;background:#f4f6f9;color:var(--muted);font-size:10px}
+.ds-production-yield strong{color:var(--ink)}
+.ds-production-add{width:100%;margin-top:8px;border:1px dashed #cbd4e2;background:#f8f9fb}
+.ds-production-add:disabled{opacity:.45}
