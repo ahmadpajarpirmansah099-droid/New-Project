@@ -4840,3 +4840,8 @@ body.auth-ready .auth-screen{display:none}
 .division-overview-loading,.division-overview-error{padding:22px 16px;border:1px dashed #dce3ec;border-radius:14px;color:#7c8798;font-size:12px;text-align:center}
 @media(max-width:520px){.top{flex-wrap:wrap;gap:9px}.brand{flex:1 1 auto;min-width:125px}.workspace-scope-switcher{order:3;width:100%;margin:0;justify-content:stretch}.workspace-scope-switcher label{flex:1 1 50%}.workspace-scope-switcher select{max-width:none;height:34px;font-size:12px}.top-actions{margin-left:auto}}
 @media(max-width:360px){.division-overview-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* Keep the active workspace visible while Developer changes outlet/division. */
+body.workspace-switching .app{pointer-events:none;opacity:.62;transition:opacity .18s ease}
+body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z-index:999;inset:0;display:grid;place-items:center;padding-top:72px;background:rgba(246,246,241,.38);color:#17172a;font-size:14px;font-weight:700;letter-spacing:.01em;pointer-events:all}
