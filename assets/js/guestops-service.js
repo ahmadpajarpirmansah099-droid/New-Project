@@ -20,7 +20,6 @@
   }
 
   function mapGuest(row) {
-    const history = Array.isArray(row.guest_status_history) ? row.guest_status_history : [];
     return {
       id: row.id,
       ticket: row.ticket,
@@ -35,15 +34,7 @@
       reservationId: row.reservation_id || null,
       reservationCode: null,
       reservationTable: null,
-      audit: history
-        .slice()
-        .sort((a, b) => new Date(a.changed_at) - new Date(b.changed_at))
-        .map(item => ({
-          at: toMs(item.changed_at),
-          label: item.label,
-          detail: item.detail || '',
-          reason: item.reason || ''
-        }))
+      audit: []
     };
   }
 
@@ -140,7 +131,7 @@
     const guard = await assertWorkspaceSession();
     const [guestResult, reservationResult, settingResult] = await Promise.all([
       client.from('guests')
-        .select('id,ticket,service_date,guest_name,pack,phone,status,created_at,resolved_at,seated_at,reservation_id,guest_status_history(changed_at,label,detail,reason)')
+        .select('id,ticket,service_date,guest_name,pack,phone,status,created_at,resolved_at,seated_at,reservation_id')
         .eq('workspace_id', workspaceId)
         .order('created_at', { ascending: true }),
       client.from('reservations')
@@ -207,6 +198,24 @@
         seatingDurationMinutes: Number(settings.seatingDurationMinutes) || 90
       }
     };
+  }
+
+  async function loadGuestAudit(guestId) {
+    requireReady();
+    const guard = await assertWorkspaceSession();
+    const { data, error } = await client.from('guest_status_history')
+      .select('changed_at,label,detail,reason')
+      .eq('workspace_id', workspaceId)
+      .eq('guest_id', guestId)
+      .order('changed_at', { ascending: true });
+    if (error) throw error;
+    await assertWorkspaceSession(guard.generation);
+    return (data || []).map(item => ({
+      at: toMs(item.changed_at),
+      label: item.label,
+      detail: item.detail || '',
+      reason: item.reason || ''
+    }));
   }
 
   async function nextTicket(day) {
@@ -318,6 +327,7 @@
     initialize,
     reset,
     load,
+    loadGuestAudit,
     persist,
     nextTicket,
     nextReservationCode,
