@@ -1705,11 +1705,29 @@ updateHistoryDateLabel();
 updateOperationalDateLabels();
 
 let appDataReady = false;
+let appInitializing = false;
 let appSessionGeneration = 0;
+let appInitializationGeneration = 0;
+let guestRefreshInterval = null;
+let seatingCountdownInterval = null;
+
+function clearSessionIntervals() {
+  if (guestRefreshInterval !== null) {
+    window.clearInterval(guestRefreshInterval);
+    guestRefreshInterval = null;
+  }
+  if (seatingCountdownInterval !== null) {
+    window.clearInterval(seatingCountdownInterval);
+    seatingCountdownInterval = null;
+  }
+}
 
 window.addEventListener('app:auth-signed-out', function () {
   appSessionGeneration += 1;
+  appInitializationGeneration += 1;
   appDataReady = false;
+  appInitializing = false;
+  clearSessionIntervals();
   state = {
     schemaVersion: 3,
     guests: [],
@@ -1727,31 +1745,35 @@ window.addEventListener('app:auth-signed-out', function () {
 });
 
 window.addEventListener('app:auth-ready', async function (event) {
-  if (appDataReady) return;
+  if (appDataReady || appInitializing) return;
+  appInitializing = true;
   const sessionGeneration = appSessionGeneration;
+  const initializationGeneration = ++appInitializationGeneration;
+  const isCurrent = () =>
+    sessionGeneration === appSessionGeneration &&
+    initializationGeneration === appInitializationGeneration;
+
   try {
     const authContext = event.detail;
-    await window.MasterDataStore.initialize(
-      window.AppAuth.getClient(),
-      authContext.workspaceId,
-      authContext.activeDivisionId
-    );
-    if (sessionGeneration !== appSessionGeneration) return;
+    const supabaseClient = window.AppAuth.getClient();
+    await window.MasterDataStore.initialize(supabaseClient, authContext.workspaceId, authContext.activeDivisionId);
+    if (!isCurrent()) return;
+    await window.MasterDataStore.assertSession();
+    if (!isCurrent()) return;
     applyRoleNavigation();
 
     if (canAccessGuestOperations()) {
-      const remoteState = await window.GuestOpsService.initialize(
-        window.AppAuth.getClient(),
-        authContext.workspaceId
-      );
-      if (sessionGeneration !== appSessionGeneration) return;
+      const remoteState = await window.GuestOpsService.initialize(supabaseClient, authContext.workspaceId);
+      if (!isCurrent()) return;
       state = remoteState;
       syncSeatingSettingInput();
       go(authContext.workspaceRole === 'service' ? 'master-items' : 'dashboard');
 
-      setInterval(async () => {
+      guestRefreshInterval = window.setInterval(async () => {
+        if (!isCurrent()) return;
         try {
           const refreshed = await window.GuestOpsService.load();
+          if (!isCurrent()) return;
           state.guests = refreshed.guests;
           state.reservations = refreshed.reservations;
           state.counters = refreshed.counters;
@@ -1759,19 +1781,29 @@ window.addEventListener('app:auth-ready', async function (event) {
           state.settings = refreshed.settings;
           renderAll();
         } catch (error) {
-          console.error('Guest Operations refresh failed:', error);
+          if (isCurrent()) console.error('Guest Operations refresh failed:', error);
         }
       }, 30000);
-      setInterval(updateSeatingCountdowns, 1000);
+      seatingCountdownInterval = window.setInterval(() => {
+        if (isCurrent()) updateSeatingCountdowns();
+      }, 1000);
     } else {
-      if (sessionGeneration !== appSessionGeneration) return;
+      if (!isCurrent()) return;
       go('master-items');
     }
+
+    if (!isCurrent()) return;
+    const revealed = await window.AppAuth.markReady(authContext.userId, authContext.workspaceId);
+    if (!isCurrent()) return;
+    if (!revealed) throw new Error('Sesi akun berubah sebelum workspace selesai dimuat.');
     appDataReady = true;
+    appInitializing = false;
   } catch (error) {
-    if (sessionGeneration !== appSessionGeneration) return;
+    if (!isCurrent()) return;
     console.error('Workspace initialization failed:', error);
-    toast('Data workspace gagal dimuat dari database. Muat ulang halaman.');
+    appInitializing = false;
+    clearSessionIntervals();
+    await window.AppAuth.failActivation('Data workspace gagal dimuat. Silakan masuk kembali.');
   }
 });
 

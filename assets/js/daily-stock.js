@@ -7,6 +7,34 @@
   const escapeHtml = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
   const dateKey = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   const state = { client:null, context:null, catalog:null, date:dateKey(), expenseDate:dateKey(), tab:'overview', data:null, busy:false, initialized:false };
+  let sessionGeneration = 0, dataLoadGeneration = 0, sessionAbortController = null;
+
+  function assertDailyCurrent(expectedGeneration, expectedClient, expectedContext) {
+    if (expectedGeneration !== sessionGeneration || expectedClient !== state.client || expectedContext !== state.context || !expectedClient || !expectedContext) {
+      throw new Error('Sesi workspace berubah. Operasi Daily SO dibatalkan.');
+    }
+  }
+
+  async function verifyDailySession(expectedGeneration = sessionGeneration) {
+    const capturedClient = state.client, capturedContext = state.context;
+    assertDailyCurrent(expectedGeneration, capturedClient, capturedContext);
+    if (!root.MasterDataStore?.isReady() || typeof root.MasterDataStore.assertSession !== 'function') {
+      throw new Error('Sesi Master Data belum siap. Muat ulang halaman.');
+    }
+    const verified = await root.MasterDataStore.assertSession();
+    assertDailyCurrent(expectedGeneration, capturedClient, capturedContext);
+    if (!verified || verified.userId !== capturedContext.userId || verified.workspaceId !== capturedContext.workspaceId || verified.divisionId !== capturedContext.activeDivisionId) {
+      throw new Error('Identitas akun, workspace, atau divisi tidak cocok. Operasi Daily SO diblokir.');
+    }
+    return { generation: expectedGeneration, client: capturedClient, context: capturedContext };
+  }
+
+  function dailyQuery(table, expectedGeneration = sessionGeneration) {
+    assertDailyCurrent(expectedGeneration, state.client, state.context);
+    const query = state.client.from(table);
+    if (sessionAbortController && typeof query?.abortSignal === 'function') return query.abortSignal(sessionAbortController.signal);
+    return query;
+  }
 
   function stockKey(kind, id) { return kind + ':' + id; }
   function itemKind(item) { return item.is_supply ? 'supply' : 'material'; }
@@ -23,11 +51,19 @@
   function canUseSales() { return !divisionIsService(); }
 
   async function initialize() {
-    const context = root.AppAuth?.getContext();
-    const client = root.AppAuth?.getClient();
+    const context = root.AppAuth?.getContext(), client = root.AppAuth?.getClient();
     if (!context || !client || !root.MasterDataStore?.isReady()) return false;
-    state.context = context;
-    state.client = client;
+    if (sessionAbortController) sessionAbortController.abort();
+    sessionGeneration += 1;
+    const generation = sessionGeneration;
+    dataLoadGeneration += 1;
+    sessionAbortController = typeof root.AbortController === 'function' ? new root.AbortController() : null;
+    state.context = context; state.client = client; state.catalog = null; state.data = null; state.initialized = false;
+    const verified = await root.MasterDataStore.assertSession();
+    assertDailyCurrent(generation, client, context);
+    if (!verified || verified.userId !== context.userId || verified.workspaceId !== context.workspaceId || verified.divisionId !== context.activeDivisionId) {
+      throw new Error('Identitas akun, workspace, atau divisi tidak cocok. Akses Daily SO diblokir.');
+    }
     state.catalog = root.MasterDataStore.load();
     state.initialized = true;
     return true;
@@ -35,32 +71,39 @@
 
   async function load(date) {
     if (!state.initialized && !(await initialize())) throw new Error('Workspace belum siap. Muat ulang halaman.');
+    const guard = await verifyDailySession();
+    const loadGeneration = ++dataLoadGeneration;
     state.date = date || state.date;
-    const { workspaceId, activeDivisionId } = state.context;
+    const requestedDate = state.date;
+    const { workspaceId, activeDivisionId } = guard.context;
     const [countResult, txResult, previousResult, historyResult] = await Promise.all([
-      state.client.from('daily_stock_counts').select('*').eq('workspace_id', workspaceId).eq('division_id', activeDivisionId).eq('stock_date', state.date).maybeSingle(),
-      state.client.from('inventory_transactions').select('*').eq('workspace_id', workspaceId).eq('division_id', activeDivisionId).eq('transaction_date', state.date).order('created_at', { ascending:false }),
-      state.client.from('daily_stock_counts').select('id,stock_date,status').eq('workspace_id', workspaceId).eq('division_id', activeDivisionId).eq('status', 'closed').lt('stock_date', state.date).order('stock_date', { ascending:false }).limit(1).maybeSingle(),
-      state.client.from('daily_stock_counts').select('id,stock_date,status,closed_at').eq('workspace_id', workspaceId).eq('division_id', activeDivisionId).order('stock_date', { ascending:false }).limit(30)
+      dailyQuery('daily_stock_counts', guard.generation).select('*').eq('workspace_id', workspaceId).eq('division_id', activeDivisionId).eq('stock_date', requestedDate).maybeSingle(),
+      dailyQuery('inventory_transactions', guard.generation).select('*').eq('workspace_id', workspaceId).eq('division_id', activeDivisionId).eq('transaction_date', requestedDate).order('created_at', { ascending:false }),
+      dailyQuery('daily_stock_counts', guard.generation).select('id,stock_date,status').eq('workspace_id', workspaceId).eq('division_id', activeDivisionId).eq('status', 'closed').lt('stock_date', requestedDate).order('stock_date', { ascending:false }).limit(1).maybeSingle(),
+      dailyQuery('daily_stock_counts', guard.generation).select('id,stock_date,status,closed_at').eq('workspace_id', workspaceId).eq('division_id', activeDivisionId).order('stock_date', { ascending:false }).limit(30)
     ]);
     for (const result of [countResult, txResult, previousResult, historyResult]) if (result.error) throw result.error;
+    await verifyDailySession(guard.generation);
+    if (loadGeneration !== dataLoadGeneration || state.date !== requestedDate) throw new Error('Tanggal Daily SO berubah. Pemuatan lama dibatalkan.');
+
     const transactionIds = (txResult.data || []).map((row) => row.id);
     const [txLinesResult, countLinesResult, previousLinesResult] = await Promise.all([
-      transactionIds.length ? state.client.from('inventory_transaction_lines').select('*').in('transaction_id', transactionIds) : Promise.resolve({ data:[], error:null }),
-      countResult.data ? state.client.from('daily_stock_count_lines').select('*').eq('count_id', countResult.data.id).order('created_at') : Promise.resolve({ data:[], error:null }),
-      previousResult.data ? state.client.from('daily_stock_count_lines').select('*').eq('count_id', previousResult.data.id) : Promise.resolve({ data:[], error:null })
+      transactionIds.length ? dailyQuery('inventory_transaction_lines', guard.generation).select('*').in('transaction_id', transactionIds) : Promise.resolve({ data:[], error:null }),
+      countResult.data ? dailyQuery('daily_stock_count_lines', guard.generation).select('*').eq('count_id', countResult.data.id).order('created_at') : Promise.resolve({ data:[], error:null }),
+      previousResult.data ? dailyQuery('daily_stock_count_lines', guard.generation).select('*').eq('count_id', previousResult.data.id) : Promise.resolve({ data:[], error:null })
     ]);
     for (const result of [txLinesResult, countLinesResult, previousLinesResult]) if (result.error) throw result.error;
+    await verifyDailySession(guard.generation);
+    if (loadGeneration !== dataLoadGeneration || state.date !== requestedDate) throw new Error('Tanggal Daily SO berubah. Pemuatan lama dibatalkan.');
+
     state.data = {
-      count:countResult.data || null,
-      transactions:txResult.data || [],
-      transactionLines:txLinesResult.data || [],
-      countLines:countLinesResult.data || [],
-      previous:previousResult.data || null,
-      previousLines:previousLinesResult.data || [],
-      history:historyResult.data || [], date:state.date
+      count:countResult.data || null, transactions:txResult.data || [], transactionLines:txLinesResult.data || [],
+      countLines:countLinesResult.data || [], previous:previousResult.data || null, previousLines:previousLinesResult.data || [],
+      history:historyResult.data || [], date:requestedDate
     };
     if (state.data.count?.status === 'draft') await refreshDraftCountSnapshot();
+    await verifyDailySession(guard.generation);
+    if (loadGeneration !== dataLoadGeneration) throw new Error('Pemuatan Daily SO sudah digantikan proses terbaru.');
     return state.data;
   }
 
@@ -96,6 +139,7 @@
 
   async function refreshDraftCountSnapshot() {
     if (!state.data?.count || state.data.count.status !== 'draft') return;
+    const guard = await verifyDailySession();
     const movements = movementsByKey();
     const previous = new Map(state.data.previousLines.map((line) => [
       stockKey(line.stock_kind, line.stock_kind === 'wip' ? line.wip_recipe_id : line.item_id),
@@ -132,24 +176,29 @@
         Number(line.inbound_quantity) !== snapshot.inbound_quantity ||
         Number(line.outbound_quantity) !== snapshot.outbound_quantity
       ) {
-        updates.push(state.client.from('daily_stock_count_lines').update(snapshot).eq('id',line.id));
+        updates.push(dailyQuery('daily_stock_count_lines').update(snapshot).eq('id',line.id));
       }
     });
+    await verifyDailySession(guard.generation);
     const results = await Promise.all(updates);
     const failed = results.find((result) => result.error);
     if (failed) throw failed.error;
+    await verifyDailySession(guard.generation);
     const removed = await Promise.all(removals.map((line) =>
-      state.client.from('daily_stock_count_lines').delete().eq('id', line.id)
+      dailyQuery('daily_stock_count_lines', guard.generation).delete().eq('id', line.id)
     ));
     const removalError = removed.find((result) => result.error);
     if (removalError) throw removalError.error;
+    await verifyDailySession(guard.generation);
     if (inserts.length) {
-      const result = await state.client.from('daily_stock_count_lines').insert(inserts);
+      const result = await dailyQuery('daily_stock_count_lines', guard.generation).insert(inserts);
       if (result.error) throw result.error;
     }
+    await verifyDailySession(guard.generation);
     if (updates.length || inserts.length || removals.length) {
-      const refreshed = await state.client.from('daily_stock_count_lines').select('*').eq('count_id',state.data.count.id).order('created_at');
+      const refreshed = await dailyQuery('daily_stock_count_lines', guard.generation).select('*').eq('count_id',state.data.count.id).order('created_at');
       if (refreshed.error) throw refreshed.error;
+      await verifyDailySession(guard.generation);
       state.data.countLines = refreshed.data || [];
     }
   }
@@ -181,13 +230,16 @@
   }
 
   async function createCount() {
+    const guard = await verifyDailySession();
     if (state.data.count) return;
     const rows = buildRows();
     if (!rows.length) throw new Error('Belum ada barang, Supplies, atau WIP pada divisi ini.');
-    const { data, error } = await state.client.from('daily_stock_counts').insert({
+    await verifyDailySession(guard.generation);
+    const { data, error } = await dailyQuery('daily_stock_counts', guard.generation).insert({
       workspace_id:state.context.workspaceId, division_id:state.context.activeDivisionId, stock_date:state.date
     }).select('*').single();
     if (error) throw error;
+    await verifyDailySession(guard.generation);
     const lines = rows.map((row) => ({
       count_id:data.id, workspace_id:state.context.workspaceId,
       count_division_id:state.context.activeDivisionId, stock_division_id:state.context.activeDivisionId,
@@ -197,15 +249,17 @@
       inbound_quantity:row.inbound, outbound_quantity:row.outbound,
       unit_cost_snapshot:row.cost || null
     }));
-    const inserted = await state.client.from('daily_stock_count_lines').insert(lines);
+    await verifyDailySession(guard.generation);
+    const inserted = await dailyQuery('daily_stock_count_lines', guard.generation).insert(lines);
     if (inserted.error) {
-      await state.client.from('daily_stock_counts').delete().eq('id', data.id);
+      await dailyQuery('daily_stock_counts').delete().eq('id', data.id);
       throw inserted.error;
     }
     await load(state.date);
   }
 
   async function savePhysicalCounts() {
+    const guard = await verifyDailySession();
     const inputs = Array.from($('dailyStockRows').querySelectorAll('[data-physical]'));
     const updates = inputs.map(async (input) => {
       const lineId = input.dataset.lineId;
@@ -213,20 +267,26 @@
       if (value === '') throw new Error('Isi stok fisik semua barang sebelum menyimpan.');
       const quantity = Number(value.replace(',', '.'));
       if (!Number.isFinite(quantity) || quantity < 0) throw new Error('Stok fisik harus angka 0 atau lebih.');
-      const result = await state.client.from('daily_stock_count_lines').update({ physical_closing_quantity:quantity }).eq('id', lineId);
+      await verifyDailySession(guard.generation);
+      const result = await dailyQuery('daily_stock_count_lines', guard.generation).update({ physical_closing_quantity:quantity }).eq('id', lineId);
       if (result.error) throw result.error;
     });
     await Promise.all(updates);
+    await verifyDailySession(guard.generation);
     await load(state.date);
   }
 
   async function closeCount() {
+    const guard = await verifyDailySession();
     if (!state.data.count || state.data.count.status !== 'draft') return;
+    const countId = state.data.count.id;
     await savePhysicalCounts();
-    const result = await state.client.from('daily_stock_counts').update({
+    await verifyDailySession(guard.generation);
+    const result = await dailyQuery('daily_stock_counts', guard.generation).update({
       status:'closed', closed_by:state.context.userId, closed_at:new Date().toISOString()
-    }).eq('id', state.data.count.id).eq('status','draft');
+    }).eq('id', countId).eq('status','draft');
     if (result.error) throw result.error;
+    await verifyDailySession(guard.generation);
     await load(state.date);
   }
 
@@ -324,36 +384,47 @@
   }
 
   async function postTransaction(type, form) {
+    const guard = await verifyDailySession();
     if (state.data?.count?.status === 'closed') throw new Error('Daily SO tanggal ini sudah ditutup. Catat transaksi pada tanggal operasional berikutnya.');
     const lines = buildTransactionLines(type, form);
     if (!lines.length) throw new Error('Transaksi tidak memiliki pergerakan stok.');
+    await verifyDailySession(guard.generation);
     const txType = type === 'production' ? 'wip_production' : type === 'sale' ? 'sale' :
       type === 'supply' ? (form.direction === 'in' ? 'supply_purchase' : 'supply_usage') : type;
-    const header = await state.client.from('inventory_transactions').insert({
+    const header = await dailyQuery('inventory_transactions', guard.generation).insert({
       workspace_id:state.context.workspaceId, division_id:state.context.activeDivisionId,
       transaction_date:state.date, transaction_type:txType, reference_code:form.reference || null,
       expense_category:type === 'expense' ? (form.category || null) : null,
       notes:form.notes || null
     }).select('*').single();
     if (header.error) throw header.error;
+    await verifyDailySession(guard.generation);
     const rows = lines.map((line) => Object.assign({}, line, {
       transaction_id:header.data.id, workspace_id:state.context.workspaceId,
       transaction_division_id:state.context.activeDivisionId,
       stock_division_id:state.context.activeDivisionId,
       notes:form.notes || null
     }));
-    const inserted = await state.client.from('inventory_transaction_lines').insert(rows);
+    await verifyDailySession(guard.generation);
+    const inserted = await dailyQuery('inventory_transaction_lines', guard.generation).insert(rows);
     if (inserted.error) {
-      await state.client.from('inventory_transactions').delete().eq('id',header.data.id);
+      await dailyQuery('inventory_transactions').delete().eq('id',header.data.id);
       throw inserted.error;
     }
-    const posted = await state.client.from('inventory_transactions').update({
+    await verifyDailySession(guard.generation);
+    const posted = await dailyQuery('inventory_transactions', guard.generation).update({
       status:'posted', posted_by:state.context.userId, posted_at:new Date().toISOString()
     }).eq('id',header.data.id).eq('status','draft');
     if (posted.error) {
-      await state.client.from('inventory_transactions').delete().eq('id',header.data.id);
+      try {
+        await verifyDailySession(guard.generation);
+        await dailyQuery('inventory_transactions', guard.generation).delete().eq('id',header.data.id);
+      } catch (sessionError) {
+        console.warn('Transaction cleanup skipped after workspace session change.');
+      }
       throw posted.error;
     }
+    await verifyDailySession(guard.generation);
     await load(state.date);
   }
 
@@ -535,9 +606,11 @@
 
   async function goToExpensePage() {
     if (!state.initialized && !(await initialize())) { root.toast?.('Data divisi belum siap. Muat ulang halaman.'); return; }
+    const guard = await verifyDailySession();
     state.catalog = root.MasterDataStore?.isReady() ? root.MasterDataStore.load() : state.catalog;
     state.date = dateKey();
     await load(state.date);
+    await verifyDailySession(guard.generation);
     root.go('daily-expense');
   }
 
@@ -667,17 +740,20 @@
   async function loadExpenseHistory() {
     const target = $('dailyExpenseHistory');
     if (!target) return;
+    const guard = await verifyDailySession();
     target.innerHTML = '<div class="ds-empty">Memuat riwayat...</div>';
-    const result = await state.client.from('inventory_transactions').select('*')
+    const result = await dailyQuery('inventory_transactions', guard.generation).select('*')
       .eq('workspace_id', state.context.workspaceId).eq('division_id', state.context.activeDivisionId)
       .eq('transaction_type', 'expense').eq('transaction_date', state.expenseDate)
       .neq('status', 'void').order('created_at', { ascending:false });
     if (result.error) throw result.error;
+    await verifyDailySession(guard.generation);
     const transactions = result.data || [];
     if (!transactions.length) { target.innerHTML = '<div class="ds-empty">Belum ada pengeluaran pada tanggal ini.</div>'; return; }
     const ids = transactions.map((tx) => tx.id);
-    const linesResult = await state.client.from('inventory_transaction_lines').select('*').in('transaction_id', ids);
+    const linesResult = await dailyQuery('inventory_transaction_lines', guard.generation).select('*').in('transaction_id', ids);
     if (linesResult.error) throw linesResult.error;
+    await verifyDailySession(guard.generation);
     const linesByTransaction = new Map();
     (linesResult.data || []).forEach((line) => { const rows = linesByTransaction.get(line.transaction_id) || []; rows.push(line); linesByTransaction.set(line.transaction_id, rows); });
     target.innerHTML = transactions.map((tx) => {
@@ -772,12 +848,26 @@
       const division = (state.context.divisions || []).find((item) => item.id === event.target.value);
       if (!division || division.id === state.context.activeDivisionId) return;
       try {
-        state.context.activeDivisionId = division.id;
-        state.context.activeDivisionName = division.name;
-        await root.MasterDataStore.initialize(state.client,state.context.workspaceId,division.id);
+        const context = state.context, client = state.client;
+        sessionGeneration += 1;
+        const switchGeneration = sessionGeneration;
+        dataLoadGeneration += 1;
+        if (sessionAbortController) sessionAbortController.abort();
+        sessionAbortController = typeof root.AbortController === 'function' ? new root.AbortController() : null;
+        state.initialized = false; state.data = null;
+        context.activeDivisionId = division.id;
+        context.activeDivisionName = division.name;
+        await root.MasterDataStore.initialize(client, context.workspaceId, division.id);
+        assertDailyCurrent(switchGeneration, client, context);
+        const verified = await root.MasterDataStore.assertSession();
+        assertDailyCurrent(switchGeneration, client, context);
+        if (!verified || verified.userId !== context.userId || verified.workspaceId !== context.workspaceId || verified.divisionId !== division.id) {
+          throw new Error('Identitas akun atau divisi tidak cocok. Pergantian divisi diblokir.');
+        }
         state.catalog = root.MasterDataStore.load();
-        state.data = null;
+        state.initialized = true;
         await load(state.date);
+        await verifyDailySession(switchGeneration);
         render();
       } catch (error) { root.toast?.(error.message || 'Divisi tidak bisa diganti.'); }
       return;
@@ -919,6 +1009,10 @@
   }
 
   root.addEventListener('app:auth-signed-out', function () {
+    sessionGeneration += 1;
+    dataLoadGeneration += 1;
+    if (sessionAbortController) sessionAbortController.abort();
+    sessionAbortController = null;
     state.client=null; state.context=null; state.catalog=null; state.data=null;
     state.initialized=false; state.busy=false; state.tab='overview'; state.date=dateKey();
   });
