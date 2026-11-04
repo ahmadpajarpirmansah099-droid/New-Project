@@ -5,6 +5,7 @@
   let workspaceId = null;
   let ready = false;
   let writeQueue = Promise.resolve();
+  let serviceGeneration = 0;
 
   const toIso = value => new Date(Number(value) || Date.now()).toISOString();
   const toMs = value => value ? new Date(value).getTime() : null;
@@ -62,18 +63,37 @@
     };
   }
 
+  async function assertWorkspaceSession(expectedGeneration = serviceGeneration) {
+    if (!client || !workspaceId || expectedGeneration !== serviceGeneration) throw new Error('Sesi workspace berubah. Operasi dibatalkan.');
+    const currentClient = client;
+    const currentWorkspaceId = workspaceId;
+    const { data: authData, error: authError } = await currentClient.auth.getUser();
+    if (expectedGeneration !== serviceGeneration || currentClient !== client || currentWorkspaceId !== workspaceId) throw new Error('Sesi workspace berubah. Operasi dibatalkan.');
+    if (authError || !authData?.user?.id) throw new Error('Sesi akun tidak valid. Silakan masuk kembali.');
+    const context = root.AppAuth?.getContext?.();
+    if (!context || context.userId !== authData.user.id || context.workspaceId !== currentWorkspaceId) throw new Error('Identitas akun dan workspace tidak cocok. Operasi diblokir.');
+    const { data: membership, error: membershipError } = await currentClient.from('workspace_memberships').select('workspace_id').eq('user_id', authData.user.id).eq('workspace_id', currentWorkspaceId).maybeSingle();
+    if (expectedGeneration !== serviceGeneration || currentClient !== client || currentWorkspaceId !== workspaceId) throw new Error('Sesi workspace berubah. Operasi dibatalkan.');
+    if (membershipError || !membership) throw new Error('Akses ditolak: akun bukan anggota workspace aktif.');
+    return { workspaceId: currentWorkspaceId, generation: expectedGeneration };
+  }
+
   async function initialize(supabaseClient, selectedWorkspaceId) {
     if (!supabaseClient || !selectedWorkspaceId) {
       throw new Error('Workspace akun tidak ditemukan. Hubungi Developer.');
     }
+    serviceGeneration += 1;
     client = supabaseClient;
     workspaceId = selectedWorkspaceId;
+    ready = false;
+    await assertWorkspaceSession(serviceGeneration);
     ready = true;
     return load();
   }
 
   async function load() {
     requireReady();
+    const guard = await assertWorkspaceSession();
     const [guestResult, reservationResult, settingResult] = await Promise.all([
       client.from('guests')
         .select('*, guest_status_history(*)')
@@ -94,6 +114,7 @@
     if (guestResult.error) throw guestResult.error;
     if (reservationResult.error) throw reservationResult.error;
     if (settingResult.error) throw settingResult.error;
+    await assertWorkspaceSession(guard.generation);
 
     const guests = (guestResult.data || []).map(mapGuest);
     const reservations = (reservationResult.data || []).map(mapReservation);
@@ -134,6 +155,7 @@
 
   async function nextTicket(day) {
     requireReady();
+    const guard = await assertWorkspaceSession();
     const { data, error } = await client.rpc('next_guest_ticket', {
       p_workspace_id: workspaceId,
       p_service_date: day
@@ -144,6 +166,7 @@
 
   async function nextReservationCode(day) {
     requireReady();
+    const guard = await assertWorkspaceSession();
     const { data, error } = await client.rpc('next_reservation_code', {
       p_workspace_id: workspaceId,
       p_service_date: day
@@ -154,7 +177,9 @@
 
   function persist(state) {
     requireReady();
+    const requestedGeneration = serviceGeneration;
     const run = async () => {
+      const guard = await assertWorkspaceSession(requestedGeneration);
       const reservations = (state.reservations || []).map(item => ({
         id: item.id,
         workspace_id: workspaceId,
@@ -185,14 +210,17 @@
         updated_at: new Date().toISOString()
       }));
 
+      await assertWorkspaceSession(guard.generation);
       if (reservations.length) {
         const result = await client.from('reservations').upsert(reservations, { onConflict: 'id' });
         if (result.error) throw result.error;
       }
+      await assertWorkspaceSession(guard.generation);
       if (guests.length) {
         const result = await client.from('guests').upsert(guests, { onConflict: 'id' });
         if (result.error) throw result.error;
       }
+      await assertWorkspaceSession(guard.generation);
       if (root.AppAuth?.getContext()?.role !== 'service') {
         const setting = await client.from('workspace_settings').upsert({
           workspace_id: workspaceId,
@@ -213,8 +241,11 @@
 
   async function appendGuestAudit(guestId, entry) {
     requireReady();
+    const guard = await assertWorkspaceSession();
     const guest = await client.from('guests').select('workspace_id').eq('id', guestId).single();
     if (guest.error) throw guest.error;
+    if (guest.data?.workspace_id !== guard.workspaceId) throw new Error('Tamu berasal dari workspace lain. Perubahan diblokir.');
+    await assertWorkspaceSession(guard.generation);
     const { error } = await client.from('guest_status_history').insert({
       workspace_id: workspaceId,
       guest_id: guestId,
@@ -228,6 +259,7 @@
   }
 
   function reset() {
+    serviceGeneration += 1;
     client = null;
     workspaceId = null;
     ready = false;
