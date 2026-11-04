@@ -436,6 +436,19 @@
     const form = target?.querySelector('#dsStandaloneTransactionForm');
     if (!form) return;
 
+    if (!target.dataset.searchPickerCloseBound) {
+      target.addEventListener('click', (event) => {
+        target.querySelectorAll('[data-ds-search-picker].is-open').forEach((picker) => {
+          if (!picker.contains(event.target)) {
+            const results = picker.querySelector('.ds-item-search-results');
+            if (results) results.hidden = true;
+            picker.classList.remove('is-open');
+          }
+        });
+      });
+      target.dataset.searchPickerCloseBound = 'true';
+    }
+
     target.querySelectorAll('[data-ds-search-picker]').forEach((picker) => {
       const input = picker.querySelector('input[type="search"]');
       const hidden = picker.querySelector('input[type="hidden"]');
@@ -479,12 +492,6 @@
           results.hidden = true;
           picker.classList.remove('is-open');
           input.blur();
-        }
-      });
-      target.addEventListener('click', (event) => {
-        if (!picker.contains(event.target)) {
-          results.hidden = true;
-          picker.classList.remove('is-open');
         }
       });
     });
