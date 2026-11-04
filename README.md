@@ -60,11 +60,13 @@ assets/
       Aturan dan tampilan Resep WIP.
     menu-service.js / menu-ui.js
       Aturan dan tampilan Menu.
-    daily-stock.js
-      Logika, tampilan, dan interaksi Daily SO (belum dipisah lebih lanjut).
+    daily-stock-service.js
+      Validasi sesi, pemuatan data, hitungan stok, dan transaksi Daily SO.
+    daily-stock-ui.js
+      Tampilan, formulir, tab, halaman Pengeluaran, dan navigasi Daily SO.
 
 tests/
-  Pengujian otomatis untuk Guest Operations, Master Data, WIP, Menu, ekspor CSV, dan sesi workspace.
+  Pengujian otomatis untuk Guest Operations, Master Data, WIP, Menu, Daily SO, ekspor CSV, dan sesi workspace.
 
 supabase/migrations/
   Riwayat perubahan database dan aturan akses.
