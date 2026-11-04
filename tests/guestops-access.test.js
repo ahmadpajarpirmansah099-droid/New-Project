@@ -15,7 +15,7 @@ function canAccess(context) {
   const runtime = {
     window: { AppAuth: { getContext: () => context } }
   };
-  return vm.runInNewContext(accessFunction + '\\ncanAccessGuestOperations();', runtime);
+  return vm.runInNewContext(accessFunction + ';canAccessGuestOperations();', runtime);
 }
 
 function developer(divisionName, divisionMode = 'single') {
