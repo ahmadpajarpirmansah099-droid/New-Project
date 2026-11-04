@@ -554,26 +554,20 @@
     const quickMenu = $('quickMenu');
     if (quickMenu) {
       const actions = [
-        ['stock-in','Barang Masuk','M12 5v14m-7-7h14'],
         ['stock-out','Pengeluaran','M5 12h14'],
         ['stock-production','Produksi WIP','m12 3 9 5-9 5-9-5 9-5zm-9 9 9 5 9-5m-18 5 9 5 9-5'],
-        ['stock-sale','Penjualan','M3 3h2l2 13h11l2-9H7'],
+        ['stock-in','Barang Masuk','M12 5v14m-7-7h14'],
         ['stock-supplies','Supplies','M4 7h16v13H4zM8 7V4h8v3'],
-        ['stock-history','Riwayat','M3 12a9 9 0 1 0 3-6.7M3 4v5h5m4-1v5l3 2']
+        ['stock-sale','Sales','M3 3h2l2 13h11l2-9H7']
       ];
-      actions.forEach(([action,label,path]) => {
+      actions.forEach(([action,label,path], index) => {
         const button = document.createElement('button');
-        button.type='button'; button.className='quick-menu-item'; button.dataset.quickContext='stock';
+        button.type='button'; button.className='quick-menu-item ds-fab-action'; button.dataset.quickContext='stock';
         button.dataset.action='runQuickAction'; button.dataset.actionArgs=JSON.stringify([action]); button.dataset.stockAction=action;
-        button.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + path + '"/></svg><span>' + label + '</span><svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
+        button.style.right='-15px';
+        button.style.bottom=(index * 58)+'px';
+        button.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + path + '"/></svg><span>' + label + '</span>';
         quickMenu.appendChild(button);
-      });
-      ['guest','master'].forEach((contextName) => {
-        const entry=document.createElement('button');
-        entry.type='button'; entry.className='quick-menu-item'; entry.dataset.quickContext=contextName;
-        entry.dataset.action='runQuickAction'; entry.dataset.actionArgs='["daily-stock"]';
-        entry.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14H4V6a2 2 0 0 1 2-2h2M8 11h8M8 15h6"/></svg><span>Daily SO</span><svg class="quick-menu-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
-        quickMenu.appendChild(entry);
       });
     }
 
@@ -608,9 +602,11 @@
       if ($('page-daily-stock')?.classList.contains('active')) {
         const menu=$('quickMenu'), backdrop=$('quickMenuBackdrop'), fab=$('fab');
         const open=!menu.classList.contains('show');
-        menu.querySelectorAll('.quick-menu-item[data-quick-context="stock"]').forEach((item)=>{
-          const unavailable=divisionIsService() && ['stock-sale','stock-production'].includes(item.dataset.stockAction);
-          item.hidden=unavailable; item.style.display=unavailable?'none':'flex';
+        menu.querySelectorAll('.quick-menu-item').forEach((item)=>{
+          const isStockAction=item.classList.contains('ds-fab-action');
+          const unavailable=isStockAction && divisionIsService() && ['stock-sale','stock-production'].includes(item.dataset.stockAction);
+          item.hidden=!isStockAction || unavailable;
+          item.style.display=!isStockAction || unavailable?'none':'flex';
         });
         const heading=menu.querySelector('.quick-menu-heading'); if(heading) heading.textContent='DAILY STOCK';
         menu.setAttribute('aria-label','Daily Stock');
