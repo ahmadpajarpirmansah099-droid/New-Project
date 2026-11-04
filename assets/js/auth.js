@@ -60,13 +60,12 @@
       assignedDivisions = divisions.filter((item) => allowed.has(item.id));
     }
     if (!assignedDivisions.length) throw new Error('Akun belum memiliki divisi aktif.');
-    const requestedAll = divisionSelection === '__all__' && profile.role === 'developer';
     const selected = assignedDivisions.find((item) => item.id === divisionSelection) ||
-      assignedDivisions.find((item) => item.name.toLowerCase() === 'bar') || assignedDivisions[0];
+      assignedDivisions.find((item) => item.name.trim().toLowerCase() === 'service') || assignedDivisions[0];
     return { userId, email, role:profile.role, workspaceId:selectedWorkspaceId, workspaceName:workspace.name,
       workspaceRole:profile.role === 'developer' ? 'developer' : membership.role, workspaces, divisions:assignedDivisions,
-      activeDivisionId:selected.id, activeDivisionName:requestedAll ? 'Semua Divisi' : selected.name,
-      divisionMode:requestedAll ? 'all' : 'single', isGlobalDeveloper:profile.role === 'developer' };
+      activeDivisionId:selected.id, activeDivisionName:selected.name,
+      divisionMode:'single', isGlobalDeveloper:profile.role === 'developer' };
   }
   function escapeSelectorText(value) {
     return String(value || '').replace(/[&<>"']/g,(char)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -77,11 +76,11 @@
     wrap.hidden=false;
     outlet.innerHTML=authContext.workspaces.map((item)=>'<option value="'+item.id+'">'+escapeSelectorText(item.name)+'</option>').join('');
     outlet.value=authContext.workspaceId;
-    division.innerHTML='<option value="__all__">Semua Divisi</option>'+authContext.divisions.map((item)=>'<option value="'+item.id+'">'+escapeSelectorText(item.name)+'</option>').join('');
-    division.value=authContext.divisionMode==='all'?'__all__':authContext.activeDivisionId;
+    division.innerHTML=authContext.divisions.map((item)=>'<option value="'+item.id+'">'+escapeSelectorText(item.name)+'</option>').join('');
+    division.value=authContext.activeDivisionId;
     const outletTrigger=$('workspaceOutletTrigger'),divisionTrigger=$('workspaceDivisionTrigger');
     if(outletTrigger)outletTrigger.querySelector('[data-scope-value]').textContent=authContext.workspaceName||'Pilih outlet';
-    if(divisionTrigger)divisionTrigger.querySelector('[data-scope-value]').textContent=authContext.divisionMode==='all'?'Semua Divisi':(authContext.activeDivisionName||'Pilih divisi');
+    if(divisionTrigger)divisionTrigger.querySelector('[data-scope-value]').textContent=authContext.activeDivisionName||'Pilih divisi';
     if(outletTrigger)outletTrigger.disabled=workspaceSwitchBusy;
     if(divisionTrigger)divisionTrigger.disabled=workspaceSwitchBusy;
     outlet.disabled=workspaceSwitchBusy; division.disabled=workspaceSwitchBusy;
@@ -101,8 +100,8 @@
     if(!menu || !backdrop || !options || !title || !trigger)return;
     const items=type==='outlet'
       ? authContext.workspaces.map(item=>({id:item.id,name:item.name}))
-      : [{id:'__all__',name:'Semua Divisi'},...authContext.divisions.map(item=>({id:item.id,name:item.name}))];
-    const selected=type==='outlet'?authContext.workspaceId:(authContext.divisionMode==='all'?'__all__':authContext.activeDivisionId);
+      : authContext.divisions.map(item=>({id:item.id,name:item.name}));
+    const selected=type==='outlet'?authContext.workspaceId:authContext.activeDivisionId;
     title.textContent=type==='outlet'?'Pilih outlet':'Pilih divisi';
     options.innerHTML=items.map(item=>{
       const active=item.id===selected;
@@ -129,7 +128,7 @@
     }catch(error){
       console.error('Workspace switch failed:',error);setMessage(error.message||'Outlet atau divisi gagal diganti.');
       if($('workspaceOutletSelect'))$('workspaceOutletSelect').value=current.workspaceId;
-      if($('workspaceDivisionSelect'))$('workspaceDivisionSelect').value=current.divisionMode==='all'?'__all__':current.activeDivisionId;
+      if($('workspaceDivisionSelect'))$('workspaceDivisionSelect').value=current.activeDivisionId;
     }finally{workspaceSwitchBusy=false;renderScopeSelectors();}
   }
 
