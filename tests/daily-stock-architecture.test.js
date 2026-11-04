@@ -73,3 +73,12 @@ test('Daily SO sales and WIP production are available in every division', () => 
   assert.ok(ui.includes("if (action === 'stock-sale') { await goToTransactionPage('sale'); return; }"));
   assert.equal(ui.includes("divisionIsService() && ['stock-sale','stock-production']"), false);
 });
+
+
+test('Production WIP uses a prefilled list of active WIPs for batch entry', () => {
+  assert.match(ui, /wips\\.map\\(\\(wip, index\\) => productionRowMarkup\\(wip, index\\)\\)/);
+  assert.match(ui, /data-production-quantity/);
+  assert.match(ui, /values\\.items = Array\\.from\\(form\\.querySelectorAll/);
+  assert.doesNotMatch(ui, /data-production-action="add"/);
+  assert.doesNotMatch(ui, /Cari nama WIP/);
+});
