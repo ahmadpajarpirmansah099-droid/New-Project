@@ -65,7 +65,7 @@
   }
 
   function catalogRows() {
-    const items = state.catalog.masterItems.map((item) => ({
+    const items = state.catalog.masterItems.filter((item) => item.status === 'active').map((item) => ({
       key:stockKey(itemKind(item), item.id), kind:itemKind(item), id:item.id,
       name:item.nama_barang, unit:item.satuan_dasar, factor:1,
       cost:Number(item.harga_beli_terakhir_per_satuan_dasar || item.harga_per_satuan_dasar || 0),
@@ -106,6 +106,11 @@
     ]));
     const inserts = [];
     const updates = [];
+    const activeKeys = new Set(catalogRows().map((row) => row.key));
+    const removals = state.data.countLines.filter((line) => {
+      const key = stockKey(line.stock_kind, line.stock_kind === 'wip' ? line.wip_recipe_id : line.item_id);
+      return !activeKeys.has(key);
+    });
     catalogRows().forEach((row) => {
       const movement = movements.get(row.key) || { inbound:0, outbound:0 };
       const snapshot = {
@@ -133,11 +138,16 @@
     const results = await Promise.all(updates);
     const failed = results.find((result) => result.error);
     if (failed) throw failed.error;
+    const removed = await Promise.all(removals.map((line) =>
+      state.client.from('daily_stock_count_lines').delete().eq('id', line.id)
+    ));
+    const removalError = removed.find((result) => result.error);
+    if (removalError) throw removalError.error;
     if (inserts.length) {
       const result = await state.client.from('daily_stock_count_lines').insert(inserts);
       if (result.error) throw result.error;
     }
-    if (updates.length || inserts.length) {
+    if (updates.length || inserts.length || removals.length) {
       const refreshed = await state.client.from('daily_stock_count_lines').select('*').eq('count_id',state.data.count.id).order('created_at');
       if (refreshed.error) throw refreshed.error;
       state.data.countLines = refreshed.data || [];
