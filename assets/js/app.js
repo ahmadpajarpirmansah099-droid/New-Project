@@ -62,14 +62,19 @@ function seatingCountdownText(guest, now = Date.now()) {
 
 function updateSeatingCountdowns() {
   const now = Date.now();
+  const seatedGuests = new Map(
+    state.guests
+      .filter(guest => guest.status === 'seated')
+      .map(guest => [guest.id, guest])
+  );
 
   document.querySelectorAll('[data-seating-countdown]').forEach(element => {
-    const guest = state.guests.find(item => item.id === element.dataset.seatingCountdown);
+    const guest = seatedGuests.get(element.dataset.seatingCountdown);
+    if (!guest) return;
 
-    if (!guest || guest.status !== 'seated') return;
-
+    const remainingMs = seatingRemainingMs(guest, now);
     element.textContent = seatingCountdownText(guest, now);
-    element.classList.toggle('is-expired', seatingRemainingMs(guest, now) <= 0);
+    element.classList.toggle('is-expired', remainingMs <= 0);
   });
 }
 
