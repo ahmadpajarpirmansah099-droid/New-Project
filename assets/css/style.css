@@ -5861,3 +5861,611 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 }
 
+/* =========================================================
+   DESKTOP ALL-PAGES WORKSPACE POLISH
+   Shared sidebar, responsive feature pages and floating actions.
+   All layout rules are desktop-only; mobile page layout is kept.
+   ========================================================= */
+
+/* Floating quick actions: consistent circular controls and safer spacing. */
+.fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50% !important;
+  box-shadow: 0 9px 24px rgba(17,18,37,.18);
+  transition: transform .22s cubic-bezier(.2,.8,.2,1), box-shadow .22s ease, background-color .2s ease;
+}
+.fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(17,18,37,.22);
+}
+.fab.is-open {
+  transform: rotate(45deg);
+}
+.quick-menu {
+  bottom: 100px;
+}
+.quick-menu-item {
+  min-height: 50px;
+  gap: 12px;
+}
+.quick-menu-item:nth-child(2) { bottom: 0; }
+.quick-menu-item:nth-child(3) { bottom: 66px; }
+.quick-menu-item:nth-child(4) { bottom: 132px; }
+.quick-menu-item:nth-child(5) { bottom: 198px; }
+.quick-menu-item:nth-child(6) { bottom: 0; }
+.quick-menu-item:nth-child(7) { bottom: 66px; }
+.quick-menu-item > svg:first-child {
+  width: 50px;
+  height: 50px;
+  flex-basis: 50px;
+}
+
+@media (min-width: 900px) {
+  /* Sidebar expanded: brand/scope at top, nav below, account actions at bottom. */
+  .top {
+    z-index: 44;
+    left: 0;
+    width: 264px;
+    height: 100dvh;
+    min-height: 100dvh;
+    padding: 24px 18px 22px;
+    gap: 18px;
+    overflow: visible;
+    border: 0;
+    border-radius: 0 22px 22px 0;
+    background: rgba(255,255,255,.98);
+    box-shadow: 5px 0 22px rgba(17,18,37,.065);
+    transition: width .26s cubic-bezier(.2,.75,.25,1), box-shadow .26s ease;
+  }
+
+  .brand {
+    min-height: 46px;
+    transition: opacity .18s ease, transform .22s ease;
+  }
+
+  .workspace-scope-switcher {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+    padding: 5px;
+    border: 1px solid #e9ebef;
+    border-radius: 14px;
+    background: #fff;
+    transition: opacity .18s ease, transform .22s ease, max-height .22s ease;
+  }
+
+  .scope-trigger {
+    max-width: none;
+    height: 40px;
+    border-radius: 11px;
+    background: #f5f6f8;
+    font-size: 12px;
+  }
+
+  .top-actions {
+    position: absolute;
+    right: 18px;
+    bottom: 20px;
+    left: 18px;
+    display: flex;
+    width: auto;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 15px 0 0;
+    border-top: 1px solid #f0eff2;
+  }
+
+  .top-actions .profile,
+  .top-actions .auth-logout-button {
+    position: static;
+    display: grid;
+  }
+
+  .top-actions .profile {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+  }
+
+  .top-actions .auth-logout-button {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: 13px;
+  }
+
+  .menu-toggle {
+    position: fixed;
+    z-index: 76;
+    top: 22px;
+    left: 208px;
+    display: grid !important;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    margin: 0;
+    border-radius: 13px;
+    box-shadow: 0 4px 12px rgba(17,18,37,.13);
+    transition: left .26s cubic-bezier(.2,.75,.25,1), transform .18s ease, box-shadow .18s ease;
+  }
+
+  .menu-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 7px 16px rgba(17,18,37,.17);
+  }
+
+  /* Expanded navigation sits below the workspace identity and scope controls. */
+  .menu-drawer {
+    z-index: 46;
+    top: 145px;
+    right: auto;
+    bottom: 86px;
+    left: 0;
+    width: 264px;
+    height: auto;
+    max-height: calc(100dvh - 235px);
+    padding: 0 12px;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-8px);
+    transition: width .26s cubic-bezier(.2,.75,.25,1), opacity .18s ease, transform .22s ease, visibility .18s ease;
+  }
+
+  .menu-drawer.show {
+    width: 264px;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
+
+  .drawer-head,
+  .drawer-foot {
+    display: none !important;
+  }
+
+  .drawer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0;
+  }
+
+  .drawer-item {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 0 13px;
+    border-radius: 13px;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: background-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
+  }
+
+  .drawer-item > svg:first-child {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+  }
+
+  .drawer-item > span {
+    width: auto;
+    max-width: 180px;
+    margin: 0;
+    overflow: hidden;
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity .18s ease, transform .2s ease, max-width .22s ease;
+  }
+
+  .drawer-item .drawer-chevron {
+    width: 16px;
+    height: 16px;
+    margin-left: auto;
+    opacity: .75;
+  }
+
+  .drawer-item.active {
+    box-shadow: 0 4px 12px rgba(17,18,37,.045);
+  }
+
+  /* Collapsed state: hide the workspace header/scope and center the icon group. */
+  body:not(:has(#menuDrawer.show)) .top {
+    width: 76px;
+    padding: 0;
+    border-radius: 0 20px 20px 0;
+    box-shadow: 5px 0 20px rgba(17,18,37,.07);
+  }
+
+  body:not(:has(#menuDrawer.show)) .brand,
+  body:not(:has(#menuDrawer.show)) .workspace-scope-switcher {
+    display: none !important;
+  }
+
+  body:not(:has(#menuDrawer.show)) .top-actions {
+    inset: 0;
+    padding: 0;
+    border: 0;
+    pointer-events: none;
+  }
+
+  body:not(:has(#menuDrawer.show)) .top-actions .profile {
+    display: none !important;
+  }
+
+  body:not(:has(#menuDrawer.show)) .top-actions .auth-logout-button {
+    position: fixed;
+    top: calc(50% + 164px);
+    left: 18px;
+    display: grid;
+    width: 40px;
+    height: 40px;
+    pointer-events: auto;
+    box-shadow: 0 3px 10px rgba(17,18,37,.08);
+  }
+
+  body:not(:has(#menuDrawer.show)) .menu-toggle {
+    top: calc(50% - 164px);
+    left: 18px;
+  }
+
+  body:not(:has(#menuDrawer.show)) .menu-drawer {
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    left: 7px;
+    width: 62px;
+    height: auto;
+    max-height: min(310px, calc(100dvh - 300px));
+    padding: 8px 6px;
+    overflow: visible;
+    border: 0;
+    border-radius: 17px;
+    background: transparent;
+    box-shadow: none;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%);
+  }
+
+  body:not(:has(#menuDrawer.show)) .drawer-nav {
+    align-items: center;
+    gap: 9px;
+  }
+
+  body:not(:has(#menuDrawer.show)) .drawer-item {
+    display: grid;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    place-items: center;
+    gap: 0;
+    padding: 0;
+    border-radius: 13px;
+    background: #f7f8fa;
+    color: #31364b;
+    box-shadow: 0 3px 9px rgba(17,18,37,.055);
+  }
+
+  body:not(:has(#menuDrawer.show)) .drawer-item.active {
+    background: #edf7c4;
+    color: #17172a;
+    box-shadow: 0 5px 12px rgba(17,18,37,.075);
+  }
+
+  body:not(:has(#menuDrawer.show)) .drawer-item > span,
+  body:not(:has(#menuDrawer.show)) .drawer-item .drawer-chevron {
+    display: none !important;
+  }
+
+  body:not(:has(#menuDrawer.show)) .drawer-item > svg:first-child {
+    width: 19px;
+    height: 19px;
+  }
+
+  /* The hamburger lines up with the active page heading while the rail is open. */
+  body:has(#menuDrawer.show) .menu-toggle {
+    left: 208px;
+  }
+
+  .content {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    padding: 38px clamp(28px, 4vw, 72px) 64px 82px;
+    box-sizing: border-box;
+    transition: padding-left .26s cubic-bezier(.2,.75,.25,1), padding-right .26s ease;
+  }
+
+  body:has(#menuDrawer.show) .content {
+    padding-left: 286px;
+  }
+
+  .page,
+  .page:not(#page-dashboard),
+  .page#page-dashboard {
+    width: 100%;
+    max-width: 1680px;
+    min-width: 0;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+  .page.active {
+    animation: pageIn .24s ease both;
+  }
+
+  .page-title {
+    font-size: clamp(25px, 2vw, 32px);
+    line-height: 1.16;
+    letter-spacing: -.04em;
+  }
+
+  .page-sub {
+    max-width: 900px;
+    font-size: 13px;
+    line-height: 1.65;
+  }
+
+  .page-back {
+    min-height: 40px;
+    border-radius: 12px;
+    transition: transform .18s ease, background-color .18s ease, box-shadow .18s ease;
+  }
+
+  .page-back:hover {
+    transform: translateX(-2px);
+  }
+
+  /* Keep every feature workspace fluid, not limited to a narrow centered column. */
+  .md-page,
+  .wip-page,
+  .menu-page,
+  .ds-page {
+    width: 100%;
+    max-width: 1680px;
+    min-width: 0;
+    margin: 0 auto;
+    gap: 18px;
+  }
+
+  .md-item-list,
+  .wip-list,
+  .menu-list,
+  .ds-stock-list,
+  .ds-expense-history,
+  .reservation-list,
+  .queue-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .md-item-card,
+  .wip-card,
+  .menu-card,
+  .ds-panel,
+  .ds-stock-row,
+  .ds-expense-card,
+  .guest,
+  .reservation-card,
+  .settings-card,
+  .division-overview-card,
+  .empty,
+  .metric,
+  .hero,
+  .reservation-toolbar,
+  .reservation-calendar {
+    min-width: 0;
+    border-radius: 18px;
+    box-shadow: 0 6px 20px rgba(17,18,37,.065);
+    transition: box-shadow .22s ease, transform .22s ease, border-color .22s ease;
+  }
+
+  .md-item-card:hover,
+  .wip-card:hover,
+  .menu-card:hover,
+  .guest:hover,
+  .reservation-card:hover,
+  .division-overview-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 11px 26px rgba(17,18,37,.095);
+  }
+
+  .md-count-grid,
+  .wip-count-grid,
+  .menu-count-grid,
+  .ds-summary,
+  .ds-overview-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 13px;
+  }
+
+  .md-item-heading {
+    grid-template-columns: minmax(130px,.72fr) minmax(0,1.65fr);
+  }
+
+  .md-item-prices,
+  .menu-card-prices {
+    min-width: 0;
+  }
+
+  .md-item-footer,
+  .wip-card-footer,
+  .menu-card-footer {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .md-form-grid,
+  .wip-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .ds-panel {
+    padding: 20px;
+  }
+
+  .settings-card {
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .division-overview-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .division-overview-heading {
+    align-items: center;
+  }
+
+  .sheet,
+  .ds-modal {
+    left: calc(82px + (100vw - 82px) / 2);
+    width: min(920px, calc(100vw - 132px));
+    transition: left .26s cubic-bezier(.2,.75,.25,1), width .26s ease, transform .24s ease;
+  }
+
+  body:has(#menuDrawer.show) .sheet,
+  body:has(#menuDrawer.show) .ds-modal {
+    left: calc(286px + (100vw - 286px) / 2);
+    width: min(920px, calc(100vw - 336px));
+  }
+
+  .fab {
+    right: 34px;
+    bottom: 30px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50% !important;
+  }
+
+  .quick-menu {
+    right: 63px;
+    bottom: 106px;
+  }
+
+  .quick-menu-item:nth-child(2) { bottom: 0; }
+  .quick-menu-item:nth-child(3) { bottom: 68px; }
+  .quick-menu-item:nth-child(4) { bottom: 136px; }
+  .quick-menu-item:nth-child(5) { bottom: 204px; }
+  .quick-menu-item:nth-child(6) { bottom: 0; }
+  .quick-menu-item:nth-child(7) { bottom: 68px; }
+}
+
+@media (min-width: 1440px) {
+  .top {
+    width: 280px;
+  }
+
+  body:not(:has(#menuDrawer.show)) .top {
+    width: 76px;
+  }
+
+  body:has(#menuDrawer.show) .menu-toggle {
+    left: 224px;
+  }
+
+  body:has(#menuDrawer.show) .content {
+    padding-left: 302px;
+  }
+
+  .menu-drawer.show {
+    width: 280px;
+  }
+
+  body:has(#menuDrawer.show) .sheet,
+  body:has(#menuDrawer.show) .ds-modal {
+    left: calc(302px + (100vw - 302px) / 2);
+    width: min(980px, calc(100vw - 352px));
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1100px) {
+  .top {
+    width: 232px;
+  }
+
+  body:not(:has(#menuDrawer.show)) .top {
+    width: 76px;
+  }
+
+  .menu-toggle {
+    left: 176px;
+  }
+
+  body:has(#menuDrawer.show) .menu-toggle {
+    left: 176px;
+  }
+
+  .menu-drawer.show {
+    width: 232px;
+  }
+
+  body:has(#menuDrawer.show) .content {
+    padding-left: 254px;
+  }
+
+  body:has(#menuDrawer.show) .sheet,
+  body:has(#menuDrawer.show) .ds-modal {
+    left: calc(254px + (100vw - 254px) / 2);
+    width: min(760px, calc(100vw - 294px));
+  }
+
+  .md-item-list,
+  .wip-list,
+  .menu-list,
+  .ds-stock-list,
+  .ds-expense-history,
+  .reservation-list,
+  .queue-list,
+  .division-overview-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top,
+  .brand,
+  .workspace-scope-switcher,
+  .menu-toggle,
+  .menu-drawer,
+  .drawer-item,
+  .content,
+  .page.active,
+  .page-back,
+  .fab,
+  .quick-menu,
+  .quick-menu-item,
+  .md-item-card,
+  .wip-card,
+  .menu-card,
+  .ds-panel,
+  .ds-stock-row,
+  .ds-expense-card,
+  .guest,
+  .reservation-card,
+  .settings-card,
+  .division-overview-card {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+

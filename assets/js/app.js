@@ -141,7 +141,14 @@ function setWorkspaceHeader(page) {
   if (isMasterWorkspace) {
     mark.classList.add('is-master');
     mark.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M4 7.5 12 12l8-4.5M12 12v9M8 5.3l8 4.5"/></svg>';
-    name.textContent = page === 'all-divisions' ? 'RINGKASAN DIVISI' : 'MASTER BARANG';
+    const pageTitles = {
+      'all-divisions': 'RINGKASAN DIVISI',
+      'master-items': 'MASTER BARANG',
+      'wips': 'WIP PRODUKSI',
+      'menus': 'MENU & RESEP',
+      'daily-stock': 'DAILY SO'
+    };
+    name.textContent = pageTitles[page] || 'MASTER BARANG';
     const context = window.AppAuth?.getContext();
     meta.textContent = context?.isGlobalDeveloper ? (context.workspaceName || 'OUTLET') + (context.divisionMode === 'all' ? ' · SEMUA DIVISI' : ' · ' + (context.activeDivisionName || '')) : 'MASTER DATA WORKSPACE';
     return;
@@ -149,7 +156,14 @@ function setWorkspaceHeader(page) {
 
   mark.classList.remove('is-master');
   mark.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
-  name.textContent = 'GUEST OPERATIONS';
+  const pageTitles = {
+    'dashboard': 'GUEST OPERATIONAL',
+    'waiting': 'ANTREAN',
+    'history': 'RIWAYAT',
+    'reservations': 'RESERVASI',
+    'settings': 'PENGATURAN'
+  };
+  name.textContent = pageTitles[page] || 'GUEST OPERATIONAL';
   const context = window.AppAuth?.getContext();
   meta.textContent = context?.isGlobalDeveloper ? (context.workspaceName || 'OUTLET') + (context.divisionMode === 'all' ? ' · SEMUA DIVISI' : ' · ' + (context.activeDivisionName || '')) : 'ADMIN WORKSPACE';
 }
@@ -273,16 +287,17 @@ function toggleMenu() {
 
   $('menuDrawer').classList.toggle('show', open);
   $('menuBackdrop').classList.toggle('show', open);
-  $('menuDrawer').setAttribute('aria-hidden', String(!open));
+  $('menuDrawer').setAttribute('aria-hidden', String(!open && !isDesktop));
   $('menuToggle').setAttribute('aria-expanded', String(open));
   $('menuToggle').setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
   document.body.style.overflow = open && !isDesktop ? 'hidden' : '';
 }
 
 function closeMenu() {
+  const isDesktop = window.matchMedia('(min-width: 900px)').matches;
   $('menuDrawer').classList.remove('show');
   $('menuBackdrop').classList.remove('show');
-  $('menuDrawer').setAttribute('aria-hidden', 'true');
+  $('menuDrawer').setAttribute('aria-hidden', String(!isDesktop));
   $('menuToggle').setAttribute('aria-expanded', 'false');
   $('menuToggle').setAttribute('aria-label', 'Buka menu');
   document.body.style.overflow = '';
@@ -547,3 +562,13 @@ function initSheetBodySwipe(){
   sheet.addEventListener('touchcancel',finishBodySwipe,{passive:true});
 }
 
+/* Keep the collapsed desktop icon rail available to assistive technology. */
+function syncDesktopMenuAccessibility() {
+  const drawer = $('menuDrawer');
+  if (!drawer) return;
+  const isDesktop = window.matchMedia('(min-width: 900px)').matches;
+  const isOpen = drawer.classList.contains('show');
+  drawer.setAttribute('aria-hidden', String(!isDesktop && !isOpen));
+}
+window.addEventListener('resize', syncDesktopMenuAccessibility, { passive: true });
+syncDesktopMenuAccessibility();
