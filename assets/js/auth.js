@@ -33,7 +33,7 @@
     activeProfile = null;
     authContext = null;
     window.dispatchEvent(new CustomEvent('app:auth-signed-out'));
-    document.body.classList.remove('auth-ready');
+    document.body.classList.remove('auth-ready', 'workspace-switching');
     document.body.classList.add('auth-locked');
     setLoading(false);
     setMessage(message || '');
@@ -90,7 +90,7 @@
       if(error || data?.user?.id!==userId || generation!==activationGeneration)throw new Error('Sesi akun berubah. Silakan masuk kembali.');
       const next=await buildWorkspaceContext(userId,current.email,activeProfile,current.workspaces,workspaceId,divisionSelection,()=>generation===activationGeneration);
       if(!next || generation!==activationGeneration)return;
-      authContext=next;document.body.classList.remove('auth-ready');document.body.classList.add('auth-locked');
+      authContext=next;document.body.classList.add('workspace-switching');
       renderScopeSelectors();window.dispatchEvent(new CustomEvent('app:workspace-context-changed',{detail:next}));
     }catch(error){
       console.error('Workspace switch failed:',error);setMessage(error.message||'Outlet atau divisi gagal diganti.');
@@ -179,7 +179,7 @@
     const { data, error } = await supabaseClient.auth.getUser();
     if (error || data?.user?.id !== expectedUserId || generation !== activationGeneration ||
         activeUserId !== expectedUserId || authContext?.workspaceId !== expectedWorkspaceId) return false;
-    document.body.classList.remove('auth-locked');
+    document.body.classList.remove('auth-locked', 'workspace-switching');
     document.body.classList.add('auth-ready');
     setLoading(false);
     setMessage('');
