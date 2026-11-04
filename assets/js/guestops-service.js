@@ -227,8 +227,16 @@
     if (error) throw error;
   }
 
+  function reset() {
+    client = null;
+    workspaceId = null;
+    ready = false;
+    writeQueue = Promise.resolve();
+  }
+
   root.GuestOpsService = {
     initialize,
+    reset,
     load,
     persist,
     nextTicket,
