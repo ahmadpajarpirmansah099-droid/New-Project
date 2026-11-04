@@ -216,7 +216,7 @@ function loadDailyStockFeature() {
   const loadStyle = new Promise((resolve, reject) => {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'assets/css/daily-stock.css?v=20261105-lazy-p1';
+    link.href = 'assets/css/daily-stock.css?v=20261105-production-list-p1';
     link.onload = resolve;
     link.onerror = () => reject(new Error('Gagal memuat tampilan Daily SO.'));
     document.head.appendChild(link);
@@ -231,8 +231,8 @@ function loadDailyStockFeature() {
   });
 
   dailyStockFeaturePromise = loadStyle
-    .then(() => loadScript('assets/js/daily-stock-service.js?v=20261105-lazy-p1'))
-    .then(() => loadScript('assets/js/daily-stock-ui.js?v=20261105-lazy-p1'))
+    .then(() => loadScript('assets/js/daily-stock-service.js?v=20261105-production-list-p1'))
+    .then(() => loadScript('assets/js/daily-stock-ui.js?v=20261105-production-list-p1'))
     .catch((error) => {
       dailyStockFeaturePromise = null;
       throw error;
