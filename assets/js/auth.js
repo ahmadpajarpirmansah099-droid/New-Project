@@ -8,6 +8,8 @@
   let authContext = null;
   let isSubmitting = false;
   let activationGeneration = 0;
+  let activeProfile = null;
+  let workspaceSwitchBusy = false;
 
   function setMessage(message, type) {
     const element = $('authMessage');
@@ -28,6 +30,7 @@
     if (emailInput) emailInput.value = '';
     activationGeneration += 1;
     activeUserId = null;
+    activeProfile = null;
     authContext = null;
     window.dispatchEvent(new CustomEvent('app:auth-signed-out'));
     document.body.classList.remove('auth-ready');
@@ -36,102 +39,33 @@
     setMessage(message || '');
   }
 
-  // Verify the signed-in user's own database profile before revealing the app.
-  async function activateSession(session) {
-    if (!session || !session.user) {
-      showLogin('');
-      return;
-    }
-    const userId = session.user.id;
-    if (activeUserId === userId && authContext) return;
-    if (activeUserId && activeUserId !== userId) showLogin('');
-    const generation = ++activationGeneration;
-    const isCurrent = () => generation === activationGeneration;
-    const verifyLiveUser = async () => {
-      const { data, error: authError } = await supabaseClient.auth.getUser();
-      return !authError && data?.user?.id === userId && isCurrent();
-    };
-    if (!(await verifyLiveUser())) return;
-    if (activeUserId === userId && document.body.classList.contains('auth-ready')) return;
-    document.body.classList.remove('auth-ready');
-    document.body.classList.add('auth-locked');
-    setLoading(true);
-    setMessage('Memverifikasi izin akun...', 'success');
-
-    const { data: profile, error } = await supabaseClient.from('profiles')
-      .select('id, display_name, role').eq('id', userId).single();
-
+  async function buildWorkspaceContext(userId, email, profile, workspaces, selectedWorkspaceId, divisionSelection, isCurrent) {
+    const workspace = workspaces.find((item) => item.id === selectedWorkspaceId);
+    if (!workspace) throw new Error('Outlet yang dipilih tidak ditemukan.');
+    const { data: memberships, error: membershipError } = await supabaseClient.from('workspace_memberships').select('workspace_id, role').eq('user_id', userId);
     if (!isCurrent()) return;
-    if (error || !profile || !['developer', 'admin', 'service'].includes(profile.role)) {
-      await supabaseClient.auth.signOut();
-      showLogin('Akun belum memiliki izin akses. Hubungi Developer untuk pengaturan role.');
-      return;
+    if (membershipError || (profile.role !== 'developer' && !memberships?.length)) {
+      await supabaseClient.auth.signOut(); showLogin('Akun belum terhubung ke workspace. Hubungi Developer.'); return;
     }
-
-    const { data: membership, error: membershipError } = await supabaseClient
-      .from('workspace_memberships')
-      .select('workspace_id, role')
-      .eq('user_id', userId)
-      .limit(1)
-      .maybeSingle();
-
-    if (!isCurrent()) return;
-    if (membershipError || !membership) {
-      await supabaseClient.auth.signOut();
-      showLogin('Akun belum terhubung ke workspace. Hubungi Developer.');
-      return;
+    let workspaces=[];
+    if(profile.role==='developer') {
+      const {data,error:workspaceError}=await supabaseClient.from('workspaces').select('id,name').order('name');
+      if(!isCurrent()) return;
+      if(workspaceError || !data?.length) { await supabaseClient.auth.signOut(); showLogin('Daftar outlet belum dapat dimuat. Hubungi Developer.'); return; }
+      workspaces=data;
+    } else {
+      const selectedMembership=memberships[0];
+      const {data,error:workspaceError}=await supabaseClient.from('workspaces').select('id,name').eq('id',selectedMembership.workspace_id).single();
+      if(!isCurrent()) return;
+      if(workspaceError || !data) { await supabaseClient.auth.signOut(); showLogin('Outlet akun belum dapat dimuat. Hubungi Developer.'); return; }
+      workspaces=[data];
     }
-
-    const { data: workspaceDivisions, error: divisionsError } = await supabaseClient
-      .from('divisions')
-      .select('id, name')
-      .eq('workspace_id', membership.workspace_id)
-      .eq('is_active', true)
-      .order('name');
-    if (!isCurrent()) return;
-    if (divisionsError) {
-      await supabaseClient.auth.signOut();
-      showLogin('Daftar divisi belum dapat dimuat. Hubungi Developer.');
-      return;
-    }
-
-    let assignedDivisions = workspaceDivisions || [];
-    if (profile.role !== 'developer' && membership.role !== 'admin') {
-      const { data: divisionLinks, error: divisionError } = await supabaseClient
-        .from('workspace_division_memberships')
-        .select('division_id')
-        .eq('workspace_id', membership.workspace_id)
-        .eq('user_id', userId);
-      if (!isCurrent()) return;
-      if (divisionError || !divisionLinks || !divisionLinks.length) {
-        await supabaseClient.auth.signOut();
-        showLogin('Akun belum ditugaskan ke divisi. Hubungi Developer.');
-        return;
-      }
-      const allowedIds = new Set(divisionLinks.map((link) => link.division_id));
-      assignedDivisions = assignedDivisions.filter((division) => allowedIds.has(division.id));
-    }
-
-    if (!assignedDivisions.length) {
-      await supabaseClient.auth.signOut();
-      showLogin('Akun belum memiliki divisi aktif. Hubungi Developer.');
-      return;
-    }
-
-    const activeDivision = assignedDivisions.find((division) => division.name.toLowerCase() === 'bar') || assignedDivisions[0];
-    if (!(await verifyLiveUser())) return;
-    activeUserId = userId;
-    authContext = {
-      userId,
-      email: session.user.email || '',
-      role: profile.role,
-      workspaceId: membership.workspace_id,
-      workspaceRole: membership.role,
-      divisions: assignedDivisions,
-      activeDivisionId: activeDivision.id,
-      activeDivisionName: activeDivision.name,
-      isGlobalDeveloper: profile.role === 'developer'
-    };
+    const selectedWorkspaceId=memberships?.[0]?.workspace_id || workspaces[0].id;
+    let nextContext;
+    try { nextContext=await buildWorkspaceContext(userId,session.user.email||'',profile,workspaces,selectedWorkspaceId,null,isCurrent); }
+    catch(contextError) { await supabaseClient.auth.signOut(); showLogin(contextError.message||'Workspace akun belum dapat dimuat.'); return; }
+    if(!nextContext || !isCurrent()) return;
+    activeProfile=profile; activeUserId=userId; authContext=nextContext; renderScopeSelectors();
     const displayName = profile.display_name || session.user.email || 'User';
     const initials = displayName.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
     const profileButton = $('authProfileButton');
@@ -221,6 +155,8 @@
       this.setAttribute('aria-label', visible ? 'Sembunyikan password' : 'Tampilkan password');
     });
     $('authLogoutButton').addEventListener('click', handleLogout);
+    $('workspaceOutletSelect')?.addEventListener('change',(event)=>switchWorkspaceContext(event.target.value,null));
+    $('workspaceDivisionSelect')?.addEventListener('change',(event)=>switchWorkspaceContext(authContext.workspaceId,event.target.value));
     $('authProfileButton').addEventListener('click', handleLogout);
 
     supabaseClient.auth.onAuthStateChange(function (event, session) {
