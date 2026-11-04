@@ -1422,9 +1422,19 @@
   }
 
   body:not(:has(#menuDrawer.show)) .top .top-actions .menu-toggle {
-    position: static !important;
-    inset: auto !important;
-    display: none !important;
+    position: fixed !important;
+    z-index: 111 !important;
+    top: 22px !important;
+    left: 208px !important;
+    right: auto !important;
+    bottom: auto !important;
+    display: grid !important;
+  }
+
+  @media (max-width: 1199px) {
+    body:not(:has(#menuDrawer.show)) .top .top-actions .menu-toggle {
+      left: 174px !important;
+    }
   }
 }
 
