@@ -6594,288 +6594,21 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   body:has(#menuDrawer.show) .content { padding-left:254px; }
 }
 
-
 /* =========================================================
-   DESKTOP SIDEBAR — PERMANENT LEFT NAVIGATION
-   Desktop only. Mobile drawer behavior remains unchanged.
+   DESKTOP SIDEBAR — EMPTY BASE FOR REBUILD
+   Keep the left panel reserved; remove all sidebar contents.
+   Mobile navigation remains unchanged.
    ========================================================= */
 @media (min-width: 900px) {
-  .app {
-    width: 100%;
-    max-width: none;
-    min-height: 100dvh;
-    margin: 0;
-    padding: 0;
-    overflow: visible;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
+  html,
+  body {
+    min-width: 900px;
   }
 
   .top {
-    position: relative;
-    z-index: 30;
-    width: calc(100% - 264px);
-    height: auto;
-    min-height: 86px;
-    margin: 0 0 0 264px;
-    padding: 18px clamp(24px, 3vw, 48px);
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    animation: none;
-  }
-
-  .top > .brand,
-  .top .menu-toggle {
     display: none !important;
-  }
-
-  .workspace-scope-switcher {
-    display: grid;
-    width: min(520px, 100%);
-    margin: 0 auto 0 0;
-  }
-
-  .top-actions {
-    position: static;
-    display: flex;
-    width: auto;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    pointer-events: auto;
-  }
-
-  .top-actions .profile,
-  .top-actions .auth-logout-button {
-    position: static;
-    display: grid;
-  }
-
-  .menu-backdrop {
-    display: none !important;
-  }
-
-  .menu-drawer,
-  .menu-drawer.show {
-    position: fixed;
-    z-index: 80;
-    inset: 0 auto 0 0;
-    display: flex;
-    flex-direction: column;
-    width: 264px;
-    height: 100dvh;
-    max-height: none;
-    padding: 24px 18px 22px;
-    overflow: hidden;
-    border: 0;
-    border-right: 1px solid #eeedf0;
-    border-radius: 0 22px 22px 0;
-    background: #fff;
-    box-shadow: 5px 0 24px rgba(17,18,37,.055);
-    visibility: visible;
-    opacity: 1;
-    pointer-events: auto;
-    transform: none;
-    transition: none;
-  }
-
-  .drawer-head {
-    display: flex !important;
-    min-height: 126px;
-    align-items: flex-start;
-    justify-content: space-between;
-    padding: 20px 4px 24px;
-    border-bottom: 1px solid #eeedf0;
-  }
-
-  .drawer-head > div {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .drawer-kicker {
-    color: #a0a0aa;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: .14em;
-  }
-
-  .drawer-head strong {
-    color: #171725;
-    font: 800 27px/1.15 Manrope, sans-serif;
-    letter-spacing: -.045em;
-  }
-
-  .drawer-close {
-    display: none !important;
-  }
-
-  .drawer-nav {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    min-height: 0;
-    padding: 28px 0 20px;
-    overflow-y: auto;
-  }
-
-  .drawer-item,
-  body:not(:has(#menuDrawer.show)) .drawer-item {
-    position: relative;
-    display: flex;
-    width: 100%;
-    min-width: 0;
-    height: 58px;
-    min-height: 58px;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 16px;
-    padding: 0 18px;
-    border: 0;
-    border-radius: 19px;
-    background: transparent;
-    color: #777783;
-    box-shadow: none;
-    text-align: left;
-    white-space: nowrap;
-    transition: background-color .18s ease, color .18s ease;
-  }
-
-  .drawer-item:hover {
-    background: #f7f7f4;
-  }
-
-  .drawer-item.active,
-  body:not(:has(#menuDrawer.show)) .drawer-item.active {
-    background: #eef7c7;
-    color: #171725;
-    box-shadow: none;
-  }
-
-  .drawer-item.active::before,
-  body:not(:has(#menuDrawer.show)) .drawer-item.active::before {
-    display: none;
-  }
-
-  .drawer-item > svg:first-child,
-  body:not(:has(#menuDrawer.show)) .drawer-item > svg:first-child {
-    display: block;
-    width: 23px;
-    height: 23px;
-    flex: 0 0 23px;
-    stroke: currentColor;
-    stroke-width: 1.9;
-  }
-
-  .drawer-item > span,
-  body:not(:has(#menuDrawer.show)) .drawer-item > span {
-    display: block;
-    width: auto;
-    max-width: none;
-    margin: 0;
-    overflow: visible;
-    opacity: 1;
-    color: inherit;
-    font-size: 15px;
-    font-weight: 700;
-    transform: none;
-  }
-
-  .drawer-item .drawer-chevron,
-  body:not(:has(#menuDrawer.show)) .drawer-item .drawer-chevron {
-    display: block;
-    width: 17px;
-    height: 17px;
-    margin-left: auto;
-    opacity: .65;
-  }
-
-  .drawer-foot {
-    display: block !important;
-    flex: 0 0 auto;
-    margin-top: auto;
-    padding: 25px 7px 3px;
-    border-top: 1px solid #eeedf0;
-    color: #a0a0aa;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: .14em;
-  }
-
-  .content,
-  body:has(#menuDrawer.show) .content {
-    width: 100%;
-    max-width: none;
-    min-width: 0;
-    margin: 0;
-    padding: 28px clamp(28px, 4vw, 64px) 64px 300px;
-    box-sizing: border-box;
-    transition: none;
-  }
-
-  .sheet,
-  .ds-modal,
-  body:has(#menuDrawer.show) .sheet,
-  body:has(#menuDrawer.show) .ds-modal {
-    left: calc(264px + (100vw - 264px) / 2);
-    width: min(920px, calc(100vw - 320px));
-  }
-
-  .fab {
-    right: 34px;
-  }
-}
-
-@media (min-width: 900px) and (max-width: 1100px) {
-  .top {
-    width: calc(100% - 244px);
-    margin-left: 244px;
-  }
-
-  .menu-drawer,
-  .menu-drawer.show {
-    width: 244px;
-  }
-
-  .content,
-  body:has(#menuDrawer.show) .content {
-    padding-left: 280px;
-  }
-
-  .sheet,
-  .ds-modal,
-  body:has(#menuDrawer.show) .sheet,
-  body:has(#menuDrawer.show) .ds-modal {
-    left: calc(244px + (100vw - 244px) / 2);
-    width: min(760px, calc(100vw - 300px));
-  }
-}
-
-
-/* =========================================================
-   DESKTOP SIDEBAR — FINAL FIXED LAYOUT
-   Match approved reference. Mobile navigation is untouched.
-   ========================================================= */
-@media (min-width: 900px) {
-  .app {
-    display: block;
-    width: 100%;
-    max-width: none;
-    min-height: 100dvh;
-    margin: 0;
-    padding: 0;
-    overflow: visible;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 
   .menu-backdrop {
@@ -6885,218 +6618,41 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   .menu-drawer,
   .menu-drawer.show {
     position: fixed !important;
-    z-index: 100;
+    z-index: 80 !important;
     inset: 0 auto 0 0 !important;
-    display: flex !important;
-    flex-direction: column;
-    width: 340px !important;
+    display: block !important;
+    width: 264px !important;
     height: 100dvh !important;
     max-height: none !important;
-    margin: 0;
-    padding: 24px 18px 22px !important;
-    overflow: hidden;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
     visibility: visible !important;
     opacity: 1 !important;
-    pointer-events: auto !important;
+    pointer-events: none !important;
     transform: none !important;
-    border: 0;
-    border-right: 1px solid #eeedf0;
-    border-radius: 0 30px 30px 0;
-    background: #fff;
-    box-shadow: 6px 0 26px rgba(17,18,37,.045);
+    border: 0 !important;
+    border-right: 1px solid #eeedf0 !important;
+    border-radius: 0 16px 16px 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
     transition: none !important;
   }
 
-  .drawer-head {
-    display: flex !important;
-    flex: 0 0 auto;
-    min-height: 132px;
-    align-items: flex-start;
-    justify-content: space-between;
-    padding: 12px 20px 26px;
-    border-bottom: 1px solid #eeedf0;
-  }
-
-  .drawer-head > div {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .drawer-kicker {
-    color: #9293a0;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: .15em;
-  }
-
-  .drawer-head strong {
-    color: #171725;
-    font: 800 28px/1.15 Manrope, sans-serif;
-    letter-spacing: -.045em;
-  }
-
-  .drawer-close {
+  .menu-drawer > * {
     display: none !important;
-  }
-
-  .drawer-nav {
-    display: flex !important;
-    flex: 1 1 auto;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    min-height: 0;
-    padding: 28px 0 22px;
-    overflow-y: auto;
-  }
-
-  .drawer-item,
-  body:not(:has(#menuDrawer.show)) .drawer-item {
-    position: relative;
-    display: flex !important;
-    width: 100%;
-    min-width: 0;
-    height: 68px;
-    min-height: 68px;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 18px;
-    padding: 0 22px;
-    overflow: visible;
-    border: 0;
-    border-radius: 20px;
-    background: transparent;
-    color: #777783;
-    box-shadow: none;
-    text-align: left;
-    white-space: nowrap;
-    transition: background-color .18s ease, color .18s ease;
-  }
-
-  .drawer-item:hover {
-    background: #f7f8f2;
-  }
-
-  .drawer-item.active,
-  body:not(:has(#menuDrawer.show)) .drawer-item.active {
-    background: #eff8c9;
-    color: #171725;
-    box-shadow: none;
-  }
-
-  .drawer-item.active::before,
-  body:not(:has(#menuDrawer.show)) .drawer-item.active::before {
-    display: none !important;
-  }
-
-  .drawer-item > svg:first-child,
-  body:not(:has(#menuDrawer.show)) .drawer-item > svg:first-child {
-    display: block !important;
-    width: 26px;
-    height: 26px;
-    flex: 0 0 26px;
-    stroke: currentColor;
-    stroke-width: 1.9;
-  }
-
-  .drawer-item > span,
-  body:not(:has(#menuDrawer.show)) .drawer-item > span {
-    display: block !important;
-    width: auto !important;
-    max-width: none !important;
-    margin: 0;
-    overflow: visible;
-    opacity: 1 !important;
-    color: inherit;
-    font-size: 18px;
-    font-weight: 700;
-    transform: none !important;
-  }
-
-  .drawer-item .drawer-chevron,
-  body:not(:has(#menuDrawer.show)) .drawer-item .drawer-chevron {
-    display: block !important;
-    width: 18px;
-    height: 18px;
-    margin-left: auto;
-    opacity: .7;
-  }
-
-  .drawer-foot {
-    display: block !important;
-    flex: 0 0 auto;
-    margin-top: auto;
-    padding: 24px 20px 4px;
-    border-top: 1px solid #eeedf0;
-    color: #9293a0;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: .15em;
-  }
-
-  .top {
-    position: absolute;
-    z-index: 90;
-    top: 18px;
-    right: 28px;
-    left: auto;
-    display: flex;
-    width: auto !important;
-    height: auto;
-    min-height: 0;
-    margin: 0;
-    padding: 0;
-    align-items: center;
-    justify-content: flex-end;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    animation: none;
-  }
-
-  .top > .brand,
-  .top .workspace-scope-switcher,
-  .top .menu-toggle {
-    display: none !important;
-  }
-
-  .top-actions {
-    position: static;
-    display: flex !important;
-    width: auto;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    pointer-events: auto;
-  }
-
-  .top-actions .profile {
-    display: none !important;
-  }
-
-  .top-actions .auth-logout-button {
-    position: static;
-    display: grid !important;
-    width: 42px;
-    height: 42px;
-    pointer-events: auto;
   }
 
   .content,
   body:has(#menuDrawer.show) .content {
-    display: block;
-    width: calc(100% - 340px);
-    max-width: none;
-    min-width: 0;
-    margin: 0 0 0 340px;
-    padding: 34px clamp(28px, 3.2vw, 54px) 64px;
-    box-sizing: border-box;
-    transition: none;
+    display: block !important;
+    width: calc(100% - 264px) !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 0 0 264px !important;
+    padding: 34px clamp(28px, 3.2vw, 54px) 64px !important;
+    box-sizing: border-box !important;
+    transition: none !important;
   }
 
   .page {
@@ -7109,215 +6665,31 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   .ds-modal,
   body:has(#menuDrawer.show) .sheet,
   body:has(#menuDrawer.show) .ds-modal {
-    left: calc(340px + (100vw - 340px) / 2);
-    width: min(920px, calc(100vw - 390px));
-  }
-
-  .fab {
-    right: 34px;
+    left: calc(264px + (100vw - 264px) / 2) !important;
+    width: min(920px, calc(100vw - 314px)) !important;
   }
 }
 
-@media (min-width: 900px) and (max-width: 1200px) {
+@media (min-width: 900px) and (max-width: 1100px) {
   .menu-drawer,
   .menu-drawer.show {
-    width: 300px !important;
+    width: 232px !important;
   }
 
   .content,
   body:has(#menuDrawer.show) .content {
-    width: calc(100% - 300px);
-    margin-left: 300px;
-    padding-right: 26px;
-    padding-left: 26px;
+    width: calc(100% - 232px) !important;
+    margin-left: 232px !important;
+    padding-right: 24px !important;
+    padding-left: 24px !important;
   }
 
   .sheet,
   .ds-modal,
   body:has(#menuDrawer.show) .sheet,
   body:has(#menuDrawer.show) .ds-modal {
-    left: calc(300px + (100vw - 300px) / 2);
-    width: min(800px, calc(100vw - 350px));
+    left: calc(232px + (100vw - 232px) / 2) !important;
+    width: min(760px, calc(100vw - 282px)) !important;
   }
 }
 
-
-/* Hide the native scrollbar gutter shadow in desktop-mode mobile viewports.
-   Scrolling remains available through touch, wheel, and trackpad input. */
-@media (min-width: 900px) and (max-width: 1200px) {
-  html,
-  body {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  html::-webkit-scrollbar,
-  body::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-  }
-}
-
-
-/* Desktop: place logout and menu controls inside the sidebar footer area. */
-@media (min-width: 900px) {
-  .top {
-    position: fixed !important;
-    z-index: 110 !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: 76px !important;
-    left: 18px !important;
-    display: flex !important;
-    width: 304px !important;
-    height: 42px !important;
-    min-height: 42px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    overflow: visible !important;
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    pointer-events: none;
-  }
-
-  .top .menu-toggle,
-  .top-actions .auth-logout-button {
-    position: static !important;
-    display: grid !important;
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
-    flex: 0 0 42px !important;
-    margin: 0 !important;
-    pointer-events: auto !important;
-  }
-
-  .top .menu-toggle {
-    order: 1;
-  }
-
-  .top-actions {
-    position: static !important;
-    display: flex !important;
-    width: auto !important;
-    height: 42px !important;
-    margin: 0 0 0 10px !important;
-    padding: 0 !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 10px !important;
-    border: 0 !important;
-    pointer-events: none;
-  }
-
-  .top-actions .profile {
-    display: none !important;
-  }
-
-  .top-actions .auth-logout-button {
-    order: 0;
-  }
-}
-
-@media (min-width: 900px) and (max-width: 1200px) {
-  .top {
-    width: 264px !important;
-  }
-}
-
-
-/* Desktop sidebar: keep logout only; hamburger is not needed for fixed navigation. */
-@media (min-width: 900px) {
-  .top .menu-toggle,
-  .top-actions .menu-toggle,
-  #menuToggle {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-
-  .top {
-    width: 264px !important;
-    justify-content: flex-start !important;
-  }
-
-  .top-actions {
-    margin-left: 0 !important;
-  }
-
-  .top-actions .auth-logout-button {
-    margin-left: 0 !important;
-  }
-}
-
-@media (min-width: 900px) and (max-width: 1200px) {
-  .top {
-    width: 264px !important;
-  }
-}
-
-
-/* Desktop sidebar footer: logout is the only remaining account/action control. */
-@media (min-width: 900px) {
-  .top .menu-toggle,
-  .top-actions .menu-toggle,
-  .top-actions .profile,
-  #menuToggle,
-  #authProfileButton {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-
-  .top-actions {
-    display: flex !important;
-    width: 42px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    gap: 0 !important;
-    justify-content: flex-start !important;
-  }
-
-  .top-actions .auth-logout-button {
-    display: grid !important;
-    margin: 0 !important;
-  }
-}
-
-
-/* Final desktop-only safeguard: only the logout control remains visible. */
-@media (min-width: 900px) {
-  html body #authProfileButton,
-  html body .top-actions > .profile,
-  html body #menuToggle,
-  html body .top-actions > .menu-toggle {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    pointer-events: none !important;
-  }
-
-  html body .top-actions > #authLogoutButton {
-    display: grid !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
-    min-height: 42px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    pointer-events: auto !important;
-  }
-}
