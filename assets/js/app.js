@@ -1747,7 +1747,7 @@ window.addEventListener('app:auth-ready', async function (event) {
       if (sessionGeneration !== appSessionGeneration) return;
       state = remoteState;
       syncSeatingSettingInput();
-      go('dashboard');
+      go(authContext.workspaceRole === 'service' ? 'master-items' : 'dashboard');
 
       setInterval(async () => {
         try {
