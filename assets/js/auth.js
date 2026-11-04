@@ -43,6 +43,7 @@
       return;
     }
     const userId = session.user.id;
+    if (activeUserId === userId && authContext) return;
     if (activeUserId && activeUserId !== userId) showLogin('');
     const generation = ++activationGeneration;
     const isCurrent = () => generation === activationGeneration;
@@ -141,11 +142,32 @@
     }
     const logoutButton = $('authLogoutButton');
     if (logoutButton) logoutButton.title = 'Keluar dari akun ' + displayName;
+    document.body.classList.remove('auth-ready');
+    document.body.classList.add('auth-locked');
+    setMessage('Memuat data workspace...', 'success');
+    window.dispatchEvent(new CustomEvent('app:auth-ready', { detail: authContext }));
+  }
+
+  async function markReady(expectedUserId, expectedWorkspaceId) {
+    const generation = activationGeneration;
+    if (!supabaseClient || !authContext || activeUserId !== expectedUserId ||
+        authContext.userId !== expectedUserId || authContext.workspaceId !== expectedWorkspaceId) return false;
+    const { data, error } = await supabaseClient.auth.getUser();
+    if (error || data?.user?.id !== expectedUserId || generation !== activationGeneration ||
+        activeUserId !== expectedUserId || authContext?.workspaceId !== expectedWorkspaceId) return false;
     document.body.classList.remove('auth-locked');
     document.body.classList.add('auth-ready');
     setLoading(false);
     setMessage('');
-    window.dispatchEvent(new CustomEvent('app:auth-ready', { detail: authContext }));
+    return true;
+  }
+
+  async function failActivation(message) {
+    showLogin(message || 'Workspace gagal dimuat. Silakan masuk kembali.');
+    if (supabaseClient) {
+      try { await supabaseClient.auth.signOut(); }
+      catch (error) { console.error('Failed to close invalid session:', error); }
+    }
   }
 
   // Sign in with Supabase Auth; the role is read from the protected profiles table.
@@ -174,7 +196,6 @@
     }
     await activateSession(data.session);
     isSubmitting = false;
-    if (!document.body.classList.contains('auth-ready')) setLoading(false);
   }
 
   async function handleLogout() {
@@ -221,7 +242,9 @@
   window.AppAuth = {
     signOut: handleLogout,
     getClient: function () { return supabaseClient; },
-    getContext: function () { return authContext; }
+    getContext: function () { return authContext; },
+    markReady,
+    failActivation
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
   else init();

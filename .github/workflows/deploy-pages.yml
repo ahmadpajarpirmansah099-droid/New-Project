@@ -22,6 +22,7 @@ jobs:
           node --check assets/js/guestops-service.js
           node --check assets/js/app.js
           node --check assets/js/masterdata-store.js
+          node --check assets/js/daily-stock.js
           node --check assets/js/masterdata-service.js
           node --check assets/js/masterdata-ui.js
           node --check assets/js/wip-service.js
@@ -32,6 +33,7 @@ jobs:
         run: |
           node --test tests/guestops-service.test.js
           node --test tests/masterdata-phase1.test.js
+          node --test tests/workspace-session.test.js
           node --test tests/wip-phase2.test.js
           node --test tests/menu-phase3.test.js
           node --test tests/csv-export.test.js
