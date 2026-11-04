@@ -1237,3 +1237,11 @@
     color: var(--desktop-nav-green-dark);
   }
 }
+
+
+@media (min-width: 900px) {
+  #menuDrawer .desktop-nav-item[hidden],
+  #menuDrawer .desktop-nav-item[style*="display: none"] {
+    display: none !important;
+  }
+}
