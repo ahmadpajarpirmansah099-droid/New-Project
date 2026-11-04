@@ -4755,3 +4755,32 @@ body.auth-ready .auth-screen{display:none}
   font-size: 10px;
   font-weight: 800;
 }
+
+
+/* Elemen detail dan catatan operasional yang sebelumnya memakai style langsung. */
+.text-muted-note {
+  color: #9aa5b8;
+  font-weight: 500;
+}
+
+.pending-guest-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-top: 1px solid #f3e5d0;
+  font-size: 11px;
+}
+
+.detail-name {
+  font: 800 18px Manrope;
+}
+
+.detail-cell-full {
+  grid-column: 1 / -1;
+}
+
+.detail-history-heading {
+  margin-top: 20px;
+  font: 800 13px Manrope;
+}
