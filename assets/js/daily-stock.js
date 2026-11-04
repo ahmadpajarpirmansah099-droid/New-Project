@@ -586,7 +586,7 @@
       if (targetPage === 'daily-stock') {
         if (typeof originalGo === 'function') originalGo(targetPage);
         root.setWorkspaceHeader?.('daily-stock');
-        root.MasterDataStore?.load();
+        if (root.MasterDataStore?.isReady()) state.catalog = root.MasterDataStore.load();
         renderPage(targetPage);
         return;
       }
