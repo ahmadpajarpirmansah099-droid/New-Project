@@ -6858,3 +6858,285 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     width: min(760px, calc(100vw - 300px));
   }
 }
+
+
+/* =========================================================
+   DESKTOP SIDEBAR — FINAL FIXED LAYOUT
+   Match approved reference. Mobile navigation is untouched.
+   ========================================================= */
+@media (min-width: 900px) {
+  .app {
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .menu-backdrop {
+    display: none !important;
+  }
+
+  .menu-drawer,
+  .menu-drawer.show {
+    position: fixed !important;
+    z-index: 100;
+    inset: 0 auto 0 0 !important;
+    display: flex !important;
+    flex-direction: column;
+    width: 340px !important;
+    height: 100dvh !important;
+    max-height: none !important;
+    margin: 0;
+    padding: 24px 18px 22px !important;
+    overflow: hidden;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    border: 0;
+    border-right: 1px solid #eeedf0;
+    border-radius: 0 30px 30px 0;
+    background: #fff;
+    box-shadow: 6px 0 26px rgba(17,18,37,.045);
+    transition: none !important;
+  }
+
+  .drawer-head {
+    display: flex !important;
+    flex: 0 0 auto;
+    min-height: 132px;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 12px 20px 26px;
+    border-bottom: 1px solid #eeedf0;
+  }
+
+  .drawer-head > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .drawer-kicker {
+    color: #9293a0;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .15em;
+  }
+
+  .drawer-head strong {
+    color: #171725;
+    font: 800 28px/1.15 Manrope, sans-serif;
+    letter-spacing: -.045em;
+  }
+
+  .drawer-close {
+    display: none !important;
+  }
+
+  .drawer-nav {
+    display: flex !important;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    min-height: 0;
+    padding: 28px 0 22px;
+    overflow-y: auto;
+  }
+
+  .drawer-item,
+  body:not(:has(#menuDrawer.show)) .drawer-item {
+    position: relative;
+    display: flex !important;
+    width: 100%;
+    min-width: 0;
+    height: 68px;
+    min-height: 68px;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 18px;
+    padding: 0 22px;
+    overflow: visible;
+    border: 0;
+    border-radius: 20px;
+    background: transparent;
+    color: #777783;
+    box-shadow: none;
+    text-align: left;
+    white-space: nowrap;
+    transition: background-color .18s ease, color .18s ease;
+  }
+
+  .drawer-item:hover {
+    background: #f7f8f2;
+  }
+
+  .drawer-item.active,
+  body:not(:has(#menuDrawer.show)) .drawer-item.active {
+    background: #eff8c9;
+    color: #171725;
+    box-shadow: none;
+  }
+
+  .drawer-item.active::before,
+  body:not(:has(#menuDrawer.show)) .drawer-item.active::before {
+    display: none !important;
+  }
+
+  .drawer-item > svg:first-child,
+  body:not(:has(#menuDrawer.show)) .drawer-item > svg:first-child {
+    display: block !important;
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    stroke: currentColor;
+    stroke-width: 1.9;
+  }
+
+  .drawer-item > span,
+  body:not(:has(#menuDrawer.show)) .drawer-item > span {
+    display: block !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0;
+    overflow: visible;
+    opacity: 1 !important;
+    color: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    transform: none !important;
+  }
+
+  .drawer-item .drawer-chevron,
+  body:not(:has(#menuDrawer.show)) .drawer-item .drawer-chevron {
+    display: block !important;
+    width: 18px;
+    height: 18px;
+    margin-left: auto;
+    opacity: .7;
+  }
+
+  .drawer-foot {
+    display: block !important;
+    flex: 0 0 auto;
+    margin-top: auto;
+    padding: 24px 20px 4px;
+    border-top: 1px solid #eeedf0;
+    color: #9293a0;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .15em;
+  }
+
+  .top {
+    position: absolute;
+    z-index: 90;
+    top: 18px;
+    right: 28px;
+    left: auto;
+    display: flex;
+    width: auto !important;
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: flex-end;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    animation: none;
+  }
+
+  .top > .brand,
+  .top .workspace-scope-switcher,
+  .top .menu-toggle {
+    display: none !important;
+  }
+
+  .top-actions {
+    position: static;
+    display: flex !important;
+    width: auto;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    pointer-events: auto;
+  }
+
+  .top-actions .profile {
+    display: none !important;
+  }
+
+  .top-actions .auth-logout-button {
+    position: static;
+    display: grid !important;
+    width: 42px;
+    height: 42px;
+    pointer-events: auto;
+  }
+
+  .content,
+  body:has(#menuDrawer.show) .content {
+    display: block;
+    width: calc(100% - 340px);
+    max-width: none;
+    min-width: 0;
+    margin: 0 0 0 340px;
+    padding: 34px clamp(28px, 3.2vw, 54px) 64px;
+    box-sizing: border-box;
+    transition: none;
+  }
+
+  .page {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .sheet,
+  .ds-modal,
+  body:has(#menuDrawer.show) .sheet,
+  body:has(#menuDrawer.show) .ds-modal {
+    left: calc(340px + (100vw - 340px) / 2);
+    width: min(920px, calc(100vw - 390px));
+  }
+
+  .fab {
+    right: 34px;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1200px) {
+  .menu-drawer,
+  .menu-drawer.show {
+    width: 300px !important;
+  }
+
+  .content,
+  body:has(#menuDrawer.show) .content {
+    width: calc(100% - 300px);
+    margin-left: 300px;
+    padding-right: 26px;
+    padding-left: 26px;
+  }
+
+  .sheet,
+  .ds-modal,
+  body:has(#menuDrawer.show) .sheet,
+  body:has(#menuDrawer.show) .ds-modal {
+    left: calc(300px + (100vw - 300px) / 2);
+    width: min(800px, calc(100vw - 350px));
+  }
+}
