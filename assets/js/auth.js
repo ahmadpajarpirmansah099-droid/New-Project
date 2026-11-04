@@ -7,6 +7,7 @@
   let activeUserId = null;
   let authContext = null;
   let isSubmitting = false;
+  let activationGeneration = 0;
 
   function setMessage(message, type) {
     const element = $('authMessage');
@@ -25,6 +26,7 @@
   function showLogin(message) {
     const emailInput = $('authEmail');
     if (emailInput) emailInput.value = '';
+    activationGeneration += 1;
     activeUserId = null;
     authContext = null;
     window.dispatchEvent(new CustomEvent('app:auth-signed-out'));
@@ -42,6 +44,13 @@
     }
     const userId = session.user.id;
     if (activeUserId && activeUserId !== userId) showLogin('');
+    const generation = ++activationGeneration;
+    const isCurrent = () => generation === activationGeneration;
+    const verifyLiveUser = async () => {
+      const { data, error: authError } = await supabaseClient.auth.getUser();
+      return !authError && data?.user?.id === userId && isCurrent();
+    };
+    if (!(await verifyLiveUser())) return;
     if (activeUserId === userId && document.body.classList.contains('auth-ready')) return;
     document.body.classList.remove('auth-ready');
     document.body.classList.add('auth-locked');
@@ -51,6 +60,7 @@
     const { data: profile, error } = await supabaseClient.from('profiles')
       .select('id, display_name, role').eq('id', userId).single();
 
+    if (!isCurrent()) return;
     if (error || !profile || !['developer', 'admin', 'service'].includes(profile.role)) {
       await supabaseClient.auth.signOut();
       showLogin('Akun belum memiliki izin akses. Hubungi Developer untuk pengaturan role.');
@@ -64,6 +74,7 @@
       .limit(1)
       .maybeSingle();
 
+    if (!isCurrent()) return;
     if (membershipError || !membership) {
       await supabaseClient.auth.signOut();
       showLogin('Akun belum terhubung ke workspace. Hubungi Developer.');
@@ -76,6 +87,7 @@
       .eq('workspace_id', membership.workspace_id)
       .eq('is_active', true)
       .order('name');
+    if (!isCurrent()) return;
     if (divisionsError) {
       await supabaseClient.auth.signOut();
       showLogin('Daftar divisi belum dapat dimuat. Hubungi Developer.');
@@ -89,6 +101,7 @@
         .select('division_id')
         .eq('workspace_id', membership.workspace_id)
         .eq('user_id', userId);
+      if (!isCurrent()) return;
       if (divisionError || !divisionLinks || !divisionLinks.length) {
         await supabaseClient.auth.signOut();
         showLogin('Akun belum ditugaskan ke divisi. Hubungi Developer.');
@@ -105,6 +118,7 @@
     }
 
     const activeDivision = assignedDivisions.find((division) => division.name.toLowerCase() === 'bar') || assignedDivisions[0];
+    if (!(await verifyLiveUser())) return;
     activeUserId = userId;
     authContext = {
       userId,
