@@ -338,25 +338,30 @@
     }
 
     if (type === 'production') {
-      const wip = getWip(form.wipId);
-      const batches = Number(form.quantity);
-      if (!wip || wip.status !== 'active') throw new Error('Pilih WIP aktif.');
-      if (!Number.isFinite(batches) || batches <= 0) throw new Error('Jumlah batch harus lebih besar dari 0.');
-      const recipe = state.catalog.wipRecipeLines.filter((line) => String(line.wip_id) === String(wip.id));
-      if (!recipe.length) throw new Error('Resep WIP belum memiliki komponen.');
-      recipe.forEach((line) => {
-        const quantity = Number(line.qty_input) * batches;
-        if (line.component_type === 'material') {
-          const item = getItem(line.item_id);
-          if (!item) throw new Error('Bahan resep tidak ditemukan.');
-          lines.push(materialLine(item, quantity, line.unit_input));
-        } else {
-          const child = getWip(line.component_wip_id);
-          if (!child) throw new Error('WIP turunan resep tidak ditemukan.');
-          lines.push(wipLine(child, quantity, 'out'));
-        }
+      const entries = Array.isArray(form.items) && form.items.length
+        ? form.items
+        : [{ wipId:form.wipId, quantity:form.quantity }];
+      entries.forEach((entry) => {
+        const wip = getWip(entry.wipId);
+        const batches = Number(entry.quantity);
+        if (!wip || wip.status !== 'active') throw new Error('Pilih WIP aktif pada semua baris.');
+        if (!Number.isFinite(batches) || batches <= 0) throw new Error('Jumlah batch harus lebih besar dari 0 pada semua baris.');
+        const recipe = state.catalog.wipRecipeLines.filter((line) => String(line.wip_id) === String(wip.id));
+        if (!recipe.length) throw new Error('Resep WIP ' + wip.nama_wip + ' belum memiliki komponen.');
+        recipe.forEach((line) => {
+          const quantity = Number(line.qty_input) * batches;
+          if (line.component_type === 'material') {
+            const item = getItem(line.item_id);
+            if (!item) throw new Error('Bahan resep tidak ditemukan.');
+            lines.push(materialLine(item, quantity, line.unit_input));
+          } else {
+            const child = getWip(line.component_wip_id);
+            if (!child) throw new Error('WIP turunan resep tidak ditemukan.');
+            lines.push(wipLine(child, quantity, 'out'));
+          }
+        });
+        lines.push(wipLine(wip, batches * Number(wip.hasil_per_batch), 'in'));
       });
-      lines.push(wipLine(wip, batches * Number(wip.hasil_per_batch), 'in'));
       return lines;
     }
 
