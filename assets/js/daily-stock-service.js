@@ -44,7 +44,8 @@
   function activeWips() { return state.catalog.wips.filter((item) => item.status === 'active'); }
   function activeMenus() { return state.catalog.menus.filter((item) => item.status === 'active'); }
   function divisionIsService() { return String(state.context?.activeDivisionName || '').trim().toLowerCase() === 'service'; }
-  function canUseSales() { return !divisionIsService(); }
+  // Sales and WIP production are available to every division, including Service.
+  function canUseSales() { return true; }
 
   async function initialize() {
     const context = root.AppAuth?.getContext(), client = root.AppAuth?.getClient();
