@@ -76,9 +76,9 @@ test('Daily SO sales and WIP production are available in every division', () => 
 
 
 test('Production WIP uses a prefilled list of active WIPs for batch entry', () => {
-  assert.match(ui, /wips\\.map\\(\\(wip, index\\) => productionRowMarkup\\(wip, index\\)\\)/);
+  assert.ok(ui.includes("wips.map((wip, index) => productionRowMarkup(wip, index))"));
   assert.match(ui, /data-production-quantity/);
-  assert.match(ui, /values\\.items = Array\\.from\\(form\\.querySelectorAll/);
+  assert.ok(ui.includes("values.items = Array.from(form.querySelectorAll"));
   assert.doesNotMatch(ui, /data-production-action="add"/);
   assert.doesNotMatch(ui, /Cari nama WIP/);
 });
