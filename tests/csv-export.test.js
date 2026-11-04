@@ -6,18 +6,18 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const appPath = path.join(__dirname, '..', 'assets', 'js', 'app.js');
-const appSource = fs.readFileSync(appPath, 'utf8');
-const helperStart = appSource.indexOf('function sanitizeCSVText(value) {');
-const exportStart = appSource.indexOf('function exportCSV() {', helperStart);
+const detailPath = path.join(__dirname, '..', 'assets', 'js', 'guestops-detail.js');
+const detailSource = fs.readFileSync(detailPath, 'utf8');
+const helperStart = detailSource.indexOf('function sanitizeCSVText(value) {');
+const exportStart = detailSource.indexOf('function exportCSV() {', helperStart);
 
 if (helperStart < 0 || exportStart < 0) {
-  throw new Error('CSV export helpers were not found in assets/js/app.js');
+  throw new Error('CSV export helpers were not found in assets/js/guestops-detail.js');
 }
 
 const helperSource = appSource.slice(helperStart, exportStart);
 const runtime = vm.createContext({});
-vm.runInContext(helperSource, runtime, { filename: 'app.js#csv-export-helpers' });
+vm.runInContext(helperSource, runtime, { filename: 'guestops-detail.js#csv-export-helpers' });
 
 test('CSV sanitizer protects ASCII formula prefixes and leading whitespace', () => {
   const cases = [
