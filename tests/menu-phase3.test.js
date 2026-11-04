@@ -161,7 +161,7 @@ test('Duplicate menu names are rejected case-insensitively within the scope', ()
   }], { nama_menu: 'iced latte' }), /Nama menu sudah digunakan/);
 });
 
-test('Menu and recipe lines persist without touching Guest Operational data', () => {
+test('Menu and recipe lines remain available in the isolated runtime without localStorage', () => {
   const values = new Map([['waitlist_frontend_demo_v1', 'guest-data-safe']]);
   const first = createRuntime(values);
   const milk = addMilk(first.runtime);
@@ -169,10 +169,10 @@ test('Menu and recipe lines persist without touching Guest Operational data', ()
     component_type: 'material', item_id: milk.id, qty_input: 10, unit_input: 'ML'
   }]);
 
-  const second = createRuntime(values);
   assert.equal(values.get('waitlist_frontend_demo_v1'), 'guest-data-safe');
-  assert.equal(second.runtime.MenuService.findMenu(menu.id).nama_menu, 'Iced Latte');
-  assert.equal(second.runtime.MenuService.getLines(menu.id).length, 1);
+  assert.equal(values.has('guestops_masterdata_demo_v1'), false);
+  assert.equal(first.runtime.MenuService.findMenu(menu.id).nama_menu, 'Iced Latte');
+  assert.equal(first.runtime.MenuService.getLines(menu.id).length, 1);
 });
 
 
