@@ -639,7 +639,10 @@
         document.querySelectorAll('.page').forEach((element) => element.classList.remove('active'));
         $('page-daily-expense')?.classList.add('active');
         document.querySelectorAll('.drawer-item').forEach((item) => item.classList.remove('active'));
-        $('fab').style.display = 'grid';
+        root.closeQuickMenu?.();
+        $('fab').style.display = 'none';
+        $('quickMenuBackdrop')?.classList.remove('show');
+        $('quickMenu')?.classList.remove('show');
         root.setWorkspaceHeader?.('daily-expense');
         root.scrollTo({ top:0, behavior:'auto' });
         renderExpensePage();
@@ -648,6 +651,10 @@
       if (targetPage === 'daily-stock') {
         if (typeof originalGo === 'function') originalGo(targetPage);
         root.setWorkspaceHeader?.('daily-stock');
+        root.closeQuickMenu?.();
+        $('fab').style.display = 'none';
+        $('quickMenuBackdrop')?.classList.remove('show');
+        $('quickMenu')?.classList.remove('show');
         if (root.MasterDataStore?.isReady()) state.catalog = root.MasterDataStore.load();
         renderPage(targetPage);
         return;
