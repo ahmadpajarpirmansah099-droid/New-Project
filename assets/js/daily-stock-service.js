@@ -433,11 +433,13 @@
     await load(state.date);
   }
 
-  async function fetchExpenseHistory(date) {
+  async function fetchTransactionHistory(date, transactionTypes) {
     const guard = await verifyDailySession();
+    const types = Array.isArray(transactionTypes) ? transactionTypes.filter(Boolean) : [];
+    if (!types.length) return { transactions:[], linesByTransaction:new Map() };
     const result = await dailyQuery('inventory_transactions', guard.generation).select('*')
       .eq('workspace_id', state.context.workspaceId).eq('division_id', state.context.activeDivisionId)
-      .eq('transaction_type', 'expense').eq('transaction_date', date)
+      .in('transaction_type', types).eq('transaction_date', date)
       .neq('status', 'void').order('created_at', { ascending:false });
     if (result.error) throw result.error;
     await verifyDailySession(guard.generation);
@@ -454,6 +456,10 @@
       linesByTransaction.set(line.transaction_id, rows);
     });
     return { transactions, linesByTransaction };
+  }
+
+  async function fetchExpenseHistory(date) {
+    return fetchTransactionHistory(date, ['expense']);
   }
 
   async function switchDivision(divisionId) {
@@ -501,6 +507,6 @@
     initialize, load, catalogRows, movementsByKey, refreshDraftCountSnapshot,
     buildRows, createCount, savePhysicalCounts, closeCount,
     priceForItem, materialLine, wipLine, buildTransactionLines, postTransaction,
-    fetchExpenseHistory, switchDivision
+    fetchTransactionHistory, fetchExpenseHistory, switchDivision
   };
 })(window);
