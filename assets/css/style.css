@@ -5759,3 +5759,105 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 }
 
+/* =========================================================
+   DESKTOP GUEST WORKSPACE — ADAPTIVE WIDTH
+   Reclaim the empty left workspace while the navigation rail
+   is collapsed; smoothly make room when the menu expands.
+   ========================================================= */
+@media (min-width: 900px) {
+  .app {
+    grid-template-columns: 250px minmax(0, 1fr);
+    grid-template-rows: 150px minmax(0, 1fr);
+  }
+
+  .content {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    padding: 38px clamp(30px, 4vw, 72px) 64px 82px;
+    box-sizing: border-box;
+    transition: padding-left .28s cubic-bezier(.2,.75,.25,1);
+  }
+
+  body:has(#menuDrawer.show) .content {
+    padding-left: 264px;
+  }
+
+  .page#page-dashboard {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    grid-template-columns: minmax(0, 1.2fr) minmax(300px, .8fr);
+    transition: width .28s ease;
+  }
+
+  #page-dashboard .metrics {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #page-dashboard .hero,
+  #page-dashboard .metric,
+  #page-dashboard .guest,
+  #page-dashboard .empty {
+    min-width: 0;
+    transition:
+      box-shadow .24s ease,
+      transform .24s ease,
+      border-radius .24s ease;
+  }
+
+  #page-dashboard .hero {
+    box-shadow: 0 8px 24px rgba(17, 18, 37, .075);
+  }
+
+  #page-dashboard .metric,
+  #page-dashboard .guest,
+  #page-dashboard .empty {
+    box-shadow: 0 5px 18px rgba(17, 18, 37, .06);
+  }
+
+  #page-dashboard .metric:hover,
+  #page-dashboard .guest:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 11px 24px rgba(17, 18, 37, .10);
+  }
+}
+
+@media (min-width: 1440px) {
+  body:has(#menuDrawer.show) .content {
+    padding-left: 280px;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1100px) {
+  .content {
+    padding-left: 78px;
+  }
+
+  body:has(#menuDrawer.show) .content {
+    padding-left: 232px;
+  }
+
+  .page#page-dashboard {
+    grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content,
+  .page#page-dashboard,
+  #page-dashboard .hero,
+  #page-dashboard .metric,
+  #page-dashboard .guest,
+  #page-dashboard .empty {
+    transition: none !important;
+  }
+}
+
