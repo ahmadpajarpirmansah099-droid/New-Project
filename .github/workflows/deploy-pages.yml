@@ -28,7 +28,8 @@ jobs:
           node --check assets/js/guestops-detail.js
           node --check assets/js/app-startup.js
           node --check assets/js/masterdata-store.js
-          node --check assets/js/daily-stock.js
+          node --check assets/js/daily-stock-service.js
+          node --check assets/js/daily-stock-ui.js
           node --check assets/js/masterdata-service.js
           node --check assets/js/masterdata-ui.js
           node --check assets/js/wip-service.js
@@ -44,6 +45,7 @@ jobs:
           node --test tests/wip-phase2.test.js
           node --test tests/menu-phase3.test.js
           node --test tests/csv-export.test.js
+          node --test tests/daily-stock-architecture.test.js
 
   deploy:
     needs: validate
