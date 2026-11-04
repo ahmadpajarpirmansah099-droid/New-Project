@@ -200,9 +200,6 @@ function applyRoleNavigation() {
   document.querySelectorAll('.quick-menu-item[data-quick-context="guest"]').forEach(item => {
     item.style.display = canUseGuestOps ? '' : 'none';
   });
-  document.querySelectorAll('[data-desktop-nav-role="guest"]').forEach(group => {
-    group.hidden = !canUseGuestOps;
-  });
 }
 
 function go(page) {
@@ -288,28 +285,25 @@ function runQuickAction(action) {
 
 function toggleMenu() {
   const open = !$('menuDrawer').classList.contains('show');
-  const isDesktop = window.matchMedia('(min-width: 900px)').matches;
 
   if (open) closeQuickMenu();
 
   $('menuDrawer').classList.toggle('show', open);
   $('menuBackdrop').classList.toggle('show', open);
-  $('menuDrawer').setAttribute('aria-hidden', String(!open && !isDesktop));
+  $('menuDrawer').setAttribute('aria-hidden', String(!open));
   $('menuToggle').setAttribute('aria-expanded', String(open));
   $('menuToggle').setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
-  document.body.style.overflow = open && !isDesktop ? 'hidden' : '';
+  document.body.style.overflow = open ? 'hidden' : '';
 }
 
 function closeMenu() {
-  const isDesktop = window.matchMedia('(min-width: 900px)').matches;
   $('menuDrawer').classList.remove('show');
   $('menuBackdrop').classList.remove('show');
-  $('menuDrawer').setAttribute('aria-hidden', String(!isDesktop));
+  $('menuDrawer').setAttribute('aria-hidden', 'true');
   $('menuToggle').setAttribute('aria-expanded', 'false');
   $('menuToggle').setAttribute('aria-label', 'Buka menu');
   document.body.style.overflow = '';
 }
-
 function navigateFromMenu(page) {
   closeMenu();
   go(page);
@@ -568,77 +562,3 @@ function initSheetBodySwipe(){
   sheet.addEventListener('touchend',finishBodySwipe,{passive:true});
   sheet.addEventListener('touchcancel',finishBodySwipe,{passive:true});
 }
-
-/* Keep the collapsed desktop icon rail available to assistive technology. */
-function syncDesktopMenuAccessibility() {
-  const drawer = $('menuDrawer');
-  if (!drawer) return;
-  const isDesktop = window.matchMedia('(min-width: 900px)').matches;
-  const isOpen = drawer.classList.contains('show');
-  drawer.setAttribute('aria-hidden', String(!isDesktop && !isOpen));
-}
-window.addEventListener('resize', syncDesktopMenuAccessibility, { passive: true });
-syncDesktopMenuAccessibility();
-
-
-/* Move workspace/account controls into the desktop sidebar footer.
-   Original positions are restored when the viewport returns to mobile. */
-(function initDesktopSidebarControls() {
-  const desktopQuery = window.matchMedia('(min-width: 900px)');
-  const drawer = document.getElementById('menuDrawer');
-  const top = document.querySelector('.top');
-  const scope = document.getElementById('workspaceScopeSwitcher');
-  const profile = document.getElementById('authProfileButton');
-  const logout = document.getElementById('authLogoutButton');
-  const actions = profile?.parentElement;
-  if (!drawer || !top || !scope || !profile || !logout || !actions) return;
-
-  const makePlaceholder = (element, name) => {
-    const marker = document.createComment('original-' + name + '-position');
-    element.parentNode.insertBefore(marker, element);
-    return marker;
-  };
-
-  const original = {
-    scope: makePlaceholder(scope, 'workspace-scope'),
-    profile: makePlaceholder(profile, 'profile'),
-    logout: makePlaceholder(logout, 'logout')
-  };
-
-  const footer = document.createElement('div');
-  footer.className = 'desktop-sidebar-footer';
-  footer.setAttribute('aria-label', 'Workspace dan akun');
-  const scopeCard = document.createElement('div');
-  scopeCard.className = 'desktop-sidebar-workspace';
-  const accountRow = document.createElement('div');
-  accountRow.className = 'desktop-sidebar-account';
-  footer.append(scopeCard, accountRow);
-
-  function moveToSidebar() {
-    if (!desktopQuery.matches) return;
-    const nav = drawer.querySelector('.desktop-sidebar-nav');
-    if (!nav) return;
-    const drawerFoot = drawer.querySelector('.drawer-foot');
-    if (!footer.isConnected) drawer.insertBefore(footer, drawerFoot || null);
-    scopeCard.appendChild(scope);
-    accountRow.append(profile, logout);
-    actions.appendChild(document.getElementById('menuToggle'));
-  }
-
-  function restoreToHeader() {
-    if (desktopQuery.matches) return;
-    if (original.scope.parentNode) original.scope.parentNode.insertBefore(scope, original.scope.nextSibling);
-    if (original.profile.parentNode) original.profile.parentNode.insertBefore(profile, original.profile.nextSibling);
-    if (original.logout.parentNode) original.logout.parentNode.insertBefore(logout, original.logout.nextSibling);
-    footer.remove();
-  }
-
-  function sync() {
-    if (desktopQuery.matches) moveToSidebar();
-    else restoreToHeader();
-  }
-
-  sync();
-  if (desktopQuery.addEventListener) desktopQuery.addEventListener('change', sync);
-  else desktopQuery.addListener(sync);
-})();
