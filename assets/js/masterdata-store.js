@@ -61,15 +61,17 @@
       throw new Error('Identitas akun, workspace, atau divisi tidak cocok. Operasi Master Data diblokir.');
     }
 
-    const membershipQuery = withSessionSignal(
-      capturedClient.from('workspace_memberships').select('workspace_id')
-        .eq('user_id', authResult.data.user.id).eq('workspace_id', capturedWorkspaceId),
-      expectedGeneration
-    );
-    const membershipResult = await membershipQuery.maybeSingle();
-    assertCurrent(expectedGeneration, capturedClient, capturedWorkspaceId, capturedDivisionId);
-    if (membershipResult.error || !membershipResult.data || membershipResult.data.workspace_id !== capturedWorkspaceId) {
-      throw new Error('Akses ditolak: akun bukan anggota workspace aktif.');
+    if (authContext.role !== 'developer') {
+      const membershipQuery = withSessionSignal(
+        capturedClient.from('workspace_memberships').select('workspace_id')
+          .eq('user_id', authResult.data.user.id).eq('workspace_id', capturedWorkspaceId),
+        expectedGeneration
+      );
+      const membershipResult = await membershipQuery.maybeSingle();
+      assertCurrent(expectedGeneration, capturedClient, capturedWorkspaceId, capturedDivisionId);
+      if (membershipResult.error || !membershipResult.data || membershipResult.data.workspace_id !== capturedWorkspaceId) {
+        throw new Error('Akses ditolak: akun bukan anggota workspace aktif.');
+      }
     }
 
     const latestContext = root.AppAuth?.getContext?.();
