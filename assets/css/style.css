@@ -7287,3 +7287,37 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     margin: 0 !important;
   }
 }
+
+
+/* Final desktop-only safeguard: only the logout control remains visible. */
+@media (min-width: 900px) {
+  html body #authProfileButton,
+  html body .top-actions > .profile,
+  html body #menuToggle,
+  html body .top-actions > .menu-toggle {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+  }
+
+  html body .top-actions > #authLogoutButton {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+  }
+}
