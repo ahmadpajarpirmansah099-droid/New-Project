@@ -349,6 +349,130 @@
       '<small class="ds-item-search-selected" aria-live="polite"></small></div></label>';
   }
 
+  function productionRowMarkup(index) {
+    const options = activeWips().map((item) => '<button type="button" class="ds-item-search-option" role="option" data-search-value="' +
+      escapeHtml(item.id) + '" data-search-label="' + escapeHtml(item.nama_wip) + '">' +
+      escapeHtml(item.nama_wip) + '</button>').join('');
+    return '<article class="ds-production-row" data-production-row data-row-index="' + index + '">' +
+      '<div class="ds-production-row-head"><strong>WIP ' + (index + 1) + '</strong>' +
+      '<button type="button" class="ds-production-remove" data-production-action="remove" aria-label="Hapus baris ' + (index + 1) + '">Hapus</button></div>' +
+      '<label>Produk WIP<div class="ds-item-search" data-ds-search-picker="productionWip">' +
+      '<input type="hidden" data-production-wip-id value="">' +
+      '<input type="search" autocomplete="off" placeholder="Cari nama WIP..." aria-label="Cari produk WIP">' +
+      '<div class="ds-item-search-results" role="listbox" aria-label="Daftar WIP" hidden>' + options + '</div>' +
+      '<small class="ds-item-search-selected" aria-live="polite"></small></div></label>' +
+      '<label>Jumlah batch<input data-production-quantity type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Masukkan jumlah batch"></label>' +
+      '<p class="ds-production-yield">Hasil jadi: <strong data-production-yield>—</strong></p></article>';
+  }
+
+  function refreshProductionRowLabels(target) {
+    const rows = Array.from(target.querySelectorAll('[data-production-row]'));
+    rows.forEach((row, index) => {
+      row.dataset.rowIndex = String(index);
+      row.querySelector('.ds-production-row-head strong').textContent = 'WIP ' + (index + 1);
+      row.querySelector('.ds-production-remove').setAttribute('aria-label', 'Hapus baris ' + (index + 1));
+    });
+    const counter = target.querySelector('#dsProductionRowCount');
+    if (counter) counter.textContent = rows.length + '/10';
+    const add = target.querySelector('[data-production-action="add"]');
+    if (add) add.disabled = rows.length >= 10;
+  }
+
+  function updateProductionYield(row) {
+    const id = row.querySelector('[data-production-wip-id]')?.value;
+    const quantity = Number(row.querySelector('[data-production-quantity]')?.value || 0);
+    const wip = activeWips().find((item) => String(item.id) === String(id));
+    const output = wip && quantity > 0 ? quantity * Number(wip.hasil_per_batch || 0) : null;
+    const target = row.querySelector('[data-production-yield]');
+    if (target) target.textContent = output == null ? '—' : number(output) + ' ' + (wip.satuan_hasil || '');
+  }
+
+  function wireProductionBatch(target, form) {
+    const rowsTarget = target.querySelector('#dsProductionRows');
+    if (!rowsTarget || rowsTarget.dataset.bound === 'true') return;
+    rowsTarget.innerHTML = productionRowMarkup(0);
+    rowsTarget.dataset.bound = 'true';
+    refreshProductionRowLabels(target);
+    rowsTarget.addEventListener('click', (event) => {
+      const option = event.target.closest('[data-search-value]');
+      if (option) {
+        const picker = option.closest('[data-ds-search-picker]');
+        const row = option.closest('[data-production-row]');
+        const hidden = picker.querySelector('[data-production-wip-id]');
+        const input = picker.querySelector('input[type="search"]');
+        hidden.value = option.dataset.searchValue;
+        input.value = option.dataset.searchLabel;
+        picker.querySelector('.ds-item-search-selected').textContent = 'Dipilih: ' + option.dataset.searchLabel;
+        picker.querySelector('.ds-item-search-results').hidden = true;
+        picker.classList.remove('is-open');
+        updateProductionYield(row);
+        return;
+      }
+      const action = event.target.closest('[data-production-action]');
+      if (!action) return;
+      if (action.dataset.productionAction === 'add') {
+        const current = rowsTarget.querySelectorAll('[data-production-row]').length;
+        if (current >= 10) return;
+        rowsTarget.insertAdjacentHTML('beforeend', productionRowMarkup(current));
+        refreshProductionRowLabels(target);
+      } else if (action.dataset.productionAction === 'remove') {
+        const rows = rowsTarget.querySelectorAll('[data-production-row]');
+        if (rows.length <= 1) {
+          const row = action.closest('[data-production-row]');
+          row.querySelector('[data-production-wip-id]').value = '';
+          row.querySelector('input[type="search"]').value = '';
+          row.querySelector('[data-production-quantity]').value = '';
+          row.querySelector('.ds-item-search-selected').textContent = '';
+          updateProductionYield(row);
+        } else {
+          action.closest('[data-production-row]').remove();
+          refreshProductionRowLabels(target);
+        }
+      }
+    });
+    rowsTarget.addEventListener('input', (event) => {
+      if (event.target.matches('[data-production-quantity]')) updateProductionYield(event.target.closest('[data-production-row]'));
+      if (event.target.matches('input[type="search"]')) {
+        const picker = event.target.closest('[data-ds-search-picker]');
+        picker.querySelector('[data-production-wip-id]').value = '';
+        picker.querySelector('.ds-item-search-selected').textContent = '';
+        const query = event.target.value.trim().toLocaleLowerCase('id');
+        const options = Array.from(picker.querySelectorAll('[data-search-value]'));
+        let visible = 0;
+        options.forEach((option) => {
+          const match = !query || option.dataset.searchLabel.toLocaleLowerCase('id').includes(query);
+          option.hidden = !match;
+          if (match) visible += 1;
+        });
+        let empty = picker.querySelector('.ds-item-search-empty');
+        if (!visible && !empty) {
+          empty = document.createElement('div');
+          empty.className = 'ds-item-search-empty';
+          empty.textContent = 'Data tidak ditemukan';
+          picker.querySelector('.ds-item-search-results').appendChild(empty);
+        } else if (visible && empty) empty.remove();
+        picker.querySelector('.ds-item-search-results').hidden = false;
+        picker.classList.add('is-open');
+        updateProductionYield(event.target.closest('[data-production-row]'));
+      }
+    });
+    rowsTarget.addEventListener('focusin', (event) => {
+      if (event.target.matches('input[type="search"]')) {
+        const picker = event.target.closest('[data-ds-search-picker]');
+        picker.querySelector('.ds-item-search-results').hidden = false;
+        picker.classList.add('is-open');
+      }
+    });
+    rowsTarget.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && event.target.matches('input[type="search"]')) {
+        const picker = event.target.closest('[data-ds-search-picker]');
+        picker.querySelector('.ds-item-search-results').hidden = true;
+        picker.classList.remove('is-open');
+        event.target.blur();
+      }
+    });
+  }
+
   function transactionUnitField() {
     return '<label>Satuan<div class="ds-unit-picker" id="dsTransactionUnitPicker">' +
       '<input class="ds-native-select" type="hidden" name="unit" data-unit-select value="">' +
@@ -391,9 +515,10 @@
     let fields = '';
 
     if (config.field === 'wip') {
-      fields = transactionSearchField('Produk WIP', 'wipId', 'Cari nama WIP...', activeWips(), 'id', 'nama_wip') +
-        '<label>Jumlah batch<input name="quantity" type="number" min="0.000001" step="any" inputmode="decimal" required placeholder="Masukkan jumlah batch"></label>' +
-        '<p class="ds-field-help">Bahan dan WIP komponen dihitung otomatis dari resep yang tersimpan.</p>';
+      fields = '<div class="ds-production-batch-head"><div><strong>Daftar produksi</strong><small>Tambahkan beberapa WIP dalam satu kali simpan.</small></div><span id="dsProductionRowCount">1/10</span></div>' +
+        '<div id="dsProductionRows" class="ds-production-rows"></div>' +
+        '<button type="button" class="ds-light ds-production-add" data-production-action="add">Tambah WIP</button>' +
+        '<p class="ds-field-help">Hasil jadi dihitung otomatis dari resep dan jumlah batch. Hapus hanya baris yang dipilih.</p>';
     } else if (config.field === 'menu') {
       fields = transactionSearchField('Menu', 'menuId', 'Cari nama menu...', activeMenus(), 'id', 'nama_menu') +
         '<label>Jumlah porsi<input name="quantity" type="number" min="1" step="1" inputmode="numeric" required placeholder="Masukkan jumlah porsi"></label>' +
@@ -431,6 +556,8 @@
     const target = $(TRANSACTION_PAGES[type].root);
     const form = target?.querySelector('#dsStandaloneTransactionForm');
     if (!form) return;
+
+    if (type === 'production') wireProductionBatch(target, form);
 
     if (!target.dataset.searchPickerCloseBound) {
       target.addEventListener('click', (event) => {
@@ -635,10 +762,24 @@
       form.querySelector('[type="search"]')?.focus();
       return;
     }
-    if (isStandalone && transactionType === 'production' && !form.elements.wipId?.value) {
-      root.toast?.('Pilih produk WIP terlebih dahulu.');
-      form.querySelector('[type="search"]')?.focus();
-      return;
+    if (isStandalone && transactionType === 'production') {
+      const rows = Array.from(form.querySelectorAll('[data-production-row]'));
+      const validRows = rows.filter((row) => row.querySelector('[data-production-wip-id]')?.value && row.querySelector('[data-production-quantity]')?.value);
+      if (!validRows.length) {
+        root.toast?.('Isi minimal satu baris WIP dan jumlah batch.');
+        rows[0]?.querySelector('[type="search"]')?.focus();
+        return;
+      }
+      const incomplete = rows.find((row) => {
+        const id = row.querySelector('[data-production-wip-id]')?.value;
+        const qty = row.querySelector('[data-production-quantity]')?.value;
+        return Boolean(id) !== Boolean(qty);
+      });
+      if (incomplete) {
+        root.toast?.('Lengkapi nama WIP dan jumlah batch pada setiap baris yang digunakan.');
+        incomplete.querySelector('[type="search"]')?.focus();
+        return;
+      }
     }
     if (isStandalone && transactionType === 'sale' && !form.elements.menuId?.value) {
       root.toast?.('Pilih menu terlebih dahulu.');
@@ -673,6 +814,12 @@
     try {
       const data = new FormData(form);
       const values = Object.fromEntries(data.entries());
+      if (isStandalone && transactionType === 'production') {
+        values.items = Array.from(form.querySelectorAll('[data-production-row]')).map((row) => ({
+          wipId: row.querySelector('[data-production-wip-id]')?.value || '',
+          quantity: row.querySelector('[data-production-quantity]')?.value || ''
+        })).filter((item) => item.wipId && item.quantity);
+      }
       await postTransaction(form.dataset.type, values);
       if (form.id === 'dsExpenseForm') { await renderExpensePage(); }
       else if (isStandalone) { await renderTransactionPage(transactionType); }
