@@ -4784,3 +4784,37 @@ body.auth-ready .auth-screen{display:none}
   margin-top: 20px;
   font: 800 13px Manrope;
 }
+
+
+/* Jeda animasi kartu antrean tetap mengikuti urutan daftar. */
+.guest[data-stagger-index="0"] {
+  animation-delay: 0s;
+}
+
+.guest[data-stagger-index="1"] {
+  animation-delay: 0.035s;
+}
+
+.guest[data-stagger-index="2"] {
+  animation-delay: 0.07s;
+}
+
+.guest[data-stagger-index="3"] {
+  animation-delay: 0.10500000000000001s;
+}
+
+.guest[data-stagger-index="4"] {
+  animation-delay: 0.14s;
+}
+
+.guest[data-stagger-index="5"] {
+  animation-delay: 0.17500000000000002s;
+}
+
+.guest[data-stagger-index="6"] {
+  animation-delay: 0.21000000000000002s;
+}
+
+.guest[data-stagger-index="7"] {
+  animation-delay: 0.24500000000000002s;
+}
