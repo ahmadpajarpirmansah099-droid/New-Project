@@ -579,3 +579,66 @@ function syncDesktopMenuAccessibility() {
 }
 window.addEventListener('resize', syncDesktopMenuAccessibility, { passive: true });
 syncDesktopMenuAccessibility();
+
+
+/* Move workspace/account controls into the desktop sidebar footer.
+   Original positions are restored when the viewport returns to mobile. */
+(function initDesktopSidebarControls() {
+  const desktopQuery = window.matchMedia('(min-width: 900px)');
+  const drawer = document.getElementById('menuDrawer');
+  const top = document.querySelector('.top');
+  const scope = document.getElementById('workspaceScopeSwitcher');
+  const profile = document.getElementById('authProfileButton');
+  const logout = document.getElementById('authLogoutButton');
+  const actions = profile?.parentElement;
+  if (!drawer || !top || !scope || !profile || !logout || !actions) return;
+
+  const makePlaceholder = (element, name) => {
+    const marker = document.createComment('original-' + name + '-position');
+    element.parentNode.insertBefore(marker, element);
+    return marker;
+  };
+
+  const original = {
+    scope: makePlaceholder(scope, 'workspace-scope'),
+    profile: makePlaceholder(profile, 'profile'),
+    logout: makePlaceholder(logout, 'logout')
+  };
+
+  const footer = document.createElement('div');
+  footer.className = 'desktop-sidebar-footer';
+  footer.setAttribute('aria-label', 'Workspace dan akun');
+  const scopeCard = document.createElement('div');
+  scopeCard.className = 'desktop-sidebar-workspace';
+  const accountRow = document.createElement('div');
+  accountRow.className = 'desktop-sidebar-account';
+  footer.append(scopeCard, accountRow);
+
+  function moveToSidebar() {
+    if (!desktopQuery.matches) return;
+    const nav = drawer.querySelector('.desktop-sidebar-nav');
+    if (!nav) return;
+    const drawerFoot = drawer.querySelector('.drawer-foot');
+    if (!footer.isConnected) drawer.insertBefore(footer, drawerFoot || null);
+    scopeCard.appendChild(scope);
+    accountRow.append(profile, logout);
+    actions.appendChild(document.getElementById('menuToggle'));
+  }
+
+  function restoreToHeader() {
+    if (desktopQuery.matches) return;
+    if (original.scope.parentNode) original.scope.parentNode.insertBefore(scope, original.scope.nextSibling);
+    if (original.profile.parentNode) original.profile.parentNode.insertBefore(profile, original.profile.nextSibling);
+    if (original.logout.parentNode) original.logout.parentNode.insertBefore(logout, original.logout.nextSibling);
+    footer.remove();
+  }
+
+  function sync() {
+    if (desktopQuery.matches) moveToSidebar();
+    else restoreToHeader();
+  }
+
+  sync();
+  if (desktopQuery.addEventListener) desktopQuery.addEventListener('change', sync);
+  else desktopQuery.addListener(sync);
+})();
