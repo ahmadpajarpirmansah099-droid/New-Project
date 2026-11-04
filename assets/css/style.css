@@ -5458,3 +5458,110 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     width: min(760px, calc(100vw - 270px));
   }
 }
+
+
+
+/* =========================================================
+   DESKTOP LEFT NAVIGATION
+   Menu berada di area kosong sidebar kiri; rail kanan dihapus.
+   Navigasi mobile tetap memakai drawer bawaan.
+   ========================================================= */
+@media (min-width: 900px) {
+  .menu-backdrop,
+  .menu-toggle {
+    display: none !important;
+  }
+
+  .menu-drawer {
+    position: fixed;
+    z-index: 40;
+    top: 150px;
+    right: auto;
+    bottom: auto;
+    left: 0;
+    width: 264px;
+    height: auto;
+    min-height: 0;
+    max-height: calc(100dvh - 220px);
+    padding: 0 11px;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+    transition: none;
+    visibility: visible;
+  }
+
+  .menu-drawer.show {
+    transform: none;
+  }
+
+  .drawer-head,
+  .drawer-foot {
+    display: none;
+  }
+
+  .drawer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding-top: 0;
+  }
+
+  .drawer-nav .drawer-item[data-page="dashboard"] { order: 1; }
+  .drawer-nav .drawer-item[data-page="daily-stock"] { order: 2; }
+  .drawer-nav .drawer-item[data-page="master-items"] { order: 3; }
+  .drawer-nav .drawer-item[data-page="settings"] { order: 4; }
+
+  .content {
+    margin-right: 0;
+  }
+
+  .sheet {
+    left: calc(264px + (100vw - 264px) / 2);
+    width: min(860px, calc(100vw - 320px));
+  }
+
+  .ds-modal {
+    left: calc(264px + (100vw - 264px) / 2);
+    width: min(860px, calc(100vw - 320px));
+  }
+}
+
+@media (min-width: 1440px) {
+  .menu-drawer {
+    width: 280px;
+    padding-right: 13px;
+    padding-left: 13px;
+  }
+
+  .content {
+    margin-right: 0;
+  }
+
+  .sheet,
+  .ds-modal {
+    left: calc(280px + (100vw - 280px) / 2);
+    width: min(920px, calc(100vw - 350px));
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1100px) {
+  .menu-drawer {
+    width: 232px;
+    padding-right: 9px;
+    padding-left: 9px;
+  }
+
+  .content {
+    margin-right: 0;
+  }
+
+  .sheet,
+  .ds-modal {
+    left: calc(232px + (100vw - 232px) / 2);
+    width: min(760px, calc(100vw - 270px));
+  }
+}
