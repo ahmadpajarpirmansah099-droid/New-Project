@@ -79,12 +79,12 @@
     const selectedName = selected ? (type === 'wip' ? selected.nama_wip : selected.nama_barang) : '';
     return '<div class="wip-recipe-row" data-wip-recipe-row>' +
       '<input type="hidden" data-wip-type value="' + type + '">' + '<div class="wip-recipe-type" data-wip-recipe-type>' + (type === 'wip' ? 'WIP' : 'Barang') + '</div>' +
-      '<div class="wip-field wip-component-search"><input type="search" data-wip-component-search autocomplete="off" placeholder="Cari item" value="' + escapeHtml(selectedName) + '" aria-label="Cari item"><select data-wip-component hidden style="display:none!important" aria-hidden="true" tabindex="-1">' + componentOptions(type, selectedId, excludeId) + '</select><div class="wip-component-options" data-wip-component-options hidden></div></div>' +
+      '<div class="wip-field wip-component-search"><input type="search" data-wip-component-search autocomplete="off" placeholder="Cari item" value="' + escapeHtml(selectedName) + '" aria-label="Cari item"><select data-wip-component hidden aria-hidden="true" tabindex="-1">' + componentOptions(type, selectedId, excludeId) + '</select><div class="wip-component-options" data-wip-component-options hidden></div></div>' +
       '<label class="wip-field"><input data-wip-qty type="number" min="0.000001" step="any" inputmode="decimal" placeholder="Jumlah" aria-label="Jumlah" value="' + escapeHtml(line && line.qty_input != null ? line.qty_input : '') + '"></label>' +
       '<input type="hidden" data-wip-unit value="' + escapeHtml(getComponentUnit(type, selectedId)) + '">' + '<div class="wip-unit-display" data-wip-unit-display>' + escapeHtml(getComponentUnit(type, selectedId) || '—') + '</div></div>';
   }
 
-    function initialRecipeRows(lines, excludeId) {
+  function initialRecipeRows(lines, excludeId) {
     const rows = Array.isArray(lines) ? lines.slice() : [];
     while (rows.length < 25) rows.push(null);
     return rows.map(function (line) { return recipeRowHtml(line, excludeId); }).join('');
