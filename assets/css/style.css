@@ -4907,7 +4907,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   .top {
     position: fixed;
     z-index: 30;
-    inset: 0 auto 0 0;
+    inset: 0 0 0 auto;
     display: flex;
     width: 264px;
     height: 100dvh;
@@ -4919,10 +4919,10 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     padding: 30px 20px 22px;
     overflow-y: auto;
     border: 0;
-    border-right: 1px solid #eae9e2;
+    border-left: 1px solid #eae9e2;
     border-radius: 0;
     background: #fff;
-    box-shadow: 5px 0 24px rgba(17,18,37,.025);
+    box-shadow: -5px 0 24px rgba(17,18,37,.025);
   }
 
   .brand {
@@ -5003,7 +5003,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     width: auto;
     max-width: none;
     min-width: 0;
-    margin: 0 0 0 264px;
+    margin: 0 264px 0 0;
     padding: 38px clamp(30px, 4vw, 72px) 64px;
   }
 
@@ -5324,7 +5324,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
 
   /* Desktop dialogs remain centered in the available workspace */
   .sheet {
-    left: calc(264px + (100vw - 264px) / 2);
+    left: calc((100vw - 264px) / 2);
     bottom: 24px;
     width: min(860px, calc(100vw - 320px));
     max-height: 88dvh;
@@ -5353,7 +5353,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 
   .ds-modal {
-    left: calc(264px + (100vw - 264px) / 2);
+    left: calc((100vw - 264px) / 2);
     bottom: 24px;
     width: min(860px, calc(100vw - 320px));
     max-height: 88dvh;
@@ -5363,7 +5363,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 
   .fab {
-    right: 36px;
+    right: calc(264px + 36px);
     bottom: 32px;
     width: 54px;
     height: 54px;
@@ -5372,12 +5372,12 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 
   .quick-menu {
-    right: 64px;
+    right: calc(264px + 64px);
     bottom: 86px;
   }
 
   .toast {
-    right: 30px;
+    right: calc(264px + 30px);
     bottom: 28px;
     left: auto;
     transform: translateY(16px);
@@ -5396,7 +5396,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 
   .content {
-    margin-left: 280px;
+    margin: 0 280px 0 0;
     padding-right: clamp(54px,5vw,96px);
     padding-left: clamp(54px,5vw,96px);
   }
@@ -5417,12 +5417,12 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 
   .sheet {
-    left: calc(280px + (100vw - 280px) / 2);
+    left: calc((100vw - 280px) / 2);
     width: min(920px, calc(100vw - 350px));
   }
 
   .ds-modal {
-    left: calc(280px + (100vw - 280px) / 2);
+    left: calc((100vw - 280px) / 2);
     width: min(920px, calc(100vw - 350px));
   }
 }
@@ -5435,7 +5435,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 
   .content {
-    margin-left: 232px;
+    margin: 0 232px 0 0;
     padding-right: 28px;
     padding-left: 28px;
   }
@@ -5454,7 +5454,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
 
   .sheet,
   .ds-modal {
-    left: calc(232px + (100vw - 232px) / 2);
+    left: calc((100vw - 232px) / 2);
     width: min(760px, calc(100vw - 270px));
   }
 }
