@@ -1,0 +1,68 @@
+/* DAILY STOCK — mobile-first stock operations */
+.ds-page{display:grid;gap:14px;min-width:0;animation:pageIn .28s both}
+.ds-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.ds-heading h1{margin:5px 0 3px;font:800 24px Manrope,sans-serif;letter-spacing:-.045em;color:var(--ink)}
+.ds-heading p{margin:0;color:var(--muted);font-size:11px}
+.ds-eyebrow{font-size:9px;font-weight:800;letter-spacing:.13em;color:var(--muted)}
+.ds-status,.ds-state{display:inline-flex;align-items:center;padding:6px 9px;border-radius:20px;font-size:10px;font-weight:800;background:#f0eff9;color:#6c639e}
+.ds-status.closed,.ds-state.closed,.ds-state.posted{background:#e9f5ed;color:#34734a}
+.ds-status.draft,.ds-state.draft{background:#fff3df;color:#9b6a1c}
+.ds-date{display:grid;gap:7px;color:var(--muted);font-size:10px;font-weight:700}
+.ds-date input{width:100%;min-height:44px;padding:0 12px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);font:700 12px 'DM Sans',sans-serif}
+.ds-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ds-summary>div,.ds-overview-grid>div{padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff;box-shadow:var(--shadow)}
+.ds-summary small,.ds-overview-grid span{display:block;color:var(--muted);font-size:9px;font-weight:700}
+.ds-summary strong,.ds-overview-grid strong{display:block;margin-top:5px;color:var(--ink);font:800 21px Manrope,sans-serif}
+.ds-value-card{display:grid;gap:5px;padding:15px;border-radius:17px;background:linear-gradient(135deg,#142747,#24446f);color:#fff;box-shadow:0 10px 24px #14274720}
+.ds-value-card small{color:#c5d2e7;font-size:10px}
+.ds-value-card strong{font:800 23px Manrope,sans-serif;letter-spacing:-.03em}
+.ds-value-card span{color:#d3dced;font-size:10px;line-height:1.4}
+.ds-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:5px;border:1px solid var(--line);border-radius:13px;background:#eceff4}
+.ds-tabs button{min-height:36px;padding:7px 4px;border:0;border-radius:9px;background:transparent;color:#77839a;font-size:10px;font-weight:800}
+.ds-tabs button.active{background:#fff;color:var(--ink);box-shadow:0 2px 8px #172c4c12}
+.ds-panel{min-width:0;padding:14px;border:1px solid var(--line);border-radius:17px;background:#fff;box-shadow:var(--shadow)}
+.ds-section-title{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:12px}
+.ds-section-title h2{margin:0;color:var(--ink);font:800 15px Manrope,sans-serif}
+.ds-section-title p{margin:4px 0 0;color:var(--muted);font-size:10px;line-height:1.45}
+.ds-overview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.ds-note{padding:11px 12px;border-radius:12px;background:#f5f6f8;color:#69768b;font-size:10px;line-height:1.55}
+.ds-primary,.ds-dark,.ds-light{min-height:42px;padding:10px 13px;border:0;border-radius:12px;font-size:11px;font-weight:800}
+.ds-primary{background:var(--blue);color:#fff}
+.ds-dark{background:var(--ink);color:#fff}
+.ds-light{background:#f1f3f7;color:var(--ink)}
+.ds-wide{width:100%;margin-top:12px}
+.ds-stock-list,.ds-history-list{display:grid;gap:9px}
+.ds-stock-row{padding:12px;border:1px solid var(--line);border-radius:13px;background:#fff}
+.ds-stock-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.ds-stock-top>div{display:grid;gap:4px;min-width:0}
+.ds-stock-top strong{color:var(--ink);font-size:12px;overflow-wrap:anywhere}
+.ds-stock-top small{color:var(--muted);font-size:9px}
+.ds-kind{width:max-content;padding:3px 7px;border-radius:7px;background:#f0eff9;color:#6d6598;font-size:8px;font-weight:800}
+.ds-expected{flex:0 0 auto;color:var(--ink);font-size:11px;font-weight:800}
+.ds-stock-math{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:11px 0}
+.ds-stock-math span{display:grid;gap:3px;color:var(--muted);font-size:8px}
+.ds-stock-math b{color:var(--ink);font-size:10px}
+.ds-physical{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--ink);font-size:10px;font-weight:800}
+.ds-physical input{width:112px;min-height:38px;padding:0 10px;border:1px solid #dce3ee;border-radius:10px;background:#f9fafc;color:var(--ink);font-size:12px;font-weight:700;text-align:right}
+.ds-physical input:disabled{background:#f1f3f5;color:#7c8797}
+.ds-form-actions{display:flex;gap:8px;margin-top:13px}
+.ds-form-actions>*{flex:1}
+.ds-locked-note{align-self:center;color:#68836e;font-size:10px;font-weight:700}
+.ds-empty{padding:22px 12px;border:1px dashed #dce2eb;border-radius:13px;color:var(--muted);font-size:11px;line-height:1.5;text-align:center}
+.ds-history-row{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;text-align:left}
+.ds-history-row>div{display:grid;gap:4px;min-width:0}
+.ds-history-row strong{color:var(--ink);font-size:11px}
+.ds-history-row small{color:var(--muted);font-size:9px}
+.ds-modal-backdrop{position:fixed;inset:0;z-index:100;background:#101c30a8;backdrop-filter:blur(5px)}
+.ds-modal{position:fixed;z-index:101;left:50%;bottom:0;width:min(520px,100%);max-height:88dvh;overflow:auto;padding:18px 18px calc(22px + env(safe-area-inset-bottom));border-radius:22px 22px 0 0;background:#fff;transform:translateX(-50%);box-shadow:0 -12px 38px #101c3028;animation:dsSheetIn .22s ease both}
+@keyframes dsSheetIn{from{transform:translate(-50%,20px);opacity:.7}to{transform:translate(-50%,0);opacity:1}}
+.ds-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}
+.ds-modal-head h2{margin:4px 0 0;color:var(--ink);font:800 19px Manrope,sans-serif}
+.ds-modal-head>button{width:36px;height:36px;border:0;border-radius:11px;background:#f1f3f7;color:var(--ink);font-size:22px}
+#dsTransactionForm{display:grid;gap:12px}
+#dsTransactionForm label{display:grid;gap:6px;color:var(--ink);font-size:10px;font-weight:800}
+#dsTransactionForm label span{color:var(--muted);font-weight:500}
+#dsTransactionForm input,#dsTransactionForm select,#dsTransactionForm textarea{width:100%;min-height:42px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fbfcfe;color:var(--ink);font:500 12px 'DM Sans',sans-serif}
+#dsTransactionForm textarea{resize:vertical}
+.ds-field-help{margin:0;padding:10px;border-radius:10px;background:#f4f6f9;color:var(--muted);font-size:10px;line-height:1.45}
+@media(min-width:480px){.ds-page{gap:16px}.ds-panel{padding:17px}.ds-stock-row{padding:14px}}
