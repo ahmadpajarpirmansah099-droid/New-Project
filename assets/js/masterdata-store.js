@@ -103,9 +103,6 @@
     }
 
     const authContext = root.AppAuth?.getContext();
-    if (authContext?.role === 'service') {
-      throw new Error('Role Service hanya dapat melihat Master Data.');
-    }
     if (authContext?.activeDivisionId !== divisionId) {
       throw new Error('Divisi aktif berubah. Muat ulang halaman sebelum menyimpan.');
     }
