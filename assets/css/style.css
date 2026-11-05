@@ -4663,3 +4663,300 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
 .workspace-scope-switcher .scope-trigger:active {
   box-shadow:0 2px 5px rgba(20,35,63,.10);
 }
+
+/* =========================================================
+   DESKTOP DASHBOARD — WIDE WORKSPACE (1280–1920px)
+   Mobile layout remains unchanged.
+   ========================================================= */
+@media (min-width: 1100px) {
+  .app {
+    width: 100%;
+    max-width: 1920px;
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding: 0 0 40px;
+    background: var(--bg);
+  }
+
+  .top {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    width: 100%;
+    min-height: 88px;
+    padding: 16px clamp(30px, 4vw, 76px);
+    gap: 28px;
+    background: rgba(246, 246, 241, .94);
+    border-bottom: 1px solid rgba(17, 18, 37, .07);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+
+  .brand {
+    flex: 0 0 auto;
+    gap: 14px;
+  }
+
+  .brandmark {
+    width: 48px;
+    height: 48px;
+  }
+
+  .brandname {
+    font-size: 17px;
+  }
+
+  .brandmeta {
+    font-size: 11px;
+  }
+
+  .workspace-scope-switcher {
+    margin-left: auto;
+    gap: 14px;
+  }
+
+  .workspace-scope-switcher .scope-field {
+    flex: 0 1 210px;
+  }
+
+  .workspace-scope-switcher .scope-field > span {
+    padding-left: 10px;
+    font-size: 9px;
+  }
+
+  .scope-trigger {
+    width: 100%;
+    max-width: none;
+    min-width: 170px;
+    height: 44px;
+    padding: 0 14px;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+
+  .top-actions {
+    flex: 0 0 auto;
+    gap: 14px;
+  }
+
+  .profile,
+  .auth-logout-button,
+  .menu-toggle {
+    width: 48px;
+    height: 48px;
+  }
+
+  .content {
+    width: 100%;
+    max-width: none;
+    padding: 28px clamp(30px, 4vw, 76px) 48px;
+  }
+
+  #page-dashboard.page.active {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) repeat(3, minmax(0, .62fr));
+    column-gap: 22px;
+    row-gap: 0;
+    align-items: stretch;
+  }
+
+  #page-dashboard > .greeting {
+    grid-column: 1 / 2;
+    grid-row: 1;
+    align-self: center;
+    min-width: 0;
+    min-height: 76px;
+    margin: 0 0 24px 2px;
+  }
+
+  #page-dashboard > .greeting h1 {
+    font-size: clamp(27px, 2vw, 34px);
+  }
+
+  #page-dashboard > .operational-date-trigger {
+    grid-column: 2 / 5;
+    grid-row: 1;
+    align-self: center;
+    width: 100%;
+    min-width: 0;
+    height: 68px;
+    margin: 0 0 24px;
+    padding: 0 20px;
+    gap: 16px;
+    border: 1px solid rgba(17, 18, 37, .045);
+    border-radius: 19px;
+    background: #fff;
+    text-align: left;
+    box-shadow: var(--card-shadow);
+  }
+
+  #page-dashboard > .operational-date-trigger .history-date-icon {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    border-radius: 15px;
+    background: var(--lime-soft);
+    color: #53652d;
+  }
+
+  #page-dashboard > .operational-date-trigger .history-date-copy {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    text-align: left;
+  }
+
+  #page-dashboard > .operational-date-trigger .history-date-copy small {
+    font-size: 11px;
+  }
+
+  #page-dashboard > .operational-date-trigger .history-date-copy strong {
+    font-size: 17px;
+  }
+
+  #page-dashboard > .operational-date-trigger .history-date-chevron {
+    margin-left: auto;
+    font-size: 20px;
+  }
+
+  #page-dashboard > .hero {
+    grid-column: 1 / 2;
+    grid-row: 2;
+    min-width: 0;
+    min-height: 250px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 26px;
+    border-radius: 24px;
+    box-shadow: var(--card-shadow-strong);
+  }
+
+  #page-dashboard > .hero .hero-label {
+    font-size: 14px;
+  }
+
+  #page-dashboard > .hero .hero-total {
+    margin-top: 14px;
+    font-size: clamp(54px, 4vw, 68px);
+  }
+
+  #page-dashboard > .hero .hero-foot {
+    gap: 24px;
+    margin-top: auto;
+    padding-top: 16px;
+  }
+
+  #page-dashboard > .hero .hero-foot span {
+    font-size: 14px;
+  }
+
+  #page-dashboard > .metrics {
+    grid-column: 2 / 5;
+    grid-row: 2;
+    min-width: 0;
+    height: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0 0 24px;
+  }
+
+  #page-dashboard > .metrics .metric {
+    min-width: 0;
+    min-height: 250px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid rgba(17, 18, 37, .035);
+    border-radius: 22px;
+    box-shadow: var(--card-shadow);
+  }
+
+  #page-dashboard > .metrics .metric-top .eyebrow {
+    font-size: 13px;
+  }
+
+  #page-dashboard > .metrics .metric-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 15px;
+  }
+
+  #page-dashboard > .metrics .metric-icon svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  #page-dashboard > .metrics .metric strong {
+    margin-top: auto;
+    padding-top: 22px;
+    font-size: 40px;
+  }
+
+  #page-dashboard > .metrics .metric small {
+    font-size: 14px;
+  }
+
+  #page-dashboard > #pendingWrap,
+  #page-dashboard > .section-head,
+  #page-dashboard > #dashboardList {
+    grid-column: 1 / -1;
+  }
+
+  #page-dashboard > #pendingWrap {
+    min-width: 0;
+  }
+
+  #page-dashboard > .section-head {
+    margin: 16px 2px 16px;
+  }
+
+  #page-dashboard > .section-head h2 {
+    font-size: 25px;
+  }
+
+  #page-dashboard > .section-head .text-btn {
+    font-size: 14px;
+  }
+
+  #page-dashboard > #dashboardList {
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 16px;
+  }
+
+  #page-dashboard > #dashboardList > .empty {
+    grid-column: 1 / -1;
+    min-height: 230px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(17, 18, 37, .035);
+    border-radius: 24px;
+    box-shadow: var(--card-shadow);
+  }
+
+  .fab {
+    right: clamp(30px, 4vw, 76px);
+    bottom: 30px;
+  }
+}
+
+@media (min-width: 1100px) and (max-width: 1350px) {
+  #page-dashboard.page.active {
+    grid-template-columns: minmax(0, 1.15fr) repeat(3, minmax(155px, .62fr));
+    column-gap: 16px;
+  }
+
+  #page-dashboard > .metrics {
+    gap: 12px;
+  }
+
+  #page-dashboard > .metrics .metric {
+    padding: 18px 16px;
+  }
+}
