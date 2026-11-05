@@ -4648,3 +4648,18 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
 #page-dashboard > button.history-date {
   box-shadow:var(--card-shadow);
 }
+
+/* Outlet and division controls — standalone with subtle elevation */
+.workspace-scope-switcher {
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+.workspace-scope-switcher .scope-trigger {
+  border-color:#e7eaf0;
+  box-shadow:0 3px 8px rgba(20,35,63,.08),0 1px 2px rgba(20,35,63,.04);
+}
+.workspace-scope-switcher .scope-trigger:active {
+  box-shadow:0 2px 5px rgba(20,35,63,.10);
+}
