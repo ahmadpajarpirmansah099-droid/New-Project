@@ -384,6 +384,24 @@
     });
   }
 
+  function salesRowMarkup(menu, index) {
+    return '<article class="ds-sales-row" data-sales-row>' +
+      '<input type="hidden" data-sales-menu-id value="' + escapeHtml(menu.id) + '">' +
+      '<div class="ds-sales-item"><span class="ds-production-index">' + String(index + 1).padStart(2, '0') + '</span>' +
+      '<div class="ds-production-item-copy"><strong>' + escapeHtml(menu.nama_menu) + '</strong></div></div>' +
+      '<label class="ds-sales-quantity">Jumlah porsi<input data-sales-quantity type="number" min="1" step="1" inputmode="numeric" placeholder="0"></label></article>';
+  }
+
+  function wireSalesBatch(target, form) {
+    const rowsTarget = target.querySelector('#dsSalesRows');
+    if (!rowsTarget || rowsTarget.dataset.bound === 'true') return;
+    const menus = activeMenus();
+    rowsTarget.innerHTML = menus.length
+      ? menus.map((menu, index) => salesRowMarkup(menu, index)).join('')
+      : '<div class="ds-empty">Belum ada menu aktif. Tambahkan menu terlebih dahulu.</div>';
+    rowsTarget.dataset.bound = 'true';
+  }
+
   function transactionUnitField() {
     return '<label>Satuan<div class="ds-unit-picker" id="dsTransactionUnitPicker">' +
       '<input class="ds-native-select" type="hidden" name="unit" data-unit-select value="">' +
@@ -432,9 +450,11 @@
         '<div id="dsProductionRows" class="ds-production-rows"></div>' +
         '<p class="ds-production-note">Biarkan jumlah batch kosong untuk WIP yang tidak diproduksi. Hasil jadi dihitung otomatis dari resep.</p>';
     } else if (config.field === 'menu') {
-      fields = transactionSearchField('Menu', 'menuId', 'Cari nama menu...', activeMenus(), 'id', 'nama_menu') +
-        '<label>Jumlah porsi<input name="quantity" type="number" min="1" step="1" inputmode="numeric" required placeholder="Masukkan jumlah porsi"></label>' +
-        '<p class="ds-field-help">Pemakaian bahan dan WIP dihitung otomatis dari komposisi menu.</p>';
+      const menus = activeMenus();
+      fields = '<div class="ds-production-batch-head"><div><strong>Daftar menu aktif</strong><small>Semua menu tampil otomatis. Isi jumlah porsi pada menu yang terjual.</small></div><span>' + menus.length + ' menu</span></div>' +
+        '<div class="ds-sales-list-head"><span>MENU</span><span>JUMLAH PORSI</span></div>' +
+        '<div id="dsSalesRows" class="ds-sales-rows"></div>' +
+        '<p class="ds-production-note">Biarkan jumlah porsi kosong untuk menu yang tidak terjual. Pemakaian bahan dan WIP dihitung otomatis dari resep menu.</p>';
     } else if (config.field === 'item') {
       fields = transactionSearchField('Barang', 'itemId', 'Cari nama bahan...', materialItems, 'id', 'nama_barang') +
         '<label>Jumlah<input name="quantity" type="number" min="0.000001" step="any" inputmode="decimal" required placeholder="Masukkan jumlah"></label>' +
@@ -470,6 +490,7 @@
     if (!form) return;
 
     if (type === 'production') wireProductionBatch(target, form);
+    if (type === 'sale') wireSalesBatch(target, form);
 
     if (!target.dataset.searchPickerCloseBound) {
       target.addEventListener('click', (event) => {
@@ -692,10 +713,23 @@
         return;
       }
     }
-    if (isStandalone && transactionType === 'sale' && !form.elements.menuId?.value) {
-      root.toast?.('Pilih menu terlebih dahulu.');
-      form.querySelector('[type="search"]')?.focus();
-      return;
+    if (isStandalone && transactionType === 'sale') {
+      const rows = Array.from(form.querySelectorAll('[data-sales-row]'));
+      const enteredRows = rows.filter((row) => String(row.querySelector('[data-sales-quantity]')?.value || '').trim());
+      if (!enteredRows.length) {
+        root.toast?.('Masukkan jumlah porsi pada minimal satu menu.');
+        rows[0]?.querySelector('[data-sales-quantity]')?.focus();
+        return;
+      }
+      const invalidRow = enteredRows.find((row) => {
+        const quantity = Number(row.querySelector('[data-sales-quantity]')?.value);
+        return !Number.isInteger(quantity) || quantity <= 0;
+      });
+      if (invalidRow) {
+        root.toast?.('Jumlah porsi harus berupa bilangan bulat lebih besar dari 0.');
+        invalidRow.querySelector('[data-sales-quantity]')?.focus();
+        return;
+      }
     }
     if (isStandalone && ['purchase','supply'].includes(transactionType) && !form.elements.unit?.value) {
       root.toast?.('Pilih satuan barang terlebih dahulu.');
@@ -730,6 +764,12 @@
           wipId: row.querySelector('[data-production-wip-id]')?.value || '',
           quantity: row.querySelector('[data-production-quantity]')?.value || ''
         })).filter((item) => item.wipId && item.quantity);
+      }
+      if (isStandalone && transactionType === 'sale') {
+        values.items = Array.from(form.querySelectorAll('[data-sales-row]')).map((row) => ({
+          menuId: row.querySelector('[data-sales-menu-id]')?.value || '',
+          quantity: row.querySelector('[data-sales-quantity]')?.value || ''
+        })).filter((item) => item.menuId && item.quantity);
       }
       await postTransaction(form.dataset.type, values);
       if (form.id === 'dsExpenseForm') { await renderExpensePage(); }
