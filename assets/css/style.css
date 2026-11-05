@@ -4990,7 +4990,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
 
 
 /* Wide desktop dashboard: keep the active queue beside the summary. */
-@media (min-width: 1351px) {
+@media (min-width: 1150px) {
   #page-dashboard.page.active {
     grid-template-columns: minmax(0, 1fr) minmax(420px, 1.08fr);
     column-gap: 32px;
