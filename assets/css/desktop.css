@@ -96,7 +96,7 @@
   }
   #page-dashboard.page.active {
     display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(360px, 2fr);
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
     column-gap: 28px;
     row-gap: 18px;
     align-items: start;
@@ -161,20 +161,16 @@
     min-width: 0;
   }
   #page-dashboard > .section-head {
-    grid-column: 1 / -1;
-    grid-row: 4;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin: 10px 0 0;
-    align-self: start;
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0 0 4px;
+    align-self: center;
   }
   #page-dashboard > .section-head h2 { font-size: 20px; }
   #page-dashboard > .section-head .text-btn { font-size: 12px; }
   #page-dashboard > #dashboardList {
-    grid-column: 1 / -1;
-    grid-row: 5;
+    grid-column: 2;
+    grid-row: 3 / span 2;
     display: grid;
     grid-template-columns: minmax(0,1fr);
     gap: 10px;
@@ -220,7 +216,7 @@
 
 @media (min-width: 900px) and (max-width: 1150px) {
   .content { padding-right: 22px; padding-left: 22px; }
-  #page-dashboard.page.active { grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr); gap: 18px; }
+  #page-dashboard.page.active { grid-template-columns: minmax(0, 1fr) minmax(320px, 1fr); gap: 18px; }
   #page-dashboard > #dashboardList .guest { grid-template-columns: 1fr; }
   #page-dashboard > #dashboardList .guest-bottom { justify-content: space-between; }
 }
