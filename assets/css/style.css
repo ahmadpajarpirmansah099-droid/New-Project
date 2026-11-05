@@ -5132,3 +5132,13 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     max-height:min(300px, 48vh);
   }
 }
+
+
+/* Hide the workspace controls while the mobile navigation drawer is open.
+   The header animation creates its own stacking layer, so z-index alone
+   cannot reliably place these controls behind the drawer on mobile. */
+body.menu-open .workspace-scope-switcher {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
