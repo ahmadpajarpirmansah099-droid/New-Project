@@ -2775,14 +2775,14 @@ button.history-date {
   flex-wrap:wrap;
 }
 
-/* GUEST DETAIL — SOFT DEPTH */
+/* GUEST DETAIL — CLEAR, SOFT CARD DEPTH */
 
 #sheet .detail-ticket {
-  box-shadow:0 5px 14px rgba(17,18,37,.075),0 1px 3px rgba(17,18,37,.045);
+  box-shadow:0 8px 20px rgba(17,18,37,.11),0 2px 5px rgba(17,18,37,.055);
 }
 
 #sheet .detail-cell {
-  box-shadow:0 2px 7px rgba(17,18,37,.045),0 1px 2px rgba(17,18,37,.025);
+  box-shadow:0 4px 11px rgba(17,18,37,.07),0 1px 3px rgba(17,18,37,.035);
 }
 
 #sheet .sheet-actions button {
