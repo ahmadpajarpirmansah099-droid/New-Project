@@ -5031,7 +5031,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
 /* In-app workspace dropdown: themed menu anchored to each selector, not OS-native. */
 .workspace-scope-switcher {
   position:relative;
-  z-index:140;
+  z-index:40;
   overflow:visible;
 }
 .workspace-scope-switcher .scope-field {
