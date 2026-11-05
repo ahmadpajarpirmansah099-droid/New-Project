@@ -5285,3 +5285,45 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   width: 0;
   height: 0;
 }
+
+/* DESKTOP — keep popups inside the workspace viewport and reduce background blur. */
+@media (min-width: 900px) {
+  .sheet.operational-modal {
+    top: 104px;
+    bottom: 16px;
+    max-height: calc(100dvh - 120px);
+    padding: 14px 16px 16px;
+    transform: translate(-50%, 0) scale(.98);
+  }
+  .sheet.operational-modal.show {
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  .calendar-dialog {
+    top: calc(50% + 44px);
+    max-height: calc(100dvh - 124px);
+    padding: 18px;
+  }
+
+  .scope-picker-sheet {
+    bottom: 16px;
+    max-height: calc(100dvh - 124px);
+  }
+
+  .sheet-backdrop,
+  .calendar-backdrop,
+  .menu-backdrop,
+  .quick-menu-backdrop,
+  .scope-picker-backdrop,
+  .app-select-dim {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .menu-backdrop {
+    background: rgba(17, 18, 37, .28);
+  }
+  .quick-menu-backdrop {
+    background: rgba(17, 18, 37, .06);
+  }
+}
