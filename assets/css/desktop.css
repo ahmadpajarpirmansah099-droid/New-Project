@@ -1,0 +1,226 @@
+/* =========================================================
+   DESKTOP WORKSPACE — sidebar and dashboard layout
+   Desktop-only rules. Mobile navigation/layout remain unchanged.
+   ========================================================= */
+@media (min-width: 900px) {
+  :root { --desktop-sidebar-width: 250px; }
+
+  body { min-width: 900px; }
+  .app {
+    width: calc(100% - var(--desktop-sidebar-width));
+    max-width: none;
+    min-height: 100dvh;
+    margin: 0 0 0 var(--desktop-sidebar-width);
+    padding: 0;
+  }
+
+  .top {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    min-height: 82px;
+    padding: 14px 32px;
+    gap: 22px;
+    background: rgba(244,246,250,.94);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(14px);
+  }
+  .top > .brand { display: none; }
+  .workspace-scope-switcher { margin-left: 0; }
+  .top-actions { margin-left: auto; gap: 10px; }
+  .menu-toggle { display: none !important; }
+  .profile, .auth-logout-button { width: 42px; height: 42px; }
+
+  .menu-backdrop { display: none !important; }
+  .menu-drawer {
+    position: fixed;
+    z-index: 70;
+    inset: 0 auto 0 0;
+    width: var(--desktop-sidebar-width);
+    height: 100dvh;
+    padding: 26px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    transform: none !important;
+    visibility: visible !important;
+    border: 0;
+    border-right: 1px solid var(--line);
+    border-radius: 0;
+    background: #fff;
+    box-shadow: 8px 0 28px rgba(20,35,63,.045);
+  }
+  .drawer-head {
+    padding: 4px 2px 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .drawer-head strong { color: var(--ink); font: 800 16px Manrope,sans-serif; }
+  .drawer-kicker { color: var(--muted); }
+  .drawer-close { display: none !important; }
+  .drawer-nav { display: grid; gap: 7px; padding-top: 20px; }
+  .drawer-item {
+    width: 100%;
+    min-height: 46px;
+    height: 46px;
+    justify-content: flex-start;
+    padding: 0 12px;
+    border-radius: 12px;
+    color: #657187;
+    font-size: 13px;
+  }
+  .drawer-item.active {
+    background: #edf3ff;
+    color: var(--blue);
+  }
+  .drawer-item.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    border-radius: 0 4px 4px 0;
+    background: var(--blue);
+  }
+  .drawer-item .drawer-chevron { display: none; }
+  .drawer-foot {
+    margin-top: auto;
+    border-top-color: var(--line);
+    color: var(--muted);
+  }
+
+  .content {
+    width: 100%;
+    max-width: none;
+    padding: 30px 32px 48px;
+  }
+  #page-dashboard.page.active {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(360px, 2fr);
+    column-gap: 28px;
+    row-gap: 18px;
+    align-items: start;
+  }
+  #page-dashboard > .greeting {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-height: 0;
+    margin: 0 0 4px;
+    align-items: center;
+  }
+  #page-dashboard > .greeting h1 {
+    margin-top: 4px;
+    font-size: 29px;
+  }
+  #page-dashboard > .greeting .date {
+    display: block !important;
+    font-size: 12px;
+    padding: 10px 13px;
+    border-radius: 12px;
+  }
+  #page-dashboard > .hero {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 190px;
+    height: auto;
+    padding: 22px;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(20,35,63,.09);
+  }
+  #page-dashboard > .hero .hero-total { font-size: 56px; }
+  #page-dashboard > .hero .hero-label { font-size: 13px; }
+  #page-dashboard > .hero .hero-foot span { font-size: 12px; }
+
+  #page-dashboard > .metrics {
+    grid-column: 1;
+    grid-row: 3;
+    width: 100%;
+    height: auto;
+    min-height: 112px;
+    margin: 0;
+    gap: 12px;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+  }
+  #page-dashboard > .metrics .metric {
+    min-height: 112px;
+    height: auto;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(20,35,63,.045);
+  }
+  #page-dashboard > .metrics .metric-top .eyebrow { font-size: 11px; }
+  #page-dashboard > .metrics .metric-icon { width: 34px; height: 34px; border-radius: 11px; }
+  #page-dashboard > .metrics .metric-icon svg { width: 17px; height: 17px; }
+  #page-dashboard > .metrics .metric strong { padding-top: 5px; font-size: 30px; }
+  #page-dashboard > .metrics .metric small { font-size: 10px; }
+
+  #page-dashboard > #pendingWrap {
+    grid-column: 1;
+    grid-row: 4;
+    min-width: 0;
+  }
+  #page-dashboard > .section-head {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0 0 4px;
+    align-self: center;
+  }
+  #page-dashboard > .section-head h2 { font-size: 20px; }
+  #page-dashboard > .section-head .text-btn { font-size: 12px; }
+  #page-dashboard > #dashboardList {
+    grid-column: 2;
+    grid-row: 3 / span 2;
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    margin: 0;
+  }
+  #page-dashboard > #dashboardList .guest {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    align-items: center;
+    gap: 10px 14px;
+    padding: 13px 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(20,35,63,.04);
+  }
+  #page-dashboard > #dashboardList .guest-row { min-width: 0; }
+  #page-dashboard > #dashboardList .guest-bottom {
+    margin: 0;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  #page-dashboard > #dashboardList .guest-bottom .actions { gap: 5px; }
+  #page-dashboard > #dashboardList .guest-bottom .mini { padding: 6px 8px; }
+  #page-dashboard > #dashboardList > .empty {
+    grid-column: 1;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(20,35,63,.045);
+  }
+
+  .fab { right: 32px; bottom: 28px; }
+  .quick-menu { right: 86px; bottom: 98px; }
+  .sheet.operational-modal { left: calc(50% + 125px); }
+}
+
+@media (min-width: 900px) and (max-width: 1150px) {
+  .content { padding-right: 22px; padding-left: 22px; }
+  #page-dashboard.page.active { grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr); gap: 18px; }
+  #page-dashboard > #dashboardList .guest { grid-template-columns: 1fr; }
+  #page-dashboard > #dashboardList .guest-bottom { justify-content: space-between; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-drawer, .drawer-item, #page-dashboard .metric, #page-dashboard .guest { animation: none !important; transition: none !important; }
+}
