@@ -71,23 +71,63 @@
       activeDivisionId:selected.id, activeDivisionName:selected.name,
       divisionMode:'single', isGlobalDeveloper:profile.role === 'developer' };
   }
-  function renderScopeSelectors() {
-    const wrap=$('workspaceScopeSwitcher'), outlet=$('workspaceOutletSelect'), division=$('workspaceDivisionSelect');
-    if(!wrap || !outlet || !division || !authContext?.isGlobalDeveloper){if(wrap)wrap.hidden=true;return;}
-    wrap.hidden=false;
-    outlet.innerHTML=authContext.workspaces.map(item=>'<option value="'+String(item.id)+'"></option>').join('');
-    authContext.workspaces.forEach((item,index)=>{outlet.options[index].textContent=item.name;});
-    outlet.value=authContext.workspaceId;
-    division.innerHTML='';
-    authContext.divisions.forEach(item=>{
-      const option=document.createElement('option');
-      option.value=item.id;
-      option.textContent=item.name;
-      division.appendChild(option);
+  function closeScopeDropdowns() {
+    ['Outlet','Division'].forEach((name) => {
+      const menu=$('workspace'+name+'Menu');
+      const trigger=$('workspace'+name+'Trigger');
+      if(menu)menu.hidden=true;
+      if(trigger)trigger.setAttribute('aria-expanded','false');
     });
-    division.value=authContext.activeDivisionId;
-    outlet.disabled=workspaceSwitchBusy;
-    division.disabled=workspaceSwitchBusy;
+  }
+  function renderScopeMenu(type, items, selectedId) {
+    const menu=$(type==='outlet'?'workspaceOutletMenu':'workspaceDivisionMenu');
+    if(!menu)return;
+    menu.replaceChildren();
+    items.forEach((item) => {
+      const option=document.createElement('button');
+      option.type='button';
+      option.className='scope-dropdown-option'+(item.id===selectedId?' is-selected':'');
+      option.setAttribute('role','option');
+      option.setAttribute('aria-selected',String(item.id===selectedId));
+      option.dataset.scopeOption=item.id;
+      const label=document.createElement('span');
+      label.textContent=item.name;
+      const check=document.createElement('span');
+      check.className='scope-dropdown-check';
+      check.setAttribute('aria-hidden','true');
+      check.textContent=item.id===selectedId?'✓':'';
+      option.append(label,check);
+      menu.appendChild(option);
+    });
+  }
+  function renderScopeSelectors() {
+    const wrap=$('workspaceScopeSwitcher');
+    const outletTrigger=$('workspaceOutletTrigger');
+    const divisionTrigger=$('workspaceDivisionTrigger');
+    if(!wrap || !outletTrigger || !divisionTrigger || !authContext?.isGlobalDeveloper){
+      if(wrap)wrap.hidden=true;
+      closeScopeDropdowns();
+      return;
+    }
+    wrap.hidden=false;
+    $('workspaceOutletValue').textContent=authContext.workspaceName||'Pilih outlet';
+    $('workspaceDivisionValue').textContent=authContext.activeDivisionName||'Pilih divisi';
+    renderScopeMenu('outlet',authContext.workspaces,authContext.workspaceId);
+    renderScopeMenu('division',authContext.divisions,authContext.activeDivisionId);
+    outletTrigger.disabled=workspaceSwitchBusy;
+    divisionTrigger.disabled=workspaceSwitchBusy;
+  }
+  function toggleScopeDropdown(type) {
+    if(workspaceSwitchBusy || !authContext?.isGlobalDeveloper)return;
+    const menu=$(type==='outlet'?'workspaceOutletMenu':'workspaceDivisionMenu');
+    const trigger=$(type==='outlet'?'workspaceOutletTrigger':'workspaceDivisionTrigger');
+    if(!menu || !trigger)return;
+    const shouldOpen=menu.hidden;
+    closeScopeDropdowns();
+    if(shouldOpen){
+      menu.hidden=false;
+      trigger.setAttribute('aria-expanded','true');
+    }
   }
   async function switchWorkspaceContext(workspaceId, divisionSelection) {
     if(workspaceSwitchBusy || !authContext?.isGlobalDeveloper)return;
@@ -102,8 +142,7 @@
       renderScopeSelectors();window.dispatchEvent(new CustomEvent('app:workspace-context-changed',{detail:next}));
     }catch(error){
       console.error('Workspace switch failed:',error);setMessage(error.message||'Outlet atau divisi gagal diganti.');
-      if($('workspaceOutletSelect'))$('workspaceOutletSelect').value=current.workspaceId;
-      if($('workspaceDivisionSelect'))$('workspaceDivisionSelect').value=current.activeDivisionId;
+      renderScopeSelectors();
     }finally{workspaceSwitchBusy=false;renderScopeSelectors();}
   }
 
@@ -256,11 +295,27 @@
       this.setAttribute('aria-label', visible ? 'Sembunyikan password' : 'Tampilkan password');
     });
     $('authLogoutButton').addEventListener('click', handleLogout);
-    $('workspaceOutletSelect')?.addEventListener('change',event=>{
-      if(authContext?.isGlobalDeveloper)switchWorkspaceContext(event.target.value,null);
+    $('workspaceOutletTrigger')?.addEventListener('click',()=>toggleScopeDropdown('outlet'));
+    $('workspaceDivisionTrigger')?.addEventListener('click',()=>toggleScopeDropdown('division'));
+    $('workspaceOutletMenu')?.addEventListener('click',(event)=>{
+      const option=event.target.closest('[data-scope-option]');
+      if(!option || !authContext?.isGlobalDeveloper)return;
+      const value=option.dataset.scopeOption;
+      closeScopeDropdowns();
+      if(value!==authContext.workspaceId)switchWorkspaceContext(value,null);
     });
-    $('workspaceDivisionSelect')?.addEventListener('change',event=>{
-      if(authContext?.isGlobalDeveloper)switchWorkspaceContext(authContext.workspaceId,event.target.value);
+    $('workspaceDivisionMenu')?.addEventListener('click',(event)=>{
+      const option=event.target.closest('[data-scope-option]');
+      if(!option || !authContext?.isGlobalDeveloper)return;
+      const value=option.dataset.scopeOption;
+      closeScopeDropdowns();
+      if(value!==authContext.activeDivisionId)switchWorkspaceContext(authContext.workspaceId,value);
+    });
+    document.addEventListener('pointerdown',(event)=>{
+      if(!$('workspaceScopeSwitcher')?.contains(event.target))closeScopeDropdowns();
+    });
+    document.addEventListener('keydown',(event)=>{
+      if(event.key==='Escape')closeScopeDropdowns();
     });
     $('authProfileButton').addEventListener('click', handleLogout);
 

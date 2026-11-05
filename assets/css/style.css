@@ -5027,3 +5027,108 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
   .top-actions { margin-left:auto; }
 }
+
+/* In-app workspace dropdown: themed menu anchored to each selector, not OS-native. */
+.workspace-scope-switcher {
+  position:relative;
+  z-index:140;
+  overflow:visible;
+}
+.workspace-scope-switcher .scope-field {
+  position:relative;
+}
+.scope-dropdown-menu[hidden] {
+  display:none !important;
+}
+.scope-dropdown-menu {
+  position:absolute;
+  z-index:160;
+  top:calc(100% + 8px);
+  left:0;
+  width:min(280px, calc(100vw - 32px));
+  max-height:min(320px, 52vh);
+  padding:6px;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  border:1px solid rgba(31,42,61,.09);
+  border-radius:15px;
+  background:#fffefa;
+  box-shadow:0 14px 34px rgba(25,35,52,.16),0 3px 9px rgba(25,35,52,.07);
+  transform-origin:top left;
+  animation:scopeDropdownIn .16s ease-out both;
+}
+.workspace-scope-switcher .scope-field:last-child .scope-dropdown-menu {
+  right:0;
+  left:auto;
+  transform-origin:top right;
+}
+.scope-dropdown-option {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  width:100%;
+  min-height:44px;
+  padding:0 11px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:#30394b;
+  text-align:left;
+  font:600 13px 'DM Sans',sans-serif;
+  cursor:pointer;
+  transition:background .15s ease,color .15s ease;
+}
+.scope-dropdown-option + .scope-dropdown-option {
+  margin-top:2px;
+}
+.scope-dropdown-option:hover,
+.scope-dropdown-option:focus-visible {
+  outline:0;
+  background:#f3f5ee;
+}
+.scope-dropdown-option.is-selected {
+  background:#eef2e7;
+  color:#26351f;
+  font-weight:800;
+}
+.scope-dropdown-check {
+  display:grid;
+  place-items:center;
+  flex:0 0 21px;
+  width:21px;
+  height:21px;
+  border-radius:50%;
+  background:#71845e;
+  color:#fff;
+  font-size:12px;
+  line-height:1;
+}
+.scope-dropdown-option:not(.is-selected) .scope-dropdown-check {
+  background:transparent;
+  border:1px solid #d6dce3;
+}
+.scope-trigger:disabled {
+  opacity:.58;
+  cursor:wait;
+}
+@keyframes scopeDropdownIn {
+  from { opacity:0; transform:translateY(-5px) scale(.985); }
+  to { opacity:1; transform:translateY(0) scale(1); }
+}
+@media (max-width:520px) {
+  .workspace-scope-switcher {
+    order:3;
+    width:100%;
+    margin:0;
+    gap:8px;
+  }
+  .workspace-scope-switcher .scope-field {
+    flex:1 1 50%;
+    min-width:0;
+  }
+  .scope-dropdown-menu {
+    width:min(300px, calc(100vw - 32px));
+    max-height:min(300px, 48vh);
+  }
+}
