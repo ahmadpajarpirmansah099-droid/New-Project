@@ -5025,7 +5025,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     width: 100%;
     height: 120px;
     min-height: 120px;
-    margin: 0 0 -8px;
+    margin: 0 0 -24px;
   }
 
   #page-dashboard > .section-head {
