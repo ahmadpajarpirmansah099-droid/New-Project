@@ -210,6 +210,17 @@
     box-shadow: 0 4px 14px rgba(20,35,63,.045);
   }
 
+  /* Consistent elevation for every dashboard card on desktop. */
+  #page-dashboard > .hero {
+    box-shadow: 0 8px 24px rgba(20,35,63,.10);
+  }
+  #page-dashboard > .metrics .metric,
+  #page-dashboard > #dashboardList .guest,
+  #page-dashboard > #dashboardList > .empty,
+  #page-dashboard > #pendingWrap .pending {
+    box-shadow: 0 5px 18px rgba(20,35,63,.075);
+  }
+
   .fab { right: 32px; bottom: 28px; }
   .quick-menu { right: 86px; bottom: 98px; }
   .sheet.operational-modal { left: calc(50% + 125px); }
