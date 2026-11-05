@@ -5162,10 +5162,10 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 }
 
-/* Desktop quick-menu fan: anchor the action buttons to the desktop FAB center. */
+/* Desktop quick-menu fan: keep the lowest action clear of the main FAB. */
 @media (min-width: 900px) {
   .quick-menu {
     right: calc(clamp(30px, 4vw, 76px) + 27px);
-    bottom: 57px;
+    bottom: 104px;
   }
 }
