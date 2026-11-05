@@ -4643,3 +4643,8 @@ body.scope-picker-open{overflow:hidden}
 /* Keep the active workspace visible while Developer changes outlet/division. */
 body.workspace-switching .app{pointer-events:none;opacity:.62;transition:opacity .18s ease}
 body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z-index:999;inset:0;display:grid;place-items:center;padding-top:72px;background:rgba(246,246,241,.38);color:#17172a;font-size:14px;font-weight:700;letter-spacing:.01em;pointer-events:all}
+
+/* Dashboard operational date card — subtle elevation */
+#page-dashboard > button.history-date {
+  box-shadow:var(--card-shadow);
+}
