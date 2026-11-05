@@ -104,10 +104,10 @@ CREATE INDEX guests_reservation_workspace_idx
 CREATE INDEX reservation_history_reservation_workspace_idx
   ON public.reservation_status_history (reservation_id, workspace_id);
 
--- Authenticated inserts cannot claim another user's identity. Creator,
--- record ID, and workspace ownership cannot be rewritten after creation.
--- Trusted server-side writes without a user JWT retain their explicit creator;
--- ordinary browser requests always carry auth.uid().
+-- Authenticated inserts always take created_by from auth.uid(), ignoring any
+-- caller-supplied value. Creator, record ID, and workspace ownership cannot
+-- be rewritten after creation. Trusted server-side writes without an end-user
+-- JWT retain their explicit creator value.
 CREATE OR REPLACE FUNCTION private.enforce_guest_record_identity()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -118,11 +118,8 @@ DECLARE
   actor_id uuid := auth.uid();
 BEGIN
   IF TG_OP = 'INSERT' THEN
-    IF actor_id IS NOT NULL
-       AND NEW.created_by IS DISTINCT FROM actor_id THEN
-      RAISE EXCEPTION USING
-        ERRCODE = '42501',
-        MESSAGE = 'The creator identity must match the signed-in account.';
+    IF actor_id IS NOT NULL THEN
+      NEW.created_by := actor_id;
     END IF;
   ELSE
     IF NEW.id IS DISTINCT FROM OLD.id THEN
