@@ -5180,3 +5180,10 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     bottom: 104px;
   }
 }
+
+/* Hide the automatic date chip on the desktop dashboard only. */
+@media (min-width: 900px) {
+  #page-dashboard > .greeting > .date {
+    display: none;
+  }
+}
