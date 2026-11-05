@@ -3,6 +3,9 @@
    Desktop-only rules. Mobile navigation/layout remain unchanged.
    ========================================================= */
 @media (min-width: 900px) {
+  .top {
+    box-shadow: 0 5px 18px rgba(20,35,63,.07);
+  }
   :root { --desktop-sidebar-width: 250px; }
 
   body { min-width: 900px; }
