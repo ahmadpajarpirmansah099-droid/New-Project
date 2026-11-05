@@ -13,6 +13,7 @@ let guestRefreshInterval = null;
 let seatingCountdownInterval = null;
 let guestRefreshBusy = false;
 let guestRefreshToken = 0;
+let workspaceReturnPage = null;
 
 function clearSessionIntervals() {
   if (guestRefreshInterval !== null) {
@@ -103,6 +104,7 @@ window.addEventListener('app:auth-signed-out', function () {
 
 async function initializeWorkspace(event, switchingContext) {
   if (switchingContext) {
+    workspaceReturnPage = document.querySelector('.page.active')?.id.replace(/^page-/, '') || null;
     appSessionGeneration += 1; appInitializationGeneration += 1; appDataReady = false; appInitializing = false;
     clearSessionIntervals();
     state = {schemaVersion:3,guests:[],counters:{},reservations:[],reservationCounters:{},settings:{seatingDurationMinutes:90}};
@@ -125,10 +127,29 @@ async function initializeWorkspace(event, switchingContext) {
       const remoteState=await window.GuestOpsService.initialize(supabaseClient,authContext.workspaceId);
       if(!isCurrent()) return;
       state=remoteState; syncSeatingSettingInput();
-      go('dashboard');
+      const requestedPage = workspaceReturnPage;
+      workspaceReturnPage = null;
+      const requestedPageExists = requestedPage && $('page-' + requestedPage);
+      const guestPageUnavailable = GUEST_OPERATION_PAGES.includes(requestedPage) && !canAccessGuestOperations();
+      const divisionsOverviewUnavailable = requestedPage === 'all-divisions' && authContext.divisionMode !== 'all';
+      const targetPage = requestedPageExists && !guestPageUnavailable && !divisionsOverviewUnavailable
+        ? requestedPage
+        : 'dashboard';
+      go(targetPage);
       guestRefreshInterval=window.setInterval(refreshGuestOperationalData,30000);
       seatingCountdownInterval=window.setInterval(()=>{if(isCurrent()) updateSeatingCountdowns();},1000);
-    } else { if(!isCurrent()) return; go('master-items'); }
+    } else {
+      if(!isCurrent()) return;
+      const requestedPage = workspaceReturnPage;
+      workspaceReturnPage = null;
+      const requestedPageExists = requestedPage && $('page-' + requestedPage);
+      const guestPageUnavailable = GUEST_OPERATION_PAGES.includes(requestedPage);
+      const divisionsOverviewUnavailable = requestedPage === 'all-divisions' && authContext.divisionMode !== 'all';
+      const targetPage = requestedPageExists && !guestPageUnavailable && !divisionsOverviewUnavailable
+        ? requestedPage
+        : 'master-items';
+      go(targetPage);
+    }
     if(!isCurrent()) return;
     const revealed=await window.AppAuth.markReady(authContext.userId,authContext.workspaceId);
     if(!isCurrent()) return;
