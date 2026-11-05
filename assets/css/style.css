@@ -4785,17 +4785,18 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 
   #page-dashboard > .operational-date-trigger {
-    grid-column: 2 / 5;
+    grid-column: 1 / 2;
     grid-row: 1;
+    justify-self: end;
     align-self: center;
-    width: 100%;
+    width: clamp(270px, 26vw, 370px);
     min-width: 0;
-    height: 68px;
+    height: 58px;
     margin: 0 0 24px;
-    padding: 0 20px;
-    gap: 16px;
+    padding: 0 14px;
+    gap: 11px;
     border: 1px solid rgba(17, 18, 37, .045);
-    border-radius: 19px;
+    border-radius: 16px;
     background: #fff;
     text-align: left;
     box-shadow: var(--card-shadow);
@@ -4804,10 +4805,10 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   #page-dashboard > .operational-date-trigger .history-date-icon {
     display: grid;
     place-items: center;
-    width: 46px;
-    height: 46px;
-    flex: 0 0 46px;
-    border-radius: 15px;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 12px;
     background: var(--lime-soft);
     color: #53652d;
   }
