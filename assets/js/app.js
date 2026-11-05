@@ -342,6 +342,7 @@ function toggleMenu() {
 
   $('menuDrawer').classList.toggle('show', open);
   $('menuBackdrop').classList.toggle('show', open);
+  document.body.classList.toggle('menu-open', open);
   $('menuDrawer').setAttribute('aria-hidden', String(!open));
   $('menuToggle').setAttribute('aria-expanded', String(open));
   $('menuToggle').setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
@@ -351,6 +352,7 @@ function toggleMenu() {
 function closeMenu() {
   $('menuDrawer').classList.remove('show');
   $('menuBackdrop').classList.remove('show');
+  document.body.classList.remove('menu-open');
   $('menuDrawer').setAttribute('aria-hidden', 'true');
   $('menuToggle').setAttribute('aria-expanded', 'false');
   $('menuToggle').setAttribute('aria-label', 'Buka menu');
