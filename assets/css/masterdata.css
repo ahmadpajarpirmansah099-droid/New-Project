@@ -872,3 +872,33 @@
   .md-sheet-simple .app-select-trigger,
   .md-sheet-simple .app-select-option { font-size: 12px; }
 }
+
+/* Desktop only: Master Barang uses three cards per row on wide screens. */
+@media (min-width: 1100px) {
+  .md-item-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .md-item-card {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .md-item-heading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .md-item-prices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .md-item-footer {
+    align-items: flex-end;
+    margin-top: auto;
+    padding-top: 12px;
+  }
+}
