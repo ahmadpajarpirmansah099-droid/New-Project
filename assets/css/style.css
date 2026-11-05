@@ -4960,3 +4960,70 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     padding: 18px 16px;
   }
 }
+
+
+/* Native workspace dropdowns — use the device/browser picker instead of a fixed header sheet. */
+.workspace-scope-switcher {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+  margin-left:auto;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+.workspace-scope-switcher[hidden] { display:none !important; }
+.workspace-scope-switcher .scope-field {
+  display:grid;
+  gap:5px;
+  flex:0 1 190px;
+  min-width:0;
+}
+.workspace-scope-switcher .scope-field > span {
+  padding-left:3px;
+  color:#8993a4;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+.scope-native-select {
+  position:static !important;
+  display:block;
+  width:100%;
+  min-width:0;
+  height:42px;
+  margin:0 !important;
+  padding:0 34px 0 12px;
+  overflow:visible;
+  clip:auto !important;
+  border:1px solid #e2e7ee;
+  border-radius:12px;
+  background-color:#fff;
+  color:#26354d;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:650;
+  line-height:1.2;
+  box-shadow:0 3px 9px rgba(20,35,63,.07),0 1px 2px rgba(20,35,63,.035);
+  cursor:pointer;
+}
+.scope-native-select:disabled { opacity:.58; cursor:wait; }
+@media(max-width:520px) {
+  .top { flex-wrap:wrap; gap:10px; }
+  .brand { flex:1 1 auto; min-width:120px; }
+  .workspace-scope-switcher {
+    order:3;
+    width:100%;
+    margin:0;
+    gap:8px;
+  }
+  .workspace-scope-switcher .scope-field { flex:1 1 50%; }
+  .workspace-scope-switcher .scope-field > span { font-size:9px; }
+  .scope-native-select {
+    height:44px;
+    padding-left:11px;
+    font-size:13px;
+  }
+  .top-actions { margin-left:auto; }
+}
