@@ -366,23 +366,28 @@
     }
 
     if (type === 'sale') {
-      const menu = getMenu(form.menuId);
-      const portions = Number(form.quantity);
-      if (!menu || menu.status !== 'active') throw new Error('Pilih menu aktif.');
-      if (!Number.isFinite(portions) || portions <= 0) throw new Error('Jumlah porsi harus lebih besar dari 0.');
-      const recipe = state.catalog.menuRecipeLines.filter((line) => String(line.menu_id) === String(menu.id));
-      if (!recipe.length) throw new Error('Komposisi menu belum diisi.');
-      recipe.forEach((line) => {
-        const quantity = Number(line.qty_input) * portions;
-        if (line.component_type === 'material') {
-          const item = getItem(line.item_id);
-          if (!item) throw new Error('Bahan menu tidak ditemukan.');
-          lines.push(materialLine(item, quantity, line.unit_input));
-        } else {
-          const wip = getWip(line.component_wip_id);
-          if (!wip) throw new Error('WIP menu tidak ditemukan.');
-          lines.push(wipLine(wip, quantity, 'out'));
-        }
+      const entries = Array.isArray(form.items) && form.items.length
+        ? form.items
+        : [{ menuId:form.menuId, quantity:form.quantity }];
+      entries.forEach((entry) => {
+        const menu = getMenu(entry.menuId);
+        const portions = Number(entry.quantity);
+        if (!menu || menu.status !== 'active') throw new Error('Pilih menu aktif pada semua baris.');
+        if (!Number.isInteger(portions) || portions <= 0) throw new Error('Jumlah porsi harus berupa bilangan bulat lebih besar dari 0 pada semua baris.');
+        const recipe = state.catalog.menuRecipeLines.filter((line) => String(line.menu_id) === String(menu.id));
+        if (!recipe.length) throw new Error('Komposisi menu ' + menu.nama_menu + ' belum diisi.');
+        recipe.forEach((line) => {
+          const quantity = Number(line.qty_input) * portions;
+          if (line.component_type === 'material') {
+            const item = getItem(line.item_id);
+            if (!item) throw new Error('Bahan menu tidak ditemukan.');
+            lines.push(materialLine(item, quantity, line.unit_input));
+          } else {
+            const wip = getWip(line.component_wip_id);
+            if (!wip) throw new Error('WIP menu tidak ditemukan.');
+            lines.push(wipLine(wip, quantity, 'out'));
+          }
+        });
       });
       return lines;
     }

@@ -82,3 +82,12 @@ test('Production WIP uses a prefilled list of active WIPs for batch entry', () =
   assert.doesNotMatch(ui, /data-production-action="add"/);
   assert.doesNotMatch(ui, /Cari nama WIP/);
 });
+
+
+test('Sales uses a prefilled list of active menus for multi-menu entry', () => {
+  assert.ok(ui.includes("menus.map((menu, index) => salesRowMarkup(menu, index))"));
+  assert.ok(ui.includes("if (type === 'sale') wireSalesBatch(target, form);"));
+  assert.ok(ui.includes("values.items = Array.from(form.querySelectorAll('[data-sales-row]'))"));
+  assert.ok(service.includes("const entries = Array.isArray(form.items) && form.items.length"));
+  assert.doesNotMatch(ui, /Cari nama menu/);
+});
