@@ -231,8 +231,8 @@ function loadDailyStockFeature() {
   });
 
   dailyStockFeaturePromise = loadStyle
-    .then(() => loadScript('assets/js/daily-stock-service.js?v=20261105-sales-direct-list-p1'))
-    .then(() => loadScript('assets/js/daily-stock-ui.js?v=20261105-sales-direct-list-p1'))
+    .then(() => loadScript('assets/js/daily-stock-service.js?v=20261105-division-switch-context-refresh-p1'))
+    .then(() => loadScript('assets/js/daily-stock-ui.js?v=20261105-division-switch-context-refresh-p1'))
     .catch((error) => {
       dailyStockFeaturePromise = null;
       throw error;
