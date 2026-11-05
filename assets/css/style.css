@@ -4868,22 +4868,22 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
 
   #page-dashboard > .metrics {
     grid-column: 1 / -1;
-    grid-row: 5;
+    grid-row: 4;
     justify-self: start;
     min-width: 0;
-    width: min(100%, 695px);
-    height: 176px;
+    width: min(100%, 510px);
+    height: 144px;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: start;
-    gap: 40px;
-    margin: 0 0 24px;
+    gap: 8px;
+    margin: 0 0 18px;
   }
 
   #page-dashboard > .metrics .metric {
     min-width: 0;
-    min-height: 176px;
-    height: 176px;
-    padding: 16px;
+    min-height: 144px;
+    height: 144px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -4928,7 +4928,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 
   #page-dashboard > .section-head {
-    grid-row: 4;
+    grid-row: 5;
     margin: 16px 2px 16px;
   }
 
@@ -4978,11 +4978,12 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 
   #page-dashboard > .metrics {
-    gap: 40px;
+    width: min(100%, 510px);
+    gap: 8px;
   }
 
   #page-dashboard > .metrics .metric {
-    padding: 16px;
+    padding: 12px;
   }
 }
 
