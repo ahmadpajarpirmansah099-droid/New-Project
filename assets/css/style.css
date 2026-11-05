@@ -2853,6 +2853,14 @@ button.history-date {
   outline-offset:4px;
 }
 
+
+
+/* Desktop: center the operational detail popup in the workspace below the fixed header. */
+@media (min-width: 900px) {
+  .sheet.operational-modal {
+    top: calc(50% + 43px);
+  }
+}
 .sheet.operational-modal {
   top:50%;
   bottom:auto;
