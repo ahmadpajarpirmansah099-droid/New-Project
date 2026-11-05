@@ -2855,12 +2855,6 @@ button.history-date {
 
 
 
-/* Desktop: center the operational detail popup in the workspace below the fixed header. */
-@media (min-width: 900px) {
-  .sheet.operational-modal {
-    top: calc(50% + 43px);
-  }
-}
 .sheet.operational-modal {
   top:50%;
   bottom:auto;
@@ -2896,6 +2890,15 @@ button.history-date {
 
 .sheet.operational-modal .sheet-handle-row .handle {
   height:24px!important;
+}
+
+
+/* DESKTOP — position the detail popup inside the workspace below the fixed header */
+@media (min-width: 900px) {
+  .sheet.operational-modal {
+    top: calc(50% + 43px);
+    max-height: calc(100dvh - 212px);
+  }
 }
 
 .operational-head {
