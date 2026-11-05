@@ -502,17 +502,23 @@
     return true;
   }
 
-  root.addEventListener('app:auth-signed-out', function () {
+  function invalidate() {
     sessionGeneration += 1;
     dataLoadGeneration += 1;
     if (sessionAbortController) sessionAbortController.abort();
     sessionAbortController = null;
     state.client=null; state.context=null; state.catalog=null; state.data=null;
-    state.initialized=false; state.busy=false; state.tab='overview'; state.date=dateKey();
+    state.initialized=false; state.busy=false;
+  }
+
+  root.addEventListener('app:auth-signed-out', function () {
+    invalidate();
+    state.tab='overview';
+    state.date=dateKey();
   });
 
   root.DailyStockService = {
-    state, dateKey,
+    state, dateKey, invalidate,
     verifyDailySession, dailyQuery, stockKey, itemKind, unitFactor, getItem, getWip, getMenu,
     activeWips, activeMenus, divisionIsService, canUseSales,
     initialize, load, catalogRows, movementsByKey, refreshDraftCountSnapshot,
