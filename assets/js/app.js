@@ -628,10 +628,8 @@ function initSheetBodySwipe(){
     button.setAttribute('aria-expanded', String(!collapsed));
     button.setAttribute('aria-label', collapsed ? 'Buka sidebar' : 'Tutup sidebar');
     button.setAttribute('title', collapsed ? 'Buka sidebar' : 'Tutup sidebar');
-    const icon = button.querySelector('[data-lucide]');
-    if (icon) {
-      icon.setAttribute('data-lucide', collapsed ? 'panel-left-open' : 'panel-left-close');
-      if (window.lucide?.createIcons) window.lucide.createIcons({ nodes: [button] });
-    }
+    button.innerHTML = collapsed
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M13 10l2 2-2 2"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 10l-2 2 2 2"/></svg>';
   });
 })();
