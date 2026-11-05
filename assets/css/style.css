@@ -4668,7 +4668,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
    DESKTOP DASHBOARD — WIDE WORKSPACE (1280–1920px)
    Mobile layout remains unchanged.
    ========================================================= */
-@media (min-width: 1100px) {
+@media (min-width: 900px) {
   .app {
     width: 100%;
     max-width: 1920px;
@@ -4946,7 +4946,7 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 }
 
-@media (min-width: 1100px) and (max-width: 1350px) {
+@media (min-width: 900px) and (max-width: 1350px) {
   #page-dashboard.page.active {
     grid-template-columns: minmax(0, 1.15fr) repeat(3, minmax(155px, .62fr));
     column-gap: 16px;
