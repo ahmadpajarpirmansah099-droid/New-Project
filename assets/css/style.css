@@ -5132,3 +5132,13 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     max-height:min(300px, 48vh);
   }
 }
+
+
+/* Hide workspace controls only while the mobile navigation drawer is open. */
+@media (max-width: 520px) {
+  body.menu-open .workspace-scope-switcher {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
