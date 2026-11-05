@@ -110,6 +110,7 @@ async function initializeWorkspace(event, switchingContext) {
     state = {schemaVersion:3,guests:[],counters:{},reservations:[],reservationCounters:{},settings:{seatingDurationMinutes:90}};
     remoteSaveQueue = Promise.resolve();
     window.GuestOpsService?.reset(); window.MasterDataStore?.reset();
+    window.DailyStockService?.invalidate();
     closeQuickMenu(); closeMenu(); closeSheet();
   }
   if (appDataReady || appInitializing) return;
@@ -122,6 +123,11 @@ async function initializeWorkspace(event, switchingContext) {
     if(!isCurrent()) return;
     await window.MasterDataStore.assertSession();
     if(!isCurrent()) return;
+    const dailyStockPages = ['daily-stock','daily-expense','daily-production','daily-sale','daily-purchase','daily-supplies'];
+    if (switchingContext && window.DailyStockService && dailyStockPages.includes(workspaceReturnPage)) {
+      await window.DailyStockService.initialize();
+      if(!isCurrent()) return;
+    }
     applyRoleNavigation();
     if(canAccessGuestOperations()) {
       const remoteState=await window.GuestOpsService.initialize(supabaseClient,authContext.workspaceId);
