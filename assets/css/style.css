@@ -5037,10 +5037,23 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   #page-dashboard > #dashboardList {
     grid-column: 2;
     grid-row: 2;
+    display: grid;
+    grid-auto-rows: max-content;
+    align-content: start;
+    gap: 10px;
     min-width: 0;
     align-self: start;
     margin-top: 44px;
     height: 290px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+  }
+
+  #page-dashboard > #dashboardList > .guest {
+    align-self: start;
+    min-height: 104px;
+    height: auto;
   }
 
   #page-dashboard > #dashboardList > .empty {
