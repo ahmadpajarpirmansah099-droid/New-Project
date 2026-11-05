@@ -5161,3 +5161,11 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     border-radius: 24px 0 0 24px;
   }
 }
+
+/* Desktop quick-menu fan: anchor the action buttons to the desktop FAB center. */
+@media (min-width: 900px) {
+  .quick-menu {
+    right: calc(clamp(30px, 4vw, 76px) + 27px);
+    bottom: 57px;
+  }
+}
