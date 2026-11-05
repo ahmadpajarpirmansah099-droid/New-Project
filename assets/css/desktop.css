@@ -224,3 +224,42 @@
 @media (prefers-reduced-motion: reduce) {
   .menu-drawer, .drawer-item, #page-dashboard .metric, #page-dashboard .guest { animation: none !important; transition: none !important; }
 }
+
+
+/* Desktop sidebar can be collapsed without affecting mobile navigation. */
+@media (min-width: 900px) {
+  .desktop-sidebar-toggle {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background .2s, border-color .2s, transform .2s;
+  }
+  .desktop-sidebar-toggle:hover { background: #f3f6fb; border-color: #cbd5e4; }
+  .desktop-sidebar-toggle:active { transform: scale(.96); }
+  .desktop-sidebar-toggle svg { width: 19px; height: 19px; }
+  .app { transition: width .25s ease, margin-left .25s ease; }
+  .menu-drawer { transition: transform .25s ease, box-shadow .25s ease; }
+  body.desktop-sidebar-collapsed .app {
+    width: 100%;
+    margin-left: 0;
+  }
+  body.desktop-sidebar-collapsed .menu-drawer {
+    transform: translateX(-100%) !important;
+    visibility: hidden !important;
+    box-shadow: none;
+  }
+  body.desktop-sidebar-collapsed .desktop-sidebar-toggle { color: var(--blue); }
+}
+@media (max-width: 899px) {
+  .desktop-sidebar-toggle { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app, .menu-drawer, .desktop-sidebar-toggle { transition: none !important; }
+}
