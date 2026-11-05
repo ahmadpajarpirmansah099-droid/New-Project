@@ -102,7 +102,7 @@
     align-items: start;
   }
   #page-dashboard > .greeting {
-    grid-column: 1 / -1;
+    grid-column: 1;
     grid-row: 1;
     min-height: 0;
     margin: 0 0 4px;
@@ -162,7 +162,7 @@
   }
   #page-dashboard > .section-head {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 1;
     margin: 0 0 4px;
     align-self: center;
   }
@@ -170,7 +170,8 @@
   #page-dashboard > .section-head .text-btn { font-size: 12px; }
   #page-dashboard > #dashboardList {
     grid-column: 2;
-    grid-row: 3 / span 2;
+    grid-row: 2 / span 2;
+    align-self: stretch;
     display: grid;
     grid-template-columns: minmax(0,1fr);
     gap: 10px;
