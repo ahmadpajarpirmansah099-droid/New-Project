@@ -5,12 +5,12 @@ Supabase project: `niwapjafzaizlnenuyui`
 
 ## Current status
 
-- Supabase reports **33 applied migrations**.
-- This repository currently tracks **17 SQL migration files**.
-- **16 historical migrations** applied before the security-hardening series are not present in the repository's migration folder.
+- Supabase reports **35 applied migrations**.
+- This repository currently tracks **18 SQL migration files**.
+- **17 applied migrations** do not yet have their SQL source in this repository. This includes 16 historical migrations predating the security-hardening series and `20261105035120_guestops_identity_and_workspace_integrity_v1`.
 - The Supabase migration history available through the project records migration versions and names, but it does not provide the missing SQL source text.
 
-The seven migrations added during the 2026-11-05 hardening work are tracked here and match the versions recorded by Supabase.
+The eight migrations tracked from the 2026-11-05 security-hardening series are committed here and match the versions recorded by Supabase.
 
 ## Important safety note
 
