@@ -278,3 +278,18 @@
 @media (prefers-reduced-motion: reduce) {
   .app, .menu-drawer, .desktop-sidebar-toggle { transition: none !important; }
 }
+
+/* Desktop statistic cards: subtle neutral gray gradient, matching default palette. */
+@media (min-width: 900px) {
+  #page-dashboard > .metrics .metric {
+    background:
+      radial-gradient(ellipse at 100% 110%, rgba(190,198,210,.34) 0%, rgba(190,198,210,0) 58%),
+      linear-gradient(145deg, #ffffff 0%, #f5f6f8 54%, #e9edf2 100%);
+    border-color: #e3e7ed;
+  }
+
+  #page-dashboard > .metrics .metric-icon {
+    background: linear-gradient(145deg, #eef1f5 0%, #dce1e8 100%);
+    color: #273247;
+  }
+}
