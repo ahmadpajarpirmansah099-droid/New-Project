@@ -71,52 +71,23 @@
       activeDivisionId:selected.id, activeDivisionName:selected.name,
       divisionMode:'single', isGlobalDeveloper:profile.role === 'developer' };
   }
-  function escapeSelectorText(value) {
-    return String(value || '').replace(/[&<>"']/g,(char)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-  }
   function renderScopeSelectors() {
     const wrap=$('workspaceScopeSwitcher'), outlet=$('workspaceOutletSelect'), division=$('workspaceDivisionSelect');
-    if(!wrap || !outlet || !division || !authContext?.isGlobalDeveloper){if(wrap)wrap.hidden=true;closeScopePicker();return;}
+    if(!wrap || !outlet || !division || !authContext?.isGlobalDeveloper){if(wrap)wrap.hidden=true;return;}
     wrap.hidden=false;
-    outlet.innerHTML=authContext.workspaces.map((item)=>'<option value="'+item.id+'">'+escapeSelectorText(item.name)+'</option>').join('');
+    outlet.innerHTML=authContext.workspaces.map(item=>'<option value="'+String(item.id)+'"></option>').join('');
+    authContext.workspaces.forEach((item,index)=>{outlet.options[index].textContent=item.name;});
     outlet.value=authContext.workspaceId;
-    division.innerHTML=authContext.divisions.map((item)=>'<option value="'+item.id+'">'+escapeSelectorText(item.name)+'</option>').join('');
+    division.innerHTML='';
+    authContext.divisions.forEach(item=>{
+      const option=document.createElement('option');
+      option.value=item.id;
+      option.textContent=item.name;
+      division.appendChild(option);
+    });
     division.value=authContext.activeDivisionId;
-    const outletTrigger=$('workspaceOutletTrigger'),divisionTrigger=$('workspaceDivisionTrigger');
-    if(outletTrigger)outletTrigger.querySelector('[data-scope-value]').textContent=authContext.workspaceName||'Pilih outlet';
-    if(divisionTrigger)divisionTrigger.querySelector('[data-scope-value]').textContent=authContext.activeDivisionName||'Pilih divisi';
-    if(outletTrigger)outletTrigger.disabled=workspaceSwitchBusy;
-    if(divisionTrigger)divisionTrigger.disabled=workspaceSwitchBusy;
-    outlet.disabled=workspaceSwitchBusy; division.disabled=workspaceSwitchBusy;
-  }
-  function closeScopePicker() {
-    const menu=$('workspaceScopeMenu'),backdrop=$('workspaceScopeBackdrop');
-    if(menu)menu.hidden=true;
-    if(backdrop)backdrop.hidden=true;
-    $('workspaceOutletTrigger')?.setAttribute('aria-expanded','false');
-    $('workspaceDivisionTrigger')?.setAttribute('aria-expanded','false');
-    document.body.classList.remove('scope-picker-open');
-  }
-  function openScopePicker(type) {
-    if(workspaceSwitchBusy || !authContext?.isGlobalDeveloper)return;
-    const menu=$('workspaceScopeMenu'),backdrop=$('workspaceScopeBackdrop'),options=$('workspaceScopeOptions');
-    const title=$('workspaceScopeMenuTitle'),trigger=$(type==='outlet'?'workspaceOutletTrigger':'workspaceDivisionTrigger');
-    if(!menu || !backdrop || !options || !title || !trigger)return;
-    const items=type==='outlet'
-      ? authContext.workspaces.map(item=>({id:item.id,name:item.name}))
-      : authContext.divisions.map(item=>({id:item.id,name:item.name}));
-    const selected=type==='outlet'?authContext.workspaceId:authContext.activeDivisionId;
-    title.textContent=type==='outlet'?'Pilih outlet':'Pilih divisi';
-    options.innerHTML=items.map(item=>{
-      const active=item.id===selected;
-      return '<button class="scope-picker-option'+(active?' is-selected':'')+'" type="button" role="option" aria-selected="'+active+'" data-scope-option="'+escapeSelectorText(item.id)+'"><span>'+escapeSelectorText(item.name)+'</span><span class="scope-picker-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg></span></button>';
-    }).join('');
-    menu.dataset.scopeType=type;
-    menu.hidden=false;backdrop.hidden=false;
-    $('workspaceOutletTrigger')?.setAttribute('aria-expanded',String(type==='outlet'));
-    $('workspaceDivisionTrigger')?.setAttribute('aria-expanded',String(type==='division'));
-    document.body.classList.add('scope-picker-open');
-    $('workspaceScopeClose')?.focus();
+    outlet.disabled=workspaceSwitchBusy;
+    division.disabled=workspaceSwitchBusy;
   }
   async function switchWorkspaceContext(workspaceId, divisionSelection) {
     if(workspaceSwitchBusy || !authContext?.isGlobalDeveloper)return;
@@ -285,20 +256,12 @@
       this.setAttribute('aria-label', visible ? 'Sembunyikan password' : 'Tampilkan password');
     });
     $('authLogoutButton').addEventListener('click', handleLogout);
-    $('workspaceOutletTrigger')?.addEventListener('click',()=>openScopePicker('outlet'));
-    $('workspaceDivisionTrigger')?.addEventListener('click',()=>openScopePicker('division'));
-    $('workspaceScopeClose')?.addEventListener('click',closeScopePicker);
-    $('workspaceScopeBackdrop')?.addEventListener('click',closeScopePicker);
-    $('workspaceScopeOptions')?.addEventListener('click',(event)=>{
-      const option=event.target.closest('[data-scope-option]');
-      if(!option || !authContext?.isGlobalDeveloper)return;
-      const type=$('workspaceScopeMenu')?.dataset.scopeType;
-      const value=option.dataset.scopeOption;
-      closeScopePicker();
-      if(type==='outlet')switchWorkspaceContext(value,null);
-      else if(type==='division')switchWorkspaceContext(authContext.workspaceId,value);
+    $('workspaceOutletSelect')?.addEventListener('change',event=>{
+      if(authContext?.isGlobalDeveloper)switchWorkspaceContext(event.target.value,null);
     });
-    document.addEventListener('keydown',(event)=>{if(event.key==='Escape'&&!$('workspaceScopeMenu')?.hidden)closeScopePicker();});
+    $('workspaceDivisionSelect')?.addEventListener('change',event=>{
+      if(authContext?.isGlobalDeveloper)switchWorkspaceContext(authContext.workspaceId,event.target.value);
+    });
     $('authProfileButton').addEventListener('click', handleLogout);
 
     supabaseClient.auth.onAuthStateChange(function (event, session) {
