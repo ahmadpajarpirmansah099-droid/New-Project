@@ -4978,11 +4978,11 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
   }
 
   #page-dashboard > .metrics {
-    gap: 12px;
+    gap: 40px;
   }
 
   #page-dashboard > .metrics .metric {
-    padding: 18px 16px;
+    padding: 16px;
   }
 }
 
