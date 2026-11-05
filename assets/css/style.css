@@ -5263,3 +5263,25 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     display: none !important;
   }
 }
+
+
+/* Hide visible scrollbar tracks inside popups while preserving scrolling. */
+.sheet,
+.sheet *,
+.calendar-dialog,
+.calendar-dialog *,
+.scope-picker-sheet,
+.scope-picker-sheet * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.sheet::-webkit-scrollbar,
+.sheet *::-webkit-scrollbar,
+.calendar-dialog::-webkit-scrollbar,
+.calendar-dialog *::-webkit-scrollbar,
+.scope-picker-sheet::-webkit-scrollbar,
+.scope-picker-sheet *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
