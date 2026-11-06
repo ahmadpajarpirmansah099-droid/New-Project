@@ -6,10 +6,16 @@ User Monitoring is a Developer-only view for live device sessions and authentica
 
 - First tab: Live Users.
 - Second tab: Activity Log.
-- Live Users groups device sessions by account and shows full email, role, outlet captured at login, device count, device type, browser, OS, login time, last heartbeat, duration, and status.
+- Live Users groups browser installations by account. A browser-stored device ID keeps repeated logins in the same browser under one device card; each login session remains available in the device detail.
 - Activity Log requires the outlet filter. It includes an "Unidentified" filter for failed login attempts that cannot be associated with an account or outlet.
 - Automatic refresh runs every 30 seconds while the page is visible; a manual refresh is available.
 - No search or export controls.
+
+## Device identification
+
+- The browser stores a random UUID under `user_monitoring_device_id_v1` in localStorage and sends it during session registration.
+- This identifies the same browser installation, not the physical hardware. A different browser, private browsing session, or cleared site storage may be counted as a separate device.
+- Existing sessions are assigned individual IDs during migration because they cannot be reliably matched to a physical browser after the fact.
 
 ## Session behavior
 
@@ -53,7 +59,8 @@ The connector used for this implementation cannot change this project-level sett
 - Auth service errors are recorded separately as login errors.
 - Logout marks only the current session as logged out.
 - A disconnected session becomes offline after the 120-second threshold.
-- A second device creates a separate session under the same account.
+- Repeated logins in the same browser share one device card while each login session remains in its detail history.
+- A different browser or separate browser storage creates a separate device card.
 - Non-Developer users cannot read monitoring tables or other users' Presence.
 - Developer can see all sessions and filter activity by outlet.
 - Offline/logged-out sessions and activity logs are removed at their respective retention limits.

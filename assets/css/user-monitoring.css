@@ -876,3 +876,31 @@
     margin-top: auto;
   }
 }
+
+
+/* Device-level login history inside account detail. */
+.monitor-modal-device-group {
+  margin-top: 8px;
+}
+
+.monitor-device-history {
+  margin: -2px 0 12px 50px;
+  padding: 0 0 0 12px;
+  border-left: 2px solid var(--line);
+}
+
+.monitor-device-history-entry {
+  display: grid;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.monitor-device-history-entry + .monitor-device-history-entry {
+  border-top: 1px dashed var(--line);
+}
+
+@media (max-width: 899px) {
+  .monitor-device-history {
+    margin-left: 46px;
+  }
+}
