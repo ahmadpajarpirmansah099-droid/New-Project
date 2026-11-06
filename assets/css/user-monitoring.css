@@ -711,3 +711,168 @@
     transition: none !important;
   }
 }
+
+
+/* Mobile User Monitoring: compact account cards, activity inside detail popup. */
+@media (max-width: 899px) {
+  #monitorLiveUsers .monitor-account {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 17px;
+  }
+
+  #monitorLiveUsers .monitor-account-head {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  #monitorLiveUsers .monitor-account-name {
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  #monitorLiveUsers .monitor-account-email {
+    font-size: 11px;
+    overflow-wrap: anywhere;
+  }
+
+  #monitorLiveUsers .monitor-device-count {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  #monitorLiveUsers .monitor-account-meta {
+    margin: 11px 0 13px;
+  }
+
+  #monitorLiveUsers .monitor-account-status {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 0;
+    margin-top: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  #monitorLiveUsers .monitor-status-lamp {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    flex: 0 0 11px;
+    border-radius: 50%;
+  }
+
+  #monitorLiveUsers .monitor-status-lamp.is-online {
+    background: #20bd70;
+    box-shadow: 0 0 0 3px rgba(32,189,112,.13), 0 0 11px rgba(32,189,112,.72);
+  }
+
+  #monitorLiveUsers .monitor-status-lamp.is-offline {
+    background: #e34b52;
+    box-shadow: 0 0 0 3px rgba(227,75,82,.12), 0 0 11px rgba(227,75,82,.58);
+  }
+
+  #monitorLiveUsers .monitor-status-lamp.is-logged_out {
+    background: #98a2b3;
+    box-shadow: 0 0 0 3px rgba(152,162,179,.14);
+  }
+
+  #monitorLiveUsers .monitor-account-status-label {
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  #monitorLiveUsers .monitor-detail-button {
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: #f7f8fa;
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, transform .16s ease;
+  }
+
+  #monitorLiveUsers .monitor-detail-button:active {
+    transform: scale(.99);
+    background: #eef2f7;
+  }
+
+  .monitor-modal-overlay {
+    position: fixed;
+    z-index: 1200;
+    inset: 0;
+    display: grid;
+    place-items: end center;
+    padding: 12px;
+    background: rgba(15, 24, 39, .5);
+    backdrop-filter: blur(4px);
+  }
+
+  .monitor-account-modal {
+    width: 100%;
+    max-height: min(84dvh, 760px);
+    overflow: auto;
+    padding: 19px 16px max(18px, env(safe-area-inset-bottom));
+    border: 1px solid rgba(255,255,255,.75);
+    border-radius: 20px 20px 16px 16px;
+    background: var(--surface);
+    box-shadow: 0 18px 55px rgba(16, 28, 48, .24);
+    animation: monitor-mobile-modal-in .22s ease-out;
+  }
+
+  .monitor-modal-title {
+    font-size: 16px;
+  }
+
+  .monitor-modal-subtitle {
+    font-size: 11px;
+  }
+
+  .monitor-modal-meta {
+    gap: 6px;
+    padding: 12px 0;
+  }
+
+  .monitor-modal-section-title {
+    margin: 15px 0 5px;
+    font-size: 12px;
+  }
+
+  .monitor-modal-device {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 10px;
+    padding: 12px 0;
+  }
+
+  .monitor-modal-device .monitor-status {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: -2px;
+  }
+
+  .monitor-modal-device .monitor-device-title {
+    font-size: 12px;
+  }
+
+  .monitor-modal-device .monitor-device-detail {
+    font-size: 10px;
+  }
+
+  @keyframes monitor-mobile-modal-in {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@media (min-width: 900px) {
+  #monitorLiveUsers .monitor-account-status {
+    margin-top: auto;
+  }
+}
