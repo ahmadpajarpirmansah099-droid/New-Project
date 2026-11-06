@@ -463,17 +463,29 @@
 
   .monitor-modal-close {
     display: grid;
-    width: 34px;
-    height: 34px;
-    flex: 0 0 34px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    flex: 0 0 40px;
     place-items: center;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: #f7f8fa;
-    color: var(--muted);
-    font-size: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 13px;
+    background: #f1f4f8;
+    color: #52627a;
+    font: inherit;
     line-height: 1;
+    appearance: none;
+    -webkit-appearance: none;
+    box-shadow: none;
     cursor: pointer;
+  }
+
+  .monitor-modal-close svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
   }
 
   .monitor-modal-meta {
@@ -982,9 +994,19 @@
     cursor: pointer;
   }
 
-  .monitor-modal-close:active {
+  .monitor-modal-close:hover {
     background: #e9edf3;
-    transform: scale(.96);
+    color: var(--ink);
+  }
+
+  .monitor-modal-close:active {
+    background: #e4eaf2;
+    transform: scale(.94);
+  }
+
+  .monitor-modal-close:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
   }
 
   .monitor-modal-meta {
