@@ -5422,3 +5422,61 @@ button:active,
     transform:none;
   }
 }
+
+/* =========================================================
+   GUEST DETAIL CARDS — TACTILE TAP FEEDBACK
+   Visual-only interaction. Cards do not trigger data actions.
+   ========================================================= */
+
+#sheet .detail-ticket,
+#sheet .detail-cell {
+  cursor:pointer;
+  transform-origin:center;
+  -webkit-tap-highlight-color:transparent;
+  transition:
+    transform .16s cubic-bezier(.2,.8,.2,1),
+    box-shadow .18s ease,
+    background-color .18s ease,
+    filter .18s ease;
+}
+
+#sheet .detail-ticket:active {
+  transform:scale(.985);
+  filter:brightness(.97) saturate(1.04);
+  box-shadow:0 3px 9px rgba(17,18,37,.13);
+}
+
+#sheet .detail-cell:active {
+  transform:scale(.975);
+  background-color:#eef1e7;
+  box-shadow:0 1px 4px rgba(17,18,37,.10);
+}
+
+@media (hover:hover) and (pointer:fine) {
+  #sheet .detail-ticket:hover,
+  #sheet .detail-cell:hover {
+    transform:translateY(-2px);
+  }
+
+  #sheet .detail-ticket:hover {
+    box-shadow:0 11px 24px rgba(17,18,37,.14),0 3px 7px rgba(17,18,37,.06);
+  }
+
+  #sheet .detail-cell:hover {
+    box-shadow:0 7px 15px rgba(17,18,37,.10),0 2px 4px rgba(17,18,37,.04);
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  #sheet .detail-ticket,
+  #sheet .detail-cell {
+    transition:none;
+  }
+
+  #sheet .detail-ticket:active,
+  #sheet .detail-cell:active,
+  #sheet .detail-ticket:hover,
+  #sheet .detail-cell:hover {
+    transform:none;
+  }
+}
