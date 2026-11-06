@@ -315,3 +315,206 @@
   font-size: 12px;
   text-align: center;
 }
+
+/* Desktop account overview: compact cards with activity in a modal. */
+@media (min-width: 900px) {
+  #monitorLiveUsers {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  #monitorLiveUsers > .monitor-empty {
+    grid-column: 1 / -1;
+  }
+
+  #monitorLiveUsers .monitor-account {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0;
+    padding: 17px;
+    margin: 0;
+    border-radius: 16px;
+  }
+
+  #monitorLiveUsers .monitor-account-head {
+    align-items: flex-start;
+  }
+
+  #monitorLiveUsers .monitor-account-name {
+    font-size: 14px;
+  }
+
+  #monitorLiveUsers .monitor-account-email {
+    overflow-wrap: anywhere;
+  }
+
+  #monitorLiveUsers .monitor-account-meta {
+    margin: 12px 0 15px;
+  }
+
+  .monitor-account-status {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 13px 0;
+    margin-top: auto;
+    border-top: 1px solid var(--line);
+  }
+
+  .monitor-status-lamp {
+    position: relative;
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    flex: 0 0 11px;
+    border-radius: 50%;
+  }
+
+  .monitor-status-lamp.is-online {
+    background: #20bd70;
+    box-shadow: 0 0 0 3px rgba(32,189,112,.13), 0 0 11px rgba(32,189,112,.72);
+  }
+
+  .monitor-status-lamp.is-offline {
+    background: #e34b52;
+    box-shadow: 0 0 0 3px rgba(227,75,82,.12), 0 0 11px rgba(227,75,82,.58);
+  }
+
+  .monitor-status-lamp.is-logged_out {
+    background: #98a2b3;
+    box-shadow: 0 0 0 3px rgba(152,162,179,.14);
+  }
+
+  .monitor-account-status-label {
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .monitor-detail-button {
+    width: 100%;
+    min-height: 37px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #f7f8fa;
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease;
+  }
+
+  .monitor-detail-button:hover {
+    border-color: #c5ceda;
+    background: #eef2f7;
+  }
+
+  .monitor-modal-overlay {
+    position: fixed;
+    z-index: 1200;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 28px;
+    background: rgba(15, 24, 39, .48);
+    backdrop-filter: blur(5px);
+  }
+
+  .monitor-account-modal {
+    width: min(680px, 100%);
+    max-height: min(78vh, 760px);
+    overflow: auto;
+    padding: 23px;
+    border: 1px solid rgba(255,255,255,.7);
+    border-radius: 20px;
+    background: var(--surface);
+    box-shadow: 0 24px 70px rgba(16, 28, 48, .24);
+    animation: monitor-modal-in .2s ease-out;
+  }
+
+  .monitor-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  .monitor-modal-title-wrap {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .monitor-modal-title {
+    color: var(--ink);
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .monitor-modal-subtitle {
+    color: var(--muted);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .monitor-modal-close {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #f7f8fa;
+    color: var(--muted);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .monitor-modal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 15px 0;
+    margin-bottom: 3px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .monitor-modal-section-title {
+    margin: 17px 0 7px;
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .monitor-modal-device {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .monitor-modal-device:last-child {
+    border-bottom: 0;
+  }
+
+  @keyframes monitor-modal-in {
+    from { opacity: 0; transform: translateY(8px) scale(.99); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .monitor-detail-button,
+  .monitor-account-modal {
+    animation: none !important;
+    transition: none !important;
+  }
+}
