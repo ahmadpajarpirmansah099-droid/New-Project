@@ -5385,3 +5385,40 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     margin-top: 8px;
   }
 }
+
+/* =========================================================
+   BUTTON MICRO-INTERACTIONS — CONSISTENT TAP FEEDBACK
+   Keep existing feature-specific press effects where defined.
+   ========================================================= */
+
+button:active,
+[role="button"]:active {
+  transform:scale(.975);
+}
+
+.filters .filter {
+  transition:
+    transform .16s cubic-bezier(.2,.8,.2,1),
+    background-color .2s ease,
+    color .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+
+.filters .filter:active {
+  transform:scale(.96);
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .filters .filter {
+    transition:none;
+  }
+
+  button:active,
+  [role="button"]:active,
+  .filters .filter:active {
+    transform:none;
+  }
+}
