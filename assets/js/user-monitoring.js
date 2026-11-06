@@ -530,7 +530,8 @@
       create('strong', 'monitor-modal-title', account.display_name || 'Tanpa nama'),
       create('span', 'monitor-modal-subtitle', account.user_email || 'Email tidak tersedia')
     );
-    const closeButton = create('button', 'monitor-modal-close', '×');
+    const closeButton = create('button', 'monitor-modal-close');
+    closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
     closeButton.type = 'button';
     closeButton.setAttribute('aria-label', 'Tutup detail');
     closeButton.addEventListener('click', closeAccountDetails);
