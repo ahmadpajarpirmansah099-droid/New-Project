@@ -430,3 +430,30 @@
     height: 0;
   }
 }
+
+
+/* DESKTOP — keep statistic cards directly below the hero.
+   The tall sticky queue panel must not enlarge the left dashboard grid rows. */
+@media (min-width: 900px) {
+  #page-dashboard.page.active {
+    grid-template-rows: auto 190px 112px auto;
+  }
+
+  #page-dashboard > .hero {
+    min-height: 190px;
+    height: 190px;
+    align-self: start;
+  }
+
+  #page-dashboard > .metrics {
+    grid-row: 3;
+    min-height: 112px;
+    height: 112px;
+    align-self: start;
+  }
+
+  #page-dashboard > #dashboardList {
+    align-self: start;
+    min-height: 0;
+  }
+}
