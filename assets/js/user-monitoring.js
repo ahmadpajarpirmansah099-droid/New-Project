@@ -77,7 +77,8 @@
     if (error || !data?.session?.access_token) return null;
     try {
       const encoded = data.session.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      const payload = JSON.parse(atob(encoded));
+      const padded = encoded.padEnd(Math.ceil(encoded.length / 4) * 4, '=');
+      const payload = JSON.parse(atob(padded));
       return payload.session_id || null;
     } catch {
       return null;
