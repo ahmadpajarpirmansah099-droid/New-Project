@@ -210,3 +210,62 @@ function exportCSV() {
   toast('File CSV berhasil dibuat');
 }
 
+/* =========================================================
+   GUEST STATUS CONFIRMATION
+   Confirm seated/done actions before changing guest status.
+   ========================================================= */
+function confirmGuestStatus(id, status) {
+  const guest = state.guests.find(item => item.id === id);
+  if (!guest) return;
+
+  const isSeated = status === 'seated';
+  const title = isSeated ? 'Dudukkan tamu?' : 'Selesaikan kunjungan?';
+  const message = isSeated
+    ? 'Yakin ingin mengubah status ' + guest.name + ' menjadi Duduk?'
+    : 'Yakin ingin menyelesaikan kunjungan ' + guest.name + '?';
+  const confirmLabel = isSeated ? 'Ya, dudukkan' : 'Ya, selesaikan';
+
+  const existing = document.getElementById('guestStatusConfirm');
+  if (existing) existing.remove();
+
+  const backdrop = document.createElement('div');
+  backdrop.id = 'guestStatusConfirm';
+  backdrop.className = 'guest-confirm-backdrop';
+  backdrop.innerHTML =
+    '<section class="guest-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="guestConfirmTitle" aria-describedby="guestConfirmMessage">' +
+      '<div class="guest-confirm-icon" aria-hidden="true">' +
+        '<i data-lucide="' + (isSeated ? 'armchair' : 'check-circle-2') + '"></i>' +
+      '</div>' +
+      '<h2 id="guestConfirmTitle"></h2>' +
+      '<p id="guestConfirmMessage"></p>' +
+      '<div class="guest-confirm-actions">' +
+        '<button type="button" class="guest-confirm-cancel">Kembali</button>' +
+        '<button type="button" class="guest-confirm-accept"></button>' +
+      '</div>' +
+    '</section>';
+
+  document.body.appendChild(backdrop);
+  backdrop.querySelector('#guestConfirmTitle').textContent = title;
+  backdrop.querySelector('#guestConfirmMessage').textContent = message;
+  backdrop.querySelector('.guest-confirm-accept').textContent = confirmLabel;
+
+  const close = () => {
+    document.removeEventListener('keydown', onKeydown);
+    backdrop.remove();
+  };
+  const onKeydown = event => {
+    if (event.key === 'Escape') close();
+  };
+
+  backdrop.querySelector('.guest-confirm-cancel').addEventListener('click', close);
+  backdrop.querySelector('.guest-confirm-accept').addEventListener('click', async () => {
+    close();
+    await setGuestStatus(id, status);
+  });
+  backdrop.addEventListener('click', event => {
+    if (event.target === backdrop) close();
+  });
+  document.addEventListener('keydown', onKeydown);
+  if (window.lucide?.createIcons) window.lucide.createIcons();
+  backdrop.querySelector('.guest-confirm-cancel').focus();
+}
