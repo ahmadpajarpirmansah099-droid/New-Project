@@ -233,9 +233,6 @@ function confirmGuestStatus(id, status) {
   backdrop.className = 'guest-confirm-backdrop';
   backdrop.innerHTML =
     '<section class="guest-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="guestConfirmTitle" aria-describedby="guestConfirmMessage">' +
-      '<div class="guest-confirm-icon" aria-hidden="true">' +
-        '<i data-lucide="' + (isSeated ? 'armchair' : 'check-circle-2') + '"></i>' +
-      '</div>' +
       '<h2 id="guestConfirmTitle"></h2>' +
       '<p id="guestConfirmMessage"></p>' +
       '<div class="guest-confirm-actions">' +
