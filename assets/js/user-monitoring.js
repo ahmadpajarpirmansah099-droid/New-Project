@@ -6,7 +6,7 @@
   const OFFLINE_AFTER_MS = 120000;
   const HEARTBEAT_MS = 25000;
   const REFRESH_MS = 30000;
-  const HIDDEN_MONITORING_EMAILS = new Set(['ahmadpajarpirmansah099@gmail.com']);
+  const HIDDEN_MONITORING_USER_IDS = new Set(['a0d14f91-434d-4274-81e5-8445f06e25cf']);
 
   let client = null;
   let context = null;
@@ -634,10 +634,10 @@
 
       if (sessionResult.error) throw sessionResult.error;
       const visibleSessions = (sessionResult.data || []).filter((session) =>
-        !HIDDEN_MONITORING_EMAILS.has(String(session.user_email || '').trim().toLowerCase())
+        !HIDDEN_MONITORING_USER_IDS.has(String(session.user_id || '').trim())
       );
       const visibleActivities = (activityResult || []).filter((activity) =>
-        !HIDDEN_MONITORING_EMAILS.has(String(activity.actor_email || '').trim().toLowerCase())
+        !HIDDEN_MONITORING_USER_IDS.has(String(activity.user_id || '').trim())
       );
       renderLiveUsers(visibleSessions);
       renderActivity(visibleActivities);
