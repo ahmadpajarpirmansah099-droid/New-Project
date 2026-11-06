@@ -69,11 +69,11 @@ function openDetail(id) {
 
   const cancelActions = canCancel
     ? '<div class="sheet-actions"><button class="secondary" data-app-action="setGuestStatus" data-app-id="' + esc(guest.id) + '" data-app-value="cancelled">Batalkan</button>' +
-      '<button class="primary" data-app-action="setGuestStatus" data-app-id="' + esc(guest.id) + '" data-app-value="seated">Dudukkan tamu</button></div>'
+      '<button class="primary" data-app-action="confirmGuestStatus" data-app-id="' + esc(guest.id) + '" data-app-value="seated">Dudukkan tamu</button></div>'
     : '';
 
   const finishAction = canFinish
-    ? '<div class="sheet-actions"><button class="primary" data-app-action="setGuestStatus" data-app-id="' + esc(guest.id) + '" data-app-value="done">Selesaikan kunjungan</button></div>'
+    ? '<div class="sheet-actions"><button class="primary" data-app-action="confirmGuestStatus" data-app-id="' + esc(guest.id) + '" data-app-value="done">Selesaikan kunjungan</button></div>'
     : '';
 
   const timeline = renderGuestAuditTimeline(guest.audit || []);
