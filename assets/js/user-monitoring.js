@@ -441,36 +441,17 @@
       );
       account.append(head, meta);
 
-      if (window.matchMedia('(min-width: 900px)').matches) {
-        const accountStatus = devices.some((device) => sessionStatus(device) === 'online')
-          ? 'online'
-          : devices.some((device) => sessionStatus(device) === 'offline') ? 'offline' : 'logged_out';
-        const statusLine = create('div', 'monitor-account-status');
-        const lamp = create('span', 'monitor-status-lamp is-' + accountStatus);
-        lamp.setAttribute('aria-hidden', 'true');
-        statusLine.append(lamp, create('strong', 'monitor-account-status-label', statusLabel(accountStatus)));
-        const detailButton = create('button', 'monitor-detail-button', 'Lihat detail');
-        detailButton.type = 'button';
-        detailButton.addEventListener('click', () => openAccountDetails(first, devices));
-        account.append(statusLine, detailButton);
-      } else {
-        devices.forEach((device) => {
-          const status = sessionStatus(device);
-          const row = create('div', 'monitor-device');
-          const icon = create('div', 'monitor-device-icon', device.device_type === 'mobile'
-            ? 'HP' : device.device_type === 'tablet' ? 'TAB' : 'PC');
-          const info = create('div', 'monitor-device-info');
-          info.append(
-            create('strong', 'monitor-device-title', device.browser + ' · ' + device.operating_system),
-            create('span', 'monitor-device-detail', 'Login ' + formatDate(device.logged_in_at)),
-            create('span', 'monitor-device-detail', 'Aktif terakhir ' + formatDate(device.last_seen_at)),
-            create('span', 'monitor-device-detail', 'Durasi ' + formatDuration(device.logged_in_at, device.ended_at))
-          );
-          const badge = create('span', 'monitor-status is-' + status, statusLabel(status));
-          row.append(icon, info, badge);
-          account.appendChild(row);
-        });
-      }
+      const accountStatus = devices.some((device) => sessionStatus(device) === 'online')
+        ? 'online'
+        : devices.some((device) => sessionStatus(device) === 'offline') ? 'offline' : 'logged_out';
+      const statusLine = create('div', 'monitor-account-status');
+      const lamp = create('span', 'monitor-status-lamp is-' + accountStatus);
+      lamp.setAttribute('aria-hidden', 'true');
+      statusLine.append(lamp, create('strong', 'monitor-account-status-label', statusLabel(accountStatus)));
+      const detailButton = create('button', 'monitor-detail-button', 'Lihat detail');
+      detailButton.type = 'button';
+      detailButton.addEventListener('click', () => openAccountDetails(first, devices));
+      account.append(statusLine, detailButton);
 
       root.appendChild(account);
     });
