@@ -1,77 +1,85 @@
 # New Project
 
-Aplikasi web operasional berbasis HTML, CSS, JavaScript, dan Supabase. Tampilan diprioritaskan untuk perangkat mobile. Aplikasi mencakup Guest Operations serta modul operasional outlet seperti Master Barang, Resep WIP, Menu, dan Daily SO.
+Aplikasi web operasional untuk pengelolaan kedatangan tamu, antrean, reservasi, dan modul operasional outlet. Antarmuka diprioritaskan untuk perangkat mobile.
+
+## Status proyek
+
+- Repository: private.
+- Branch utama: `main`.
+- Hosting: GitHub Pages melalui GitHub Actions.
+- Frontend: HTML, CSS, dan JavaScript biasa; tidak memakai Vite atau proses build.
+- Backend dan sumber data: Supabase.
+- Repository ini berdiri sendiri dan tidak terhubung dengan Barapp.
+
+Catatan akses: visibilitas repository yang Private tidak otomatis membuat website GitHub Pages menjadi private. Perlakukan URL website sebagai alamat yang mungkin dapat diakses publik. Akses repository dan akses website adalah dua hal berbeda.
 
 ## Modul aplikasi
 
 ### Guest Operations
 
-- **Guest Operational** — halaman utama untuk ringkasan tamu, pack, status, dan antrean aktif.
-- **Antrean** — tambah tamu, nomor antrean otomatis, membuka WhatsApp untuk menghubungi tamu, mengubah status, melihat detail, dan mengoreksi data.
-- **Riwayat** — mencari catatan tamu berdasarkan tanggal.
-- **Reservasi** — kalender bulanan, pembuatan kode reservasi, detail reservasi, pembatalan, dan proses mendudukkan tamu.
+- **Guest Operational** — dashboard ringkasan tamu, pack, status, dan antrean aktif.
+- **Waiting List / Antrean** — tambah tamu, nomor antrean, status, detail, koreksi data, dan membuka WhatsApp untuk menghubungi tamu.
+- **Riwayat** — pencarian catatan tamu berdasarkan tanggal.
+- **Reservasi** — kalender, kode reservasi, detail, pembatalan, dan proses mendudukkan tamu.
 - **Pengaturan** — pengaturan durasi Seating Time dan ekspor CSV.
 - **Menu cepat (+)** — akses Antrean, Riwayat, Reservasi, dan Tambah Tamu.
 
-### Modul operasional dan COGS
+### Master Data dan COGS
 
-- **Master Barang** — sumber bahan, satuan dasar, konversi satuan, harga referensi, status aktif/nonaktif, dan penanda barang supply.
-- **Resep WIP** — komposisi bahan/WIP turunan, hasil per batch, kalkulasi HPP rekursif, dan validasi resep.
+- **Master Barang** — data barang/bahan, satuan dasar, konversi satuan, harga, status aktif/nonaktif, dan klasifikasi supply.
+- **Resep WIP** — komposisi bahan atau WIP turunan, hasil per batch, perhitungan HPP rekursif, dan validasi resep.
 - **Menu** — komposisi bahan/WIP per porsi, HPP per porsi, harga jual, dan margin.
-- **Daily SO** — pencatatan stok dan transaksi operasional.
-- **Bagian Daily SO** — Pengeluaran, Produksi WIP, Sales, Barang Masuk, dan Supplies.
+- **Daily SO** — pencatatan stok dan transaksi operasional, termasuk Pengeluaran, Produksi WIP, Sales, Barang Masuk, dan Supplies.
 
-## Outlet dan divisi
+### User Monitoring
 
-Data Supabase saat dokumentasi ini diperbarui memiliki 3 outlet aktif:
+Halaman khusus Developer untuk memantau sesi perangkat dan riwayat aktivitas autentikasi.
 
-- Lazy Jennie
-- Mannaka
-- Rumah Sejoli
+- Tab **Live Users** dan **Activity Log**.
+- Sesi dikelompokkan berdasarkan ID perangkat browser; setiap sesi login tetap tersedia pada detail perangkat.
+- Heartbeat dikirim setiap 25 detik.
+- Sesi dianggap offline setelah 120 detik tanpa heartbeat.
+- Tampilan diperbarui otomatis setiap 30 detik saat halaman aktif/terlihat.
+- Riwayat sesi disimpan selama 7 hari dan aktivitas selama 30 hari.
+- Identitas perangkat mewakili instalasi browser, bukan identitas fisik perangkat.
+- Detail implementasi dan batasannya: [docs/USER_MONITORING.md](docs/USER_MONITORING.md).
 
-Setiap outlet memiliki 4 divisi aktif:
+## Hak akses dan workspace
 
-- Bar
-- Kitchen
-- Pastry
-- Service
+Akses aplikasi diverifikasi melalui sesi Supabase, profil akun, keanggotaan workspace, serta role yang ditetapkan.
 
-Daftar outlet dan divisi yang tampil di aplikasi mengikuti data aktif di Supabase. Daftar di atas merupakan kondisi database saat README ini diperbarui, bukan daftar yang ditanam permanen di aplikasi.
-
-## Hak akses akun
-
-Hak akses dibatasi berdasarkan peran, outlet, dan divisi yang ditugaskan.
-
-| Jenis akun | Cakupan akses |
+| Role | Cakupan |
 |---|---|
-| **Developer** | Akses seluruh outlet, seluruh divisi, dan seluruh modul aplikasi, termasuk Guest Operations dan Reservasi. |
-| **Admin Service** | Akses Guest Operations, Antrean, Riwayat Tamu, Reservasi, serta pengelolaan divisi Service pada outlet yang ditugaskan. Tidak memiliki akses global ke outlet lain. |
-| **Admin Divisi** | Mengelola modul sesuai divisi yang ditugaskan pada outletnya. Cakupan divisi operasional Admin Divisi adalah Bar, Kitchen, dan Pastry. Tidak mendapat akses Guest Operations, Antrean, Riwayat Tamu, atau Reservasi. |
+| **Developer** | Akses global lintas workspace dan dapat memilih outlet serta divisi aktif. |
+| **Admin** | Mengelola data dan pengaturan di workspace yang ditugaskan. |
+| **Service** | Menjalankan Guest Operations di workspace yang ditugaskan dan memiliki akses baca-saja ke Master Data. |
 
-Guest Operations dan Reservasi dibatasi berdasarkan outlet/workspace, bukan berdasarkan divisi. Karena itu, Admin Service yang ditugaskan pada outlet dapat mengelola Guest Operations dan Reservasi di outlet tersebut; Admin Divisi Bar, Kitchen, dan Pastry tidak dapat mengakses fitur tersebut.
+- Keanggotaan workspace disimpan pada `workspace_memberships`.
+- Penugasan divisi disimpan pada `workspace_division_memberships`.
+- Developer memiliki cakupan global; Admin dan Service tidak memperoleh akses global hanya karena role-nya.
+- Otorisasi tidak boleh didasarkan pada email yang ditulis atau diperiksa secara lokal di frontend.
+- Guest Operations dan data modul harus tetap dibatasi pada workspace yang telah diverifikasi.
 
-## Penyimpanan data
+Rujukan arsitektur: [docs/SUPABASE_WORKSPACE_ARCHITECTURE.md](docs/SUPABASE_WORKSPACE_ARCHITECTURE.md).
 
-- Supabase menjadi sumber data operasional aplikasi.
-- Data Guest Operations, riwayat perubahan status tamu, reservasi, dan pengaturan terkait disimpan melalui layanan Supabase.
-- Master Barang, Resep WIP, dan Menu menggunakan `MasterDataStore` untuk membaca serta menyimpan payload ke tabel Supabase `workspace_module_state`.
-- Data Master Data dipisahkan berdasarkan workspace/outlet dan divisi aktif.
-- Data Guest Operations dan Reservasi dibatasi berdasarkan workspace/outlet.
-- Data operasional demo di `localStorage` bukan sumber data aplikasi.
-- Struktur Master Data menggunakan array terpisah `masterItems`, `wips`, `wipRecipeLines`, `menus`, dan `menuRecipeLines`.
-- Master Barang menyediakan penanda supply agar jenis barang dapat dibedakan tanpa membuat modul inventory tambahan.
-- HPP WIP dihitung dari kuantitas dasar bahan dikali harga per satuan dasar. WIP turunan dihitung secara rekursif berdasarkan HPP per satuan hasilnya.
-- Harga beli terakhir menjadi sumber utama; jika belum tersedia, harga referensi digunakan dan hasil HPP diberi tanda estimasi. Jika harga tidak tersedia, HPP ditandai tidak valid, bukan dianggap nol.
-- Perubahan satuan Master Barang memperbarui kuantitas dasar pada resep WIP yang terkait. Perubahan satuan hasil WIP diblokir jika masih dipakai oleh resep induk dengan satuan lama.
-- Menu menggunakan `menus` dan `menuRecipeLines` untuk komposisi per porsi. HPP Menu menjumlahkan biaya komponen tanpa membagi ulang hasil batch WIP.
-- Margin nominal dihitung dari harga jual dikurangi HPP; persentase margin dihitung terhadap harga jual. Harga jual nol membuat hasil margin tidak valid.
-- Perubahan satuan hasil WIP diblokir jika satuan lama masih dipakai oleh resep WIP induk atau Menu.
+## Penyimpanan dan alur data
+
+- Supabase menjadi sumber data operasional; data bisnis tidak boleh menjadikan `localStorage` sebagai sumber kebenaran.
+- Guest Operations menggunakan tabel Supabase untuk tamu, riwayat status, reservasi, dan pengaturan workspace.
+- Master Barang, Resep WIP, dan Menu saat ini disinkronkan melalui `MasterDataStore` ke record `workspace_module_state` dengan module key `master_data`.
+- Tabel Master Data terstruktur tersedia sebagai fondasi untuk adapter terpisah di tahap berikutnya; jangan menganggap seluruh modul sudah berpindah ke tabel-tabel tersebut.
+- Daily SO memiliki layanan frontend dan struktur database/migration tersendiri.
+- Nomor antrean dan referensi berurutan harus dibuat melalui mekanisme database, bukan penghitung browser.
+
+### Catatan data demo lama
+
+Key prototype lama `waitlist_frontend_demo_v1` masih disebut di `assets/js/app.js`. Pada kondisi kode saat ini, fungsi inisialisasi menjalankan `localStorage.removeItem('waitlist_frontend_demo_v1')` untuk membersihkan data prototype lama. Ini adalah perilaku kode yang sudah ada, bukan izin untuk mengubah atau menghapus key tersebut lagi. Tinjau dan sepakati perilakunya sebelum ada perubahan lanjutan.
 
 ## Struktur file
 
 ```
 index.html
-  Kerangka halaman, komponen antarmuka, dan urutan pemanggilan file fitur.
+  Kerangka halaman, komponen antarmuka, serta urutan pemanggilan CSS dan JavaScript.
 
 assets/
   css/
@@ -80,23 +88,29 @@ assets/
     auth.css
       Tampilan login, autentikasi, dan indikator proses logout.
     app-overrides.css
-      Penyempurnaan tampilan Guest Operations, popup, reservasi, workspace, dan desktop. File ini dimuat setelah style.css dan auth.css; urutan pemuatan harus dipertahankan.
+      Penyempurnaan tampilan Guest Operations, popup, reservasi, workspace, dan desktop.
+      Dimuat setelah style.css dan auth.css; urutan ini harus dipertahankan.
     masterdata.css
       Tampilan Master Barang.
     wip.css
       Tampilan Resep WIP.
     menu.css
       Tampilan Menu dan COGS.
+    desktop.css
+      Penyesuaian tampilan desktop.
+    user-monitoring.css
+      Tampilan halaman User Monitoring.
     daily-stock.css
-      Tampilan Daily SO.
+      File stylesheet Daily SO yang tersedia di repository; saat ini tidak tercantum
+      sebagai stylesheet yang dipanggil langsung oleh index.html.
 
   js/
     auth.js
-      Login, sesi, role, pemilihan outlet, dan divisi.
+      Login, sesi, verifikasi profil/role, workspace, dan divisi.
     app.js
-      Utilitas bersama, status aplikasi, navigasi, dan kontrol popup/bottom sheet.
+      Status aplikasi, utilitas, navigasi, popup/bottom sheet, dan alur Guest Operations.
     guestops-queue.js
-      Tambah tamu, nomor antrean, status, kartu tamu, dan dashboard Guest Operations.
+      Tambah tamu, nomor antrean, status, kartu tamu, dan dashboard.
     guestops-operational.js
       Detail operasional dashboard, filter status, dan grafik.
     guestops-history.js
@@ -104,11 +118,13 @@ assets/
     guestops-reservations.js
       Kalender, formulir, waktu reservasi, pembatalan, dan proses duduk tamu.
     guestops-detail.js
-      Detail tamu, koreksi data, status tamu, WhatsApp, dan ekspor CSV.
+      Detail tamu, koreksi data, status, WhatsApp, dan ekspor CSV.
+    guestops-service.js
+      Komunikasi dan penyimpanan Guest Operations ke Supabase.
     app-startup.js
       Inisialisasi workspace, pemuatan data, dan pembaruan berkala.
-    guestops-service.js
-      Komunikasi dan penyimpanan data Guest Operations ke Supabase.
+    user-monitoring.js
+      Pendaftaran sesi, heartbeat, Presence, dan tampilan monitoring.
     masterdata-store.js
       Penyimpanan Master Data dan pemeriksaan sesi workspace.
     masterdata-service.js / masterdata-ui.js
@@ -117,33 +133,50 @@ assets/
       Aturan dan tampilan Resep WIP.
     menu-service.js / menu-ui.js
       Aturan dan tampilan Menu.
-    daily-stock-service.js
-      Validasi sesi, pemuatan data, hitungan stok, dan transaksi Daily SO.
-    daily-stock-ui.js
-      Tampilan Daily SO serta halaman terpisah Pengeluaran, Produksi WIP, Sales, Barang Masuk, dan Supplies.
+    daily-stock-service.js / daily-stock-ui.js
+      Layanan data, validasi, hitungan stok, dan tampilan Daily SO.
+
+docs/
+  SUPABASE_WORKSPACE_ARCHITECTURE.md
+    Batas workspace, role, penyimpanan modul, dan aturan untuk modul baru.
+  USER_MONITORING.md
+    Rincian implementasi, keamanan, dan verifikasi User Monitoring.
+
+supabase/
+  functions/
+    auth-login/
+      Edge Function untuk alur login dan pencatatan aktivitas autentikasi.
+  migrations/
+    Riwayat file SQL perubahan database yang tersedia di repository.
+    README.md menjelaskan keterbatasan kelengkapan sumber migration.
 
 tests/
-  Pengujian otomatis untuk Guest Operations, Master Data, WIP, Menu, Daily SO, ekspor CSV, dan sesi workspace.
-
-supabase/migrations/
-  Riwayat perubahan database dan aturan akses.
+  Pengujian otomatis Guest Operations, akses workspace, Master Data, WIP,
+  Menu, Daily SO, ekspor CSV, dan sesi workspace.
 
 .github/workflows/
-  Pemeriksaan JavaScript, tes frontend, dan deployment GitHub Pages.
+  Pemeriksaan sintaks JavaScript, tes frontend, dan deployment GitHub Pages.
 ```
 
-## Menjalankan aplikasi
+## Menjalankan dan menerbitkan aplikasi
 
-Buka `index.html` melalui browser atau gunakan alamat GitHub Pages repository ini. Struktur saat ini menggunakan HTML, CSS, dan JavaScript biasa; tidak memerlukan Vite atau proses build.
+- Untuk pengembangan sederhana, buka `index.html` melalui server lokal atau gunakan URL GitHub Pages.
+- Tidak diperlukan Vite atau proses build untuk struktur saat ini.
+- Push ke `main` menjalankan workflow GitHub Actions: pemeriksaan sintaks JavaScript, tes frontend, lalu deployment GitHub Pages jika pemeriksaan lulus.
+- Perubahan pada pull request menjalankan validasi; deployment dilakukan dari push ke `main` atau workflow manual pada `main`.
+- Keberhasilan workflow adalah bukti proses validasi/deploy pada run tersebut, bukan pengganti pemeriksaan tampilan langsung di browser.
 
-## Batasan dan catatan pengembangan
+## Database dan migration
 
-- Repository ini berdiri sendiri dan tidak terhubung dengan Barapp.
-- Ekspor data tersedia dalam format CSV.
-- Jangan menghapus atau mengubah data pengguna maupun struktur database tanpa persetujuan.
-- Jangan mengubah nama kunci penyimpanan, struktur database, atau halaman yang sudah selesai tanpa persetujuan.
-- Pertahankan Guest Operational sebagai halaman utama; Antrean, Riwayat, Reservasi, dan Tambah Tamu diakses melalui tombol `+`.
-- Semua ikon antarmuka baru harus berasal dari Lucide Icons.
-- Jaga tampilan mobile sebagai prioritas dan jangan mengubah alur fitur yang tidak diminta.
-- Perubahan JavaScript harus melewati pemeriksaan sintaks dan tes Master Barang, Resep WIP, serta Menu melalui GitHub Actions.
-- Jangan menaruh Supabase service key, secret key, atau kredensial pribadi di kode frontend.
+Folder `supabase/migrations/` berisi file migration yang tersedia di repository, tetapi belum boleh dianggap sebagai riwayat rebuild database yang lengkap. Baca [supabase/migrations/README.md](supabase/migrations/README.md) sebelum menjalankan reset, bootstrap database baru, atau pekerjaan migration. Database live tetap menjadi sumber kebenaran sampai gap sumber migration diselesaikan.
+
+## Aturan pengembangan
+
+- Pertahankan pendekatan mobile-first.
+- Semua ikon antarmuka baru harus menggunakan Lucide Icons.
+- Jangan mengubah alur atau fitur yang tidak termasuk ruang lingkup pekerjaan.
+- Jangan mengubah nama key penyimpanan, menghapus data tamu/riwayat, atau mengubah struktur database tanpa persetujuan.
+- Jangan mengubah RLS, RPC, autentikasi, hak akses, atau migration tanpa persetujuan.
+- Jangan menaruh Supabase service-role key, password, atau kredensial privat di frontend. Publishable key boleh digunakan sesuai fungsi publiknya.
+- Perubahan JavaScript harus melewati pemeriksaan sintaks dan rangkaian tes melalui GitHub Actions.
+- Pertahankan urutan stylesheet yang ditulis di `index.html`.
