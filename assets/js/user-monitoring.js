@@ -213,6 +213,8 @@
     renderWorkspaceFilter();
   }
 
+  let workspaceDropdown = null;
+
   function renderWorkspaceFilter() {
     const select = $('monitorActivityWorkspace');
     if (!select) return;
@@ -223,6 +225,144 @@
     workspaces.forEach((workspace) => select.appendChild(new Option(workspace.name, workspace.id)));
     select.value = Array.from(select.options).some((option) => option.value === previous) ? previous : 'all';
     selectedWorkspace = select.value;
+    setupWorkspaceDropdown(select);
+    syncWorkspaceDropdown();
+  }
+
+  function setupWorkspaceDropdown(select) {
+    if (workspaceDropdown) return;
+
+    const control = create('div', 'monitor-select-control');
+    const trigger = create('button', 'monitor-select-trigger');
+    trigger.type = 'button';
+    trigger.id = 'monitorActivityWorkspaceTrigger';
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.setAttribute('aria-controls', 'monitorActivityWorkspaceMenu');
+
+    const label = create('span', 'monitor-select-value', 'Semua outlet');
+    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    arrow.setAttribute('viewBox', '0 0 24 24');
+    arrow.setAttribute('width', '18');
+    arrow.setAttribute('height', '18');
+    arrow.setAttribute('fill', 'none');
+    arrow.setAttribute('stroke', 'currentColor');
+    arrow.setAttribute('stroke-width', '2');
+    arrow.setAttribute('stroke-linecap', 'round');
+    arrow.setAttribute('stroke-linejoin', 'round');
+    arrow.setAttribute('aria-hidden', 'true');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'm6 9 6 6 6-6');
+    arrow.appendChild(path);
+    trigger.append(label, arrow);
+
+    const menu = create('div', 'monitor-select-menu');
+    menu.id = 'monitorActivityWorkspaceMenu';
+    menu.hidden = true;
+    menu.setAttribute('role', 'listbox');
+    menu.setAttribute('aria-label', 'Pilihan outlet aktivitas');
+
+    control.append(trigger, menu);
+    select.insertAdjacentElement('afterend', control);
+    select.hidden = true;
+    select.tabIndex = -1;
+    select.setAttribute('aria-hidden', 'true');
+    const filterLabel = select.closest('.monitor-filter')?.querySelector('label');
+    if (filterLabel) filterLabel.htmlFor = trigger.id;
+
+    workspaceDropdown = { control, trigger, label, menu, select };
+
+    trigger.addEventListener('click', () => {
+      const shouldOpen = menu.hidden;
+      if (shouldOpen) openWorkspaceDropdown();
+      else closeWorkspaceDropdown();
+    });
+
+    trigger.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openWorkspaceDropdown(true);
+      } else if (event.key === 'Escape') {
+        closeWorkspaceDropdown();
+      }
+    });
+
+    menu.addEventListener('click', (event) => {
+      const option = event.target.closest('[data-workspace-option]');
+      if (!option) return;
+      select.value = option.dataset.workspaceOption;
+      selectedWorkspace = select.value;
+      syncWorkspaceDropdown();
+      closeWorkspaceDropdown(true);
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    menu.addEventListener('keydown', (event) => {
+      const options = Array.from(menu.querySelectorAll('[data-workspace-option]'));
+      const currentIndex = options.indexOf(document.activeElement);
+      let nextIndex = currentIndex;
+      if (event.key === 'ArrowDown') nextIndex = Math.min(options.length - 1, currentIndex + 1);
+      else if (event.key === 'ArrowUp') nextIndex = Math.max(0, currentIndex - 1);
+      else if (event.key === 'Home') nextIndex = 0;
+      else if (event.key === 'End') nextIndex = options.length - 1;
+      else if (event.key === 'Escape') {
+        event.preventDefault();
+        closeWorkspaceDropdown(true);
+        return;
+      } else return;
+      event.preventDefault();
+      options[nextIndex]?.focus();
+    });
+
+    document.addEventListener('pointerdown', (event) => {
+      if (workspaceDropdown && !workspaceDropdown.control.contains(event.target)) {
+        closeWorkspaceDropdown();
+      }
+    });
+  }
+
+  function syncWorkspaceDropdown() {
+    if (!workspaceDropdown) return;
+    const { select, label, menu } = workspaceDropdown;
+    const selectedOption = select.options[select.selectedIndex];
+    label.textContent = selectedOption ? selectedOption.textContent.trim() : 'Pilih outlet';
+    menu.replaceChildren();
+
+    Array.from(select.options).forEach((option) => {
+      const item = create('button', 'monitor-select-option');
+      item.type = 'button';
+      item.dataset.workspaceOption = option.value;
+      item.setAttribute('role', 'option');
+      item.setAttribute('aria-selected', String(option.value === select.value));
+      const text = create('span', 'monitor-select-option-label', option.textContent.trim());
+      const indicator = create('span', 'monitor-select-radio');
+      indicator.setAttribute('aria-hidden', 'true');
+      item.append(text, indicator);
+      menu.appendChild(item);
+    });
+  }
+
+  function openWorkspaceDropdown(focusSelected = false) {
+    if (!workspaceDropdown) return;
+    const { control, trigger, menu, select } = workspaceDropdown;
+    menu.hidden = false;
+    trigger.setAttribute('aria-expanded', 'true');
+    control.classList.add('is-open');
+    control.closest('.monitor-filter')?.classList.add('has-open-menu');
+    if (focusSelected) {
+      menu.querySelector('[aria-selected="true"]')?.focus();
+    }
+  }
+
+  function closeWorkspaceDropdown(returnFocus = false) {
+    if (!workspaceDropdown) return;
+    const { control, trigger, menu } = workspaceDropdown;
+    if (menu.hidden) return;
+    menu.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    control.classList.remove('is-open');
+    control.closest('.monitor-filter')?.classList.remove('has-open-menu');
+    if (returnFocus) trigger.focus();
   }
 
   function renderTabs() {
@@ -507,6 +647,7 @@
     $('monitorRefreshButton')?.addEventListener('click', refresh);
     $('monitorActivityWorkspace')?.addEventListener('change', (event) => {
       selectedWorkspace = event.target.value;
+      syncWorkspaceDropdown();
       if (currentTab === 'activity') refresh();
       else loadActivity().then((data) => renderActivity(data)).catch((error) => console.error(error));
     });
