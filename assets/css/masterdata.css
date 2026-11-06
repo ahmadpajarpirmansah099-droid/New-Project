@@ -1,0 +1,904 @@
+/* MASTER BARANG — Guest Operations visual language */
+.md-page {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  animation: pageIn .28s both;
+}
+.md-page-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.md-page-heading h1 {
+  margin: 5px 0 4px;
+  color: var(--ink);
+  font: 800 24px Manrope, sans-serif;
+  letter-spacing: -.045em;
+}
+.md-page-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.md-eyebrow {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .13em;
+}
+.md-primary {
+  min-height: 42px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 13px;
+  padding: 10px 13px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  transition: transform .18s ease, background .18s ease;
+}
+.md-primary:active { transform: scale(.97); }
+.md-count-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 8px;
+}
+.md-count-grid>div {
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.md-count-grid span,.md-item-prices small {
+  display: block;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+}
+.md-count-grid b {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink);
+  font: 800 21px Manrope, sans-serif;
+}
+.md-count-grid>div:nth-child(2) b { color: #668c3e; }
+.md-count-grid>div:nth-child(3) b { color: #8b83c8; }
+.md-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #fff;
+  color: var(--muted);
+}
+.md-search span { font-size: 23px; line-height: 1; }
+.md-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 12px;
+}
+.md-filter-row {
+  display: flex;
+  gap: 7px;
+}
+.md-filter-row button {
+  min-height: 34px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+.md-filter-row button.is-selected {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+.md-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+.md-list-heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font: 800 14px Manrope, sans-serif;
+}
+.md-list-heading span {
+  color: var(--muted);
+  font-size: 10px;
+}
+.md-item-list { display: grid; gap: 10px; }
+.md-item-card {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.md-item-heading {
+  display: grid;
+  grid-template-columns: minmax(72px,.6fr) minmax(0,1.7fr);
+  align-items: stretch;
+  gap: 8px;
+}
+.md-item-copy { min-width: 0; align-self: center; }
+.md-item-title-row {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.md-item-copy h3 {
+  margin: 0;
+  color: var(--ink);
+  font: 800 16px Manrope, sans-serif;
+  overflow-wrap: anywhere;
+}
+.md-base-unit-label {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+.md-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.md-status.is-active { background: #eef7c7; color: #526f2d; }
+.md-status.is-inactive { background: #eceaf8; color: #6c639e; }
+.md-item-prices {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  align-content: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+}
+.md-item-prices>div {
+  display: flex;
+  min-width: 0;
+  min-height: 58px;
+  flex-direction: column;
+  justify-content: center;
+  padding: 7px 8px;
+  border-radius: 10px;
+  background: #f8f8f4;
+}
+.md-item-prices small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.md-item-prices b {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.md-price-reference b span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+.md-more,.md-status-action {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 9px;
+  background: #f5f5f0;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+.md-status-action { background: #f0eff9; color: #6e659d; }
+.md-unit-section {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 10px;
+}
+.md-unit-caption {
+  padding-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.md-unit-list {
+  display: flex;
+  flex: 1 1 180px;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+}
+.md-unit-chip {
+  display: inline-flex;
+  max-width: 100%;
+  min-height: 30px;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: #f0eff9;
+  color: #655e95;
+  font-size: 11px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.md-supply-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin: 0;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: #f0eff9;
+  color: #625b92;
+  font-size: 11px;
+  font-weight: 800;
+}
+.md-item-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.md-item-footer>span {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+.md-item-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+}
+.md-item-actions .md-more { background: #f5f5f0; }
+.md-item-actions .md-status-action { background: #f0eff9; text-align: center; }
+.md-empty,.md-error {
+  padding: 28px 18px;
+  border: 1px dashed #dcdce5;
+  border-radius: 16px;
+  background: #fff;
+  text-align: center;
+}
+.md-empty-mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  margin: 0 auto 9px;
+  border-radius: 12px;
+  background: var(--lime-soft);
+  color: var(--ink);
+  font-size: 20px;
+}
+.md-empty b,.md-error b { color: var(--ink); font-size: 12px; }
+.md-empty p,.md-error p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+.md-error .md-primary { margin-top: 12px; }
+.md-sheet { display: grid; gap: 14px; }
+.md-sheet-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+.md-sheet-heading h2 {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font: 800 19px Manrope, sans-serif;
+  letter-spacing: -.035em;
+}
+.md-close {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 11px;
+  background: #f1f1ed;
+  color: var(--ink);
+  font-size: 22px;
+}
+.md-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: #55576a;
+  font-size: 10px;
+  font-weight: 800;
+}
+.md-field i { color: #9b8bd7; font-style: normal; }
+.md-field input,.md-field select {
+  width: 100%;
+  min-width: 0;
+  height: 43px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  outline: 0;
+  background: #fbfbf8;
+  color: var(--ink);
+  font-size: 13px;
+}
+.md-field input:focus,.md-field select:focus {
+  border-color: #aaa3e8;
+  box-shadow: 0 0 0 3px rgba(170,163,232,.16);
+}
+.md-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+}
+.md-form-section {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fcfcf9;
+}
+.md-form-section> b { color: var(--ink); font: 800 12px Manrope, sans-serif; }
+.md-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+}
+.md-section-heading>div { display: grid; gap: 3px; }
+.md-section-heading b { color: var(--ink); font-size: 11px; }
+.md-section-heading small { color: var(--muted); font-size: 9px; line-height: 1.4; }
+.md-add-unit {
+  min-height: 32px;
+  padding: 7px 10px;
+  border: 1px solid #dcd9f2;
+  border-radius: 9px;
+  background: #f0eff9;
+  color: #625b92;
+  font-size: 10px;
+  font-weight: 800;
+}
+.md-base-unit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: var(--lime-soft);
+  color: #526f2d;
+  font-size: 10px;
+}
+.md-base-unit-row strong { font: 800 12px Manrope, sans-serif; }
+.md-conversion-rows { display: grid; gap: 8px; }
+.md-conversion-row {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr) 30px;
+  align-items: end;
+  gap: 7px;
+}
+.md-remove-unit {
+  width: 30px;
+  height: 39px;
+  border: 1px solid #f1dfe2;
+  border-radius: 9px;
+  background: #fff3f3;
+  color: #b45e6a;
+  font-size: 18px;
+}
+.md-conversion-preview {
+  display: grid;
+  gap: 5px;
+}
+.md-conversion-preview-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 9px;
+}
+.md-conversion-preview-row b { color: var(--ink); font-size: 9px; }
+.md-price-result {
+  display: grid;
+  gap: 5px;
+  padding: 11px;
+  border-radius: 11px;
+  background: #eef7e9;
+}
+.md-price-result span { color: #69824a; font-size: 9px; font-weight: 700; }
+.md-price-result strong { color: #3e5e2b; font: 800 15px Manrope, sans-serif; }
+.md-price-result strong.is-muted { color: #77778a; font: 600 10px 'DM Sans',sans-serif; }
+.md-form-note {
+  margin: -3px 0 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.5;
+}
+.md-sheet-actions { display: flex; gap: 8px; margin-top: 2px; }
+.md-sheet-actions button {
+  min-height: 43px;
+  flex: 1;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.md-cancel {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+}
+.md-save {
+  border: 0;
+  background: var(--ink);
+  color: #fff;
+}
+@media (max-width: 390px) {
+  .md-page-heading { align-items: stretch; flex-direction: column; }
+  .md-page-heading .md-primary { width: 100%; }
+  .md-count-grid>div { padding: 10px 8px; }
+  .md-count-grid span { font-size: 8px; }
+  .md-item-card { padding: 12px; }
+  .md-item-prices { grid-template-columns: minmax(0,1.15fr) minmax(0,.85fr); }
+  .md-form-grid { grid-template-columns: minmax(0,1fr); }
+  .md-conversion-row { grid-template-columns: minmax(0,1fr) minmax(0,1fr) 28px; gap: 5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-page,.md-primary { animation: none; transition: none; }
+}
+
+.md-supply-toggle { display:flex; align-items:center; gap:10px; padding:11px 12px; border:1px solid var(--line); border-radius:12px; background:#fcfcf9; color:var(--ink); cursor:pointer; }
+.md-supply-toggle input { width:17px; height:17px; accent-color:#8ea95a; }
+.md-supply-toggle span { display:grid; gap:3px; }
+.md-supply-toggle b { font-size:10px; }
+.md-supply-toggle small { color:var(--muted); font-size:9px; line-height:1.4; }
+.md-supply-chip { display:inline-flex; width:max-content; margin-top:7px; padding:3px 8px; border-radius:20px; background:#f0eff9; color:#625b92; font-size:9px; font-weight:800; }
+
+
+/* Simplified Master Barang entry form */
+.md-sheet-simple { gap: 18px; }
+.md-sheet-simple form { display: grid; gap: 16px; }
+.md-sheet-simple .md-sheet-heading { margin-bottom: 2px; }
+.md-sheet-simple .md-sheet-heading h2 { font-size: 22px; }
+.md-sheet-simple .md-close { width: 44px; height: 44px; flex: 0 0 44px; }
+.md-sheet-simple .md-field { gap: 8px; font-size: 14px; }
+.md-sheet-simple .md-field input,
+.md-sheet-simple .md-field select {
+  height: 52px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 16px;
+}
+.md-sheet-simple .md-field i { color: #d96a19; }
+.md-sheet-simple .md-supply-toggle {
+  min-height: 60px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fbfbf8;
+}
+.md-sheet-simple .md-supply-toggle input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+.md-sheet-simple .md-supply-toggle b { font-size: 13px; }
+.md-sheet-simple .md-supply-toggle small { font-size: 12px; }
+.md-advanced {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.md-advanced summary {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+.md-advanced summary::-webkit-details-marker { display: none; }
+.md-advanced summary>span:first-child { display: grid; gap: 4px; }
+.md-advanced summary b { color: var(--ink); font-size: 14px; }
+.md-advanced summary small { color: var(--muted); font-size: 12px; line-height: 1.4; }
+.md-advanced-mark {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 9px;
+  background: #f0f0eb;
+  color: var(--ink);
+  font-size: 20px;
+  transition: transform .18s ease;
+}
+.md-advanced[open] .md-advanced-mark { transform: rotate(45deg); }
+.md-advanced-content { display: grid; gap: 12px; padding: 0 0 14px; }
+.md-advanced-content .md-section-heading { align-items: center; }
+.md-advanced-content .md-add-unit { min-height: 40px; font-size: 12px; }
+.md-advanced-content .md-field { font-size: 12px; }
+.md-advanced-content .md-field input { height: 44px; font-size: 16px; }
+.md-sheet-simple .md-price-result {
+  padding: 12px 14px;
+  border-radius: 12px;
+}
+.md-sheet-simple .md-price-result span { font-size: 12px; }
+.md-sheet-simple .md-price-result strong { font-size: 16px; }
+.md-sheet-simple .md-price-result strong.is-muted { font-size: 12px; }
+.md-sheet-simple .md-form-note { margin-top: -8px; font-size: 12px; line-height: 1.5; }
+.md-sheet-actions-simple { margin-top: 2px; }
+.md-sheet-actions-simple .md-save {
+  width: 100%;
+  min-height: 54px;
+  border-radius: 13px;
+  background: #ed7418;
+  font-size: 16px;
+}
+@media (max-width: 390px) {
+  .md-sheet-simple form { gap: 14px; }
+  .md-sheet-simple .md-sheet-heading h2 { font-size: 21px; }
+}
+
+
+.md-sheet-simple .md-price-result small {
+  display: block;
+  color: #526b43;
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.md-sheet-simple .md-price-result small[hidden] { display: none; }
+
+@media (max-width: 390px) {
+  .md-item-card { padding: 11px; }
+  .md-item-heading { grid-template-columns: minmax(68px,.58fr) minmax(0,1.72fr); gap: 7px; }
+  .md-item-title-row { gap: 5px; }
+  .md-item-copy h3 { font-size: 15px; }
+  .md-base-unit-label { font-size: 11px; }
+  .md-item-prices { gap: 5px; }
+  .md-item-prices>div { min-height: 56px; padding: 6px 7px; }
+  .md-item-prices small { font-size: 9px; }
+  .md-item-prices b { font-size: 11px; }
+  .md-price-reference b span { font-size: 10px; }
+  .md-item-footer>span { font-size: 10px; }
+  .md-item-actions { gap: 3px; }
+  .md-item-actions .md-more,.md-item-actions .md-status-action { padding: 0 7px; font-size: 12px; }
+}
+
+
+/* Final compact alignment for Master Barang item cards */
+.md-item-heading {
+  align-items: start;
+  gap: 6px;
+}
+.md-item-copy {
+  align-self: start;
+}
+.md-item-title-row {
+  gap: 3px;
+}
+.md-item-copy h3 {
+  font-size: 14px;
+}
+.md-base-unit-label {
+  margin-top: 4px;
+  font-size: 10px;
+}
+.md-item-prices {
+  align-content: start;
+  align-self: start;
+  gap: 4px;
+}
+.md-item-prices > div {
+  min-height: 46px;
+  padding: 5px 6px;
+}
+.md-item-prices small {
+  font-size: 9px;
+}
+.md-item-prices b {
+  margin-top: 2px;
+  font-size: 11px;
+}
+.md-price-reference b span {
+  font-size: 9px;
+}
+.md-item-footer {
+  margin-top: 4px;
+  padding-top: 4px;
+}
+.md-item-footer > span {
+  font-size: 10px;
+}
+.md-item-actions {
+  gap: 3px;
+}
+.md-item-actions .md-more,
+.md-item-actions .md-status-action {
+  min-height: 38px;
+  padding: 0 7px;
+  font-size: 11px;
+}
+@media (max-width: 390px) {
+  .md-item-card { padding: 10px; }
+  .md-item-heading {
+    grid-template-columns: minmax(68px,.58fr) minmax(0,1.72fr);
+    gap: 6px;
+  }
+  .md-item-copy h3 { font-size: 13px; }
+  .md-base-unit-label { font-size: 10px; }
+  .md-item-prices > div { min-height: 44px; padding: 4px 5px; }
+  .md-item-prices small { font-size: 8px; }
+  .md-item-prices b { font-size: 10px; }
+  .md-item-footer { margin-top: 3px; padding-top: 3px; }
+  .md-item-footer > span { font-size: 9px; }
+  .md-item-actions { gap: 2px; }
+  .md-item-actions .md-more,
+  .md-item-actions .md-status-action {
+    min-height: 36px;
+    padding: 0 6px;
+    font-size: 10px;
+  }
+}
+
+
+/* Compact Master Barang form controls */
+.md-sheet-simple { gap: 14px; }
+.md-sheet-simple form { gap: 12px; }
+.md-sheet-simple .md-sheet-heading h2 { font-size: 20px; }
+.md-sheet-simple .md-eyebrow { font-size: 8px; }
+.md-sheet-simple .md-field {
+  gap: 6px;
+  font-size: 13px;
+}
+.md-sheet-simple .md-field input,
+.md-sheet-simple .md-field select {
+  height: 48px;
+  border-radius: 11px;
+  font-size: 16px;
+  box-shadow: 0 2px 5px rgba(17,18,37,.045), 0 1px 2px rgba(17,18,37,.035);
+}
+.md-sheet-simple .md-supply-toggle {
+  min-height: 54px;
+  padding: 10px 12px;
+  box-shadow: 0 2px 5px rgba(17,18,37,.035);
+}
+.md-sheet-simple .md-supply-toggle b { font-size: 12px; }
+.md-sheet-simple .md-supply-toggle small { font-size: 11px; }
+.md-advanced summary { min-height: 56px; }
+.md-advanced summary b { font-size: 13px; }
+.md-advanced summary small { font-size: 11px; }
+.md-advanced-content { gap: 10px; }
+.md-advanced-content .md-section-heading b { font-size: 10px; }
+.md-advanced-content .md-section-heading small { font-size: 10px; }
+.md-advanced-content .md-add-unit {
+  min-height: 38px;
+  box-shadow: 0 2px 5px rgba(17,18,37,.045);
+}
+.md-sheet-simple .md-close {
+  box-shadow: 0 2px 5px rgba(17,18,37,.055);
+}
+.md-sheet-simple .md-price-result {
+  padding: 10px 12px;
+  box-shadow: 0 2px 6px rgba(17,18,37,.035);
+}
+.md-sheet-simple .md-price-result span { font-size: 11px; }
+.md-sheet-simple .md-price-result strong { font-size: 15px; }
+.md-sheet-simple .md-price-result small { font-size: 11px; }
+.md-sheet-simple .md-form-note { font-size: 11px; }
+.md-sheet-simple .md-save {
+  box-shadow: 0 3px 8px rgba(17,18,37,.10), 0 1px 2px rgba(17,18,37,.045);
+}
+.md-sheet-simple .md-remove-unit {
+  box-shadow: 0 1px 3px rgba(17,18,37,.035);
+}
+@media (max-width: 390px) {
+  .md-sheet-simple form { gap: 11px; }
+  .md-sheet-simple .md-sheet-heading h2 { font-size: 19px; }
+  .md-sheet-simple .md-field { font-size: 12px; }
+  .md-sheet-simple .md-field input { height: 46px; }
+  .md-advanced summary { min-height: 52px; }
+}
+
+
+/* Refined typography for Master Barang form */
+.md-sheet-simple .md-sheet-heading h2 {
+  font-size: 18px;
+  letter-spacing: -.025em;
+}
+.md-sheet-simple .md-eyebrow {
+  font-size: 8px;
+  letter-spacing: .12em;
+}
+.md-sheet-simple .md-field {
+  font-size: 12px;
+  line-height: 1.25;
+  gap: 5px;
+}
+.md-sheet-simple .md-field input,
+.md-sheet-simple .md-field select {
+  font-size: 16px;
+}
+.md-sheet-simple .app-select-trigger {
+  min-height: 46px;
+  font-size: 14px;
+  box-shadow: 0 2px 5px rgba(17,18,37,.04), 0 1px 2px rgba(17,18,37,.03);
+}
+.md-sheet-simple .app-select-option {
+  min-height: 42px;
+  font-size: 14px;
+}
+.md-sheet-simple .md-supply-toggle b {
+  font-size: 11px;
+}
+.md-sheet-simple .md-supply-toggle small {
+  font-size: 10px;
+  line-height: 1.35;
+}
+.md-advanced summary b {
+  font-size: 12px;
+}
+.md-advanced summary small {
+  font-size: 10px;
+}
+.md-advanced-mark {
+  width: 30px;
+  height: 30px;
+  flex-basis: 30px;
+  font-size: 18px;
+}
+.md-advanced-content .md-section-heading b {
+  font-size: 10px;
+}
+.md-advanced-content .md-section-heading small {
+  font-size: 9px;
+}
+.md-advanced-content .md-add-unit {
+  font-size: 11px;
+}
+.md-advanced-content .md-field {
+  font-size: 11px;
+}
+.md-advanced-content .md-field input {
+  font-size: 16px;
+}
+.md-sheet-simple .md-price-result span {
+  font-size: 10px;
+}
+.md-sheet-simple .md-price-result strong {
+  font-size: 14px;
+}
+.md-sheet-simple .md-price-result strong.is-muted {
+  font-size: 11px;
+}
+.md-sheet-simple .md-price-result small {
+  font-size: 10px;
+  line-height: 1.35;
+}
+.md-sheet-simple .md-form-note {
+  font-size: 10px;
+  line-height: 1.4;
+}
+.md-sheet-simple .md-save {
+  font-size: 15px;
+}
+@media (max-width: 390px) {
+  .md-sheet-simple .md-sheet-heading h2 { font-size: 17px; }
+  .md-sheet-simple .md-field { font-size: 11px; }
+  .md-sheet-simple .app-select-trigger { font-size: 14px; }
+  .md-sheet-simple .md-supply-toggle b { font-size: 10px; }
+  .md-sheet-simple .md-supply-toggle small { font-size: 9px; }
+  .md-advanced summary b { font-size: 11px; }
+  .md-advanced summary small { font-size: 9px; }
+  .md-sheet-simple .md-price-result span { font-size: 9px; }
+  .md-sheet-simple .md-price-result strong { font-size: 13px; }
+  .md-sheet-simple .md-form-note { font-size: 9px; }
+}
+
+
+/* Match Master Barang form typography to the compact price summary card */
+.md-sheet-simple .md-sheet-heading h2 { font-size: 16px; }
+.md-sheet-simple .md-field {
+  font-size: 10px;
+  gap: 5px;
+}
+.md-sheet-simple .md-field input {
+  font-size: 14px;
+}
+.md-sheet-simple .app-select-trigger {
+  min-height: 44px;
+  font-size: 12px;
+}
+.md-sheet-simple .app-select-option {
+  min-height: 40px;
+  font-size: 12px;
+}
+.md-sheet-simple .md-supply-toggle b { font-size: 10px; }
+.md-sheet-simple .md-supply-toggle small { font-size: 9px; }
+.md-advanced summary b { font-size: 10px; }
+.md-advanced summary small { font-size: 9px; }
+.md-advanced-content .md-field { font-size: 9px; }
+.md-advanced-content .md-add-unit { font-size: 10px; }
+.md-sheet-simple .md-price-result span { font-size: 9px; }
+.md-sheet-simple .md-price-result strong { font-size: 12px; }
+.md-sheet-simple .md-price-result small { font-size: 9px; }
+.md-sheet-simple .md-form-note { font-size: 9px; }
+.md-sheet-simple .md-save { font-size: 13px; }
+@media (max-width: 390px) {
+  .md-sheet-simple .md-sheet-heading h2 { font-size: 16px; }
+  .md-sheet-simple .md-field { font-size: 9px; }
+  .md-sheet-simple .md-field input { font-size: 14px; }
+  .md-sheet-simple .app-select-trigger,
+  .md-sheet-simple .app-select-option { font-size: 12px; }
+}
+
+/* Desktop only: Master Barang uses three cards per row on wide screens. */
+@media (min-width: 1100px) {
+  .md-item-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .md-item-card {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .md-item-heading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .md-item-prices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .md-item-footer {
+    align-items: flex-end;
+    margin-top: auto;
+    padding-top: 12px;
+  }
+}
