@@ -5340,3 +5340,48 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
     background: rgba(17, 18, 37, .06);
   }
 }
+
+
+/* GUEST DETAIL — SHORTER MOBILE SHEET */
+@media (max-width: 700px) {
+  #sheet:has(.detail-ticket) {
+    max-height: 72dvh;
+    padding-top: 8px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+
+  #sheet:has(.detail-ticket) .sheet-head {
+    margin-bottom: 12px;
+  }
+
+  #sheet:has(.detail-ticket) .handle {
+    margin-bottom: 12px;
+  }
+
+  #sheet:has(.detail-ticket) .detail-ticket {
+    padding: 13px 16px;
+    margin-bottom: 12px;
+  }
+
+  #sheet:has(.detail-ticket) .detail-ticket strong {
+    font-size: 27px;
+  }
+
+  #sheet:has(.detail-ticket) .detail-grid {
+    gap: 7px;
+    margin: 10px 0;
+  }
+
+  #sheet:has(.detail-ticket) .detail-cell {
+    padding: 9px 10px;
+  }
+
+  #sheet:has(.detail-ticket) .sheet-actions {
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  #sheet:has(.detail-ticket) .timeline {
+    margin-top: 8px;
+  }
+}
