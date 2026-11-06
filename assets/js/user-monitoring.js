@@ -111,12 +111,33 @@
     };
   }
 
+  function getStableDeviceId() {
+    const storageKey = 'user_monitoring_device_id_v1';
+    try {
+      let deviceId = localStorage.getItem(storageKey);
+      if (!deviceId) {
+        deviceId = typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
+            const random = Math.random() * 16 | 0;
+            return (char === 'x' ? random : (random & 3 | 8)).toString(16);
+          });
+        localStorage.setItem(storageKey, deviceId);
+      }
+      return deviceId;
+    } catch (error) {
+      console.warn('Stable device ID storage unavailable:', error);
+      return typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : null;
+    }
+  }
+
   async function registerSession() {
     const device = getDeviceInfo();
     const { data, error } = await client.rpc('register_user_monitoring_session', {
       p_device_type: device.device_type,
       p_browser: device.browser,
       p_operating_system: device.operating_system,
+      p_device_id: getStableDeviceId(),
       p_workspace_id: context?.workspaceId || null
     });
     if (error) throw error;
@@ -391,6 +412,30 @@
     $('monitorActivityCount').textContent = String(activities.length);
   }
 
+  function groupDeviceSessions(sessions) {
+    const groups = new Map();
+    sessions.forEach((session) => {
+      const key = session.device_id || session.auth_session_id;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(session);
+    });
+    return Array.from(groups.values()).map((deviceSessions) => {
+      deviceSessions.sort((a, b) => new Date(b.last_seen_at) - new Date(a.last_seen_at));
+      return deviceSessions;
+    }).sort((a, b) => {
+      const aOnline = a.some((item) => sessionStatus(item) === 'online');
+      const bOnline = b.some((item) => sessionStatus(item) === 'online');
+      if (aOnline !== bOnline) return aOnline ? -1 : 1;
+      return new Date(b[0].last_seen_at) - new Date(a[0].last_seen_at);
+    });
+  }
+
+  function deviceGroupStatus(deviceSessions) {
+    if (deviceSessions.some((item) => sessionStatus(item) === 'online')) return 'online';
+    const latest = deviceSessions[0];
+    return latest ? sessionStatus(latest) : 'logged_out';
+  }
+
   function renderLiveUsers(sessions) {
     const root = $('monitorLiveUsers');
     if (!root) return;
@@ -401,29 +446,27 @@
       return;
     }
 
-    const groups = new Map();
+    const accounts = new Map();
     sessions.forEach((session) => {
       const key = session.user_id || session.user_email;
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key).push(session);
+      if (!accounts.has(key)) accounts.set(key, []);
+      accounts.get(key).push(session);
     });
 
-    const accounts = Array.from(groups.values()).sort((a, b) => {
-      const aOnline = a.some((item) => sessionStatus(item) === 'online');
-      const bOnline = b.some((item) => sessionStatus(item) === 'online');
+    const accountGroups = Array.from(accounts.values()).sort((a, b) => {
+      const aDevices = groupDeviceSessions(a);
+      const bDevices = groupDeviceSessions(b);
+      const aOnline = aDevices.some((device) => deviceGroupStatus(device) === 'online');
+      const bOnline = bDevices.some((device) => deviceGroupStatus(device) === 'online');
       if (aOnline !== bOnline) return aOnline ? -1 : 1;
       return new Date(b[0].last_seen_at) - new Date(a[0].last_seen_at);
     });
 
-    accounts.forEach((devices) => {
-      devices.sort((a, b) => {
-        const aStatus = sessionStatus(a) === 'online';
-        const bStatus = sessionStatus(b) === 'online';
-        if (aStatus !== bStatus) return aStatus ? -1 : 1;
-        return new Date(b.last_seen_at) - new Date(a.last_seen_at);
-      });
-
-      const first = devices[0];
+    accountGroups.forEach((accountSessions) => {
+      const devices = groupDeviceSessions(accountSessions);
+      const first = accountSessions.slice().sort((a, b) =>
+        new Date(b.last_seen_at) - new Date(a.last_seen_at)
+      )[0];
       const account = create('article', 'monitor-account');
       const head = create('div', 'monitor-account-head');
       const identity = create('div', 'monitor-account-identity');
@@ -441,9 +484,9 @@
       );
       account.append(head, meta);
 
-      const accountStatus = devices.some((device) => sessionStatus(device) === 'online')
+      const accountStatus = devices.some((device) => deviceGroupStatus(device) === 'online')
         ? 'online'
-        : devices.some((device) => sessionStatus(device) === 'offline') ? 'offline' : 'logged_out';
+        : devices.some((device) => deviceGroupStatus(device) === 'offline') ? 'offline' : 'logged_out';
       const statusLine = create('div', 'monitor-account-status');
       const lamp = create('span', 'monitor-status-lamp is-' + accountStatus);
       lamp.setAttribute('aria-hidden', 'true');
@@ -493,29 +536,42 @@
     closeButton.addEventListener('click', closeAccountDetails);
     header.append(titleWrap, closeButton);
 
+    const deviceCount = devices.length;
     const meta = create('div', 'monitor-modal-meta');
     meta.append(
       create('span', 'monitor-role', account.role || '—'),
       create('span', 'monitor-outlet', account.workspace_name || 'Outlet belum dipilih'),
-      create('span', 'monitor-device-count', devices.length + ' perangkat')
+      create('span', 'monitor-device-count', deviceCount + ' perangkat')
     );
-    dialog.append(header, meta, create('h3', 'monitor-modal-section-title', 'Aktivitas perangkat'));
+    dialog.append(header, meta, create('h3', 'monitor-modal-section-title', 'Perangkat dan riwayat login'));
 
-    devices.forEach((device) => {
-      const status = sessionStatus(device);
-      const row = create('article', 'monitor-modal-device');
-      const icon = create('div', 'monitor-device-icon', device.device_type === 'mobile'
-        ? 'HP' : device.device_type === 'tablet' ? 'TAB' : 'PC');
+    devices.forEach((deviceSessions) => {
+      const latest = deviceSessions[0];
+      const status = deviceGroupStatus(deviceSessions);
+      const row = create('article', 'monitor-modal-device monitor-modal-device-group');
+      const icon = create('div', 'monitor-device-icon', latest.device_type === 'mobile'
+        ? 'HP' : latest.device_type === 'tablet' ? 'TAB' : 'PC');
       const info = create('div', 'monitor-device-info');
       info.append(
-        create('strong', 'monitor-device-title', device.browser + ' · ' + device.operating_system),
-        create('span', 'monitor-device-detail', 'Login ' + formatDate(device.logged_in_at)),
-        create('span', 'monitor-device-detail', 'Aktif terakhir ' + formatDate(device.last_seen_at)),
-        create('span', 'monitor-device-detail', 'Durasi ' + formatDuration(device.logged_in_at, device.ended_at))
+        create('strong', 'monitor-device-title', latest.browser + ' · ' + latest.operating_system),
+        create('span', 'monitor-device-detail', deviceSessions.length + ' riwayat login')
       );
       const badge = create('span', 'monitor-status is-' + status, statusLabel(status));
       row.append(icon, info, badge);
       dialog.appendChild(row);
+
+      const history = create('div', 'monitor-device-history');
+      deviceSessions.forEach((session) => {
+        const entry = create('div', 'monitor-device-history-entry');
+        entry.append(
+          create('span', 'monitor-device-detail', 'Login ' + formatDate(session.logged_in_at)),
+          create('span', 'monitor-device-detail', 'Aktif terakhir ' + formatDate(session.last_seen_at)),
+          create('span', 'monitor-device-detail', 'Durasi ' + formatDuration(session.logged_in_at, session.ended_at)),
+          create('span', 'monitor-device-detail', 'Status ' + statusLabel(sessionStatus(session)))
+        );
+        history.appendChild(entry);
+      });
+      dialog.appendChild(history);
     });
 
     overlay.appendChild(dialog);
@@ -568,7 +624,7 @@
     try {
       const [sessionResult, activityResult] = await Promise.all([
         client.from('user_monitoring_sessions')
-          .select('id,user_id,user_email,display_name,role,workspace_id,workspace_name,device_type,browser,operating_system,status,logged_in_at,last_seen_at,last_active_at,ended_at')
+          .select('id,auth_session_id,device_id,user_id,user_email,display_name,role,workspace_id,workspace_name,device_type,browser,operating_system,status,logged_in_at,last_seen_at,last_active_at,ended_at')
           .order('last_seen_at', { ascending: false })
           .limit(300),
         loadActivity()
