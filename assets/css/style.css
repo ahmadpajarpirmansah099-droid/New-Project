@@ -5571,3 +5571,35 @@ button:active,
     transition:none;
   }
 }
+
+
+/* Logout progress indicator */
+.auth-profile-button.is-logging-out,
+.profile.is-logging-out,
+.auth-logout-button.is-logging-out {
+  cursor: wait;
+  opacity: .82;
+}
+.auth-logout-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: auth-logout-spin .7s linear infinite;
+}
+.profile .auth-logout-spinner {
+  width: 17px;
+  height: 17px;
+}
+.auth-logout-button .auth-logout-spinner {
+  width: 15px;
+  height: 15px;
+}
+@keyframes auth-logout-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-logout-spinner { animation-duration: 1.8s; }
+}
