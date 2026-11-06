@@ -175,7 +175,8 @@ function setWorkspaceHeader(page) {
     'waiting': 'ANTREAN',
     'history': 'RIWAYAT',
     'reservations': 'RESERVASI',
-    'settings': 'PENGATURAN'
+    'settings': 'PENGATURAN',
+    'user-monitoring': 'USER MONITORING'
   };
   name.textContent = pageTitles[page] || 'GUEST OPERATIONAL';
   const context = window.AppAuth?.getContext();
@@ -205,6 +206,8 @@ function applyRoleNavigation() {
   document.querySelectorAll('.quick-menu-item[data-quick-context="guest"]').forEach(item => {
     item.style.display = canUseGuestOps ? '' : 'none';
   });
+  const monitoringItem = document.querySelector('.drawer-item[data-page="user-monitoring"]');
+  if (monitoringItem) monitoringItem.style.display = window.AppAuth?.getContext()?.isGlobalDeveloper ? '' : 'none';
 }
 
 let dailyStockFeaturePromise = null;
@@ -253,6 +256,10 @@ function go(page) {
   }
   const previousPage = document.querySelector('.page.active')?.id.replace(/^page-/, '') || '';
   const currentContext = window.AppAuth?.getContext();
+  if (page === 'user-monitoring' && !currentContext?.isGlobalDeveloper) {
+    toast('User Monitoring hanya tersedia untuk Developer.');
+    return;
+  }
   document.body.dataset.divisionMode = currentContext?.divisionMode || 'single';
   if (!canAccessGuestOperations() && GUEST_OPERATION_PAGES.includes(page)) {
     toast('Guest Operational hanya tersedia untuk akun Service.');
@@ -267,9 +274,10 @@ function go(page) {
     item.classList.toggle('active', item.dataset.page === page);
   });
 
-  $('fab').style.display = page === 'settings' ? 'none' : 'grid';
+  $('fab').style.display = ['settings', 'user-monitoring'].includes(page) ? 'none' : 'grid';
 
   if (page === 'settings') syncSeatingSettingInput();
+  if (page === 'user-monitoring') window.UserMonitoring?.onPageShown?.();
   if (page === 'dashboard') dashboardCountUpPending = true;
   if (page === 'all-divisions') loadAllDivisionsOverview();
 
