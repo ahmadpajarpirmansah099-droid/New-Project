@@ -5499,29 +5499,13 @@ button:active,
 
 .guest-confirm-dialog {
   width:min(100%,360px);
-  padding:24px 22px 20px;
+  padding:30px 22px 22px;
   border:1px solid rgba(255,255,255,.72);
   border-radius:24px;
   background:#fff;
   box-shadow:0 22px 60px rgba(17,18,37,.22);
   text-align:center;
   animation:guestConfirmPop .22s cubic-bezier(.2,.8,.2,1) both;
-}
-
-.guest-confirm-icon {
-  width:52px;
-  height:52px;
-  display:grid;
-  place-items:center;
-  margin:0 auto 14px;
-  border-radius:17px;
-  background:#eff2df;
-  color:#5e683d;
-}
-
-.guest-confirm-icon svg {
-  width:25px;
-  height:25px;
 }
 
 .guest-confirm-dialog h2 {
