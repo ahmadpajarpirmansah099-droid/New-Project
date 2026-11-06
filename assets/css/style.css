@@ -5480,3 +5480,110 @@ button:active,
     transform:none;
   }
 }
+
+/* =========================================================
+   GUEST STATUS CONFIRMATION
+   ========================================================= */
+.guest-confirm-backdrop {
+  position:fixed;
+  inset:0;
+  z-index:1200;
+  display:grid;
+  place-items:center;
+  padding:22px;
+  background:rgba(17,18,37,.48);
+  -webkit-backdrop-filter:blur(5px);
+  backdrop-filter:blur(5px);
+  animation:guestConfirmFade .18s ease both;
+}
+
+.guest-confirm-dialog {
+  width:min(100%,360px);
+  padding:24px 22px 20px;
+  border:1px solid rgba(255,255,255,.72);
+  border-radius:24px;
+  background:#fff;
+  box-shadow:0 22px 60px rgba(17,18,37,.22);
+  text-align:center;
+  animation:guestConfirmPop .22s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.guest-confirm-icon {
+  width:52px;
+  height:52px;
+  display:grid;
+  place-items:center;
+  margin:0 auto 14px;
+  border-radius:17px;
+  background:#eff2df;
+  color:#5e683d;
+}
+
+.guest-confirm-icon svg {
+  width:25px;
+  height:25px;
+}
+
+.guest-confirm-dialog h2 {
+  margin:0;
+  color:#171827;
+  font:800 19px Manrope,sans-serif;
+}
+
+.guest-confirm-dialog p {
+  margin:9px 0 22px;
+  color:#777b88;
+  font-size:13px;
+  line-height:1.55;
+}
+
+.guest-confirm-actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.guest-confirm-actions button {
+  min-height:46px;
+  padding:0 12px;
+  border:0;
+  border-radius:14px;
+  font:700 13px Manrope,sans-serif;
+  cursor:pointer;
+  transition:transform .16s ease,box-shadow .16s ease,background-color .16s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.guest-confirm-cancel {
+  background:#f3f3f0;
+  color:#343544;
+}
+
+.guest-confirm-accept {
+  background:#141426;
+  color:#fff;
+  box-shadow:0 4px 10px rgba(17,18,37,.16);
+}
+
+.guest-confirm-actions button:active {
+  transform:scale(.96);
+}
+
+@keyframes guestConfirmFade {
+  from { opacity:0; }
+  to { opacity:1; }
+}
+
+@keyframes guestConfirmPop {
+  from { opacity:0; transform:translateY(9px) scale(.97); }
+  to { opacity:1; transform:translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .guest-confirm-backdrop,
+  .guest-confirm-dialog,
+  .guest-confirm-actions button {
+    animation:none;
+    transition:none;
+  }
+}
