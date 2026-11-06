@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="assets/css/wip.css?v=20261103-unit-flat-p1">
 <link rel="stylesheet" href="assets/css/menu.css?v=20261103-unit-flat-p1">
 <link rel="stylesheet" href="assets/css/desktop.css?v=20261105-metric-gray-gradients-p1">
+<link rel="stylesheet" href="assets/css/user-monitoring.css?v=20261106-user-monitoring-p1">
 </head>
 <body class="auth-locked">
 <section class="auth-screen" id="authScreen" aria-labelledby="authTitle">
@@ -145,6 +146,36 @@
       <div class="setting-row"><div class="setting-icon">⇩</div><div class="setting-copy"><b>Ekspor data</b><small>Unduh data antrean hari ini dalam CSV</small></div><button data-action="exportCSV">Ekspor</button></div>
     </div>
     <div class="empty"><div class="empty-icon">✦</div><h3>Penyimpanan workspace</h3><p>Data Guest Operations, Master Barang, WIP, dan Menu disimpan di workspace Supabase dan mengikuti izin akun.</p></div>
+  </section>
+
+  <section class="page user-monitoring-page" id="page-user-monitoring">
+    <div class="monitor-heading">
+      <div><span class="eyebrow">DEVELOPER ONLY</span><div class="page-title">User Monitoring</div><p class="page-sub">Pantau sesi perangkat dan riwayat autentikasi.</p></div>
+      <button class="monitor-refresh" id="monitorRefreshButton" type="button">Muat ulang</button>
+    </div>
+    <p class="monitor-updated" id="monitorLastUpdated">Menunggu data...</p>
+    <div class="monitor-summary">
+      <div class="monitor-stat"><span>Pengguna online</span><strong id="monitorOnlineUsers">0</strong></div>
+      <div class="monitor-stat"><span>Perangkat online</span><strong id="monitorOnlineDevices">0</strong></div>
+      <div class="monitor-stat"><span>Aktivitas tampil</span><strong id="monitorActivityCount">0</strong></div>
+    </div>
+    <div class="monitor-tabs" role="tablist" aria-label="Jenis monitoring">
+      <button class="monitor-tab is-active" type="button" role="tab" aria-selected="true" data-monitor-tab="live">Live Users</button>
+      <button class="monitor-tab" type="button" role="tab" aria-selected="false" data-monitor-tab="activity">Activity Log</button>
+    </div>
+    <section class="monitor-panel" id="monitorLivePanel" role="tabpanel">
+      <div id="monitorLiveUsers"><div class="monitor-empty">Memuat pengguna...</div></div>
+    </section>
+    <section class="monitor-panel" id="monitorActivityPanel" role="tabpanel" hidden>
+      <div class="monitor-filter">
+        <label for="monitorActivityWorkspace">FILTER OUTLET</label>
+        <select id="monitorActivityWorkspace" aria-label="Filter outlet Activity Log">
+          <option value="all">Semua outlet</option>
+          <option value="unknown">Tidak teridentifikasi</option>
+        </select>
+      </div>
+      <div id="monitorActivityList"><div class="monitor-empty">Memuat aktivitas...</div></div>
+    </section>
   </section>
 
   <section class="page" id="page-all-divisions">
@@ -289,6 +320,7 @@
 <nav class="drawer-nav">
   <button class="drawer-item active" title="Guest Operational" data-page="dashboard" data-action="navigateFromMenu" data-action-args='["dashboard"]' aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Guest Operational</span></button>
   <button class="drawer-item" title="Pengaturan" data-page="settings" data-action="navigateFromMenu" data-action-args='["settings"]'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg><span>Pengaturan</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+  <button class="drawer-item" title="User Monitoring" data-page="user-monitoring" data-action="navigateFromMenu" data-action-args='["user-monitoring"]' style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>User Monitoring</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
   <button class="drawer-item" type="button" title="Master Barang" data-page="master-items" data-md-action="nav" aria-label="Master Barang"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M4 7.5 12 12l8-4.5M12 12v9M8 5.3l8 4.5"/></svg><span>Master Barang</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
   <button class="drawer-item" type="button" title="Daily SO" data-page="daily-stock" data-action="navigateFromMenu" data-action-args='["daily-stock"]' aria-label="Daily SO"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3.5h6M9 9h6M9 13h6M9 17h3"/></svg><span>Daily SO</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
   </nav><div class="drawer-foot">ADMIN WORKSPACE</div></aside><div class="toast" id="toast"></div>
@@ -308,6 +340,7 @@
 <script src="assets/js/guestops-history.js?v=20261104-feature-modules-p1" defer></script>
 <script src="assets/js/guestops-reservations.js?v=20261104-feature-modules-p1" defer></script>
 <script src="assets/js/guestops-detail.js?v=20261106-confirm-dialog-no-icon-p1" defer></script>
+<script src="assets/js/user-monitoring.js?v=20261106-user-monitoring-p1" defer></script>
 <script src="assets/js/app-startup.js?v=20261105-daily-stock-context-refresh-p1" defer></script>
 </body>
 </html>
