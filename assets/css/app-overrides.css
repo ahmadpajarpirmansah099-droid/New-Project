@@ -1,0 +1,1343 @@
+/* =========================================================
+    RESERVATION FORM — MOBILE CONTROL NORMALIZATION
+    Fix native button appearance leaking into custom pickers.
+    ========================================================= */
+#sheet .field .reservation-picker-trigger,
+#sheet .field .reservation-select-trigger {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  background: #fbfcfe;
+  color: var(--ink);
+  box-shadow: 0 2px 5px rgba(17,18,37,.045), 0 1px 2px rgba(17,18,37,.035);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#sheet .field .reservation-picker-trigger:active,
+#sheet .field .reservation-select-trigger:active {
+  background: #f5f7fb;
+}
+
+#sheet .field .reservation-picker-trigger svg,
+#sheet .field .reservation-select-trigger svg {
+  display: block;
+  width: 19px;
+  height: 19px;
+  min-width: 19px;
+  fill: none;
+  stroke: #8490a5;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#sheet .field .reservation-select {
+  position: relative;
+  width: 100%;
+}
+
+#sheet .field .reservation-select-options {
+  position: absolute;
+  z-index: 45;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  padding: 5px;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(20,35,63,.12);
+}
+
+#sheet .field .reservation-select-options[hidden] {
+  display: none !important;
+}
+
+#sheet .field .reservation-select-option {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+}
+
+#sheet .field .reservation-select-option.selected {
+  background: #f1f5fb;
+  color: #2457d7;
+  font-weight: 700;
+}
+
+#sheet .field .reservation-select-option svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 520px) {
+  #sheet .field .reservation-picker-trigger,
+  #sheet .field .reservation-select-trigger {
+    min-height: 52px;
+    height: 52px;
+    font-size: 16px;
+  }
+}
+
+/* =========================================================
+    RESERVATION TIME PICKER — MOBILE LAYOUT
+    Keep hour/minute controls inside the dialog on narrow screens.
+    ========================================================= */
+.reservation-time-dialog {
+  width: min(92vw, 390px);
+  padding: 20px;
+}
+
+.reservation-time-display {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 13px 14px;
+  margin-bottom: 16px;
+  border-radius: 13px;
+  background: #f3f6e8;
+  color: #25263a;
+}
+
+.reservation-time-display small {
+  flex-basis: 100%;
+  color: #777d5c;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.reservation-time-display strong {
+  font: 800 27px Manrope, sans-serif;
+  line-height: 1.2;
+  color: #111225;
+}
+
+.reservation-time-display span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #777d5c;
+}
+
+.reservation-time-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.reservation-time-unit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 7px;
+  min-width: 0;
+}
+
+.reservation-time-unit label {
+  color: #555469;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.reservation-time-unit button {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  border: 1px solid #e7e7eb;
+  border-radius: 10px;
+  background: #f7f7f5;
+  color: #343448;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.reservation-time-unit input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  padding: 0 8px;
+  border: 1px solid #dedee5;
+  border-radius: 10px;
+  background: #fff;
+  color: #111225;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+}
+
+.reservation-time-unit input:focus {
+  border-color: #a8b77a;
+  box-shadow: 0 0 0 3px rgba(168,183,122,.16);
+}
+
+.reservation-time-unit {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.reservation-time-unit label {
+  grid-column: 1 / -1;
+}
+
+.reservation-time-unit button:first-of-type,
+.reservation-time-unit button:last-of-type {
+  grid-row: 2;
+}
+
+.reservation-time-unit input {
+  grid-row: 2;
+}
+
+.reservation-time-unit {
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+}
+
+.reservation-time-unit button {
+  height: 48px;
+}
+
+.reservation-time-unit button:first-of-type { grid-column: 1; }
+.reservation-time-unit input { grid-column: 2; }
+.reservation-time-unit button:last-of-type { grid-column: 3; }
+
+.reservation-time-dialog .calendar-dialog-actions {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.reservation-time-dialog .calendar-today,
+.reservation-time-dialog .calendar-apply {
+  min-width: 0;
+  min-height: 48px;
+  height: 48px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+@media (max-width: 360px) {
+  .reservation-time-dialog {
+    padding: 16px;
+  }
+  .reservation-time-controls {
+    gap: 8px;
+  }
+  .reservation-time-unit {
+    grid-template-columns: 34px minmax(0, 1fr) 34px;
+  }
+  .reservation-time-unit button {
+    height: 44px;
+  }
+  .reservation-time-unit input {
+    height: 44px;
+    font-size: 18px;
+  }
+}
+
+/* Status aktif pada halaman pengaturan. */
+.settings-status-active {
+  color: #15966a;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* Elemen detail dan catatan operasional yang sebelumnya memakai style langsung. */
+.text-muted-note {
+  color: #9aa5b8;
+  font-weight: 500;
+}
+
+.pending-guest-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-top: 1px solid #f3e5d0;
+  font-size: 11px;
+}
+
+.detail-name {
+  font: 800 18px Manrope;
+}
+
+.detail-cell-full {
+  grid-column: 1 / -1;
+}
+
+.detail-history-heading {
+  margin-top: 20px;
+  font: 800 13px Manrope;
+}
+
+/* Jeda animasi kartu antrean tetap mengikuti urutan daftar. */
+.guest[data-stagger-index="0"] {
+  animation-delay: 0s;
+}
+
+.guest[data-stagger-index="1"] {
+  animation-delay: 0.035s;
+}
+
+.guest[data-stagger-index="2"] {
+  animation-delay: 0.07s;
+}
+
+.guest[data-stagger-index="3"] {
+  animation-delay: 0.10500000000000001s;
+}
+
+.guest[data-stagger-index="4"] {
+  animation-delay: 0.14s;
+}
+
+.guest[data-stagger-index="5"] {
+  animation-delay: 0.17500000000000002s;
+}
+
+.guest[data-stagger-index="6"] {
+  animation-delay: 0.21000000000000002s;
+}
+
+.guest[data-stagger-index="7"] {
+  animation-delay: 0.24500000000000002s;
+}
+
+/* DEVELOPER OUTLET / DIVISION SWITCHER */
+.workspace-scope-switcher{display:flex;align-items:center;gap:8px;min-width:0;margin-left:auto;padding:5px;border:1px solid #e6eaf0;border-radius:13px;background:rgba(255,255,255,.9)}
+.workspace-scope-switcher[hidden]{display:none!important}
+.workspace-scope-switcher .scope-field{display:grid;gap:3px;flex:1 1 0;min-width:0}
+.workspace-scope-switcher .scope-field>span{padding-left:7px;color:#8993a4;font-size:8px;font-weight:800;letter-spacing:.09em}
+.scope-trigger{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;max-width:142px;height:34px;padding:0 10px;border:1px solid transparent;border-radius:9px;background:#f5f7fa;color:#24334d;text-align:left;font-family:inherit;font-size:11px;font-weight:700;line-height:1.2;cursor:pointer;transition:background .18s ease,border-color .18s ease,box-shadow .18s ease}
+.scope-trigger>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scope-trigger svg{flex:0 0 15px;width:15px;height:15px;color:#68758a;transition:transform .18s ease}
+.scope-trigger[aria-expanded="true"]{border-color:#d7deea;background:#fff;box-shadow:0 0 0 3px rgba(93,112,150,.09)}
+.scope-trigger[aria-expanded="true"] svg{transform:rotate(180deg)}
+.scope-trigger:disabled{opacity:.55;cursor:wait}
+.scope-native-select{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.scope-picker-backdrop[hidden],.scope-picker-sheet[hidden]{display:none!important}
+.scope-picker-backdrop{position:fixed;z-index:1200;inset:0;background:rgba(18,22,34,.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);animation:scopeFadeIn .16s ease both}
+.scope-picker-sheet{position:fixed;z-index:1201;left:50%;bottom:max(14px,env(safe-area-inset-bottom));width:min(420px,calc(100% - 28px));max-height:min(72vh,520px);padding:10px 16px 14px;overflow:hidden;transform:translateX(-50%);border:1px solid rgba(255,255,255,.8);border-radius:22px;background:#fffefa;box-shadow:0 22px 70px rgba(18,28,45,.22);animation:scopeSheetIn .22s cubic-bezier(.2,.8,.2,1) both}
+.scope-picker-grab{width:34px;height:4px;margin:0 auto 12px;border-radius:99px;background:#d9dde4}
+.scope-picker-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 2px 12px}
+.scope-picker-eyebrow{color:#9aa1ad;font-size:9px;font-weight:800;letter-spacing:.12em}
+.scope-picker-header h2{margin:4px 0 0;color:#171b2c;font-size:19px;font-weight:800;letter-spacing:-.025em}
+.scope-picker-close{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border:1px solid #edf0f3;border-radius:12px;background:#f7f8fa;color:#687386}
+.scope-picker-close svg{width:18px;height:18px}
+.scope-picker-options{max-height:calc(min(72vh,520px) - 90px);overflow-y:auto;overscroll-behavior:contain}
+.scope-picker-option{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:56px;padding:0 12px;border:0;border-top:1px solid #eef0f3;background:transparent;color:#30394b;text-align:left;font-size:15px;font-weight:650;cursor:pointer;transition:background .15s ease,color .15s ease}
+.scope-picker-option:active{background:#f5f6f2}
+.scope-picker-option.is-selected{color:#202a40;background:#f7f8f4}
+.scope-picker-check{display:grid;place-items:center;flex:0 0 23px;width:23px;height:23px;border:1.5px solid #cbd2dc;border-radius:50%;color:transparent}
+.scope-picker-check svg{width:13px;height:13px;opacity:0}
+.scope-picker-option.is-selected .scope-picker-check{border-color:#71845e;background:#71845e;color:#fff}
+.scope-picker-option.is-selected .scope-picker-check svg{opacity:1}
+body.scope-picker-open{overflow:hidden}
+@keyframes scopeFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scopeSheetIn{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
+.division-overview-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}
+.division-overview-heading .page-title{margin-top:4px}
+.division-overview-refresh{min-height:38px;padding:0 12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:#43536d;font-size:11px;font-weight:700}
+.division-overview-list{display:grid;gap:12px}
+.division-overview-card{padding:16px;border:1px solid #e8edf3;border-radius:17px;background:#fff;box-shadow:0 5px 18px rgba(25,42,70,.035)}
+.division-overview-card h2{margin:0 0 12px;color:#1b2b46;font-size:15px;font-weight:800}
+.division-overview-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.division-overview-metrics div{min-width:0;padding:10px 7px;border-radius:10px;background:#f6f8fb}
+.division-overview-metrics span{display:block;overflow:hidden;color:#8993a4;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+.division-overview-metrics strong{display:block;margin-top:4px;color:#263752;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+.division-overview-note{margin:15px 2px;color:#7c8798;font-size:11px;line-height:1.6}
+.division-overview-loading,.division-overview-error{padding:22px 16px;border:1px dashed #dce3ec;border-radius:14px;color:#7c8798;font-size:12px;text-align:center}
+@media(max-width:520px){.top{flex-wrap:wrap;gap:9px}.brand{flex:1 1 auto;min-width:125px}.workspace-scope-switcher{order:3;width:100%;margin:0;justify-content:stretch;gap:7px;padding:6px}.workspace-scope-switcher .scope-field{flex:1 1 50%}.scope-trigger{max-width:none;height:42px;padding:0 11px;font-size:13px}.scope-picker-sheet{width:calc(100% - 24px);padding-right:14px;padding-left:14px}.top-actions{margin-left:auto}}
+@media(max-width:360px){.division-overview-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Keep the active workspace visible while Developer changes outlet/division. */
+body.workspace-switching .app{pointer-events:none;opacity:.62;transition:opacity .18s ease}
+body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z-index:999;inset:0;display:grid;place-items:center;padding-top:72px;background:rgba(246,246,241,.38);color:#17172a;font-size:14px;font-weight:700;letter-spacing:.01em;pointer-events:all}
+
+/* Dashboard operational date card — subtle elevation */
+#page-dashboard > button.history-date {
+  box-shadow:var(--card-shadow);
+}
+
+/* Outlet and division controls — standalone with subtle elevation */
+.workspace-scope-switcher {
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+.workspace-scope-switcher .scope-trigger {
+  border-color:#e7eaf0;
+  box-shadow:0 3px 8px rgba(20,35,63,.08),0 1px 2px rgba(20,35,63,.04);
+}
+.workspace-scope-switcher .scope-trigger:active {
+  box-shadow:0 2px 5px rgba(20,35,63,.10);
+}
+
+/* =========================================================
+   DESKTOP DASHBOARD — WIDE WORKSPACE (1280–1920px)
+   Mobile layout remains unchanged.
+   ========================================================= */
+@media (min-width: 900px) {
+  .app {
+    width: 100%;
+    max-width: 1920px;
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding: 0 0 40px;
+    background: var(--bg);
+  }
+
+  .top {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    width: 100%;
+    min-height: 88px;
+    padding: 16px clamp(30px, 4vw, 76px);
+    gap: 28px;
+    background: rgba(246, 246, 241, .94);
+    border-bottom: 1px solid rgba(17, 18, 37, .07);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+
+  .brand {
+    flex: 0 0 auto;
+    gap: 14px;
+  }
+
+  .brandmark {
+    width: 48px;
+    height: 48px;
+  }
+
+  .brandname {
+    font-size: 17px;
+  }
+
+  .brandmeta {
+    font-size: 11px;
+  }
+
+  .workspace-scope-switcher {
+    margin-left: auto;
+    gap: 14px;
+  }
+
+  .workspace-scope-switcher .scope-field {
+    flex: 0 1 210px;
+  }
+
+  .workspace-scope-switcher .scope-field > span {
+    padding-left: 10px;
+    font-size: 9px;
+  }
+
+  .scope-trigger {
+    width: 100%;
+    max-width: none;
+    min-width: 170px;
+    height: 44px;
+    padding: 0 14px;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+
+  .top-actions {
+    flex: 0 0 auto;
+    gap: 14px;
+  }
+
+  .profile,
+  .auth-logout-button,
+  .menu-toggle {
+    width: 48px;
+    height: 48px;
+  }
+
+  .content {
+    width: 100%;
+    max-width: none;
+    padding: 28px clamp(30px, 4vw, 76px) 48px;
+  }
+
+  #page-dashboard.page.active {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) repeat(3, minmax(0, .63fr));
+    column-gap: 22px;
+    row-gap: 0;
+    align-items: stretch;
+  }
+
+  #page-dashboard > .greeting {
+    grid-column: 1 / 2;
+    grid-row: 1;
+    align-self: center;
+    min-width: 0;
+    min-height: 76px;
+    margin: 0 0 24px 2px;
+  }
+
+  #page-dashboard > .greeting h1 {
+    font-size: clamp(27px, 2vw, 34px);
+  }
+
+  #page-dashboard > .operational-date-trigger {
+    grid-column: 1 / 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
+    width: clamp(220px, 24vw, 260px);
+    min-width: 0;
+    height: 52px;
+    margin: 0 0 24px;
+    padding: 0 11px;
+    gap: 8px;
+    border: 1px solid rgba(17, 18, 37, .045);
+    border-radius: 16px;
+    background: #fff;
+    text-align: left;
+    box-shadow: var(--card-shadow);
+  }
+
+  #page-dashboard > .operational-date-trigger .history-date-icon {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 10px;
+    background: var(--lime-soft);
+    color: #53652d;
+  }
+
+  #page-dashboard > .operational-date-trigger .history-date-copy {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    text-align: left;
+  }
+
+  #page-dashboard > .operational-date-trigger .history-date-copy small {
+    font-size: 10px;
+  }
+
+  #page-dashboard > .operational-date-trigger .history-date-copy strong {
+    font-size: 14px;
+  }
+
+  #page-dashboard > .operational-date-trigger .history-date-chevron {
+    margin-left: auto;
+    font-size: 20px;
+  }
+
+  #page-dashboard > .hero {
+    grid-column: 1 / 2;
+    grid-row: 2;
+    min-width: 0;
+    min-height: 220px;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    border-radius: 24px;
+    box-shadow: var(--card-shadow-strong);
+  }
+
+  #page-dashboard > .hero .hero-label {
+    font-size: 14px;
+  }
+
+  #page-dashboard > .hero .hero-total {
+    margin-top: 14px;
+    font-size: clamp(54px, 4vw, 68px);
+  }
+
+  #page-dashboard > .hero .hero-foot {
+    gap: 24px;
+    margin-top: auto;
+    padding-top: 10px;
+  }
+
+  #page-dashboard > .hero .hero-foot span {
+    font-size: 14px;
+  }
+
+  #page-dashboard > .metrics {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    justify-self: start;
+    min-width: 0;
+    width: min(100%, 510px);
+    height: 144px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    gap: 8px;
+    margin: 24px 0 18px;
+  }
+
+  #page-dashboard > .metrics .metric {
+    min-width: 0;
+    min-height: 144px;
+    height: 144px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid rgba(17, 18, 37, .035);
+    border-radius: 22px;
+    box-shadow: var(--card-shadow);
+  }
+
+  #page-dashboard > .metrics .metric-top .eyebrow {
+    font-size: 13px;
+  }
+
+  #page-dashboard > .metrics .metric-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 15px;
+  }
+
+  #page-dashboard > .metrics .metric-icon svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  #page-dashboard > .metrics .metric strong {
+    margin-top: auto;
+    padding-top: 12px;
+    font-size: 40px;
+  }
+
+  #page-dashboard > .metrics .metric small {
+    font-size: 14px;
+  }
+
+  #page-dashboard > #pendingWrap,
+  #page-dashboard > .section-head,
+  #page-dashboard > #dashboardList {
+    grid-column: 1 / -1;
+  }
+
+  #page-dashboard > #pendingWrap {
+    min-width: 0;
+  }
+
+  #page-dashboard > .section-head {
+    grid-row: 5;
+    margin: 16px 2px 16px;
+  }
+
+  #page-dashboard > #pendingWrap {
+    grid-row: 3;
+  }
+
+  #page-dashboard > #dashboardList {
+    grid-row: 6;
+  }
+
+  #page-dashboard > .section-head h2 {
+    font-size: 25px;
+  }
+
+  #page-dashboard > .section-head .text-btn {
+    font-size: 14px;
+  }
+
+  #page-dashboard > #dashboardList {
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 16px;
+  }
+
+  #page-dashboard > #dashboardList > .empty {
+    grid-column: 1 / -1;
+    min-height: 230px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(17, 18, 37, .035);
+    border-radius: 24px;
+    box-shadow: var(--card-shadow);
+  }
+
+  .fab {
+    right: clamp(30px, 4vw, 76px);
+    bottom: 30px;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1350px) {
+  #page-dashboard.page.active {
+    grid-template-columns: minmax(0, 1.8fr) repeat(3, minmax(0, .63fr));
+    column-gap: 16px;
+  }
+
+  #page-dashboard > .metrics {
+    width: min(100%, 510px);
+    gap: 8px;
+  }
+
+  #page-dashboard > .metrics .metric {
+    padding: 12px;
+  }
+}
+
+
+
+/* Wide desktop dashboard: keep the active queue beside the summary. */
+@media (min-width: 1150px) {
+  #page-dashboard.page.active {
+    grid-template-columns: minmax(0, 1fr) minmax(420px, 1.08fr);
+    column-gap: 32px;
+    row-gap: 0;
+    align-items: start;
+  }
+
+  #page-dashboard > .greeting {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  #page-dashboard > .operational-date-trigger {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  #page-dashboard > .hero {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  #page-dashboard > #pendingWrap {
+    grid-column: 1;
+    grid-row: 4;
+  }
+
+  #page-dashboard > .metrics {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: end;
+    width: 100%;
+    height: 120px;
+    min-height: 120px;
+    margin: 0 0 -24px;
+  }
+
+  #page-dashboard > .section-head {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0 2px 16px;
+  }
+
+  #page-dashboard > #dashboardList {
+    grid-column: 2;
+    grid-row: 2;
+    display: grid;
+    grid-auto-rows: max-content;
+    align-content: start;
+    gap: 10px;
+    min-width: 0;
+    align-self: start;
+    margin-top: 44px;
+    height: 290px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+  }
+
+  #page-dashboard > #dashboardList > .guest {
+    align-self: start;
+    min-height: 104px;
+    height: auto;
+  }
+
+  #page-dashboard > #dashboardList > .empty {
+    min-height: 290px;
+    height: 100%;
+  }
+}
+
+/* Native workspace dropdowns — use the device/browser picker instead of a fixed header sheet. */
+.workspace-scope-switcher {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+  margin-left:auto;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+.workspace-scope-switcher[hidden] { display:none !important; }
+.workspace-scope-switcher .scope-field {
+  display:grid;
+  gap:5px;
+  flex:0 1 190px;
+  min-width:0;
+}
+.workspace-scope-switcher .scope-field > span {
+  padding-left:3px;
+  color:#8993a4;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+.scope-native-select {
+  position:static !important;
+  display:block;
+  width:100%;
+  min-width:0;
+  height:42px;
+  margin:0 !important;
+  padding:0 34px 0 12px;
+  overflow:visible;
+  clip:auto !important;
+  border:1px solid #e2e7ee;
+  border-radius:12px;
+  background-color:#fff;
+  color:#26354d;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:650;
+  line-height:1.2;
+  box-shadow:0 3px 9px rgba(20,35,63,.07),0 1px 2px rgba(20,35,63,.035);
+  cursor:pointer;
+}
+.scope-native-select:disabled { opacity:.58; cursor:wait; }
+@media(max-width:520px) {
+  .top { flex-wrap:wrap; gap:10px; }
+  .brand { flex:1 1 auto; min-width:120px; }
+  .workspace-scope-switcher {
+    order:3;
+    width:100%;
+    margin:0;
+    gap:8px;
+  }
+  .workspace-scope-switcher .scope-field { flex:1 1 50%; }
+  .workspace-scope-switcher .scope-field > span { font-size:9px; }
+  .scope-native-select {
+    height:44px;
+    padding-left:11px;
+    font-size:13px;
+  }
+  .top-actions { margin-left:auto; }
+}
+
+/* In-app workspace dropdown: themed menu anchored to each selector, not OS-native. */
+.workspace-scope-switcher {
+  position:relative;
+  z-index:40;
+  overflow:visible;
+}
+.workspace-scope-switcher .scope-field {
+  position:relative;
+}
+.scope-dropdown-menu[hidden] {
+  display:none !important;
+}
+.scope-dropdown-menu {
+  position:absolute;
+  z-index:160;
+  top:calc(100% + 8px);
+  left:0;
+  width:min(280px, calc(100vw - 32px));
+  max-height:min(320px, 52vh);
+  padding:6px;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  border:1px solid rgba(31,42,61,.09);
+  border-radius:15px;
+  background:#fffefa;
+  box-shadow:0 14px 34px rgba(25,35,52,.16),0 3px 9px rgba(25,35,52,.07);
+  transform-origin:top left;
+  animation:scopeDropdownIn .16s ease-out both;
+}
+.workspace-scope-switcher .scope-field:last-child .scope-dropdown-menu {
+  right:0;
+  left:auto;
+  transform-origin:top right;
+}
+.scope-dropdown-option {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  width:100%;
+  min-height:44px;
+  padding:0 11px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:#30394b;
+  text-align:left;
+  font:600 13px 'DM Sans',sans-serif;
+  cursor:pointer;
+  transition:background .15s ease,color .15s ease;
+}
+.scope-dropdown-option + .scope-dropdown-option {
+  margin-top:2px;
+}
+.scope-dropdown-option:hover,
+.scope-dropdown-option:focus-visible {
+  outline:0;
+  background:#f3f5ee;
+}
+.scope-dropdown-option.is-selected {
+  background:#eef2e7;
+  color:#26351f;
+  font-weight:800;
+}
+.scope-dropdown-check {
+  display:grid;
+  place-items:center;
+  flex:0 0 21px;
+  width:21px;
+  height:21px;
+  border-radius:50%;
+  background:#71845e;
+  color:#fff;
+  font-size:12px;
+  line-height:1;
+}
+.scope-dropdown-option:not(.is-selected) .scope-dropdown-check {
+  background:transparent;
+  border:1px solid #d6dce3;
+}
+.scope-trigger:disabled {
+  opacity:.58;
+  cursor:wait;
+}
+@keyframes scopeDropdownIn {
+  from { opacity:0; transform:translateY(-5px) scale(.985); }
+  to { opacity:1; transform:translateY(0) scale(1); }
+}
+@media (max-width:520px) {
+  .workspace-scope-switcher {
+    order:3;
+    width:100%;
+    margin:0;
+    gap:8px;
+  }
+  .workspace-scope-switcher .scope-field {
+    flex:1 1 50%;
+    min-width:0;
+  }
+  .scope-dropdown-menu {
+    width:min(300px, calc(100vw - 32px));
+    max-height:min(300px, 48vh);
+  }
+}
+
+
+/* Hide workspace controls only while the mobile navigation drawer is open. */
+@media (max-width: 520px) {
+  body.menu-open .workspace-scope-switcher {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
+/* Desktop navigation overlay: blur the complete workspace, including its header. */
+@media (min-width: 900px) {
+  .menu-backdrop {
+    z-index: 90;
+    background: rgba(17, 18, 37, .34);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+  }
+
+  .menu-drawer {
+    z-index: 91;
+    top: 0;
+    right: 0;
+    width: clamp(360px, 27vw, 440px);
+    height: 100dvh;
+    border-radius: 24px 0 0 24px;
+  }
+}
+
+/* Desktop quick-menu fan: keep the lowest action clear of the main FAB. */
+@media (min-width: 900px) {
+  .quick-menu {
+    right: calc(clamp(30px, 4vw, 76px) + 27px);
+    bottom: 104px;
+  }
+}
+
+/* Hide the automatic date label on the desktop dashboard only. */
+@media (min-width: 900px) {
+  #page-dashboard .greeting .date {
+    display: none !important;
+  }
+}
+
+
+/* Hide visible scrollbar tracks inside popups while preserving scrolling. */
+.sheet,
+.sheet *,
+.calendar-dialog,
+.calendar-dialog *,
+.scope-picker-sheet,
+.scope-picker-sheet * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.sheet::-webkit-scrollbar,
+.sheet *::-webkit-scrollbar,
+.calendar-dialog::-webkit-scrollbar,
+.calendar-dialog *::-webkit-scrollbar,
+.scope-picker-sheet::-webkit-scrollbar,
+.scope-picker-sheet *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* DESKTOP — keep popups inside the workspace viewport and reduce background blur. */
+@media (min-width: 900px) {
+  .sheet.operational-modal {
+    top: 104px;
+    bottom: 16px;
+    max-height: calc(100dvh - 120px);
+    padding: 14px 16px 16px;
+    transform: translate(-50%, 0) scale(.98);
+  }
+  .sheet.operational-modal.show {
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  .calendar-dialog {
+    top: calc(50% + 44px);
+    max-height: calc(100dvh - 124px);
+    padding: 18px;
+  }
+
+  .scope-picker-sheet {
+    bottom: 16px;
+    max-height: calc(100dvh - 124px);
+  }
+
+  .sheet-backdrop,
+  .calendar-backdrop,
+  .menu-backdrop,
+  .quick-menu-backdrop,
+  .scope-picker-backdrop,
+  .app-select-dim {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .menu-backdrop {
+    background: rgba(17, 18, 37, .28);
+  }
+  .quick-menu-backdrop {
+    background: rgba(17, 18, 37, .06);
+  }
+}
+
+
+/* GUEST DETAIL — SHORTER MOBILE SHEET */
+@media (max-width: 700px) {
+  #sheet:has(.detail-ticket) {
+    max-height: 72dvh;
+    padding-top: 8px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+
+  #sheet:has(.detail-ticket) .sheet-head {
+    margin-bottom: 12px;
+  }
+
+  #sheet:has(.detail-ticket) .handle {
+    margin-bottom: 12px;
+  }
+
+  #sheet:has(.detail-ticket) .detail-ticket {
+    padding: 13px 16px;
+    margin-bottom: 12px;
+  }
+
+  #sheet:has(.detail-ticket) .detail-ticket strong {
+    font-size: 27px;
+  }
+
+  #sheet:has(.detail-ticket) .detail-grid {
+    gap: 7px;
+    margin: 10px 0;
+  }
+
+  #sheet:has(.detail-ticket) .detail-cell {
+    padding: 9px 10px;
+  }
+
+  #sheet:has(.detail-ticket) .sheet-actions {
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  #sheet:has(.detail-ticket) .timeline {
+    margin-top: 8px;
+  }
+}
+
+/* =========================================================
+   BUTTON MICRO-INTERACTIONS — CONSISTENT TAP FEEDBACK
+   Keep existing feature-specific press effects where defined.
+   ========================================================= */
+
+button:active,
+[role="button"]:active {
+  transform:scale(.975);
+}
+
+.filters .filter {
+  transition:
+    transform .16s cubic-bezier(.2,.8,.2,1),
+    background-color .2s ease,
+    color .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+
+.filters .filter:active {
+  transform:scale(.96);
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .filters .filter {
+    transition:none;
+  }
+
+  button:active,
+  [role="button"]:active,
+  .filters .filter:active {
+    transform:none;
+  }
+}
+
+/* =========================================================
+   GUEST DETAIL CARDS — TACTILE TAP FEEDBACK
+   Visual-only interaction. Cards do not trigger data actions.
+   ========================================================= */
+
+#sheet .detail-ticket,
+#sheet .detail-cell {
+  cursor:pointer;
+  transform-origin:center;
+  -webkit-tap-highlight-color:transparent;
+  transition:
+    transform .16s cubic-bezier(.2,.8,.2,1),
+    box-shadow .18s ease,
+    background-color .18s ease,
+    filter .18s ease;
+}
+
+#sheet .detail-ticket:active {
+  transform:scale(.985);
+  filter:brightness(.97) saturate(1.04);
+  box-shadow:0 3px 9px rgba(17,18,37,.13);
+}
+
+#sheet .detail-cell:active {
+  transform:scale(.975);
+  background-color:#eef1e7;
+  box-shadow:0 1px 4px rgba(17,18,37,.10);
+}
+
+@media (hover:hover) and (pointer:fine) {
+  #sheet .detail-ticket:hover,
+  #sheet .detail-cell:hover {
+    transform:translateY(-2px);
+  }
+
+  #sheet .detail-ticket:hover {
+    box-shadow:0 11px 24px rgba(17,18,37,.14),0 3px 7px rgba(17,18,37,.06);
+  }
+
+  #sheet .detail-cell:hover {
+    box-shadow:0 7px 15px rgba(17,18,37,.10),0 2px 4px rgba(17,18,37,.04);
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  #sheet .detail-ticket,
+  #sheet .detail-cell {
+    transition:none;
+  }
+
+  #sheet .detail-ticket:active,
+  #sheet .detail-cell:active,
+  #sheet .detail-ticket:hover,
+  #sheet .detail-cell:hover {
+    transform:none;
+  }
+}
+
+/* =========================================================
+   GUEST STATUS CONFIRMATION
+   ========================================================= */
+.guest-confirm-backdrop {
+  position:fixed;
+  inset:0;
+  z-index:1200;
+  display:grid;
+  place-items:center;
+  padding:22px;
+  background:rgba(17,18,37,.48);
+  -webkit-backdrop-filter:blur(5px);
+  backdrop-filter:blur(5px);
+  animation:guestConfirmFade .18s ease both;
+}
+
+.guest-confirm-dialog {
+  width:min(100%,360px);
+  padding:30px 22px 22px;
+  border:1px solid rgba(255,255,255,.72);
+  border-radius:24px;
+  background:#fff;
+  box-shadow:0 22px 60px rgba(17,18,37,.22);
+  text-align:center;
+  animation:guestConfirmPop .22s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.guest-confirm-dialog h2 {
+  margin:0;
+  color:#171827;
+  font:800 19px Manrope,sans-serif;
+}
+
+.guest-confirm-dialog p {
+  margin:9px 0 22px;
+  color:#777b88;
+  font-size:13px;
+  line-height:1.55;
+}
+
+.guest-confirm-actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.guest-confirm-actions button {
+  min-height:46px;
+  padding:0 12px;
+  border:0;
+  border-radius:14px;
+  font:700 13px Manrope,sans-serif;
+  cursor:pointer;
+  transition:transform .16s ease,box-shadow .16s ease,background-color .16s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.guest-confirm-cancel {
+  background:#f3f3f0;
+  color:#343544;
+}
+
+.guest-confirm-accept {
+  background:#141426;
+  color:#fff;
+  box-shadow:0 4px 10px rgba(17,18,37,.16);
+}
+
+.guest-confirm-actions button:active {
+  transform:scale(.96);
+}
+
+@keyframes guestConfirmFade {
+  from { opacity:0; }
+  to { opacity:1; }
+}
+
+@keyframes guestConfirmPop {
+  from { opacity:0; transform:translateY(9px) scale(.97); }
+  to { opacity:1; transform:translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .guest-confirm-backdrop,
+  .guest-confirm-dialog,
+  .guest-confirm-actions button {
+    animation:none;
+    transition:none;
+  }
+}
+
+
+/* Logout progress indicator */
+.auth-profile-button.is-logging-out,
+.profile.is-logging-out,
+.auth-logout-button.is-logging-out {
+  cursor: wait;
+  opacity: .82;
+}
+.auth-logout-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: auth-logout-spin .7s linear infinite;
+}
+.profile .auth-logout-spinner {
+  width: 17px;
+  height: 17px;
+}
+.auth-logout-button .auth-logout-spinner {
+  width: 15px;
+  height: 15px;
+}
+@keyframes auth-logout-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-logout-spinner { animation-duration: 1.8s; }
+}
