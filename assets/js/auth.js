@@ -29,6 +29,7 @@
 
   function showLogin(message) {
     if (message) persistentLoginMessage = message;
+    window.UserMonitoring?.stop?.();
     const visibleMessage = persistentLoginMessage || message || '';
     const emailInput = $('authEmail');
     if (emailInput) emailInput.value = '';
@@ -173,7 +174,7 @@
 
     if (!isCurrent()) return;
     if (error || !profile || !['developer', 'admin', 'service'].includes(profile.role)) {
-      await supabaseClient.auth.signOut();
+      await supabaseClient.auth.signOut({ scope: 'local' });
       showLogin('Akun belum memiliki izin akses. Hubungi Developer untuk pengaturan role.');
       return;
     }
@@ -182,25 +183,25 @@
       .select('workspace_id, role').eq('user_id', userId);
     if (!isCurrent()) return;
     if (membershipError || (profile.role !== 'developer' && !memberships?.length)) {
-      await supabaseClient.auth.signOut(); showLogin('Akun belum terhubung ke workspace. Hubungi Developer.'); return;
+      await supabaseClient.auth.signOut({ scope: 'local' }); showLogin('Akun belum terhubung ke workspace. Hubungi Developer.'); return;
     }
     let workspaces=[];
     if(profile.role==='developer'){
       const {data,error:workspaceError}=await supabaseClient.from('workspaces').select('id,name').order('name');
       if(!isCurrent())return;
-      if(workspaceError||!data?.length){await supabaseClient.auth.signOut();showLogin('Daftar outlet belum dapat dimuat. Hubungi Developer.');return;}
+      if(workspaceError||!data?.length){await supabaseClient.auth.signOut({ scope: 'local' });showLogin('Daftar outlet belum dapat dimuat. Hubungi Developer.');return;}
       workspaces=data;
     }else{
       const selectedMembership=memberships[0];
       const {data,error:workspaceError}=await supabaseClient.from('workspaces').select('id,name').eq('id',selectedMembership.workspace_id).single();
       if(!isCurrent())return;
-      if(workspaceError||!data){await supabaseClient.auth.signOut();showLogin('Outlet akun belum dapat dimuat. Hubungi Developer.');return;}
+      if(workspaceError||!data){await supabaseClient.auth.signOut({ scope: 'local' });showLogin('Outlet akun belum dapat dimuat. Hubungi Developer.');return;}
       workspaces=[data];
     }
     const selectedWorkspaceId=memberships?.[0]?.workspace_id||workspaces[0].id;
     let nextContext;
     try{nextContext=await buildWorkspaceContext(userId,session.user.email||'',profile,workspaces,selectedWorkspaceId,null,isCurrent);}
-    catch(contextError){await supabaseClient.auth.signOut();showLogin(contextError.message||'Workspace akun belum dapat dimuat.');return;}
+    catch(contextError){await supabaseClient.auth.signOut({ scope: 'local' });showLogin(contextError.message||'Workspace akun belum dapat dimuat.');return;}
     if(!nextContext||!isCurrent())return;
     activeProfile=profile;activeUserId=userId;authContext=nextContext;renderScopeSelectors();
     const displayName = profile.display_name || session.user.email || 'User';
@@ -216,6 +217,11 @@
     document.body.classList.remove('auth-ready');
     document.body.classList.add('auth-locked');
     setMessage('Memuat data workspace...', 'success');
+    try {
+      await window.UserMonitoring?.start?.(supabaseClient, authContext);
+    } catch (monitoringError) {
+      console.error('User Monitoring initialization failed:', monitoringError);
+    }
     window.dispatchEvent(new CustomEvent('app:auth-ready', { detail: authContext }));
   }
 
@@ -237,7 +243,7 @@
     // Let Supabase finish signing out before showing the reason; SIGNED_OUT
     // also calls showLogin('') and would otherwise erase the error immediately.
     if (supabaseClient) {
-      try { await supabaseClient.auth.signOut(); }
+      try { await supabaseClient.auth.signOut({ scope: 'local' }); }
       catch (error) { console.error('Failed to close invalid session:', error); }
     }
     showLogin(message || 'Workspace gagal dimuat. Silakan masuk kembali.');
@@ -261,21 +267,39 @@
     persistentLoginMessage = '';
     setLoading(true);
     setMessage('');
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error || !data.session) {
+    const { data: loginData, error: loginError } = await supabaseClient.functions.invoke('auth-login', {
+      body: { email, password }
+    });
+    if (loginError || !loginData?.access_token || !loginData?.refresh_token) {
       setMessage('Email atau password tidak sesuai, atau akun belum dapat digunakan.');
       setLoading(false);
       isSubmitting = false;
       return;
     }
-    await activateSession(data.session);
+    const { data: sessionData, error: sessionError } = await supabaseClient.auth.setSession({
+      access_token: loginData.access_token,
+      refresh_token: loginData.refresh_token
+    });
+    if (sessionError || !sessionData?.session) {
+      setMessage('Sesi gagal dibuat. Silakan coba masuk kembali.');
+      setLoading(false);
+      isSubmitting = false;
+      return;
+    }
+    await activateSession(sessionData.session);
     isSubmitting = false;
   }
 
   async function handleLogout() {
     if (!window.confirm('Keluar dari akun sekarang?')) return;
+    try {
+      await supabaseClient.rpc('end_user_monitoring_session');
+    } catch (error) {
+      console.error('Monitoring logout record failed:', error);
+    }
+    await window.UserMonitoring?.stop?.();
     showLogin('Anda sudah keluar dari workspace.');
-    await supabaseClient.auth.signOut();
+    await supabaseClient.auth.signOut({ scope: 'local' });
     $('authPassword').value = '';
   }
 
