@@ -430,3 +430,53 @@
     height: 0;
   }
 }
+
+
+/* DESKTOP — pointer feedback for dashboard summary and Master Barang cards. */
+@media (min-width: 900px) and (hover: hover) and (pointer: fine) {
+  #page-dashboard > .hero,
+  #page-dashboard > .metrics .metric,
+  #page-master-items .md-item-card {
+    transition:
+      transform .2s cubic-bezier(.2,.75,.25,1),
+      box-shadow .2s ease,
+      border-color .2s ease,
+      filter .2s ease;
+    transform: translateY(0);
+    will-change: transform;
+  }
+
+  #page-dashboard > .hero:hover,
+  #page-dashboard > .metrics .metric:hover,
+  #page-master-items .md-item-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(100, 119, 150, .28);
+    box-shadow: 0 13px 28px rgba(20,35,63,.13);
+  }
+
+  #page-dashboard > .hero:hover {
+    filter: saturate(1.035);
+  }
+
+  #page-dashboard > .metrics .metric:hover {
+    box-shadow: 0 10px 22px rgba(20,35,63,.12);
+  }
+
+  #page-master-items .md-item-card:hover {
+    background-color: #fff;
+  }
+
+  #page-dashboard > .hero:active,
+  #page-dashboard > .metrics .metric:active,
+  #page-master-items .md-item-card:active {
+    transform: translateY(-1px) scale(.995);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #page-dashboard > .hero,
+  #page-dashboard > .metrics .metric,
+  #page-master-items .md-item-card {
+    transition: none !important;
+  }
+}
