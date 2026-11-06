@@ -123,7 +123,7 @@
   }
 
   async function sendHeartbeat() {
-    if (!client || document.visibilityState === 'hidden') return;
+    if (!client) return;
     const { error } = await client.rpc('touch_user_monitoring_session');
     if (error) console.warn('User Monitoring heartbeat failed:', error.message);
   }
