@@ -393,3 +393,40 @@
     transition: none !important;
   }
 }
+
+
+/* DESKTOP — keep the active queue panel in view while the dashboard page scrolls. */
+@media (min-width: 900px) {
+  #page-dashboard > .section-head {
+    position: sticky;
+    top: 18px;
+    z-index: 12;
+    align-self: start;
+    grid-column: 2;
+    grid-row: 1;
+    padding: 8px 0;
+    background: var(--page-bg, #f7f7f3);
+  }
+
+  #page-dashboard > #dashboardList {
+    position: sticky;
+    top: 76px;
+    z-index: 11;
+    align-self: start;
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    height: min(520px, calc(100dvh - 150px));
+    max-height: min(520px, calc(100dvh - 150px));
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  #page-dashboard > #dashboardList::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
