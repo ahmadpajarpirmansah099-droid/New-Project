@@ -290,17 +290,57 @@
     isSubmitting = false;
   }
 
-  async function handleLogout() {
-    if (!window.confirm('Keluar dari akun sekarang?')) return;
-    try {
-      await supabaseClient.rpc('end_user_monitoring_session');
-    } catch (error) {
-      console.error('Monitoring logout record failed:', error);
+  let logoutInProgress = false;
+
+  function setLogoutLoading(loading) {
+    const profileButton = $('authProfileButton');
+    const logoutButton = $('authLogoutButton');
+    [profileButton, logoutButton].forEach((button) => {
+      if (!button) return;
+      button.disabled = loading;
+      button.classList.toggle('is-logging-out', loading);
+      button.setAttribute('aria-busy', String(loading));
+      if (loading) {
+        button.title = 'Sedang keluar...';
+        button.replaceChildren(Object.assign(document.createElement('span'), {
+          className: 'auth-logout-spinner',
+          ariaHidden: 'true'
+        }));
+      }
+    });
+    if (!loading) {
+      const displayName = activeProfile?.display_name || 'User';
+      if (profileButton) {
+        const initials = displayName.trim().split(/\\s+/).slice(0, 2)
+          .map((part) => part[0]).join('').toUpperCase();
+        profileButton.textContent = initials || 'US';
+        profileButton.title = displayName + ' · Klik untuk keluar';
+      }
+      if (logoutButton) {
+        logoutButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg>';
+        logoutButton.title = 'Keluar dari akun ' + displayName;
+      }
     }
-    await window.UserMonitoring?.stop?.();
-    showLogin('Anda sudah keluar dari workspace.');
-    await supabaseClient.auth.signOut({ scope: 'local' });
-    $('authPassword').value = '';
+  }
+
+  async function handleLogout() {
+    if (logoutInProgress || !window.confirm('Keluar dari akun sekarang?')) return;
+    logoutInProgress = true;
+    setLogoutLoading(true);
+    try {
+      try {
+        await supabaseClient.rpc('end_user_monitoring_session');
+      } catch (error) {
+        console.error('Monitoring logout record failed:', error);
+      }
+      await window.UserMonitoring?.stop?.();
+      showLogin('Anda sudah keluar dari workspace.');
+      await supabaseClient.auth.signOut({ scope: 'local' });
+      $('authPassword').value = '';
+    } finally {
+      logoutInProgress = false;
+      setLogoutLoading(false);
+    }
   }
 
   function init() {
