@@ -76,7 +76,11 @@ index.html
 assets/
   css/
     style.css
-      Gaya umum Guest Operations, navigasi, autentikasi, popup, dan komponen bersama.
+      Fondasi tampilan Guest Operations, tata letak, dan komponen utama.
+    auth.css
+      Tampilan login, autentikasi, dan indikator proses logout.
+    app-overrides.css
+      Penyempurnaan tampilan Guest Operations, popup, reservasi, workspace, dan desktop. File ini dimuat setelah style.css dan auth.css; urutan pemuatan harus dipertahankan.
     masterdata.css
       Tampilan Master Barang.
     wip.css
