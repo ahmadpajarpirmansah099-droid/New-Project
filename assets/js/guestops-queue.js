@@ -166,11 +166,14 @@ function setDashboardCounter(id,targetValue,animate=false){
   requestAnimationFrame(step);
 }
 function renderAll() {
-  $('dateLabel').textContent = historyDateLabel(selectedOperationalDate, {
+  const dashboardDateText = historyDateLabel(selectedOperationalDate, {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
   });
+  $('dateLabel').textContent = dashboardDateText;
+  const desktopQueueDate = document.getElementById('desktopQueueDate');
+  if (desktopQueueDate) desktopQueueDate.textContent = dashboardDateText;
   updateOperationalDateLabels();
 
   if ($('page-dashboard')?.classList.contains('active')) {
