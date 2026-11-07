@@ -253,73 +253,82 @@
 }
 
 
-/* Desktop sidebar can be collapsed without affecting mobile navigation. */
+/* Desktop sidebar — permanent icon rail with individual icon cards. */
 @media (min-width: 900px) {
-  .desktop-sidebar-toggle {
-    display: inline-grid;
-    place-items: center;
-    width: 40px;
-    height: 40px;
-    flex: 0 0 40px;
-    border: 1px solid var(--line);
-    border-radius: 11px;
-    background: #fff;
-    color: var(--ink);
-    cursor: pointer;
-    transition: background .2s, border-color .2s, transform .2s;
-  }
-  .desktop-sidebar-toggle:hover { background: #f3f6fb; border-color: #cbd5e4; }
-  .desktop-sidebar-toggle:active { transform: scale(.96); }
-  .desktop-sidebar-toggle svg { width: 19px; height: 19px; }
-  .app { transition: width .25s ease, margin-left .25s ease; }
-  .menu-drawer { transition: transform .25s ease, box-shadow .25s ease; }
-  body.desktop-sidebar-collapsed {
-    --desktop-sidebar-width: 72px;
-  }
-  body.desktop-sidebar-collapsed .app {
+  :root { --desktop-sidebar-width: 72px; }
+
+  .app {
     width: calc(100% - var(--desktop-sidebar-width));
     margin-left: var(--desktop-sidebar-width);
+    transition: width .25s ease, margin-left .25s ease;
   }
-  body.desktop-sidebar-collapsed .menu-drawer {
+
+  .menu-backdrop { display: none !important; }
+  .menu-drawer {
     width: var(--desktop-sidebar-width);
     padding: 22px 10px 20px;
-    overflow-x: hidden;
+    overflow: visible;
     transform: none !important;
     visibility: visible !important;
-    box-shadow: 4px 0 18px rgba(20,35,63,.055);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
   }
-  body.desktop-sidebar-collapsed .drawer-head {
+
+  .drawer-head {
     min-height: 48px;
     padding: 0 0 16px;
     justify-content: center;
+    border: 0;
   }
-  body.desktop-sidebar-collapsed .drawer-head > div { display: none; }
-  body.desktop-sidebar-collapsed .drawer-head::before {
+  .drawer-head > div,
+  .drawer-close,
+  .drawer-foot { display: none !important; }
+  .drawer-head::before {
     content: "G";
     display: grid;
     place-items: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-    background: #edf3ee;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #e5e9e5;
+    border-radius: 13px;
+    background: #fff;
     color: #477455;
+    box-shadow: 0 3px 10px rgba(20,35,63,.055);
     font: 800 17px Manrope,sans-serif;
   }
-  body.desktop-sidebar-collapsed .drawer-nav {
+
+  .drawer-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 10px;
-    padding-top: 16px;
+    width: 100%;
+    padding-top: 10px;
+    overflow: visible;
   }
-  body.desktop-sidebar-collapsed .drawer-item {
+  .drawer-item {
+    position: relative;
+    display: grid;
+    place-items: center;
     width: 48px;
-    min-height: 48px;
+    min-width: 48px;
     height: 48px;
-    justify-content: center;
+    min-height: 48px;
+    flex: 0 0 48px;
     gap: 0;
     padding: 0;
+    border: 1px solid #e6e9e7;
     border-radius: 14px;
+    background: #fff;
+    color: #657187;
+    box-shadow: 0 3px 10px rgba(20,35,63,.055);
     font-size: 0;
+    cursor: pointer;
+    transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
   }
-  body.desktop-sidebar-collapsed .drawer-item > span {
+  .drawer-item > span {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -330,28 +339,73 @@
     white-space: nowrap;
     border: 0;
   }
-  body.desktop-sidebar-collapsed .drawer-item > svg:first-child {
+  .drawer-item > svg:first-child {
+    display: block;
     width: 20px;
     height: 20px;
     flex: 0 0 20px;
   }
-  body.desktop-sidebar-collapsed .drawer-item .drawer-chevron,
-  body.desktop-sidebar-collapsed .drawer-foot { display: none !important; }
-  body.desktop-sidebar-collapsed .drawer-item.active {
+  .drawer-item .drawer-chevron { display: none !important; }
+  .drawer-item.active {
+    border-color: #dce9df;
     background: #eaf2ec;
     color: #477455;
+    box-shadow: 0 3px 10px rgba(71,116,85,.10);
   }
-  body.desktop-sidebar-collapsed .drawer-item.active::before { display: none; }
-  body.desktop-sidebar-collapsed .desktop-sidebar-toggle { color: var(--blue); }
-  body.desktop-sidebar-collapsed .sheet.operational-modal {
-    left: calc(50% + 36px);
+  .drawer-item:not(.active):hover,
+  .drawer-item:not(.active):focus-visible {
+    border-color: #d9e1dc;
+    background: #f7faf7;
+    color: #477455;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(20,35,63,.09);
   }
+  .drawer-item.active:hover,
+  .drawer-item.active:focus-visible {
+    background: #e3eee6;
+    box-shadow: 0 5px 14px rgba(71,116,85,.14);
+  }
+
+  /* Tooltip stays beside the icon; the icon card remains visible. */
+  .drawer-item::after {
+    content: attr(aria-label);
+    position: absolute;
+    z-index: 120;
+    top: 50%;
+    left: calc(100% + 12px);
+    width: max-content;
+    max-width: 220px;
+    padding: 8px 11px;
+    border: 1px solid rgba(17,18,37,.08);
+    border-radius: 9px;
+    background: #202536;
+    color: #fff;
+    box-shadow: 0 7px 20px rgba(20,35,63,.16);
+    font: 600 12px/1.2 Manrope,sans-serif;
+    letter-spacing: 0;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate(4px,-50%);
+    transition: opacity .14s ease, transform .14s ease, visibility .14s ease;
+  }
+  .drawer-item:hover::after,
+  .drawer-item:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(0,-50%);
+  }
+  .drawer-item:focus-visible {
+    outline: 2px solid rgba(71,116,85,.55);
+    outline-offset: 3px;
+  }
+
+  .sheet.operational-modal { left: calc(50% + 36px); }
 }
-@media (max-width: 899px) {
-  .desktop-sidebar-toggle { display: none !important; }
-}
+
 @media (prefers-reduced-motion: reduce) {
-  .app, .menu-drawer, .desktop-sidebar-toggle { transition: none !important; }
+  .app, .menu-drawer, .drawer-item, .drawer-item::after { transition: none !important; }
 }
 
 /* Desktop statistic cards: subtle neutral gray gradient, matching default palette. */
