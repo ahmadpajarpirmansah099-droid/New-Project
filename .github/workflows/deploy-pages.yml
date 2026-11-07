@@ -76,7 +76,7 @@ jobs:
 
           index = Path("index.html")
           html = index.read_text(encoding="utf-8")
-          pattern = re.compile(r'((?:href|src)="(?:\\./)?assets/[^"?]+)(?:\\?[^"]*)?(")')
+          pattern = re.compile(r'((?:href|src)="assets/[^"?]+)(?:\?[^"]*)?(")')
           updated, count = pattern.subn(
               lambda match: f"{match.group(1)}?v={os.environ['GITHUB_SHA']}{match.group(2)}",
               html,
