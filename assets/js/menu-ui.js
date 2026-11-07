@@ -162,10 +162,11 @@ function findComponent(type, id) {
       const counts = root.MenuService.getCounts();
       const items = root.MenuService.listMenus({ status: currentTab, query: searchQuery });
       host.innerHTML = '<div class="menu-page"><button type="button" class="page-back" data-menu-action="back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Master Barang</span></button>' +
-        '<div class="menu-page-heading"><div><span class="menu-eyebrow">COST OF GOODS SOLD</span><h1>Menu</h1><p>Susun komposisi per porsi, hitung HPP, dan lihat margin.</p></div>' +
-        '<button class="menu-primary" type="button" data-menu-action="add">+ Tambah menu</button></div>' +
+        '<div class="menu-page-heading"><div><span class="menu-eyebrow">COST OF GOODS SOLD</span><h1>Menu</h1><p>Susun komposisi per porsi, hitung HPP, dan lihat margin.</p></div></div>' +
         '<div class="menu-count-grid"><div><span>Total menu</span><b>' + counts.total + '</b></div><div><span>Aktif</span><b>' + counts.active + '</b></div><div><span>Nonaktif</span><b>' + counts.inactive + '</b></div></div>' +
-        '<label class="menu-search"><span>⌕</span><input id="menuSearch" type="search" placeholder="Cari nama menu..." value="' + escapeHtml(searchQuery) + '"></label>' +
+        '<div class="md-export-toolbar"><label class="menu-search"><span>⌕</span><input id="menuSearch" type="search" placeholder="Cari nama menu..." value="' + escapeHtml(searchQuery) + '"></label>' +
+        '<div class="md-export-toolbar-actions"><button type="button" class="md-export-button" data-export-excel="menus">Download Excel</button>' +
+        '<button class="menu-primary" type="button" data-menu-action="add">+ Tambah menu</button></div></div>' +
         '<div class="menu-filter-row"><button type="button" class="' + (currentTab === 'active' ? 'is-selected' : '') + '" data-menu-action="filter" data-filter="active">Aktif</button>' +
         '<button type="button" class="' + (currentTab === 'inactive' ? 'is-selected' : '') + '" data-menu-action="filter" data-filter="inactive">Nonaktif</button></div>' +
         '<div class="menu-list-heading"><h2>' + (currentTab === 'active' ? 'Menu aktif' : 'Menu nonaktif') + '</h2><span>' + items.length + ' menu</span></div>' +
