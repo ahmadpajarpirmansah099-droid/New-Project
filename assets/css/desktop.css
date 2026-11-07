@@ -293,6 +293,7 @@
 
 /* Desktop dashboard cards: flat statistic surfaces and a restrained lime hero gradient. */
 .desktop-queue-date { display: none; }
+.greeting-dates { display: none; }
 
 @media (min-width: 900px) {
   #page-dashboard > .hero {
@@ -312,6 +313,21 @@
 
   #page-dashboard > .greeting .date {
     display: none !important;
+  }
+
+  #page-dashboard > .greeting .greeting-dates {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+    margin-left: auto;
+  }
+
+  #page-dashboard > .greeting .desktop-queue-date {
+    display: block !important;
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 8px 11px;
   }
 }
 
@@ -419,14 +435,6 @@
     grid-row: 1;
     padding: 17px 0 0;
     background: var(--page-bg, #f7f7f3);
-  }
-
-  #page-dashboard > .section-head .desktop-queue-date {
-    display: block;
-    flex: 0 0 auto;
-    white-space: nowrap;
-    font-size: 12px;
-    padding: 8px 11px;
   }
 
   #page-dashboard > .section-head h2 {
