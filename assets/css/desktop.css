@@ -273,16 +273,79 @@
   .desktop-sidebar-toggle svg { width: 19px; height: 19px; }
   .app { transition: width .25s ease, margin-left .25s ease; }
   .menu-drawer { transition: transform .25s ease, box-shadow .25s ease; }
+  body.desktop-sidebar-collapsed {
+    --desktop-sidebar-width: 72px;
+  }
   body.desktop-sidebar-collapsed .app {
-    width: 100%;
-    margin-left: 0;
+    width: calc(100% - var(--desktop-sidebar-width));
+    margin-left: var(--desktop-sidebar-width);
   }
   body.desktop-sidebar-collapsed .menu-drawer {
-    transform: translateX(-100%) !important;
-    visibility: hidden !important;
-    box-shadow: none;
+    width: var(--desktop-sidebar-width);
+    padding: 22px 10px 20px;
+    overflow-x: hidden;
+    transform: none !important;
+    visibility: visible !important;
+    box-shadow: 4px 0 18px rgba(20,35,63,.055);
   }
+  body.desktop-sidebar-collapsed .drawer-head {
+    min-height: 48px;
+    padding: 0 0 16px;
+    justify-content: center;
+  }
+  body.desktop-sidebar-collapsed .drawer-head > div { display: none; }
+  body.desktop-sidebar-collapsed .drawer-head::before {
+    content: "G";
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: #edf3ee;
+    color: #477455;
+    font: 800 17px Manrope,sans-serif;
+  }
+  body.desktop-sidebar-collapsed .drawer-nav {
+    gap: 10px;
+    padding-top: 16px;
+  }
+  body.desktop-sidebar-collapsed .drawer-item {
+    width: 48px;
+    min-height: 48px;
+    height: 48px;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    border-radius: 14px;
+    font-size: 0;
+  }
+  body.desktop-sidebar-collapsed .drawer-item > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+  body.desktop-sidebar-collapsed .drawer-item > svg:first-child {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+  }
+  body.desktop-sidebar-collapsed .drawer-item .drawer-chevron,
+  body.desktop-sidebar-collapsed .drawer-foot { display: none !important; }
+  body.desktop-sidebar-collapsed .drawer-item.active {
+    background: #eaf2ec;
+    color: #477455;
+  }
+  body.desktop-sidebar-collapsed .drawer-item.active::before { display: none; }
   body.desktop-sidebar-collapsed .desktop-sidebar-toggle { color: var(--blue); }
+  body.desktop-sidebar-collapsed .sheet.operational-modal {
+    left: calc(50% + 36px);
+  }
 }
 @media (max-width: 899px) {
   .desktop-sidebar-toggle { display: none !important; }
