@@ -165,10 +165,10 @@ function findComponent(type, id) {
         '<div class="menu-page-heading"><div><span class="menu-eyebrow">COST OF GOODS SOLD</span><h1>Menu</h1><p>Susun komposisi per porsi, hitung HPP, dan lihat margin.</p></div></div>' +
         '<div class="menu-count-grid"><div><span>Total menu</span><b>' + counts.total + '</b></div><div><span>Aktif</span><b>' + counts.active + '</b></div><div><span>Nonaktif</span><b>' + counts.inactive + '</b></div></div>' +
         '<div class="md-export-toolbar"><label class="menu-search"><span>⌕</span><input id="menuSearch" type="search" placeholder="Cari nama menu..." value="' + escapeHtml(searchQuery) + '"></label>' +
-        '<div class="md-export-toolbar-actions"><button type="button" class="md-export-button" data-export-excel="menus">Download Excel</button>' +
+        '<div class="md-export-toolbar-actions"><div class="menu-filter-row"><button type="button" class="' + (currentTab === 'active' ? 'is-selected' : '') + '" data-menu-action="filter" data-filter="active">Aktif</button>' +
+        '<button type="button" class="' + (currentTab === 'inactive' ? 'is-selected' : '') + '" data-menu-action="filter" data-filter="inactive">Nonaktif</button></div>' +<button type="button" class="md-export-button" data-export-excel="menus">Download Excel</button>' +
         '<button class="menu-primary" type="button" data-menu-action="add">+ Tambah menu</button></div></div>' +
-        '<div class="menu-filter-row"><button type="button" class="' + (currentTab === 'active' ? 'is-selected' : '') + '" data-menu-action="filter" data-filter="active">Aktif</button>' +
-        '<button type="button" class="' + (currentTab === 'inactive' ? 'is-selected' : '') + '" data-menu-action="filter" data-filter="inactive">Nonaktif</button></div>' +
+        '
         '<div class="menu-list-heading"><h2>' + (currentTab === 'active' ? 'Menu aktif' : 'Menu nonaktif') + '</h2><span>' + items.length + ' menu</span></div>' +
         '<div class="menu-list">' + (items.length ? items.map(cardHtml).join('') : '<div class="menu-empty"><b>' +
           (searchQuery ? 'Menu tidak ditemukan' : 'Belum ada menu') + '</b><p>' +

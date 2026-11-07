@@ -183,10 +183,10 @@
         '<div class="wip-page-heading"><div><span class="wip-eyebrow">PENGELOLAAN RESEP</span><h1>Resep WIP</h1><p>Susun komposisi bahan dan hitung HPP per satuan hasil.</p></div></div>' +
         '<div class="wip-count-grid"><div><span>Total WIP</span><b>' + counts.total + '</b></div><div><span>Aktif</span><b>' + counts.active + '</b></div><div><span>Nonaktif</span><b>' + counts.inactive + '</b></div></div>' +
         '<div class="md-export-toolbar"><label class="wip-search"><span>⌕</span><input id="wipSearch" type="search" placeholder="Cari nama WIP..." value="' + escapeHtml(searchQuery) + '"></label>' +
-        '<div class="md-export-toolbar-actions"><button type="button" class="md-export-button" data-export-excel="wips">Download Excel</button>' +
+        '<div class="md-export-toolbar-actions"><div class="wip-filter-row"><button type="button" class="' + (currentTab === 'active' ? 'is-selected' : '') + '" data-wip-action="filter" data-filter="active">Aktif</button>' +
+        '<button type="button" class="' + (currentTab === 'inactive' ? 'is-selected' : '') + '" data-wip-action="filter" data-filter="inactive">Nonaktif</button></div>' +<button type="button" class="md-export-button" data-export-excel="wips">Download Excel</button>' +
         '<button class="wip-primary" type="button" data-wip-action="add">+ Tambah WIP</button></div></div>' +
-        '<div class="wip-filter-row"><button type="button" class="' + (currentTab === 'active' ? 'is-selected' : '') + '" data-wip-action="filter" data-filter="active">Aktif</button>' +
-        '<button type="button" class="' + (currentTab === 'inactive' ? 'is-selected' : '') + '" data-wip-action="filter" data-filter="inactive">Nonaktif</button></div>' +
+        '
         '<div class="wip-list-heading"><h2>' + (currentTab === 'active' ? 'WIP aktif' : 'WIP nonaktif') + '</h2><span>' + items.length + ' resep</span></div>' +
         '<div class="wip-list">' + (items.length ? items.map(cardHtml).join('') :
           '<div class="wip-empty"><b>' + (searchQuery ? 'WIP tidak ditemukan' : 'Belum ada resep WIP') + '</b><p>' +
