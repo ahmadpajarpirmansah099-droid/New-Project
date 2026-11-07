@@ -624,17 +624,3 @@ function initSheetBodySwipe(){
   sheet.addEventListener('touchend',finishBodySwipe,{passive:true});
   sheet.addEventListener('touchcancel',finishBodySwipe,{passive:true});
 }
-
-
-/* Desktop sidebar toggle — isolated from mobile drawer behavior. */
-(function initDesktopSidebarToggle() {
-  const button = document.getElementById('desktopSidebarToggle');
-  if (!button) return;
-
-  button.addEventListener('click', function () {
-    const collapsed = document.body.classList.toggle('desktop-sidebar-collapsed');
-    button.setAttribute('aria-expanded', String(!collapsed));
-    button.setAttribute('aria-label', collapsed ? 'Buka sidebar' : 'Tutup sidebar');
-    button.setAttribute('title', collapsed ? 'Buka sidebar' : 'Tutup sidebar');
-  });
-})();
