@@ -75,3 +75,9 @@ Status workflow yang berhasil tidak menggantikan pemeriksaan aplikasi secara lan
 - Jangan menghapus atau mengubah data pengguna tanpa persetujuan.
 - Simpan konfigurasi rahasia di tempat penyimpanan rahasia yang sesuai; jangan commit file rahasia ke repository.
 - Jalankan pemeriksaan dan pengujian yang relevan sebelum mengajukan perubahan.
+
+## Catatan fitur sementara
+
+- Menu **Daily SO** sengaja disembunyikan sementara dari navigasi untuk semua akun, termasuk Developer dan Admin, sesuai keputusan pemilik proyek pada 7 November 2026.
+- Fitur dan kode Daily SO tidak dihapus. Catatan ini menjadi pengingat agar menu dapat ditinjau dan ditampilkan kembali saat sudah siap.
+- Penyembunyian ini hanya mengatur tampilan menu; ini bukan pembatasan hak akses. Jika halaman Daily SO masih dapat dibuka melalui URL langsung atau pemanggilan internal, akses tersebut belum diblokir oleh perubahan ini.
