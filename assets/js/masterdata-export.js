@@ -79,6 +79,10 @@
     return key === 'id' || key === 'ID' || /(^|_)id$/i.test(key) || /_id_/i.test(key);
   }
 
+  function isHiddenColumn(key) {
+    return isIdColumn(key) || /(^|_)scope_id$/i.test(key) || key === 'konversi_satuan';
+  }
+
   function isDateColumn(key) {
     return /(^|_)(created|updated|deleted|changed|tanggal|date|time|timestamp)(_|$)/i.test(key) || /_at$/i.test(key);
   }
@@ -132,7 +136,8 @@
     }));
     const columnXml = widths.map(function (width, index) {
       const number = index + 1;
-      return '<col min="' + number + '" max="' + number + '" width="' + width + '" customWidth="1"/>';
+      const hidden = isHiddenColumn(columns[index]) ? ' hidden="1"' : '';
+      return '<col min="' + number + '" max="' + number + '" width="' + width + '" customWidth="1"' + hidden + '/>';
     }).join('');
     const rowXml = allRows.map(function (values, rowIndex) {
       const cells = values.map(function (value, columnIndex) {
