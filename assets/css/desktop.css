@@ -404,8 +404,12 @@
     align-self: start;
     grid-column: 2;
     grid-row: 1;
-    padding: 8px 0;
+    padding: 17px 0 0;
     background: var(--page-bg, #f7f7f3);
+  }
+
+  #page-dashboard > .section-head h2 {
+    font-size: 29px;
   }
 
   #page-dashboard > #dashboardList {
