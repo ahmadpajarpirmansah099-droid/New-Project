@@ -187,3 +187,77 @@
   .md-export-toolbar-actions > .wip-primary,
   .md-export-toolbar-actions > .menu-primary { padding: 0 7px; }
 }
+
+/* Toolbar alignment: consistent control height and compact spacing on all Master Data pages. */
+.md-export-toolbar-actions {
+  justify-content: flex-start;
+  gap: 8px;
+}
+.md-export-toolbar-actions > .md-filter-row,
+.md-export-toolbar-actions > .wip-filter-row,
+.md-export-toolbar-actions > .menu-filter-row {
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.md-export-toolbar-actions > .md-filter-row button,
+.md-export-toolbar-actions > .wip-filter-row button,
+.md-export-toolbar-actions > .menu-filter-row button,
+.md-export-toolbar-actions > .md-export-button,
+.md-export-toolbar-actions > .md-primary,
+.md-export-toolbar-actions > .wip-primary,
+.md-export-toolbar-actions > .menu-primary {
+  box-sizing: border-box;
+  display: inline-flex;
+  min-height: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 13px;
+  border-radius: 11px;
+  font-size: 10px;
+  line-height: 1;
+  white-space: nowrap;
+}
+@media (max-width: 560px) {
+  .md-export-toolbar-actions {
+    justify-content: flex-start;
+    gap: 6px;
+  }
+  .md-export-toolbar-actions > .md-filter-row,
+  .md-export-toolbar-actions > .wip-filter-row,
+  .md-export-toolbar-actions > .menu-filter-row {
+    gap: 6px;
+    margin: 0;
+  }
+  .md-export-toolbar-actions > .md-filter-row button,
+  .md-export-toolbar-actions > .wip-filter-row button,
+  .md-export-toolbar-actions > .menu-filter-row button,
+  .md-export-toolbar-actions > .md-export-button,
+  .md-export-toolbar-actions > .md-primary,
+  .md-export-toolbar-actions > .wip-primary,
+  .md-export-toolbar-actions > .menu-primary {
+    min-height: 38px;
+    height: 38px;
+    padding: 0 9px;
+    font-size: 9px;
+  }
+}
+@media (max-width: 390px) {
+  .md-export-toolbar-actions { gap: 4px; }
+  .md-export-toolbar-actions > .md-filter-row,
+  .md-export-toolbar-actions > .wip-filter-row,
+  .md-export-toolbar-actions > .menu-filter-row { gap: 4px; }
+  .md-export-toolbar-actions > .md-filter-row button,
+  .md-export-toolbar-actions > .wip-filter-row button,
+  .md-export-toolbar-actions > .menu-filter-row button,
+  .md-export-toolbar-actions > .md-export-button,
+  .md-export-toolbar-actions > .md-primary,
+  .md-export-toolbar-actions > .wip-primary,
+  .md-export-toolbar-actions > .menu-primary {
+    min-height: 36px;
+    height: 36px;
+    padding: 0 7px;
+    font-size: 8px;
+  }
+}
