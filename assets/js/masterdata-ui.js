@@ -215,10 +215,11 @@
       const counts = service().getCounts();
       const items = service().listItems({ status: currentTab, query: searchQuery });
       host.innerHTML = '<div class="md-page">' +
-        '<div class="md-page-heading"><div><p>Daftar bahan utama untuk seluruh resep WIP dan Menu.</p></div>' +
-        '<button type="button" class="md-primary" data-md-action="add">+ Tambah barang</button></div>' +
+        '<div class="md-page-heading"><div><p>Daftar bahan utama untuk seluruh resep WIP dan Menu.</p></div></div>' +
         '<div class="md-count-grid"><div><span>Total barang</span><b>' + counts.total + '</b></div><div><span>Aktif</span><b>' + counts.active + '</b></div><div><span>Nonaktif</span><b>' + counts.inactive + '</b></div></div>' +
-        '<label class="md-search"><span aria-hidden="true">⌕</span><input id="mdSearch" type="search" placeholder="Cari nama barang..." value="' + escapeHtml(searchQuery) + '"></label>' +
+        '<div class="md-export-toolbar"><label class="md-search"><span aria-hidden="true">⌕</span><input id="mdSearch" type="search" placeholder="Cari nama barang..." value="' + escapeHtml(searchQuery) + '"></label>' +
+        '<div class="md-export-toolbar-actions"><button type="button" class="md-export-button" data-export-excel="master-items">Download Excel</button>' +
+        '<button type="button" class="md-primary" data-md-action="add">+ Tambah barang</button></div></div>' +
         '<div class="md-filter-row"><button type="button" class="' + (currentTab === 'active' ? 'is-selected' : '') + '" data-md-action="filter" data-filter="active">Aktif</button>' +
         '<button type="button" class="' + (currentTab === 'inactive' ? 'is-selected' : '') + '" data-md-action="filter" data-filter="inactive">Nonaktif</button></div>' +
         '<div class="md-list-heading"><h2>' + (currentTab === 'active' ? 'Barang aktif' : 'Barang nonaktif') + '</h2><span>' + items.length + ' barang</span></div>' +

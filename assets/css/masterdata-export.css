@@ -1,0 +1,71 @@
+/* Toolbar export Excel — hanya digunakan pada tiga halaman Master Data. */
+.md-export-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+.md-export-toolbar > .md-search,
+.md-export-toolbar > .wip-search,
+.md-export-toolbar > .menu-search {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+.md-export-toolbar-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+.md-export-button {
+  display: inline-flex;
+  min-height: 42px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border: 1px solid var(--line, #e7e7e2);
+  border-radius: 11px;
+  background: #fff;
+  color: var(--ink, #17172a);
+  font: 800 10px 'DM Sans', sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 2px 5px rgba(17,18,37,.04);
+  transition: background .18s ease, border-color .18s ease, transform .18s ease, opacity .18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.md-export-button:active:not(:disabled) { transform: scale(.97); }
+.md-export-button:disabled { cursor: wait; opacity: .62; }
+.md-export-button:focus-visible {
+  outline: 2px solid rgba(126,115,177,.48);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .md-export-button:hover:not(:disabled) {
+    border-color: #cbcbd3;
+    background: #fafaf7;
+  }
+}
+@media (max-width: 560px) {
+  .md-export-toolbar { flex-wrap: wrap; }
+  .md-export-toolbar > .md-search,
+  .md-export-toolbar > .wip-search,
+  .md-export-toolbar > .menu-search {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+  .md-export-toolbar-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+@media (max-width: 360px) {
+  .md-export-toolbar-actions { gap: 6px; }
+  .md-export-button { padding: 0 9px; font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-export-button { transition: none; }
+}
