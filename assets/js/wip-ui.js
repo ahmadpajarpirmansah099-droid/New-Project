@@ -180,10 +180,11 @@
       const items = root.WipService.listWips({ status: currentTab, query: searchQuery });
       host.innerHTML = '<div class="wip-page">' +
         '<button type="button" class="page-back" data-wip-action="back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Master Barang</span></button>' +
-        '<div class="wip-page-heading"><div><span class="wip-eyebrow">PENGELOLAAN RESEP</span><h1>Resep WIP</h1><p>Susun komposisi bahan dan hitung HPP per satuan hasil.</p></div>' +
-        '<button class="wip-primary" type="button" data-wip-action="add">+ Tambah WIP</button></div>' +
+        '<div class="wip-page-heading"><div><span class="wip-eyebrow">PENGELOLAAN RESEP</span><h1>Resep WIP</h1><p>Susun komposisi bahan dan hitung HPP per satuan hasil.</p></div></div>' +
         '<div class="wip-count-grid"><div><span>Total WIP</span><b>' + counts.total + '</b></div><div><span>Aktif</span><b>' + counts.active + '</b></div><div><span>Nonaktif</span><b>' + counts.inactive + '</b></div></div>' +
-        '<label class="wip-search"><span>⌕</span><input id="wipSearch" type="search" placeholder="Cari nama WIP..." value="' + escapeHtml(searchQuery) + '"></label>' +
+        '<div class="md-export-toolbar"><label class="wip-search"><span>⌕</span><input id="wipSearch" type="search" placeholder="Cari nama WIP..." value="' + escapeHtml(searchQuery) + '"></label>' +
+        '<div class="md-export-toolbar-actions"><button type="button" class="md-export-button" data-export-excel="wips">Download Excel</button>' +
+        '<button class="wip-primary" type="button" data-wip-action="add">+ Tambah WIP</button></div></div>' +
         '<div class="wip-filter-row"><button type="button" class="' + (currentTab === 'active' ? 'is-selected' : '') + '" data-wip-action="filter" data-filter="active">Aktif</button>' +
         '<button type="button" class="' + (currentTab === 'inactive' ? 'is-selected' : '') + '" data-wip-action="filter" data-filter="inactive">Nonaktif</button></div>' +
         '<div class="wip-list-heading"><h2>' + (currentTab === 'active' ? 'WIP aktif' : 'WIP nonaktif') + '</h2><span>' + items.length + ' resep</span></div>' +
