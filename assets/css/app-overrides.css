@@ -1341,3 +1341,30 @@ button:active,
 @media (prefers-reduced-motion: reduce) {
   .auth-logout-spinner { animation-duration: 1.8s; }
 }
+
+
+/* Waiting List: clear feedback and duplicate-submit protection while saving a guest. */
+#sheet .sheet-actions .primary.is-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  cursor: wait;
+  opacity: .88;
+}
+#sheet .sheet-actions .primary.is-loading::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  border: 2px solid rgba(255,255,255,.8);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: guest-save-spin .7s linear infinite;
+}
+@keyframes guest-save-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #sheet .sheet-actions .primary.is-loading::before { animation: none; }
+}
