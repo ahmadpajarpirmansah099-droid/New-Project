@@ -4164,3 +4164,9 @@ textarea::-webkit-input-placeholder {
 .drawer-item[hidden] {
   display: none !important;
 }
+
+
+/* FAB shape: keep the existing size, placement, colors, and behavior. */
+.fab {
+  border-radius: 50%;
+}
