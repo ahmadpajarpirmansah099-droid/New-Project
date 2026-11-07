@@ -457,3 +457,19 @@
     min-height: 0;
   }
 }
+
+
+/* Align desktop hamburger control with the Outlet/Divisi dropdown fields. */
+@media (min-width: 900px) {
+  .desktop-sidebar-toggle {
+    align-self: center;
+    transform: translateY(10px);
+  }
+  .desktop-sidebar-toggle:active {
+    transform: translateY(10px) scale(.96);
+  }
+  .desktop-sidebar-toggle svg {
+    width: 20px;
+    height: 20px;
+  }
+}
