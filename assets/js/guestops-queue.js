@@ -33,8 +33,23 @@ function chooseInitial(status) {
     200
   );
 }
+let guestSaveInFlight = false;
 async function saveGuest(e){
   e.preventDefault();
+  const form = e.currentTarget;
+  if (guestSaveInFlight || !form || form.dataset.saving === 'true') return;
+
+  guestSaveInFlight = true;
+  form.dataset.saving = 'true';
+  form.setAttribute('aria-busy', 'true');
+  const submitButton = form.querySelector('button[type="submit"]');
+  const originalButtonLabel = submitButton ? submitButton.textContent : '';
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.classList.add('is-loading');
+    submitButton.textContent = 'Menyimpan...';
+  }
+
   const day=todayKey(),now=Date.now(),status=$('initialStatus').value;
   const g={
   id:uid(),ticket:'',day,
@@ -55,6 +70,17 @@ async function saveGuest(e){
   } catch (error) {
   console.error(error);
   toast('Tamu belum berhasil disimpan. Coba lagi.');
+  } finally {
+    guestSaveInFlight = false;
+    if (form.isConnected) {
+      delete form.dataset.saving;
+      form.removeAttribute('aria-busy');
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.classList.remove('is-loading');
+        submitButton.textContent = originalButtonLabel;
+      }
+    }
   }
 }
 /* =========================================================
