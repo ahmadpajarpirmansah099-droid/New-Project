@@ -323,8 +323,61 @@
     }
   }
 
+  function confirmLogout() {
+    return new Promise((resolve) => {
+      const previousFocus = document.activeElement;
+      const overlay = document.createElement('div');
+      overlay.className = 'logout-confirm-overlay';
+      overlay.innerHTML = `
+        <section class="logout-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="logoutConfirmTitle" aria-describedby="logoutConfirmDescription">
+          <div class="logout-confirm-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg>
+          </div>
+          <h2 id="logoutConfirmTitle">Keluar dari akun?</h2>
+          <p id="logoutConfirmDescription">Kamu yakin ingin mengakhiri sesi Guest Operational sekarang?</p>
+          <div class="logout-confirm-actions">
+            <button type="button" class="logout-confirm-cancel">Batal</button>
+            <button type="button" class="logout-confirm-accept">Keluar</button>
+          </div>
+        </section>`;
+      document.body.appendChild(overlay);
+
+      const cancelButton = overlay.querySelector('.logout-confirm-cancel');
+      const acceptButton = overlay.querySelector('.logout-confirm-accept');
+      let settled = false;
+      const finish = (confirmed) => {
+        if (settled) return;
+        settled = true;
+        document.removeEventListener('keydown', onKeydown);
+        overlay.classList.remove('is-visible');
+        window.setTimeout(() => overlay.remove(), 160);
+        if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
+        resolve(confirmed);
+      };
+      const onKeydown = (event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          finish(false);
+        } else if (event.key === 'Tab') {
+          event.preventDefault();
+          (document.activeElement === cancelButton ? acceptButton : cancelButton).focus();
+        }
+      };
+      cancelButton.addEventListener('click', () => finish(false));
+      acceptButton.addEventListener('click', () => finish(true));
+      overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) finish(false);
+      });
+      document.addEventListener('keydown', onKeydown);
+      requestAnimationFrame(() => {
+        overlay.classList.add('is-visible');
+        cancelButton.focus();
+      });
+    });
+  }
+
   async function handleLogout() {
-    if (logoutInProgress || !window.confirm('Keluar dari akun sekarang?')) return;
+    if (logoutInProgress || !(await confirmLogout())) return;
     logoutInProgress = true;
     setLogoutLoading(true);
     try {
