@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="assets/css/desktop.css?v=20261107-hamburger-scope-align-p1">
 <link rel="stylesheet" href="assets/css/user-monitoring.css?v=20261106-user-monitoring-p1">
 </head>
-<body class="auth-locked">
+<body class="auth-locked desktop-sidebar-collapsed">
 <section class="auth-screen" id="authScreen" aria-labelledby="authTitle">
   <div class="auth-orb auth-orb-one" aria-hidden="true"></div><div class="auth-orb auth-orb-two" aria-hidden="true"></div>
   <div class="auth-panel">
@@ -45,7 +45,7 @@
       <div class="brandmeta" id="workspaceBrandmeta">ADMIN WORKSPACE</div>
     </div>
   </div>
-  <button class="desktop-sidebar-toggle" id="desktopSidebarToggle" type="button" aria-label="Tutup sidebar" aria-expanded="true" title="Tutup sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  <button class="desktop-sidebar-toggle" id="desktopSidebarToggle" type="button" aria-label="Buka sidebar" aria-expanded="false" title="Buka sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
   <div class="workspace-scope-switcher" id="workspaceScopeSwitcher" hidden aria-label="Pemilihan outlet dan divisi">
     <div class="scope-field">
       <span>OUTLET</span>
@@ -77,7 +77,7 @@
     </div>
     
     <div id="pendingWrap"></div>
-    <div class="section-head"><h2>Antrean aktif</h2><button class="text-btn" data-action="go" data-action-args='["waiting"]'>Lihat semua →</button></div>
+    <div class="section-head"><div class="date desktop-queue-date" id="desktopQueueDate" aria-hidden="true">Hari ini</div><h2>Antrean aktif</h2><button class="text-btn" data-action="go" data-action-args='["waiting"]'>Lihat semua →</button></div>
     <div class="queue-list" id="dashboardList"></div>
   </section>
   <section class="page" id="page-waiting">
