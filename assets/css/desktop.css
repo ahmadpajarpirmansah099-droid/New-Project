@@ -315,19 +315,13 @@
     display: none !important;
   }
 
-  #page-dashboard > .greeting .greeting-dates {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    min-width: 0;
-    margin-left: auto;
-  }
-
-  #page-dashboard > .greeting .desktop-queue-date {
+  .top-actions .desktop-queue-date {
     display: block !important;
+    flex: 0 0 auto;
     white-space: nowrap;
     font-size: 12px;
     padding: 8px 11px;
+    margin-right: 2px;
   }
 }
 
