@@ -65,6 +65,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Add automatic asset cache version
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          import re
+
+          index = Path("index.html")
+          html = index.read_text(encoding="utf-8")
+          pattern = re.compile(r'((?:href|src)="assets/[^"?]+)(?:\?[^"]*)?(")')
+          updated, count = pattern.subn(
+              lambda match: f"{match.group(1)}?v={os.environ['GITHUB_SHA']}{match.group(2)}",
+              html,
+          )
+          if count == 0:
+              raise SystemExit("No local CSS/JS assets found in index.html")
+          index.write_text(updated, encoding="utf-8")
+          print(f"Applied a fresh cache version to {count} local assets.")
+          PY
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
