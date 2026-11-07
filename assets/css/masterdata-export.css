@@ -59,13 +59,77 @@
   }
   .md-export-toolbar-actions {
     width: 100%;
-    justify-content: flex-end;
+    justify-content: space-between;
+    gap: 4px;
+  }
+  .md-export-toolbar-actions > .md-filter-row,
+  .md-export-toolbar-actions > .wip-filter-row,
+  .md-export-toolbar-actions > .menu-filter-row {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+  }
+  .md-export-toolbar-actions > .md-filter-row button,
+  .md-export-toolbar-actions > .wip-filter-row button,
+  .md-export-toolbar-actions > .menu-filter-row button {
+    min-height: 38px;
+    padding: 0 7px;
+    font-size: 9px;
+    white-space: nowrap;
   }
 }
 @media (max-width: 360px) {
-  .md-export-toolbar-actions { gap: 6px; }
-  .md-export-button { padding: 0 9px; font-size: 9px; }
+  .md-export-toolbar-actions { gap: 3px; }
+  .md-export-toolbar-actions > .md-filter-row,
+  .md-export-toolbar-actions > .wip-filter-row,
+  .md-export-toolbar-actions > .menu-filter-row { gap: 3px; }
+  .md-export-toolbar-actions > .md-filter-row button,
+  .md-export-toolbar-actions > .wip-filter-row button,
+  .md-export-toolbar-actions > .menu-filter-row button {
+    padding: 0 6px;
+    font-size: 8px;
+  }
+  .md-export-button { padding: 0 7px; font-size: 8px; }
+  .md-export-toolbar-actions > .md-primary,
+  .md-export-toolbar-actions > .wip-primary,
+  .md-export-toolbar-actions > .menu-primary {
+    padding: 0 7px;
+    font-size: 8px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .md-export-button { transition: none; }
+}
+
+
+/* Master Barang: filter status sejajar dengan aksi toolbar pada layar mobile. */
+@media (max-width: 560px) {
+  .md-export-toolbar-actions {
+    justify-content: space-between;
+    gap: 4px;
+  }
+  .md-export-toolbar-actions .md-filter-row {
+    flex: 0 0 auto;
+    gap: 4px;
+    padding: 0;
+  }
+  .md-export-toolbar-actions .md-filter-row button {
+    min-height: 38px;
+    padding: 0 7px;
+    font-size: 9px;
+  }
+  .md-export-toolbar-actions .md-export-button {
+    min-height: 38px;
+    padding: 0 8px;
+    font-size: 9px;
+  }
+  .md-export-toolbar-actions > .md-primary {
+    min-height: 38px;
+    padding: 0 8px;
+    font-size: 9px;
+    white-space: nowrap;
+  }
 }
