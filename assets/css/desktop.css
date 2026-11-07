@@ -590,3 +590,97 @@
     height: 20px;
   }
 }
+
+
+/* FINAL OVERRIDE — desktop icon rail cards and visible hover labels. */
+@media (min-width: 900px) {
+  #menuDrawer.menu-drawer {
+    width: 72px !important;
+    min-width: 72px !important;
+    padding: 22px 10px 20px !important;
+    overflow: visible !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  #menuDrawer .drawer-nav {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+    overflow: visible !important;
+  }
+
+  #menuDrawer .drawer-nav > .drawer-item {
+    position: relative !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    border: 1px solid #e1e7e2 !important;
+    border-radius: 14px !important;
+    background: #fff !important;
+    color: #657187 !important;
+    box-shadow: 0 3px 10px rgba(20,35,63,.08) !important;
+    font-size: 0 !important;
+    overflow: visible !important;
+  }
+
+  #menuDrawer .drawer-nav > .drawer-item > span {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0,0,0,0) !important;
+    white-space: nowrap !important;
+  }
+
+  #menuDrawer .drawer-nav > .drawer-item > svg:first-child {
+    display: block !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 !important;
+  }
+
+  #menuDrawer .drawer-nav > .drawer-item.active {
+    border-color: #dce9df !important;
+    background: #eaf2ec !important;
+    color: #477455 !important;
+  }
+
+  #menuDrawer .drawer-nav > .drawer-item::after {
+    content: attr(aria-label) !important;
+    position: absolute !important;
+    z-index: 9999 !important;
+    top: 50% !important;
+    left: calc(100% + 10px) !important;
+    width: max-content !important;
+    max-width: 220px !important;
+    padding: 8px 11px !important;
+    border: 1px solid rgba(17,18,37,.08) !important;
+    border-radius: 9px !important;
+    background: #202536 !important;
+    color: #fff !important;
+    box-shadow: 0 7px 20px rgba(20,35,63,.18) !important;
+    font: 600 12px/1.2 Manrope,sans-serif !important;
+    white-space: nowrap !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translate(4px,-50%) !important;
+    transition: opacity .14s ease, transform .14s ease, visibility .14s ease !important;
+  }
+
+  #menuDrawer .drawer-nav > .drawer-item:hover::after,
+  #menuDrawer .drawer-nav > .drawer-item:focus-visible::after {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translate(0,-50%) !important;
+  }
+}
