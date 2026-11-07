@@ -291,18 +291,27 @@
   .app, .menu-drawer, .desktop-sidebar-toggle { transition: none !important; }
 }
 
-/* Desktop statistic cards: subtle neutral gray gradient, matching default palette. */
+/* Desktop dashboard cards: flat statistic surfaces and a restrained lime hero gradient. */
+.desktop-queue-date { display: none; }
+
 @media (min-width: 900px) {
+  #page-dashboard > .hero {
+    background: linear-gradient(135deg, var(--lime) 0%, #d5e985 58%, #deef9a 100%);
+  }
+
   #page-dashboard > .metrics .metric {
-    background:
-      radial-gradient(ellipse at 100% 110%, rgba(190,198,210,.34) 0%, rgba(190,198,210,0) 58%),
-      linear-gradient(145deg, #ffffff 0%, #f5f6f8 54%, #e9edf2 100%);
+    background: #fff;
+    background-image: none;
     border-color: #e3e7ed;
   }
 
   #page-dashboard > .metrics .metric-icon {
-    background: linear-gradient(145deg, #eef1f5 0%, #dce1e8 100%);
+    background: #e9edf2;
     color: #273247;
+  }
+
+  #page-dashboard > .greeting .date {
+    display: none !important;
   }
 }
 
@@ -401,6 +410,10 @@
     position: sticky;
     top: 18px;
     z-index: 12;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
     align-self: start;
     grid-column: 2;
     grid-row: 1;
@@ -408,8 +421,22 @@
     background: var(--page-bg, #f7f7f3);
   }
 
+  #page-dashboard > .section-head .desktop-queue-date {
+    display: block;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 8px 11px;
+  }
+
   #page-dashboard > .section-head h2 {
     font-size: 29px;
+    margin: 0;
+  }
+
+  #page-dashboard > .section-head .text-btn {
+    flex: 0 0 auto;
+    margin-left: auto;
   }
 
   #page-dashboard > #dashboardList {
