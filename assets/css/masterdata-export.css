@@ -133,3 +133,57 @@
     white-space: nowrap;
   }
 }
+
+/* Compact mobile toolbar controls across Master Barang, Resep WIP, and Menu. */
+@media (max-width: 560px) {
+  .md-export-toolbar-actions {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 3px;
+  }
+  .md-export-toolbar-actions > .md-filter-row,
+  .md-export-toolbar-actions > .wip-filter-row,
+  .md-export-toolbar-actions > .menu-filter-row {
+    flex: 0 0 auto;
+    gap: 3px;
+  }
+  .md-export-toolbar-actions > .md-filter-row button,
+  .md-export-toolbar-actions > .wip-filter-row button,
+  .md-export-toolbar-actions > .menu-filter-row button {
+    box-sizing: border-box;
+    min-height: 32px;
+    padding: 0 7px;
+    font-size: 8px;
+    line-height: 1;
+  }
+  .md-export-toolbar-actions > .md-export-button {
+    min-height: 34px;
+    padding: 0 8px;
+    font-size: 8px;
+  }
+  .md-export-toolbar-actions > .md-primary,
+  .md-export-toolbar-actions > .wip-primary,
+  .md-export-toolbar-actions > .menu-primary {
+    min-height: 34px;
+    padding: 0 9px;
+    border-radius: 10px;
+    font-size: 8px;
+    line-height: 1;
+  }
+}
+@media (max-width: 390px) {
+  .md-export-toolbar-actions { gap: 2px; }
+  .md-export-toolbar-actions > .md-filter-row,
+  .md-export-toolbar-actions > .wip-filter-row,
+  .md-export-toolbar-actions > .menu-filter-row { gap: 2px; }
+  .md-export-toolbar-actions > .md-filter-row button,
+  .md-export-toolbar-actions > .wip-filter-row button,
+  .md-export-toolbar-actions > .menu-filter-row button { padding: 0 6px; }
+  .md-export-toolbar-actions > .md-export-button { padding: 0 7px; }
+  .md-export-toolbar-actions > .md-primary,
+  .md-export-toolbar-actions > .wip-primary,
+  .md-export-toolbar-actions > .menu-primary { padding: 0 7px; }
+}
