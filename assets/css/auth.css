@@ -98,3 +98,95 @@ body.auth-ready .auth-screen{display:none}
     animation: none !important;
   }
 }
+
+
+/* In-app logout confirmation dialog */
+.logout-confirm-overlay {
+  position: fixed;
+  z-index: 2500;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(17, 18, 37, .48);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+.logout-confirm-overlay.is-visible { opacity: 1; }
+.logout-confirm-dialog {
+  width: min(100%, 390px);
+  padding: 25px;
+  border: 1px solid rgba(23, 23, 42, .06);
+  border-radius: 23px;
+  background: #fff;
+  box-shadow: 0 22px 65px rgba(17, 18, 37, .2);
+  transform: translateY(10px) scale(.985);
+  transition: transform .2s cubic-bezier(.2,.75,.25,1);
+}
+.logout-confirm-overlay.is-visible .logout-confirm-dialog {
+  transform: translateY(0) scale(1);
+}
+.logout-confirm-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 17px;
+  border-radius: 14px;
+  background: #f0eff8;
+  color: #17172a;
+}
+.logout-confirm-mark svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.logout-confirm-dialog h2 {
+  margin: 0;
+  color: #17172a;
+  font: 800 20px/1.25 Manrope, sans-serif;
+  letter-spacing: -.035em;
+}
+.logout-confirm-dialog p {
+  margin: 10px 0 23px;
+  color: #85848d;
+  font: 500 13px/1.6 'DM Sans', sans-serif;
+}
+.logout-confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+.logout-confirm-actions button {
+  min-width: 0;
+  min-height: 46px;
+  flex: 1;
+  border: 0;
+  border-radius: 13px;
+  font: 700 13px 'DM Sans', sans-serif;
+}
+.logout-confirm-cancel {
+  background: #f3f3ef;
+  color: #343342;
+}
+.logout-confirm-accept {
+  background: #17172a;
+  color: #fff;
+  box-shadow: 0 5px 13px rgba(23, 23, 42, .13);
+}
+.logout-confirm-actions button:focus-visible {
+  outline: 3px solid rgba(119, 117, 141, .35);
+  outline-offset: 2px;
+}
+@media (max-width: 480px) {
+  .logout-confirm-overlay { padding: 20px; }
+  .logout-confirm-dialog { padding: 23px; border-radius: 21px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logout-confirm-overlay, .logout-confirm-dialog { transition: none; }
+}
