@@ -269,7 +269,7 @@
     display: grid;
     grid-template-columns: minmax(300px,.88fr) minmax(0,1.12fr);
     gap: 22px;
-    align-items: start;
+    align-items: stretch;
   }
   .dashboard-reservation-calendar-panel {
     min-width: 0;
