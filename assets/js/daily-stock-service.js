@@ -327,7 +327,6 @@
       if (!(factor > 0)) throw new Error('Satuan barang tidak valid.');
       const isSupply = Boolean(item.is_supply);
       if (type === 'supply' && !isSupply) throw new Error('Pilih barang yang ditandai sebagai Supplies.');
-      if (type !== 'supply' && isSupply) throw new Error('Barang Supplies harus dicatat dari menu Supplies.');
       const direction = type === 'purchase' || (type === 'supply' && form.direction === 'in') ? 'in' : 'out';
       lines.push({
         stock_kind:isSupply ? 'supply' : 'material', item_id:item.id, wip_recipe_id:null,
