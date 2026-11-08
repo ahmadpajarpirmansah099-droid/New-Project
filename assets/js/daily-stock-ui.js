@@ -41,13 +41,6 @@
       historyDescription:'Catatan penerimaan bahan pada tanggal yang dipilih.',
       types:['purchase'], field:'item', submit:'Simpan barang masuk'
     },
-    supplies: {
-      page:'daily-supplies', root:'dailySuppliesRoot', title:'Supplies',
-      description:'Catat supplies masuk dan supplies keluar.',
-      formTitle:'Input supplies', historyTitle:'Riwayat supplies',
-      historyDescription:'Catatan pergerakan supplies pada tanggal yang dipilih.',
-      types:['supply_purchase','supply_usage'], field:'supply', submit:'Simpan supplies'
-    }
   };
 
   function rowLabel(kind) { return kind === 'wip' ? 'WIP' : kind === 'supply' ? 'Supplies' : 'Bahan'; }
@@ -410,14 +403,6 @@
       '<div class="ds-unit-options" role="listbox" aria-label="Pilih satuan" hidden></div></div></label>';
   }
 
-  function transactionDirectionField() {
-    return '<label>Arah catatan<div class="ds-direction-picker" role="group" aria-label="Arah supplies">' +
-      '<input type="hidden" name="direction" value="in">' +
-      '<button type="button" class="active" data-direction-value="in" aria-pressed="true">Supplies masuk</button>' +
-      '<button type="button" data-direction-value="out" aria-pressed="false">Supplies keluar</button>' +
-      '</div></label>';
-  }
-
   async function goToTransactionPage(type) {
     const config = TRANSACTION_PAGES[type];
     if (!config) return;
@@ -440,7 +425,6 @@
     if (!target || !state.initialized) return;
 
     const materialItems = state.catalog.masterItems.filter((item) => item.status === 'active' && !item.is_supply);
-    const supplyItems = state.catalog.masterItems.filter((item) => item.status === 'active' && item.is_supply);
     let fields = '';
 
     if (config.field === 'wip') {
@@ -457,11 +441,6 @@
         '<p class="ds-production-note">Biarkan jumlah porsi kosong untuk menu yang tidak terjual. Pemakaian bahan dan WIP dihitung otomatis dari resep menu.</p>';
     } else if (config.field === 'item') {
       fields = transactionSearchField('Barang', 'itemId', 'Cari nama bahan...', materialItems, 'id', 'nama_barang') +
-        '<label>Jumlah<input name="quantity" type="number" min="0.000001" step="any" inputmode="decimal" required placeholder="Masukkan jumlah"></label>' +
-        transactionUnitField();
-    } else if (config.field === 'supply') {
-      fields = transactionDirectionField() +
-        transactionSearchField('Barang supplies', 'itemId', 'Cari nama supplies...', supplyItems, 'id', 'nama_barang') +
         '<label>Jumlah<input name="quantity" type="number" min="0.000001" step="any" inputmode="decimal" required placeholder="Masukkan jumlah"></label>' +
         transactionUnitField();
     }
@@ -644,7 +623,6 @@
     if (action === 'daily-stock') { await goToPage(); return; }
     if (action === 'stock-in') { await goToTransactionPage('purchase'); return; }
     if (action === 'stock-out') { await goToExpensePage(); return; }
-    if (action === 'stock-supplies') { await goToTransactionPage('supplies'); return; }
     if (action === 'stock-production') { await goToTransactionPage('production'); return; }
     if (action === 'stock-sale') { await goToTransactionPage('sale'); return; }
     if (action === 'stock-history') { await goToPage(); state.tab='history'; render(); return; }
@@ -690,7 +668,7 @@
     event.preventDefault();
     const isStandalone = form.id === 'dsStandaloneTransactionForm';
     const transactionType = form.dataset.type;
-    if (isStandalone && ['purchase','supply'].includes(transactionType) && !form.elements.itemId?.value) {
+    if (isStandalone && transactionType === 'purchase' && !form.elements.itemId?.value) {
       root.toast?.('Cari lalu pilih barang terlebih dahulu.');
       form.querySelector('[type="search"]')?.focus();
       return;
@@ -731,7 +709,7 @@
         return;
       }
     }
-    if (isStandalone && ['purchase','supply'].includes(transactionType) && !form.elements.unit?.value) {
+    if (isStandalone && transactionType === 'purchase' && !form.elements.unit?.value) {
       root.toast?.('Pilih satuan barang terlebih dahulu.');
       form.querySelector('.ds-unit-trigger')?.focus();
       return;
@@ -837,7 +815,6 @@
         ['stock-out','Pengeluaran','M5 12h14'],
         ['stock-production','Produksi WIP','m12 3 9 5-9 5-9-5 9-5zm-9 9 9 5 9-5m-18 5 9 5 9-5'],
         ['stock-in','Barang Masuk','M12 5v14m-7-7h14'],
-        ['stock-supplies','Supplies','M4 7h16v13H4zM8 7V4h8v3'],
         ['stock-sale','Sales','M3 3h2l2 13h11l2-9H7']
       ];
       actions.forEach(([action,label,path], index) => {
