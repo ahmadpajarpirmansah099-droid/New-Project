@@ -40,14 +40,9 @@ async function saveGuest(e){
   if (guestSaveInFlight || !form || form.dataset.saving === 'true') return;
 
   guestSaveInFlight = true;
-  form.dataset.saving = 'true';
-  form.setAttribute('aria-busy', 'true');
   const submitButton = form.querySelector('button[type="submit"]');
-  const originalButtonLabel = submitButton ? submitButton.textContent : '';
   if (submitButton) {
-    submitButton.disabled = true;
     submitButton.classList.add('is-loading');
-    submitButton.textContent = 'Menyimpan...';
   }
 
   const day=todayKey(),now=Date.now(),status=$('initialStatus').value;
@@ -73,12 +68,8 @@ async function saveGuest(e){
   } finally {
     guestSaveInFlight = false;
     if (form.isConnected) {
-      delete form.dataset.saving;
-      form.removeAttribute('aria-busy');
       if (submitButton) {
-        submitButton.disabled = false;
         submitButton.classList.remove('is-loading');
-        submitButton.textContent = originalButtonLabel;
       }
     }
   }
