@@ -507,6 +507,25 @@
   }
 }
 
+/* Match desktop waiting-list ticket badges to the dashboard hero surface. */
+@media (min-width: 900px) {
+  #page-dashboard > #dashboardList .guest .ticket {
+    background: linear-gradient(135deg, var(--lime) 0%, #d5e985 58%, #deef9a 100%);
+    color: #424c28;
+  }
+}
+
+/* Stronger elevation for the desktop hero and its three summary cards. */
+@media (min-width: 900px) {
+  #page-dashboard > .hero {
+    box-shadow: 0 12px 30px rgba(20,35,63,.16);
+  }
+
+  #page-dashboard > .metrics .metric {
+    box-shadow: 0 8px 22px rgba(20,35,63,.11);
+  }
+}
+
 /* Desktop overlays must sit above the sticky header so it dims and blurs too. */
 @media (min-width: 900px) {
   .sheet-backdrop {
