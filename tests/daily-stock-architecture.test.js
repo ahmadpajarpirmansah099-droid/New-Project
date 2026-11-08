@@ -53,6 +53,14 @@ test('Daily SO production, sales, and purchase use separate pages', () => {
   assert.match(ui, /data-ds-transaction-date/);
 });
 
+test('Pengeluaran accepts active Supplies items and keeps their stock classification', () => {
+  assert.match(ui, /masterItems\.filter\(\(item\) => item\.status === 'active'\)/);
+  assert.doesNotMatch(ui, /masterItems\.filter\(\(item\) => item\.status === 'active' && !item\.is_supply\)/);
+  assert.match(service, /stock_kind:isSupply \? 'supply' : 'material'/);
+  assert.doesNotMatch(service, /type !== 'supply' && isSupply/);
+  assert.match(service, /expense_category:type === 'expense' \? \(form\.category \|\| null\) : null/);
+});
+
 test('Daily SO keeps Supplies in stock counts and legacy transaction history', () => {
   assert.match(ui, /counts\.supply/);
   assert.match(ui, /supply_purchase:\s*'Supplies Masuk'/);
