@@ -901,3 +901,23 @@
     box-shadow: 0 9px 24px rgba(20,35,63,.14);
   }
 }
+
+
+/* DESKTOP — make reservation time the most visible detail in each guest card. */
+@media (min-width: 900px) {
+  .dashboard-reservation-time {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    margin-top: 2px;
+    padding: 5px 9px;
+    border-radius: 8px;
+    background: #edf3ff;
+    color: #2457d7;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: .02em;
+    font-variant-numeric: tabular-nums;
+  }
+}
