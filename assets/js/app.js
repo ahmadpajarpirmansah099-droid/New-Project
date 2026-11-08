@@ -10,7 +10,6 @@ const uid=()=>window.crypto?.randomUUID ? window.crypto.randomUUID() : 'g-' + Da
 let state=loadState(),activeFilter='waiting',sheetGuest=null,toastTimer;
 let selectedOperationalDate = todayKey();
 let remoteSaveQueue = Promise.resolve();
-save();
 let dashboardCountUpPending = true;
 function loadState() {
   return {
