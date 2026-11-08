@@ -80,7 +80,8 @@ function renderDashboardReservations() {
           '<div class="dashboard-reservation-item-main">' +
             '<span class="reservation-code">' + esc(reservation.code) + '</span>' +
             '<strong>' + esc(reservation.name) + '</strong>' +
-            '<small>' + esc(reservation.pack) + ' pack · ' + esc(reservation.time) + ' WIB' +
+            '<span class="dashboard-reservation-time">' + esc(reservation.time) + ' WIB</span>' +
+            '<small>' + esc(reservation.pack) + ' pack' +
               (reservation.table ? ' · Meja ' + esc(reservation.table) : '') + '</small>' +
           '</div>' +
           '<div class="dashboard-reservation-item-side">' +
