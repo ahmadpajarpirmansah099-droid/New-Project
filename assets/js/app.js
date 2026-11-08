@@ -255,7 +255,7 @@ function loadUserGuideFeature() {
   const loadStyle = new Promise((resolve, reject) => {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'assets/css/user-guide.css?v=20261108-slidepage-p1';
+    link.href = 'assets/css/user-guide.css?v=20261108-guide-page-p2';
     link.onload = resolve;
     link.onerror = () => reject(new Error('Gagal memuat tampilan Panduan Pengguna.'));
     document.head.appendChild(link);
@@ -263,7 +263,7 @@ function loadUserGuideFeature() {
 
   const loadScript = new Promise((resolve, reject) => {
     const script = document.createElement('script');
-    script.src = 'assets/js/user-guide.js?v=20261108-slidepage-p1';
+    script.src = 'assets/js/user-guide.js?v=20261108-guide-page-p2';
     script.onload = resolve;
     script.onerror = () => reject(new Error('Gagal memuat Panduan Pengguna.'));
     document.body.appendChild(script);
