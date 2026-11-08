@@ -884,3 +884,20 @@
     overflow-x: hidden;
   }
 }
+
+
+/* DESKTOP — stronger, consistent shadows across dashboard cards. */
+@media (min-width: 900px) {
+  #page-dashboard > .hero {
+    box-shadow: 0 14px 34px rgba(20,35,63,.20);
+  }
+
+  #page-dashboard > .metrics .metric,
+  #page-dashboard > #dashboardList .guest,
+  #page-dashboard > #dashboardList > .empty,
+  #page-dashboard > #pendingWrap .pending,
+  .dashboard-reservation-calendar-panel,
+  .dashboard-reservation-details {
+    box-shadow: 0 9px 24px rgba(20,35,63,.14);
+  }
+}
