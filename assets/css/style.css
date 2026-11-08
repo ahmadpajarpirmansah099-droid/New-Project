@@ -4206,3 +4206,33 @@ textarea::-webkit-input-placeholder {
 .fab {
   border-radius: 50%;
 }
+
+
+/* Calendar date hover feedback */
+@media (hover: hover) and (pointer: fine) {
+  .reservation-day:not(.outside),
+  .calendar-day:not(.outside):not(:disabled) {
+    cursor: pointer;
+    transition: transform .16s ease, background-color .16s ease, box-shadow .16s ease;
+  }
+
+  .reservation-day:not(.outside):not(.selected):hover,
+  .calendar-day:not(.outside):not(.selected):not(:disabled):hover {
+    transform: translateY(-2px) scale(1.05);
+    background: #eef4d4;
+    box-shadow: 0 4px 10px rgba(17, 18, 37, .10);
+  }
+
+  .reservation-day.selected:hover,
+  .calendar-day.selected:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 10px rgba(17, 18, 37, .14);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reservation-day,
+  .calendar-day {
+    transition: none;
+  }
+}
