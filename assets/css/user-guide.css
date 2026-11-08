@@ -275,3 +275,22 @@
 .user-guide-page .ug-lightbox-visual{display:flex;justify-content:center}
 .user-guide-page .ug-lightbox-visual .ug-visual-svg{width:min(100%,420px);max-height:80dvh;border-radius:15px}
 @media(max-width:620px){.user-guide-page .ug-image-frame{width:min(100%,250px)}.user-guide-page .ug-shot-gallery-multi{align-items:flex-start;gap:14px}.user-guide-page .ug-shot-gallery-multi .ug-shot{flex:0 0 min(86vw,340px);width:min(86vw,340px);max-width:340px}.user-guide-page .ug-shot{max-width:100%;padding:5px;border-radius:19px}.user-guide-page .ug-shot-button{border-radius:13px}.user-guide-page .ug-shot-button .ug-visual-svg{border-radius:13px}}
+
+
+/* Refined custom SVG illustrations: layered cards, soft depth, crisp UI. */
+.user-guide-page .ug-visual-svg rect[fill="url(#ug-card-gradient)"]{filter:url(#ug-card-shadow)}
+.user-guide-page .ug-visual-svg rect[fill="url(#ug-lime-gradient)"]{filter:url(#ug-soft-shadow)}
+.user-guide-page .ug-visual-svg text{letter-spacing:.01em}
+.user-guide-page .ug-visual-svg{background:#f5f5ef}
+.user-guide-page .ug-image-frame{width:min(100%,310px);padding:7px;border-radius:24px;box-shadow:0 20px 42px #11122526;transform:rotate(1.2deg)}
+.user-guide-page .ug-image-frame .ug-visual-svg{border-radius:17px}
+.user-guide-page .ug-shot{padding:8px;border-radius:22px}
+.user-guide-page .ug-shot-button{background:#f5f5ef;border-radius:15px}
+.user-guide-page .ug-shot-button .ug-visual-svg{border-radius:15px}
+.user-guide-page .ug-shot figcaption{margin:10px auto 2px;padding:7px 12px;border-radius:30px;background:var(--surface);box-shadow:var(--shadow);text-align:center}
+.user-guide-page .ug-lightbox-visual .ug-visual-svg{width:min(100%,420px);max-height:82dvh}
+@media(max-width:620px){
+ .user-guide-page .ug-image-frame{width:min(100%,260px);padding:6px;border-radius:21px}
+ .user-guide-page .ug-shot{padding:6px;border-radius:19px}
+ .user-guide-page .ug-shot-button .ug-visual-svg{border-radius:13px}
+}
