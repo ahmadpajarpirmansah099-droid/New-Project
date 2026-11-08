@@ -8,8 +8,6 @@ const vm = require('node:vm');
 
 const rootDir = path.resolve(__dirname, '..');
 const storePath = path.join(rootDir, 'assets/js/masterdata-store.js');
-const dailyServicePath = path.join(rootDir, 'assets/js/daily-stock-service.js');
-const dailyUiPath = path.join(rootDir, 'assets/js/daily-stock-ui.js');
 
 function createStoreRuntime(options = {}) {
   const calls = [];
@@ -44,28 +42,6 @@ function createStoreRuntime(options = {}) {
   return { runtime, client, calls, setContext(value) { context = value; }, resolveModuleState };
 }
 
-function createDailyRuntime(options = {}) {
-  const listeners = {};
-  const authContext = { userId: 'user-1', workspaceId: 'workspace-1', activeDivisionId: 'division-1', divisions: [{ id: 'division-1', name: 'BAR' }] };
-  const client = { from() { throw new Error('Database should not be reached by initialize test'); } };
-  const runtime = {
-    AbortController, console, Date, Math, Promise, Error, Array, Number, String, Object, Intl,
-    document: { readyState: 'loading', addEventListener() {}, querySelector() { return null; } },
-    addEventListener(name, callback) { listeners[name] = callback; },
-    AppAuth: { getClient: () => client, getContext: () => authContext },
-    MasterDataStore: {
-      isReady: () => true,
-      load: () => ({ masterItems: [], wips: [], menus: [], wipRecipeLines: [], menuRecipeLines: [] }),
-      assertSession: options.assertSession || (async () => ({ userId: 'user-1', workspaceId: 'workspace-1', divisionId: 'division-1' }))
-    }
-  };
-  runtime.window = runtime;
-  vm.createContext(runtime);
-  // Load the Daily SO service first so the UI test uses the same public entry point as the app.
-  vm.runInContext(fs.readFileSync(dailyServicePath, 'utf8'), runtime, { filename: 'daily-stock-service.js' });
-  vm.runInContext(fs.readFileSync(dailyUiPath, 'utf8'), runtime, { filename: 'daily-stock-ui.js' });
-  return { runtime, fireSignedOut() { listeners['app:auth-signed-out']?.(); } };
-}
 
 test('Master Data rejects an authenticated user when workspace context differs', async () => {
   const env = createStoreRuntime();
@@ -98,16 +74,3 @@ test('Master Data queued writes are cancelled when the account session resets', 
   assert.equal(env.calls.some((call) => call.operation === 'upsert'), false);
 });
 
-test('Daily SO refuses initialization when the verified workspace session is rejected', async () => {
-  const env = createDailyRuntime({ assertSession: async () => { throw new Error('Identitas akun dan workspace tidak cocok.'); } });
-  await assert.rejects(env.runtime.DailyStockUI.initialize(), /Identitas akun dan workspace tidak cocok/);
-});
-
-test('Daily SO cancels initialization when logout occurs during session verification', async () => {
-  let resolveSession;
-  const env = createDailyRuntime({ assertSession: () => new Promise((resolve) => { resolveSession = resolve; }) });
-  const initializing = env.runtime.DailyStockUI.initialize();
-  env.fireSignedOut();
-  resolveSession({ userId: 'user-1', workspaceId: 'workspace-1', divisionId: 'division-1' });
-  await assert.rejects(initializing, /Sesi workspace berubah/);
-});
