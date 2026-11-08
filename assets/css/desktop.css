@@ -506,3 +506,11 @@
     height: 20px;
   }
 }
+
+/* Match desktop waiting-list ticket badges to the dashboard hero surface. */
+@media (min-width: 900px) {
+  #page-dashboard > #dashboardList .guest .ticket {
+    background: linear-gradient(135deg, var(--lime) 0%, #d5e985 58%, #deef9a 100%);
+    color: #424c28;
+  }
+}
