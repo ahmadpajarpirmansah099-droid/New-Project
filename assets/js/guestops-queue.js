@@ -83,6 +83,8 @@ async function saveGuest(e){
     }
   }
 }
+// Expose handler explicitly for the delegated submit listener.
+window.saveGuest = saveGuest;
 /* =========================================================
     4. WAITING LIST: STATUS, CARDS, AND DASHBOARD RENDERING
     ========================================================= */
