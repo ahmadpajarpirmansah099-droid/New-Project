@@ -110,7 +110,6 @@ async function initializeWorkspace(event, switchingContext) {
     state = {schemaVersion:3,guests:[],counters:{},reservations:[],reservationCounters:{},settings:{seatingDurationMinutes:90}};
     remoteSaveQueue = Promise.resolve();
     window.GuestOpsService?.reset(); window.MasterDataStore?.reset();
-    window.DailyStockService?.invalidate();
     closeQuickMenu(); closeMenu(); closeSheet();
   }
   if (appDataReady || appInitializing) return;
@@ -123,11 +122,6 @@ async function initializeWorkspace(event, switchingContext) {
     if(!isCurrent()) return;
     await window.MasterDataStore.assertSession();
     if(!isCurrent()) return;
-    const dailyStockPages = ['daily-stock','daily-expense','daily-production','daily-sale','daily-purchase','daily-supplies'];
-    if (switchingContext && window.DailyStockService && dailyStockPages.includes(workspaceReturnPage)) {
-      await window.DailyStockService.initialize();
-      if(!isCurrent()) return;
-    }
     applyRoleNavigation();
     if(canAccessGuestOperations()) {
       const remoteState=await window.GuestOpsService.initialize(supabaseClient,authContext.workspaceId);
@@ -179,12 +173,8 @@ async function loadAllDivisionsOverview() {
   host.innerHTML='<div class="division-overview-loading">Memuat ringkasan divisi...</div>';
   try {
     const client=window.AppAuth.getClient(), ids=context.divisions.map((division)=>division.id);
-    const [moduleResult,stockResult]=await Promise.all([
-      client.from('workspace_module_state').select('division_id,payload').eq('workspace_id',context.workspaceId).in('division_id',ids),
-      client.from('daily_stock_counts').select('division_id,status').eq('workspace_id',context.workspaceId).in('division_id',ids)
-    ]);
+    const moduleResult=await client.from('workspace_module_state').select('division_id,payload').eq('workspace_id',context.workspaceId).in('division_id',ids);
     if(moduleResult.error) throw moduleResult.error;
-    if(stockResult.error) throw stockResult.error;
     const latest=window.AppAuth.getContext();
     if(!latest || latest.workspaceId!==context.workspaceId || latest.divisionMode!=='all') return;
     const summaries=context.divisions.map((division)=>{
@@ -192,15 +182,15 @@ async function loadAllDivisionsOverview() {
       const payload=rows.reduce((combined,row)=>Object.assign(combined,row.payload||{}),{});
       return {name:division.name,items:Array.isArray(payload.masterItems)?payload.masterItems.length:0,
         wips:Array.isArray(payload.wips)?payload.wips.length:0,menus:Array.isArray(payload.menus)?payload.menus.length:0,
-        stock:(stockResult.data||[]).filter((row)=>row.division_id===division.id).length};
+      };
     });
-    const totals=summaries.reduce((sum,item)=>({items:sum.items+item.items,wips:sum.wips+item.wips,menus:sum.menus+item.menus,stock:sum.stock+item.stock}),{items:0,wips:0,menus:0,stock:0});
+    const totals=summaries.reduce((sum,item)=>({items:sum.items+item.items,wips:sum.wips+item.wips,menus:sum.menus+item.menus}),{items:0,wips:0,menus:0});
     host.innerHTML='<article class="division-overview-card"><h2>Total outlet</h2><div class="division-overview-metrics">'+
       '<div><span>Master Barang</span><strong>'+totals.items+'</strong></div><div><span>Resep WIP</span><strong>'+totals.wips+'</strong></div>'+
-      '<div><span>Menu</span><strong>'+totals.menus+'</strong></div><div><span>Daily SO</span><strong>'+totals.stock+'</strong></div></div></article>'+
+      '<div><span>Menu</span><strong>'+totals.menus+'</strong></div></div></article>'+
       summaries.map((item)=>'<article class="division-overview-card"><h2>'+escapeHtmlText(item.name)+'</h2><div class="division-overview-metrics">'+
       '<div><span>Master Barang</span><strong>'+item.items+'</strong></div><div><span>Resep WIP</span><strong>'+item.wips+'</strong></div>'+
-      '<div><span>Menu</span><strong>'+item.menus+'</strong></div><div><span>Daily SO</span><strong>'+item.stock+'</strong></div></div></article>').join('');
+      '<div><span>Menu</span><strong>'+item.menus+'</strong></div></div></article>').join('');
   } catch(error) {
     console.error('All divisions overview failed:',error);
     host.innerHTML='<div class="division-overview-error">Ringkasan belum dapat dimuat. Periksa koneksi lalu tekan Muat ulang.</div>';
