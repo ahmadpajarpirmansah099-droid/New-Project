@@ -80,13 +80,13 @@ function renderDashboardReservations() {
           '<div class="dashboard-reservation-item-main">' +
             '<span class="reservation-code">' + esc(reservation.code) + '</span>' +
             '<strong>' + esc(reservation.name) + '</strong>' +
-            '<span class="dashboard-reservation-time"><small>JAM</small><strong>' + esc(reservation.time) + '</strong></span>' +
             '<small>' + esc(reservation.pack) + ' pack' +
               (reservation.table ? ' · Meja ' + esc(reservation.table) : '') + '</small>' +
-          '</div>' +
-          '<div class="dashboard-reservation-item-side">' +
             '<span class="reservation-status ' + esc(reservation.status) + '">' +
               reservationStatusLabel(reservation.status) + '</span>' +
+          '</div>' +
+          '<span class="dashboard-reservation-time"><small>JAM</small><strong>' + esc(reservation.time) + '</strong></span>' +
+          '<div class="dashboard-reservation-item-side">' +
             '<div class="dashboard-reservation-actions">' +
               (reservation.phone
                 ? '<button type="button" class="dashboard-reservation-wa" data-app-action="callReservationWhatsApp" data-app-id="' + esc(reservation.id) + '">Panggil WA</button>'

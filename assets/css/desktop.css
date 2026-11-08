@@ -313,7 +313,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     min-width: 0;
     padding: 13px;
     border: 1px solid var(--line);
@@ -324,6 +324,7 @@
     display: grid;
     gap: 4px;
     min-width: 0;
+    flex: 1 1 auto;
   }
   .dashboard-reservation-item-main strong {
     overflow: hidden;
@@ -930,10 +931,12 @@
     align-items: center;
     justify-content: center;
     gap: 3px;
-    width: fit-content;
-    min-width: 92px;
-    margin-top: 2px;
-    padding: 9px 13px;
+    width: 155px;
+    min-width: 155px;
+    height: 62px;
+    flex: 0 0 155px;
+    margin: 0;
+    padding: 7px 12px;
     border-radius: 16px;
     background: #eff6c7;
     color: #56613a;
