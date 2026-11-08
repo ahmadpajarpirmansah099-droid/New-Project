@@ -525,3 +525,25 @@
     box-shadow: 0 8px 22px rgba(20,35,63,.11);
   }
 }
+
+/* Desktop overlays must sit above the sticky header so it dims and blurs too. */
+@media (min-width: 900px) {
+  .sheet-backdrop {
+    z-index: 81;
+  }
+  .sheet {
+    z-index: 82;
+  }
+
+  .quick-menu-backdrop {
+    z-index: 81;
+  }
+  .quick-menu {
+    z-index: 82;
+  }
+
+  .calendar-backdrop {
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+  }
+}
