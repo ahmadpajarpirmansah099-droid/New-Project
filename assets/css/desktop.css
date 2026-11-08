@@ -729,3 +729,17 @@
     box-shadow: none;
   }
 }
+
+
+/* DESKTOP — show up to three reservation cards, then scroll within the list. */
+@media (min-width: 900px) {
+  .dashboard-reservation-list {
+    grid-template-rows: repeat(3, max-content);
+    grid-auto-rows: max-content;
+    max-height: 350px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    padding-right: 4px;
+  }
+}
