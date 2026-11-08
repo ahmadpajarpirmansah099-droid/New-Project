@@ -72,8 +72,8 @@
     font-size: 13px;
   }
   .drawer-item.active {
-    background: #edf3ff;
-    color: var(--blue);
+    background: #eff6c7;
+    color: #4f5b35;
   }
   .drawer-item.active::before {
     content: "";
@@ -83,7 +83,7 @@
     bottom: 10px;
     width: 3px;
     border-radius: 0 4px 4px 0;
-    background: var(--blue);
+    background: #899b4d;
   }
   .drawer-item .drawer-chevron { display: none; }
   .drawer-foot {
@@ -549,8 +549,8 @@
   }
 
   .drawer-item.active:hover {
-    background: #e7efff;
-    box-shadow: 0 4px 12px rgba(40,93,216,.08);
+    background: #e6efad;
+    box-shadow: 0 4px 12px rgba(104,126,43,.10);
   }
 
   .drawer-item.active:hover > svg:first-child {
