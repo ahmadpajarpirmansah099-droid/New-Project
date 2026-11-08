@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="assets/css/wip.css?v=20261107-export-excel-p1">
 <link rel="stylesheet" href="assets/css/menu.css?v=20261107-export-excel-p1">
 <link rel="stylesheet" href="assets/css/masterdata-export.css?v=20261107-actions-right-p4">
-<link rel="stylesheet" href="assets/css/desktop.css?v=20261109-reservation-outer-border-p1">
+<link rel="stylesheet" href="assets/css/desktop.css?v=20261109-reservation-shadow-add-button-p1">
 <link rel="stylesheet" href="assets/css/user-monitoring.css?v=20261106-user-monitoring-p1">
 
 </head>
@@ -83,7 +83,10 @@
     <section class="dashboard-reservations" id="dashboardReservations" aria-label="Kalender reservasi">
       <div class="dashboard-reservations-head">
         <div><span class="eyebrow">GUEST OPERATIONS</span><h2>Kalender reservasi</h2></div>
-        <button class="text-btn" type="button" data-action="go" data-action-args='["reservations"]'>Lihat semua →</button>
+        <div class="dashboard-reservations-head-actions">
+          <button class="dashboard-reservation-add-button" type="button" data-action="openReservationForm">+ Reservasi</button>
+          <button class="text-btn" type="button" data-action="go" data-action-args='["reservations"]'>Lihat semua →</button>
+        </div>
       </div>
       <div class="dashboard-reservations-layout">
         <div class="dashboard-reservation-calendar-panel">
