@@ -166,3 +166,99 @@
 @media(max-width:620px){
   .user-guide-page .ug-shot-gallery-multi .ug-shot{flex:0 0 auto;width:fit-content;max-width:min(86vw,340px)}
 }
+
+
+/* Screenshot cards use the same clean device frame as the guide hero. */
+.user-guide-page .ug-shot{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  width:100%;
+  max-width:460px;
+  margin:0 auto;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.user-guide-page .ug-shot-button{
+  width:fit-content;
+  max-width:100%;
+  margin:0 auto;
+  padding:6px;
+  overflow:hidden;
+  border:1px solid #1112251c;
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 16px 34px #11122520;
+  transform:rotate(1deg);
+  transition:transform .25s ease,box-shadow .25s ease;
+}
+.user-guide-page .ug-shot-button:hover{
+  transform:rotate(0);
+  box-shadow:0 18px 38px #11122526;
+}
+.user-guide-page .ug-shot-button img{
+  display:block;
+  width:auto;
+  max-width:100%;
+  height:auto;
+  max-height:620px;
+  margin:0 auto;
+  border-radius:13px;
+  object-fit:contain;
+  image-rendering:auto;
+  transition:none;
+}
+.user-guide-page .ug-shot-button:hover img{transform:none}
+.user-guide-page .ug-zoom-label{
+  right:14px;
+  bottom:14px;
+  padding:7px 9px;
+  border:1px solid #ffffff20;
+  border-radius:30px;
+  background:#111225e8;
+  color:#fff;
+  font-size:9px;
+  font-weight:800;
+}
+.user-guide-page .ug-shot figcaption{
+  width:max-content;
+  max-width:100%;
+  margin:12px auto 0;
+  padding:7px 11px;
+  border-radius:30px;
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.5;
+  text-align:center;
+}
+.user-guide-page .ug-shot-gallery-multi .ug-shot{padding:0}
+.user-guide-page .ug-lightbox-panel{
+  width:min(560px,100%);
+  padding:12px;
+  border:1px solid #ffffff30;
+  border-radius:22px;
+}
+.user-guide-page .ug-lightbox img{
+  width:auto;
+  max-width:100%;
+  max-height:80dvh;
+  margin:0 auto;
+  border-radius:14px;
+}
+@media(max-width:620px){
+  .user-guide-page .ug-shot-gallery-multi{align-items:flex-start;gap:14px}
+  .user-guide-page .ug-shot-gallery-multi .ug-shot{
+    flex:0 0 min(86vw,340px);
+    width:min(86vw,340px);
+  }
+  .user-guide-page .ug-shot-gallery-multi .ug-shot-button{max-width:100%}
+  .user-guide-page .ug-shot{max-width:100%}
+  .user-guide-page .ug-shot-button{padding:5px;border-radius:18px}
+  .user-guide-page .ug-shot-button img{max-height:560px;border-radius:12px}
+  .user-guide-page .ug-shot figcaption{font-size:9px}
+}
