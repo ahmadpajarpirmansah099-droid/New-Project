@@ -28,8 +28,8 @@ function openOperationalDetail() {
 }
 function renderOperationalDetail() {
   const day = selectedOperationalDate;
-  const guests = state.guests.filter(guest => guest.day === day).sort((a, b) => b.created - a.created);
-  const yesterday = state.guests.filter(guest => guest.day === shiftDateKey(day, -1));
+  const guests = state.guests.filter(guest => guest.day === day && guest.status !== 'missed').sort((a, b) => b.created - a.created);
+  const yesterday = state.guests.filter(guest => guest.day === shiftDateKey(day, -1) && guest.status !== 'missed');
   const total = guests.length;
   const difference = total - yesterday.length;
   const trend = yesterday.length ? (difference > 0 ? '+' : '') + Math.round((difference / yesterday.length) * 100) + '%' : (total ? 'Data awal' : '0%');
@@ -54,7 +54,7 @@ function renderOperationalDetail() {
 }
 function setOperationalChartMode(mode) {
   operationalChartMode = mode;
-  const guests = state.guests.filter(guest => guest.day === todayKey());
+  const guests = state.guests.filter(guest => guest.day === todayKey() && guest.status !== 'missed');
   document.querySelectorAll('.chart-toggle button').forEach(button => button.classList.toggle('active', button.textContent.trim().toLowerCase() === (mode === 'hour' ? 'jam' : 'pack')));
   renderOperationalChart(guests);
 }
@@ -123,7 +123,7 @@ function renderOperationalGuestList() {
   const element = $('operationalGuestList');
   if (!element) return;
   const query = ($('operationalSearch')?.value || '').trim().toLowerCase();
-  const guests = state.guests.filter(guest => guest.day === todayKey())
+  const guests = state.guests.filter(guest => guest.day === todayKey() && guest.status !== 'missed')
     .filter(guest => operationalStatusFilter === 'all' || guest.status === operationalStatusFilter)
     .filter(guest => {
       const reservation = reservationIdentity(guest);
