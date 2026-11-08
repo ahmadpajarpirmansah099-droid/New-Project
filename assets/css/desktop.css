@@ -718,3 +718,14 @@
     grid-row: 5;
   }
 }
+
+
+/* DESKTOP — flatten the reservation calendar surface and empty-state card. */
+@media (min-width: 900px) {
+  .dashboard-reservation-calendar-panel,
+  .dashboard-reservation-calendar,
+  .dashboard-reservation-list .reservation-empty {
+    border: 0;
+    box-shadow: none;
+  }
+}
