@@ -176,6 +176,7 @@ function setWorkspaceHeader(page) {
     'history': 'RIWAYAT',
     'reservations': 'RESERVASI',
     'settings': 'PENGATURAN',
+    'user-guide': 'PANDUAN PENGGUNA',
     'user-monitoring': 'USER MONITORING'
   };
   name.textContent = pageTitles[page] || 'GUEST OPERATIONAL';
@@ -274,7 +275,7 @@ function go(page) {
     item.classList.toggle('active', item.dataset.page === page);
   });
 
-  $('fab').style.display = ['settings', 'user-monitoring'].includes(page) ? 'none' : 'grid';
+  $('fab').style.display = ['settings', 'user-monitoring', 'user-guide'].includes(page) ? 'none' : 'grid';
 
   if (page === 'settings') syncSeatingSettingInput();
   if (page === 'user-monitoring') window.UserMonitoring?.onPageShown?.();
