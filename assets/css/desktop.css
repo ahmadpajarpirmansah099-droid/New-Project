@@ -334,6 +334,11 @@
     white-space: nowrap;
   }
   .dashboard-reservation-item-main small { color: var(--muted); font-size: 10px; }
+  .dashboard-reservation-item-main .reservation-status {
+    justify-self: start;
+    width: fit-content;
+    max-width: 100%;
+  }
   .dashboard-reservation-item-side {
     display: grid;
     justify-items: end;
