@@ -789,3 +789,11 @@
     box-shadow: 0 5px 16px rgba(20,35,63,.07);
   }
 }
+
+
+/* MOBILE — keep the dashboard focused; reservations remain available in their own page. */
+@media (max-width: 899px) {
+  #page-dashboard > .dashboard-reservations {
+    display: none !important;
+  }
+}
