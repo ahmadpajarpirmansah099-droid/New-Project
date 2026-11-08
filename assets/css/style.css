@@ -2402,6 +2402,10 @@ button.history-date {
 }
 
 .drawer-foot {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
   margin-top:auto;
   padding:15px 4px 0;
   border-top:1px solid #f0eff2;
@@ -2409,6 +2413,33 @@ button.history-date {
   font-size:9px;
   font-weight:800;
   letter-spacing:.13em;
+}
+
+.drawer-guide-icon {
+  display:grid;
+  width:36px;
+  height:36px;
+  flex:0 0 36px;
+  place-items:center;
+  border:0;
+  border-radius:11px;
+  background:#f4f3f7;
+  color:#777585;
+}
+
+.drawer-guide-icon svg {
+  width:19px;
+  height:19px;
+}
+
+.drawer-guide-icon.active {
+  background:#eef7c7;
+  color:#111225;
+}
+
+.drawer-guide-icon:focus-visible {
+  outline:2px solid #111225;
+  outline-offset:3px;
 }
 
 .fab {

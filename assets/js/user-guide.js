@@ -2,8 +2,7 @@
 (function () {
   const page = document.getElementById('page-user-guide');
   const root = document.getElementById('userGuideRoot');
-  if (!page || !root || page.dataset.initialized === 'true') return;
-  page.dataset.initialized = 'true';
+  if (!page || !root || window.UserGuideInitialized) return;
 
   const features = [
     {
@@ -166,7 +165,7 @@
   const escapeHTML = value => String(value == null ? '' : value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const docIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg>';
   const stepsHTML = steps => '<div class="ug-steps">' + steps.map((step,index) => '<div class="ug-step"><span>'+(index+1)+'</span><div><b>'+escapeHTML(step[0])+'</b><p>'+escapeHTML(step[1])+'</p></div></div>').join('') + '</div>';
-  const shotHTML = shot => '<figure class="ug-shot"><button class="ug-shot-button" type="button" data-ug-open-shot data-ug-src="assets/images/user-guide/'+escapeHTML(shot.src)+'" data-ug-title="'+escapeHTML(shot.title)+'" data-ug-alt="'+escapeHTML(shot.alt)+'" aria-label="Perbesar '+escapeHTML(shot.title)+'"><img src="assets/images/user-guide/'+escapeHTML(shot.src)+'" alt="'+escapeHTML(shot.alt)+'" loading="lazy"><span class="ug-zoom-label">Perbesar ↗</span></button><figcaption>'+escapeHTML(shot.caption)+'</figcaption></figure>';
+  const shotHTML = shot => '<figure class="ug-shot"><button class="ug-shot-button" type="button" data-ug-open-shot data-ug-src="assets/images/user-guide/'+escapeHTML(shot.src)+'" data-ug-title="'+escapeHTML(shot.title)+'" data-ug-alt="'+escapeHTML(shot.alt)+'" aria-label="Perbesar '+escapeHTML(shot.title)+'"><img src="assets/images/user-guide/'+escapeHTML(shot.src)+'" alt="'+escapeHTML(shot.alt)+'" loading="lazy" decoding="async"><span class="ug-zoom-label">Perbesar ↗</span></button><figcaption>'+escapeHTML(shot.caption)+'</figcaption></figure>';
   const featureHTML = feature => {
     const gallery = '<div class="ug-shot-gallery'+(feature.shots.length > 1 ? ' ug-shot-gallery-multi' : '')+'">'+feature.shots.map(shotHTML).join('')+'</div>';
     const statusFlow = feature.statusFlow ? '<div class="ug-status-flow" aria-label="Alur status kunjungan">'+feature.statusFlow.map((label,index)=>(index?'<i>→</i>':'')+'<span>'+escapeHTML(label)+'</span>').join('')+'</div>' : '';
@@ -177,7 +176,7 @@
   const overviewHTML = overview.map(item => '<article class="ug-flow"><div class="ug-flow-mark">'+item.no+'</div><div class="ug-flow-body"><b>'+escapeHTML(item.title)+'</b><p>'+escapeHTML(item.desc)+'</p><div class="ug-flow-steps">'+item.flow.map((step,index)=>(index?'<i>→</i>':'')+'<span>'+escapeHTML(step)+'</span>').join('')+'</div></div></article>').join('');
 
   root.innerHTML = '<div class="ug-shell">'+
-    '<header class="ug-hero ug-reveal"><div class="ug-hero-copy"><span class="ug-eyebrow">PUSAT BANTUAN · GUEST OPERATIONS</span><h1 id="ug-title">Guest Operations,<br><em>lebih mudah dipahami.</em></h1><p>Panduan langkah demi langkah untuk mencatat tamu, mengelola antrean, memproses reservasi, dan membaca data operasional.</p><div class="ug-hero-meta"><span><b>'+features.length+'</b> topik panduan</span><i></i><span>Mobile & desktop</span></div><a class="ug-primary-link" href="#ug-overview">Jelajahi panduan <span>↓</span></a></div><div class="ug-hero-media"><div class="ug-image-frame"><img src="assets/images/user-guide/dashboard.webp" alt="Dashboard Guest Operational dengan data nama fiktif"></div><span class="ug-media-caption">Dashboard Guest · contoh data fiktif</span></div></header>'+
+    '<header class="ug-hero ug-reveal"><div class="ug-hero-copy"><span class="ug-eyebrow">PUSAT BANTUAN · GUEST OPERATIONS</span><h1 id="ug-title">Guest Operations,<br><em>lebih mudah dipahami.</em></h1><p>Panduan langkah demi langkah untuk mencatat tamu, mengelola antrean, memproses reservasi, dan membaca data operasional.</p><div class="ug-hero-meta"><span><b>'+features.length+'</b> topik panduan</span><i></i><span>Mobile & desktop</span></div><a class="ug-primary-link" href="#ug-overview">Jelajahi panduan <span>↓</span></a></div><div class="ug-hero-media"><div class="ug-image-frame"><img src="assets/images/user-guide/dashboard.webp" alt="Dashboard Guest Operational dengan data nama fiktif" loading="lazy" decoding="async"></div><span class="ug-media-caption">Dashboard Guest · contoh data fiktif</span></div></header>'+
     '<div class="ug-intro-row ug-reveal"><p>Mulai dari Dashboard Guest dan Detail Tamu sebagai alur utama. Panduan Master Barang, Resep WIP, Menu & COGS, serta Pengaturan tersedia sebagai materi pendukung.</p><span>GULIR UNTUK MENJELAJAHI ↓</span></div>'+
     '<div class="ug-layout"><aside class="ug-toc" aria-label="Daftar isi panduan"><div class="ug-toc-label">DAFTAR PANDUAN</div><nav class="ug-toc-links">'+toc.map((item,index)=>'<a href="#ug-'+item.id+'" '+(index===0?'class="is-active"':'')+'><span>'+item.no+'</span>'+escapeHTML(item.label)+'</a>').join('')+'</nav><div class="ug-toc-note"><b>Catatan data contoh</b><p>Nama dan nomor kontak pada screenshot telah disamarkan. Contoh data tamu menggunakan nama fiktif.</p></div></aside>'+
     '<article class="ug-article"><section class="ug-section ug-reveal" id="ug-overview" data-ug-section><div class="ug-section-heading"><div><span class="ug-kicker">00 · GAMBARAN UMUM</span><h2>Mulai dari Guest Operations</h2><p>Ikuti alur kerja utama terlebih dahulu. Bagian lain membantu menjaga data bahan, resep, dan harga menu tetap konsisten.</p></div><span class="ug-section-number">00</span></div><div class="ug-overview-list">'+overviewHTML+'</div><div class="ug-note"><b>Prioritas panduan</b><span>Dashboard Guest dan Detail Tamu mendapat penjelasan paling lengkap. Materi lain dibuat lebih ringkas sebagai panduan pendukung.</span></div></section>'+
@@ -262,4 +261,6 @@
     target.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
   }));
   activateObservers();
+  page.dataset.initialized = 'true';
+  window.UserGuideInitialized = true;
 })();
