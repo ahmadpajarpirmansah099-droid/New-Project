@@ -43,11 +43,9 @@ async function saveGuest(e){
   form.dataset.saving = 'true';
   form.setAttribute('aria-busy', 'true');
   const submitButton = form.querySelector('button[type="submit"]');
-  const originalButtonLabel = submitButton ? submitButton.textContent : '';
   if (submitButton) {
     submitButton.disabled = true;
     submitButton.classList.add('is-loading');
-    submitButton.textContent = 'Menyimpan...';
   }
 
   const day=todayKey(),now=Date.now(),status=$('initialStatus').value;
@@ -78,7 +76,6 @@ async function saveGuest(e){
       if (submitButton) {
         submitButton.disabled = false;
         submitButton.classList.remove('is-loading');
-        submitButton.textContent = originalButtonLabel;
       }
     }
   }
