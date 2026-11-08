@@ -80,10 +80,10 @@ function renderDashboardReservations() {
           '<div class="dashboard-reservation-item-main">' +
             '<span class="reservation-code">' + esc(reservation.code) + '</span>' +
             '<strong>' + esc(reservation.name) + '</strong>' +
-            '<span class="dashboard-reservation-time"><small>JAM</small><strong>' + esc(reservation.time) + '</strong></span>' +
             '<small>' + esc(reservation.pack) + ' pack' +
               (reservation.table ? ' · Meja ' + esc(reservation.table) : '') + '</small>' +
           '</div>' +
+          '<span class="dashboard-reservation-time"><small>JAM</small><strong>' + esc(reservation.time) + '</strong></span>' +
           '<div class="dashboard-reservation-item-side">' +
             '<span class="reservation-status ' + esc(reservation.status) + '">' +
               reservationStatusLabel(reservation.status) + '</span>' +
