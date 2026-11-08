@@ -351,8 +351,8 @@
     font-size: 10px;
   }
   .dashboard-reservation-item-side .dashboard-reservation-actions .dashboard-reservation-wa {
-    background: #e8f5ed;
-    color: #237348;
+    background: #111225;
+    color: #fff;
   }
   .dashboard-reservation-item-side .dashboard-reservation-actions .dashboard-reservation-seat {
     background: #111225;
@@ -926,17 +926,30 @@
 @media (min-width: 900px) {
   .dashboard-reservation-time {
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    gap: 3px;
     width: fit-content;
+    min-width: 92px;
     margin-top: 2px;
-    padding: 5px 9px;
-    border-radius: 8px;
-    background: #edf3ff;
-    color: #2457d7;
-    font-size: 15px;
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: .02em;
+    padding: 9px 13px;
+    border-radius: 16px;
+    background: #eff6c7;
+    color: #56613a;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
+  }
+  .dashboard-reservation-time small {
+    color: #626d43;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .08em;
+  }
+  .dashboard-reservation-time strong {
+    color: #4f5b35;
+    font-size: 29px;
+    font-weight: 800;
+    line-height: 1.05;
   }
 }
