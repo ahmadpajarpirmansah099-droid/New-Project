@@ -54,8 +54,8 @@ test('Daily SO production, sales, and purchase use separate pages', () => {
 });
 
 test('Pengeluaran accepts active Supplies items and keeps their stock classification', () => {
-  assert.match(ui, /masterItems\.filter\(\(item\) => item\.status === 'active'\)/);
-  assert.doesNotMatch(ui, /masterItems\.filter\(\(item\) => item\.status === 'active' && !item\.is_supply\)/);
+  assert.match(ui, /const items = state\.catalog\.masterItems\.filter\(\(item\) => item\.status === 'active'\)/);
+  assert.doesNotMatch(ui, /const items = state\.catalog\.masterItems\.filter\(\(item\) => item\.status === 'active' && !item\.is_supply\)/);
   assert.match(service, /stock_kind:isSupply \? 'supply' : 'material'/);
   assert.doesNotMatch(service, /type !== 'supply' && isSupply/);
   assert.match(service, /expense_category:type === 'expense' \? \(form\.category \|\| null\) : null/);
