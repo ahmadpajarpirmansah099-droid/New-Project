@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="assets/css/wip.css?v=20261107-export-excel-p1">
 <link rel="stylesheet" href="assets/css/menu.css?v=20261107-export-excel-p1">
 <link rel="stylesheet" href="assets/css/masterdata-export.css?v=20261107-actions-right-p4">
-<link rel="stylesheet" href="assets/css/desktop.css?v=20261107-hamburger-scope-align-p1">
+<link rel="stylesheet" href="assets/css/desktop.css?v=20261109-dashboard-reservations-p1">
 <link rel="stylesheet" href="assets/css/user-monitoring.css?v=20261106-user-monitoring-p1">
 
 </head>
@@ -80,6 +80,29 @@
     <div id="pendingWrap"></div>
     <div class="section-head"><h2>Antrean aktif</h2><button class="text-btn" data-action="go" data-action-args='["waiting"]'>Lihat semua →</button></div>
     <div class="queue-list" id="dashboardList"></div>
+    <section class="dashboard-reservations" id="dashboardReservations" aria-label="Kalender reservasi">
+      <div class="dashboard-reservations-head">
+        <div><span class="eyebrow">GUEST OPERATIONS</span><h2>Kalender reservasi</h2></div>
+        <button class="text-btn" type="button" data-action="go" data-action-args='["reservations"]'>Lihat semua →</button>
+      </div>
+      <div class="dashboard-reservations-layout">
+        <div class="dashboard-reservation-calendar-panel">
+          <div class="dashboard-reservation-month">
+            <strong id="dashboardReservationMonthLabel"></strong>
+            <div class="reservation-month-nav">
+              <button type="button" data-app-action="changeReservationMonth" data-app-value="-1" aria-label="Bulan sebelumnya">‹</button>
+              <button type="button" data-app-action="changeReservationMonth" data-app-value="1" aria-label="Bulan berikutnya">›</button>
+            </div>
+          </div>
+          <div class="reservation-legend"><span><i class="r-dot waiting"></i> Menunggu</span><span><i class="r-dot seated"></i> Duduk</span><span><i class="r-dot cancelled"></i> Batal</span></div>
+          <div class="reservation-calendar dashboard-reservation-calendar" id="dashboardReservationCalendar"></div>
+        </div>
+        <div class="dashboard-reservation-details">
+          <div class="dashboard-reservation-details-head"><div><h3 id="dashboardReservationDateLabel"></h3><p id="dashboardReservationCount"></p></div><button class="reservation-today-button" type="button" data-app-action="goReservationToday">Hari ini</button></div>
+          <div class="dashboard-reservation-list" id="dashboardReservationList"></div>
+        </div>
+      </div>
+    </section>
   </section>
   <section class="page" id="page-waiting">
     <button class="page-back" type="button" data-action="returnToGuestOperational" aria-label="Kembali ke Guest Operational"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>
@@ -346,10 +369,10 @@
 <script src="assets/js/masterdata-export.js?v=20261107-export-excel-p1" defer></script>
 <script src="assets/js/guestops-service.js?v=20261104-workspace-guard-v2" defer></script>
 <script src="assets/js/app.js?v=20261108-guide-symmetry-p1" defer></script>
-<script src="assets/js/guestops-queue.js?v=20261108-guest-save-fix-p1" defer></script>
+<script src="assets/js/guestops-queue.js?v=20261109-dashboard-reservations-p1" defer></script>
 <script src="assets/js/guestops-operational.js?v=20261104-feature-modules-p1" defer></script>
 <script src="assets/js/guestops-history.js?v=20261104-feature-modules-p1" defer></script>
-<script src="assets/js/guestops-reservations.js?v=20261104-feature-modules-p1" defer></script>
+<script src="assets/js/guestops-reservations.js?v=20261109-dashboard-reservations-p1" defer></script>
 <script src="assets/js/guestops-detail.js?v=20261106-confirm-dialog-no-icon-p1" defer></script>
 <script src="assets/js/user-monitoring.js?v=20261106-user-monitoring-p1" defer></script>
 

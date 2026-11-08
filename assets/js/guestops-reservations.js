@@ -33,6 +33,67 @@ function reservationCode(date) {
   return 'RSV-' + String(number).padStart(3, '0');
 }
 
+
+function renderDashboardReservations() {
+  const calendar = $('dashboardReservationCalendar');
+  if (!calendar) return;
+
+  const [year, month] = reservationMonth.split('-').map(Number);
+  const firstOffset = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  $('dashboardReservationMonthLabel').textContent = reservationDateText(
+    reservationMonth + '-01',
+    { month: 'long', year: 'numeric' }
+  );
+
+  const weekdays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+  let cells = weekdays.map(day => '<div class="reservation-weekday">' + day + '</div>').join('');
+  for (let index = 0; index < firstOffset; index++) {
+    cells += '<div class="reservation-day outside" aria-hidden="true"></div>';
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = reservationDateKey(year, month, day);
+    const items = state.reservations.filter(reservation => reservation.date === date);
+    const dots =
+      (items.some(item => item.status === 'pending') ? '<i></i>' : '') +
+      (items.some(item => item.status === 'seated') ? '<i class="seated"></i>' : '') +
+      (items.some(item => item.status === 'cancelled') ? '<i class="cancelled"></i>' : '');
+    cells += '<button type="button" class="reservation-day' +
+      (date === todayKey() ? ' today' : '') +
+      (date === reservationDate ? ' selected' : '') +
+      (items.length ? ' has-items' : '') +
+      '" data-app-action="selectReservationDate" data-app-date="' + date + '" aria-label="' +
+      esc(reservationDateText(date)) + (items.length ? ', ' + items.length + ' reservasi' : '') +
+      '"><span>' + day + '</span><span class="reservation-day-dots">' + dots + '</span></button>';
+  }
+  calendar.innerHTML = cells;
+
+  const reservations = state.reservations
+    .filter(reservation => reservation.date === reservationDate)
+    .sort((a, b) => a.time.localeCompare(b.time));
+  $('dashboardReservationDateLabel').textContent = reservationDateText(reservationDate);
+  $('dashboardReservationCount').textContent = reservations.length + ' reservasi';
+
+  $('dashboardReservationList').innerHTML = reservations.length
+    ? reservations.map(reservation =>
+        '<article class="dashboard-reservation-item">' +
+          '<div class="dashboard-reservation-item-main">' +
+            '<span class="reservation-code">' + esc(reservation.code) + '</span>' +
+            '<strong>' + esc(reservation.name) + '</strong>' +
+            '<small>' + esc(reservation.pack) + ' pack · ' + esc(reservation.time) + ' WIB' +
+              (reservation.table ? ' · Meja ' + esc(reservation.table) : '') + '</small>' +
+          '</div>' +
+          '<div class="dashboard-reservation-item-side">' +
+            '<span class="reservation-status ' + esc(reservation.status) + '">' +
+              reservationStatusLabel(reservation.status) + '</span>' +
+            '<button type="button" data-app-action="openReservationDetail" data-app-id="' +
+              esc(reservation.id) + '">Detail</button>' +
+          '</div>' +
+        '</article>'
+      ).join('')
+    : '<div class="reservation-empty"><strong>Belum ada reservasi</strong>Tidak ada reservasi pada tanggal ini.</div>';
+}
+
 function changeReservationMonth(delta) {
   const [year, month] = reservationMonth.split('-').map(Number);
   const date = new Date(Date.UTC(year, month - 1 + delta, 1));
@@ -140,6 +201,8 @@ function renderReservations(animateDateChange = false) {
         '</article>';
       }).join('')
     : '<div class="reservation-empty"><strong>Belum ada reservasi</strong>Tidak ada reservasi pada tanggal ini.</div>';
+
+  renderDashboardReservations();
 
   if (animateDateChange) {
     reservationList.classList.remove('is-changing');
