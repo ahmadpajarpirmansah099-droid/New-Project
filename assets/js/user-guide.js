@@ -216,6 +216,12 @@
     } else if(c.mode==='settings'){
       [['Outlet aktif','LAZY JENNIE','AKTIF'],['Reset nomor antrean','Setiap hari pukul 00.00 WIB','OTOMATIS'],['Format nomor','WL-001, WL-002, ...','WL']].forEach((a,i)=>{const y=258+i*94;s+=vRect(20,y,380,78,'#fff',14)+vText(38,y+25,a[0],12,'#111225',800)+vText(38,y+49,a[1],9,'#858594',500)+vPill(318,y+22,66,a[2],'#eef7c7','#4c5b32');});
       s+=vRect(20,555,380,88,'#fff',14)+vText(38,581,'Durasi Seating Time',12,'#111225',800)+vPill(38,595,40,'−','#f6f6f1')+vText(210,622,'90 menit',14,'#111225',800,'middle')+vPill(340,595,40,'+','#f6f6f1')+vButton(20,665,380,'Ekspor data antrean · CSV');
+    } else if(c.mode==='recipe'){
+      s+=vRect(7,192,406,574,'#fff',24,'#e8e8e2')+vRect(184,204,52,5,'#d4d4d4',3)+vText(24,250,'Tambah WIP',20,'#111225',800)+vText(390,250,'×',22,'#858594',400,'middle');
+      s+=vField(283,'Nama WIP *','Nama resep baru',true)+vText(28,368,'Hasil per batch *',10,'#858594',700)+vRect(22,378,178,48,'#f7f7f4',11)+vText(40,408,'Jumlah hasil',11,'#a2a2aa',500)+vRect(214,378,184,48,'#f7f7f4',11)+vText(232,408,'Satuan hasil',11,'#a2a2aa',500);
+      s+=vText(24,464,'Komposisi resep',13,'#111225',800)+vText(28,487,'JENIS ITEM',8,'#858594',700)+vText(178,487,'NAMA ITEM',8,'#858594',700)+vText(340,487,'QTY / SATUAN',8,'#858594',700);
+      for(let row=0;row<3;row++){const y=500+row*42;s+=vRect(22,y,376,34,'#f7f7f4',8)+vText(38,y+22,'Barang',10,'#111225',600)+vText(178,y+22,'Pilih item...',10,'#a2a2aa',500)+vText(340,y+22,'0 / unit',9,'#858594',500);}
+      s+=vButton(22,650,174,'Batal')+vButton(214,650,184,'Simpan WIP',true);
     } else {
       const stats=c.mode==='items'?['82','75','7']:c.mode==='wip'?['32','30','2']:['58','54','4'];
       const title=c.mode==='items'?'TOTAL BARANG':c.mode==='wip'?'TOTAL RESEP':'TOTAL MENU';
@@ -239,7 +245,7 @@
   const overviewHTML = overview.map(item => '<article class="ug-flow"><div class="ug-flow-mark">'+item.no+'</div><div class="ug-flow-body"><b>'+escapeHTML(item.title)+'</b><p>'+escapeHTML(item.desc)+'</p><div class="ug-flow-steps">'+item.flow.map((step,index)=>(index?'<i>→</i>':'')+'<span>'+escapeHTML(step)+'</span>').join('')+'</div></div></article>').join('');
 
   root.innerHTML = '<div class="ug-shell">'+
-    '<header class="ug-hero ug-reveal"><div class="ug-hero-copy"><span class="ug-eyebrow">PUSAT BANTUAN · GUEST OPERATIONS</span><h1 id="ug-title">Kenali cara kerja<br><em>Guest Operational.</em></h1><p>Panduan langkah demi langkah untuk mengelola kedatangan tamu, antrean, reservasi, riwayat, dan data operasional.</p><div class="ug-hero-meta"><span><b>'+features.length+'</b> topik panduan</span><i></i><span>Mobile & desktop</span></div><a class="ug-primary-link" href="#ug-overview">Jelajahi panduan <span>↓</span></a></div><div class="ug-hero-media"><div class="ug-image-frame">'+renderVisual('dashboard.webp')+'</div><span class="ug-media-caption">Dashboard Guest · contoh data fiktif</span></div></header>'+
+    '<header class="ug-hero ug-reveal"><div class="ug-hero-copy"><span class="ug-eyebrow">PUSAT BANTUAN · GUEST OPERATIONS</span><h1 id="ug-title">Kenali cara kerja<br><em>Guest Operational.</em></h1><p>Panduan langkah demi langkah untuk mengelola kedatangan tamu, antrean, reservasi, riwayat, dan data operasional.</p><div class="ug-hero-meta"><span><b>'+features.length+'</b> topik panduan</span><i></i><span>Mobile & desktop</span></div><a class="ug-primary-link" href="#ug-overview">Jelajahi panduan <span>↓</span></a></div><div class="ug-hero-media"><div class="ug-image-frame">'+renderVisual('dashboard.webp')+'</div><span class="ug-media-caption">Ilustrasi Dashboard Guest</span></div></header>'+
     '<div class="ug-intro-row ug-reveal"><p>Mulai dari Dashboard, Tambah Tamu, dan Detail Tamu. Master Barang, Resep WIP, Menu & COGS, serta Pengaturan menjadi panduan pendukung.</p><span>GULIR UNTUK MENJELAJAHI ↓</span></div>'+
     '<div class="ug-layout"><aside class="ug-toc" aria-label="Daftar isi panduan"><div class="ug-toc-label">DAFTAR PANDUAN</div><nav class="ug-toc-links">'+toc.map((item,index)=>'<a href="#ug-'+item.id+'" '+(index===0?'class="is-active"':'')+'><span>'+item.no+'</span>'+escapeHTML(item.label)+'</a>').join('')+'</nav><div class="ug-toc-note"><b>Catatan data contoh</b><p>Visual panduan merupakan ilustrasi ulang antarmuka aplikasi. Gunakan langkah tertulis sebagai acuan tindakan.</p></div></aside>'+
     '<article class="ug-article"><section class="ug-section ug-reveal" id="ug-overview" data-ug-section><div class="ug-section-heading"><div><span class="ug-kicker">00 · GAMBARAN UMUM</span><h2>Mulai dari Guest Operations</h2><p>Ikuti alur kerja utama terlebih dahulu. Bagian lain membantu menjaga data bahan, resep, dan harga menu tetap konsisten.</p></div><span class="ug-section-number">00</span></div><div class="ug-overview-list">'+overviewHTML+'</div><div class="ug-note"><b>Prioritas panduan</b><span>Dashboard Guest dan Detail Tamu mendapat penjelasan paling lengkap. Materi lain dibuat lebih ringkas sebagai panduan pendukung.</span></div></section>'+
@@ -260,7 +266,7 @@
     previousOverflow = document.body.style.overflow;
     const visual = button.querySelector('.ug-visual-svg');
     lightboxVisual.innerHTML = visual ? visual.outerHTML : renderVisual(button.dataset.ugVisual);
-    lightboxTitle.textContent = button.dataset.ugTitle || 'Screenshot panduan';
+    lightboxTitle.textContent = button.dataset.ugTitle || 'Ilustrasi panduan';
     lightbox.hidden = false;
     document.body.style.overflow = 'hidden';
     closeButton.focus();
