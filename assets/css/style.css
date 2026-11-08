@@ -484,6 +484,11 @@ button:focus-visible,input:focus-visible,select:focus-visible {
   background:#fff0f1;
 }
 
+.s-missed {
+  color:#8a5b22;
+  background:#fff4df;
+}
+
 .guest-bottom {
   display:flex;
   justify-content:space-between;

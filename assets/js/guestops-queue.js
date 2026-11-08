@@ -74,7 +74,7 @@ window.saveGuest = saveGuest;
     4. WAITING LIST: STATUS, CARDS, AND DASHBOARD RENDERING
     ========================================================= */
 function statusLabel(s) {
-  return { waiting: 'Menunggu', called: 'Dipanggil', seated: 'Duduk', done: 'Selesai', cancelled: 'Dibatalkan' }[s] || s;
+  return { waiting: 'Menunggu', called: 'Dipanggil', seated: 'Duduk', done: 'Selesai', missed: 'Lupa diselesaikan', cancelled: 'Dibatalkan' }[s] || s;
 }
 
 function statusClass(s) {
@@ -164,7 +164,7 @@ function renderAll() {
   updateOperationalDateLabels();
 
   if ($('page-dashboard')?.classList.contains('active')) {
-    const todayGuests = state.guests.filter(guest => guest.day === selectedOperationalDate);
+    const todayGuests = state.guests.filter(guest => guest.day === selectedOperationalDate && guest.status !== 'missed');
     const waitingGuests = todayGuests.filter(guest => ['waiting', 'called'].includes(guest.status));
     const doneGuests = todayGuests.filter(guest => guest.status === 'done');
     const cancelledGuests = todayGuests.filter(guest => guest.status === 'cancelled');
