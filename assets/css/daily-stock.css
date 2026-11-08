@@ -257,3 +257,41 @@
  .ds-sales-item{gap:5px}
  .ds-sales-quantity input{min-height:40px;padding:0 6px;font-size:11px}
 }
+
+
+/* Stronger card separation for Daily SO and its transaction pages */
+.ds-page .ds-summary>div,
+.ds-page .ds-overview-grid>div,
+.ds-page .ds-panel,
+.ds-page .ds-stock-row,
+.ds-page .ds-history-row,
+.ds-page .ds-expense-history-card,
+.ds-page .ds-transaction-history-card,
+.ds-page .ds-production-row,
+.ds-page .ds-sales-row {
+  box-shadow: 0 5px 16px rgba(17, 18, 37, .12), 0 1px 3px rgba(17, 18, 37, .07);
+}
+
+.ds-page .ds-note,
+.ds-page .ds-tabs {
+  box-shadow: 0 3px 10px rgba(17, 18, 37, .09);
+}
+
+.ds-page .ds-division select,
+.ds-page .ds-date input,
+.ds-page .ds-physical input,
+.ds-page #dsTransactionForm input,
+.ds-page #dsTransactionForm select,
+.ds-page #dsTransactionForm textarea,
+.ds-page #dsExpenseForm input,
+.ds-page #dsExpenseForm select,
+.ds-page #dsExpenseForm textarea,
+.ds-page .ds-category-trigger,
+.ds-page .ds-unit-trigger,
+.ds-page .ds-item-search input[type="search"],
+.ds-page .ds-transaction-form input,
+.ds-page .ds-transaction-form textarea,
+.ds-page .ds-production-quantity input,
+.ds-page .ds-sales-quantity input {
+  box-shadow: 0 3px 10px rgba(17, 18, 37, .09), 0 1px 2px rgba(17, 18, 37, .05);
+}
