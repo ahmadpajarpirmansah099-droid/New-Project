@@ -61,6 +61,13 @@ test('Pengeluaran accepts active Supplies items and keeps their stock classifica
   assert.match(service, /expense_category:type === 'expense' \? \(form\.category \|\| null\) : null/);
 });
 
+test('Barang Masuk accepts active Supplies and records inbound supply stock', () => {
+  assert.match(ui, /const activeStockItems = state\.catalog\.masterItems\.filter\(\(item\) => item\.status === 'active'\)/);
+  assert.match(ui, /transactionSearchField\('Barang', 'itemId', 'Cari nama barang\.\.\.', activeStockItems/);
+  assert.match(service, /const direction = type === 'purchase' \|\|/);
+  assert.match(service, /stock_kind:isSupply \? 'supply' : 'material'/);
+});
+
 test('Daily SO keeps Supplies in stock counts and legacy transaction history', () => {
   assert.match(ui, /counts\.supply/);
   assert.match(ui, /supply_purchase:\s*'Supplies Masuk'/);
