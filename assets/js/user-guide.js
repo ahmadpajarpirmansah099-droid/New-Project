@@ -36,9 +36,9 @@
     '<section class="ug-hero" aria-labelledby="ug-title">' +
       '<div class="ug-hero-copy">' +
         '<span class="ug-eyebrow">PANDUAN PENGGUNA · NEW PROJECT</span>' +
-        '<h1 id="ug-title">Kenali cara kerja <em>Guest Operational.</em></h1>' +
+        '<h1 id="ug-title"><span>Kenali cara kerja</span><em>Guest Operational.</em></h1>' +
         '<p>Panduan pengguna untuk membantu tim memahami alur kedatangan tamu, antrean, dan operasional. Materi akan ditambahkan bertahap.</p>' +
-        '<div class="ug-hero-meta"><span><b>Panduan bertahap</b></span><i></i><span>Mobile & desktop</span></div>' +
+        '<div class="ug-hero-meta"><span><b>Panduan bertahap</b></span><i aria-hidden="true"></i><span>Mobile & desktop</span></div>' +
         '<div class="ug-hero-cta"><button class="ug-btn ug-btn-dark" type="button" data-ug-start>Jelajahi panduan <span aria-hidden="true">↓</span></button><button class="ug-btn ug-btn-light" type="button" data-ug-dashboard>Kembali ke Dashboard</button></div>' +
       '</div>' +
       '<div class="ug-hero-art" aria-label="Ilustrasi Dashboard Guest"><div class="ug-hero-orbit" aria-hidden="true"></div><div class="ug-hero-device">' + dashboardVisual + '</div><span class="ug-hero-device-label">Dashboard Guest · Ilustrasi UI</span></div>' +
