@@ -681,3 +681,21 @@
     backdrop-filter: blur(5px);
   }
 }
+
+
+/* DESKTOP — prevent the sticky queue panel from overlapping the reservation calendar. */
+@media (min-width: 900px) {
+  #page-dashboard > .section-head {
+    position: static;
+    top: auto;
+    z-index: auto;
+  }
+
+  #page-dashboard > #dashboardList {
+    position: static;
+    top: auto;
+    z-index: auto;
+    height: auto;
+    max-height: min(550px, calc(100dvh - 180px));
+  }
+}
