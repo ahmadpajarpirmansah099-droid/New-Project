@@ -36,7 +36,7 @@
     },
     purchase: {
       page:'daily-purchase', root:'dailyPurchaseRoot', title:'Barang Masuk',
-      description:'Catat penerimaan bahan baku ke stok operasional.',
+      description:'Catat penerimaan bahan dan Supplies ke stok operasional.',
       formTitle:'Input barang masuk', historyTitle:'Riwayat barang masuk',
       historyDescription:'Catatan penerimaan bahan pada tanggal yang dipilih.',
       types:['purchase'], field:'item', submit:'Simpan barang masuk'
@@ -424,7 +424,7 @@
     const target = config && $(config.root);
     if (!target || !state.initialized) return;
 
-    const materialItems = state.catalog.masterItems.filter((item) => item.status === 'active' && !item.is_supply);
+    const activeStockItems = state.catalog.masterItems.filter((item) => item.status === 'active');
     let fields = '';
 
     if (config.field === 'wip') {
@@ -440,7 +440,7 @@
         '<div id="dsSalesRows" class="ds-sales-rows"></div>' +
         '<p class="ds-production-note">Biarkan jumlah porsi kosong untuk menu yang tidak terjual. Pemakaian bahan dan WIP dihitung otomatis dari resep menu.</p>';
     } else if (config.field === 'item') {
-      fields = transactionSearchField('Barang', 'itemId', 'Cari nama bahan...', materialItems, 'id', 'nama_barang') +
+      fields = transactionSearchField('Barang', 'itemId', 'Cari nama barang...', activeStockItems, 'id', 'nama_barang') +
         '<label>Jumlah<input name="quantity" type="number" min="0.000001" step="any" inputmode="decimal" required placeholder="Masukkan jumlah"></label>' +
         transactionUnitField();
     }
