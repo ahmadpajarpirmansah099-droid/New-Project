@@ -185,7 +185,7 @@ function exportCSV() {
   const rows = [
     ['Tanggal', 'Nomor antrean', 'Nama', 'Pack', 'WhatsApp', 'Status', 'Waktu daftar', 'Waiting time'],
     ...state.guests
-      .filter(guest => guest.day === todayKey())
+      .filter(guest => guest.day === todayKey() && guest.status !== 'missed')
       .map(guest => [
         guest.day,
         guest.ticket,
