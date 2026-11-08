@@ -146,7 +146,7 @@ function openDashboardQueue() {
 }
 
 function setWorkspaceHeader(page) {
-  const isMasterWorkspace = ['master-items', 'wips', 'menus', 'all-divisions', 'daily-stock'].includes(page);
+  const isMasterWorkspace = ['master-items', 'wips', 'menus', 'all-divisions'].includes(page);
   const mark = $('workspaceBrandmark');
   const name = $('workspaceBrandname');
   const meta = $('workspaceBrandmeta');
@@ -159,8 +159,7 @@ function setWorkspaceHeader(page) {
       'all-divisions': 'RINGKASAN DIVISI',
       'master-items': 'MASTER BARANG',
       'wips': 'WIP PRODUKSI',
-      'menus': 'MENU & RESEP',
-      'daily-stock': 'DAILY SO'
+      'menus': 'MENU & RESEP'
     };
     name.textContent = pageTitles[page] || 'MASTER BARANG';
     const context = window.AppAuth?.getContext();
@@ -211,41 +210,6 @@ function applyRoleNavigation() {
   if (monitoringItem) monitoringItem.style.display = window.AppAuth?.getContext()?.isGlobalDeveloper ? '' : 'none';
 }
 
-let dailyStockFeaturePromise = null;
-
-function loadDailyStockFeature() {
-  if (window.DailyStockUI) return Promise.resolve();
-  if (dailyStockFeaturePromise) return dailyStockFeaturePromise;
-
-  const loadStyle = new Promise((resolve, reject) => {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'assets/css/daily-stock.css?v=20261105-sales-direct-list-p1';
-    link.onload = resolve;
-    link.onerror = () => reject(new Error('Gagal memuat tampilan Daily SO.'));
-    document.head.appendChild(link);
-  });
-
-  const loadScript = (src) => new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = src;
-    script.onload = resolve;
-    script.onerror = () => reject(new Error('Gagal memuat fitur Daily SO.'));
-    document.body.appendChild(script);
-  });
-
-  dailyStockFeaturePromise = loadStyle
-    .then(() => loadScript('assets/js/daily-stock-service.js?v=20261105-division-switch-context-refresh-p1'))
-    .then(() => loadScript('assets/js/daily-stock-ui.js?v=20261105-division-switch-context-refresh-p1'))
-    .catch((error) => {
-      dailyStockFeaturePromise = null;
-      throw error;
-    });
-
-  return dailyStockFeaturePromise;
-}
-
-
 let userGuideFeaturePromise = null;
 
 function loadUserGuideFeature() {
@@ -289,15 +253,6 @@ function go(page) {
       .catch(error => {
         console.error('Panduan Pengguna gagal dimuat:', error);
         toast('Panduan Pengguna gagal dimuat. Coba buka lagi.');
-      });
-    return;
-  }
-  if (page === 'daily-stock' && !window.DailyStockUI) {
-    loadDailyStockFeature()
-      .then(() => go(page))
-      .catch((error) => {
-        console.error('Daily SO gagal dimuat:', error);
-        toast('Daily SO gagal dimuat. Coba buka lagi.');
       });
     return;
   }
