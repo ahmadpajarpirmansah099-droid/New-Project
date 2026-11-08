@@ -7,7 +7,7 @@
 
   const features = [
     {id:'dashboard',no:'01',title:'Dashboard',group:'RINGKASAN OPERASIONAL',desc:'Ringkasan aktivitas tamu pada tanggal yang sedang dipilih.',image:true,steps:[
-      ['Periksa outlet dan divisi','Header menampilkan outlet dan divisi aktif pada workspace.'],
+      ['Periksa konteks workspace','Header menampilkan identitas workspace dan akun. Pemilihan outlet atau divisi hanya muncul pada konteks yang memiliki akses.'],
       ['Baca ringkasan kunjungan','Kartu utama menunjukkan total tamu, total pack, dan rata-rata waktu tunggu untuk tanggal yang dipilih.'],
       ['Pantau status operasional','Kartu Menunggu, Selesai, dan Batal membantu melihat kondisi kunjungan.'],
       ['Buka daftar atau detail','Gunakan Lihat semua atau tombol Detail pada kartu antrean aktif.']

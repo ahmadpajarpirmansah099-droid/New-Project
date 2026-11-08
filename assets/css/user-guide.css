@@ -104,6 +104,7 @@
  .user-guide-page .ug-intro-row{flex-direction:column;align-items:flex-start;gap:9px;padding:16px 3px 25px}
  .user-guide-page .ug-intro-row p{font-size:10px}
  .user-guide-page .ug-intro-row>span{font-size:8px}
+ .user-guide-page .ug-section{scroll-margin-top:62px}
  .user-guide-page .ug-feature-grid{grid-template-columns:1fr;gap:14px}
  .user-guide-page .ug-section{padding-bottom:34px;margin-bottom:34px}
  .user-guide-page .ug-section-heading h2{font-size:25px}
