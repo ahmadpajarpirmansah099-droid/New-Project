@@ -12,6 +12,7 @@ as $function$
 declare actor_id uuid := auth.uid();
 begin
   if new.status = 'missed'
+     and (tg_op = 'INSERT' or old.status is distinct from 'missed')
      and pg_catalog.current_setting('app.guestops_auto_close', true) is distinct from 'true' then
     raise exception using errcode = '42501',
       message = 'Status Lupa diselesaikan hanya boleh ditetapkan oleh reset otomatis.';
