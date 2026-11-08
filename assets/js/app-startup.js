@@ -123,7 +123,7 @@ async function initializeWorkspace(event, switchingContext) {
     if(!isCurrent()) return;
     await window.MasterDataStore.assertSession();
     if(!isCurrent()) return;
-    const dailyStockPages = ['daily-stock','daily-expense','daily-production','daily-sale','daily-purchase','daily-supplies'];
+    const dailyStockPages = ['daily-stock','daily-expense','daily-production','daily-sale','daily-purchase'];
     if (switchingContext && window.DailyStockService && dailyStockPages.includes(workspaceReturnPage)) {
       await window.DailyStockService.initialize();
       if(!isCurrent()) return;
