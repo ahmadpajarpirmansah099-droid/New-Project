@@ -7,19 +7,12 @@ const fmtTime=t=>new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Jakarta',hour:'
 const fmtDate=d=>new Intl.DateTimeFormat('id-ID',{timeZone:'UTC',weekday:'long',day:'numeric',month:'long'}).format(new Date(d+'T00:00:00Z'));
 const fmtElapsed=ms=>{let m=Math.max(0,Math.floor(ms/60000));return m<60?m+' menit':Math.floor(m/60)+'j '+m%60+'m'};
 const uid=()=>window.crypto?.randomUUID ? window.crypto.randomUUID() : 'g-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,10);
-// Legacy browser key retained only to clear the old prototype data once.
-const legacyStorageKey='waitlist_frontend_demo_v1';
 let state=loadState(),activeFilter='waiting',sheetGuest=null,toastTimer;
 let selectedOperationalDate = todayKey();
 let remoteSaveQueue = Promise.resolve();
 save();
 let dashboardCountUpPending = true;
 function loadState() {
-  try {
-    localStorage.removeItem(legacyStorageKey);
-  } catch (error) {
-    console.warn('Legacy browser data could not be cleared:', error);
-  }
   return {
     schemaVersion: 3,
     guests: [],
