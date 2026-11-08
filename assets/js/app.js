@@ -31,9 +31,17 @@ function loadState() {
 }
 
 function save() {
-  if (!window.GuestOpsService || !window.GuestOpsService.isReady()) return;
+  if (!window.GuestOpsService || !window.GuestOpsService.isReady()) {
+    toast('Database belum siap. Data belum disimpan. Coba lagi.');
+    return Promise.resolve(false);
+  }
   remoteSaveQueue = remoteSaveQueue
-    .then(() => window.GuestOpsService.persist(state))
+    .then(() => {
+      if (!window.GuestOpsService || !window.GuestOpsService.isReady()) {
+        throw new Error('Guest Operations database is not ready.');
+      }
+      return window.GuestOpsService.persist(state);
+    })
     .catch(error => {
       console.error('Guest Operations database save failed:', error);
       toast('Data belum tersimpan ke database. Periksa koneksi lalu coba lagi.');
