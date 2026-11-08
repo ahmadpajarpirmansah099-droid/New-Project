@@ -245,6 +245,30 @@ function loadDailyStockFeature() {
   return dailyStockFeaturePromise;
 }
 
+
+let userGuideFeaturePromise = null;
+
+function loadUserGuideFeature() {
+  if (window.UserGuideInitialized) return Promise.resolve();
+  if (userGuideFeaturePromise) return userGuideFeaturePromise;
+
+  userGuideFeaturePromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'assets/js/user-guide.js?v=20261108-user-guide-lazy-load-p1';
+    script.onload = () => {
+      if (window.UserGuideInitialized) resolve();
+      else reject(new Error('Panduan Pengguna belum berhasil diinisialisasi.'));
+    };
+    script.onerror = () => reject(new Error('Gagal memuat Panduan Pengguna.'));
+    document.body.appendChild(script);
+  }).catch(error => {
+    userGuideFeaturePromise = null;
+    throw error;
+  });
+
+  return userGuideFeaturePromise;
+}
+
 function go(page) {
   if (page === 'daily-stock' && !window.DailyStockUI) {
     loadDailyStockFeature()
@@ -290,6 +314,15 @@ function go(page) {
   if (window.WipUI && page === 'wips') window.WipUI.renderPage(page);
   if (window.MenuUI && page === 'menus') window.MenuUI.renderPage(page);
   window.scrollTo({ top: 0, behavior: 'auto' });
+
+  const guideButton = $('drawerGuideButton');
+  if (guideButton) guideButton.classList.toggle('active', page === 'user-guide');
+  if (page === 'user-guide' && !window.UserGuideInitialized) {
+    loadUserGuideFeature().catch(error => {
+      console.error('Panduan Pengguna gagal dimuat:', error);
+      toast('Panduan belum dapat dibuka. Coba lagi.');
+    });
+  }
 }
 
 function toggleQuickMenu() {
