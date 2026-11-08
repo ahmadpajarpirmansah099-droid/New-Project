@@ -514,3 +514,14 @@
     color: #424c28;
   }
 }
+
+/* Stronger elevation for the desktop hero and its three summary cards. */
+@media (min-width: 900px) {
+  #page-dashboard > .hero {
+    box-shadow: 0 12px 30px rgba(20,35,63,.16);
+  }
+
+  #page-dashboard > .metrics .metric {
+    box-shadow: 0 8px 22px rgba(20,35,63,.11);
+  }
+}
