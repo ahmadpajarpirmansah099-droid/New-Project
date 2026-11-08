@@ -68,12 +68,12 @@
     justify-content: flex-start;
     padding: 0 12px;
     border-radius: 12px;
-    color: #657187;
+    color: #111225;
     font-size: 13px;
   }
   .drawer-item.active {
     background: #eff6c7;
-    color: #4f5b35;
+    color: #111225;
   }
   .drawer-item.active::before {
     content: "";
@@ -538,14 +538,14 @@
 
   .drawer-item:not(.active):hover {
     background: #f4f6fa;
-    color: #252b3b;
+    color: #111225;
     transform: translateX(3px);
     box-shadow: 0 3px 10px rgba(20,35,63,.045);
   }
 
   .drawer-item:not(.active):hover > svg:first-child {
     transform: scale(1.08);
-    color: var(--blue);
+    color: #111225;
   }
 
   .drawer-item.active:hover {
@@ -560,7 +560,7 @@
 
 @media (min-width: 900px) {
   .drawer-item:focus-visible {
-    outline: 2px solid rgba(40,93,216,.55);
+    outline: 2px solid #899b4d;
     outline-offset: 2px;
   }
 }
