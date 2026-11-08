@@ -699,3 +699,22 @@
     max-height: min(550px, calc(100dvh - 180px));
   }
 }
+
+
+/* DESKTOP — reserve enough grid height for the queue before the reservation calendar. */
+@media (min-width: 900px) {
+  #page-dashboard.page.active {
+    grid-template-rows: auto 190px 112px auto auto;
+  }
+
+  #page-dashboard > #dashboardList {
+    grid-row: 2 / span 3;
+    min-height: min(550px, calc(100dvh - 180px));
+    height: min(550px, calc(100dvh - 180px));
+    max-height: min(550px, calc(100dvh - 180px));
+  }
+
+  #page-dashboard > .dashboard-reservations {
+    grid-row: 5;
+  }
+}
