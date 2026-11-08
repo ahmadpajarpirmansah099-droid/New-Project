@@ -743,3 +743,11 @@
     padding-right: 4px;
   }
 }
+
+
+/* DESKTOP — restore a subtle border around the outer reservation calendar panel. */
+@media (min-width: 900px) {
+  .dashboard-reservation-calendar-panel {
+    border: 1px solid var(--line);
+  }
+}
