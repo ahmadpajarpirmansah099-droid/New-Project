@@ -797,3 +797,47 @@
     display: none !important;
   }
 }
+
+
+/* DESKTOP — compact the summary card and align the active queue panel with both left rows. */
+@media (min-width: 900px) {
+  #page-dashboard.page.active {
+    grid-template-rows: auto 112px 112px auto auto;
+  }
+
+  #page-dashboard > .hero {
+    min-height: 112px;
+    height: 112px;
+    padding: 12px 18px;
+    align-self: start;
+  }
+
+  #page-dashboard > .hero .hero-total {
+    margin-top: 0;
+    font-size: 38px;
+    line-height: 1;
+  }
+
+  #page-dashboard > .hero .hero-foot {
+    margin-top: 4px;
+    gap: 14px;
+  }
+
+  #page-dashboard > .hero .hero-action {
+    top: 0;
+  }
+
+  #page-dashboard > .metrics {
+    min-height: 112px;
+    height: 112px;
+    align-self: start;
+  }
+
+  #page-dashboard > #dashboardList {
+    grid-row: 2 / span 2;
+    align-self: stretch;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+  }
+}
