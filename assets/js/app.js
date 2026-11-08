@@ -253,14 +253,21 @@ function loadUserGuideFeature() {
   if (userGuideFeaturePromise) return userGuideFeaturePromise;
 
   userGuideFeaturePromise = new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = 'assets/js/user-guide.js?v=20261108-user-guide-lazy-load-p1';
-    script.onload = () => {
-      if (window.UserGuideInitialized) resolve();
-      else reject(new Error('Panduan Pengguna belum berhasil diinisialisasi.'));
+    const style = document.createElement('link');
+    style.rel = 'stylesheet';
+    style.href = 'assets/css/user-guide.css?v=20261108-user-guide-lazy-load-p1';
+    style.onload = () => {
+      const script = document.createElement('script');
+      script.src = 'assets/js/user-guide.js?v=20261108-user-guide-lazy-load-p1';
+      script.onload = () => {
+        if (window.UserGuideInitialized) resolve();
+        else reject(new Error('Panduan Pengguna belum berhasil diinisialisasi.'));
+      };
+      script.onerror = () => reject(new Error('Gagal memuat Panduan Pengguna.'));
+      document.body.appendChild(script);
     };
-    script.onerror = () => reject(new Error('Gagal memuat Panduan Pengguna.'));
-    document.body.appendChild(script);
+    style.onerror = () => reject(new Error('Gagal memuat tampilan Panduan Pengguna.'));
+    document.head.appendChild(style);
   }).catch(error => {
     userGuideFeaturePromise = null;
     throw error;
