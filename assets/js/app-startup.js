@@ -283,8 +283,16 @@ document.addEventListener('input', function (event) {
 document.addEventListener('submit', function (event) {
   const form = event.target.closest('[data-app-submit]');
   if (!form) return;
-  const handler = window[form.dataset.appSubmit];
-  if (typeof handler !== 'function') return;
+  const handlerName = form.dataset.appSubmit;
+  const handler = window[handlerName];
+  if (typeof handler !== 'function') {
+    event.preventDefault();
+    console.error('Submit handler tidak ditemukan:', handlerName);
+    if (typeof toast === 'function') {
+      toast('Form belum siap. Muat ulang halaman lalu coba lagi.');
+    }
+    return;
+  }
   if (form.dataset.appId !== undefined) handler(event, form.dataset.appId);
   else handler(event);
 });
