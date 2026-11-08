@@ -20,6 +20,7 @@
     linear-gradient(145deg,#dcf49a 0%,#d6f18a 55%,#d0ec80 100%);
   box-shadow:0 18px 55px rgba(31,35,24,.09);
   isolation:isolate;
+  text-align:center;
 }
 .user-guide-page .ug-hero::before,
 .user-guide-page .ug-hero::after{
