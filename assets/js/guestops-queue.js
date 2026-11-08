@@ -36,42 +36,36 @@ function chooseInitial(status) {
 let guestSaveInFlight = false;
 async function saveGuest(e){
   e.preventDefault();
-  const form = e.currentTarget;
-  if (guestSaveInFlight || !form || form.dataset.saving === 'true') return;
+  const form = e.target;
+  if (guestSaveInFlight || !form || form.tagName !== 'FORM') return;
 
   guestSaveInFlight = true;
-  const submitButton = form.querySelector('button[type="submit"]');
-  if (submitButton) {
-    submitButton.classList.add('is-loading');
-  }
-
-  const day=todayKey(),now=Date.now(),status=$('initialStatus').value;
-  const g={
-  id:uid(),ticket:'',day,
-  name:$('guestName').value.trim(),
-  pack:Number($('guestPack').value),
-  phone:$('guestPhone').value.trim(),
-  status,created:now,
-  resolved:status==='seated'?now:null,
-  audit:[{at:now,label:'Terdaftar',detail:$('guestPack').value+' pack'}]
-  };
-  if(status==='seated')g.audit.push({at:now,label:'Langsung Duduk'});
   try {
-  g.ticket = await window.GuestOpsService.nextTicket(day);
-  state.guests.push(g);
-  if (await save() === false) { state.guests = state.guests.filter(item => item.id !== g.id); return; }
-  closeSheet();renderAll();
-  toast('Tamu berhasil ditambahkan · '+g.ticket);
+    const day=todayKey(),now=Date.now(),status=$('initialStatus').value;
+    const g={
+      id:uid(),ticket:'',day,
+      name:$('guestName').value.trim(),
+      pack:Number($('guestPack').value),
+      phone:$('guestPhone').value.trim(),
+      status,created:now,
+      resolved:status==='seated'?now:null,
+      audit:[{at:now,label:'Terdaftar',detail:$('guestPack').value+' pack'}]
+    };
+    if(status==='seated')g.audit.push({at:now,label:'Langsung Duduk'});
+    g.ticket = await window.GuestOpsService.nextTicket(day);
+    state.guests.push(g);
+    if (await save() === false) {
+      state.guests = state.guests.filter(item => item.id !== g.id);
+      return;
+    }
+    closeSheet();
+    renderAll();
+    toast('Tamu berhasil ditambahkan · '+g.ticket);
   } catch (error) {
-  console.error(error);
-  toast('Tamu belum berhasil disimpan. Coba lagi.');
+    console.error(error);
+    toast('Tamu belum berhasil disimpan. Coba lagi.');
   } finally {
     guestSaveInFlight = false;
-    if (form.isConnected) {
-      if (submitButton) {
-        submitButton.classList.remove('is-loading');
-      }
-    }
   }
 }
 // Expose handler explicitly for the delegated submit listener.
