@@ -854,3 +854,33 @@
     margin-bottom: -15px;
   }
 }
+
+
+/* DESKTOP — keep both reservation cards at the empty-state height. */
+@media (min-width: 900px) {
+  .dashboard-reservations-layout {
+    height: 490px;
+    align-items: stretch;
+  }
+
+  .dashboard-reservation-calendar-panel,
+  .dashboard-reservation-details {
+    height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+  }
+
+  .dashboard-reservation-details {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .dashboard-reservation-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
