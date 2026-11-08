@@ -246,9 +246,50 @@ function loadDailyStockFeature() {
 }
 
 
+let userGuideFeaturePromise = null;
+
+function loadUserGuideFeature() {
+  if (window.UserGuideInitialized) return Promise.resolve();
+  if (userGuideFeaturePromise) return userGuideFeaturePromise;
+
+  const loadStyle = new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'assets/css/user-guide.css?v=20261108-slidepage-p1';
+    link.onload = resolve;
+    link.onerror = () => reject(new Error('Gagal memuat tampilan Panduan Pengguna.'));
+    document.head.appendChild(link);
+  });
+
+  const loadScript = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'assets/js/user-guide.js?v=20261108-slidepage-p1';
+    script.onload = resolve;
+    script.onerror = () => reject(new Error('Gagal memuat Panduan Pengguna.'));
+    document.body.appendChild(script);
+  });
+
+  userGuideFeaturePromise = loadStyle
+    .then(() => loadScript)
+    .then(() => {
+      if (!window.UserGuideInitialized) throw new Error('Panduan Pengguna belum berhasil diinisialisasi.');
+    })
+    .catch(error => {
+      userGuideFeaturePromise = null;
+      throw error;
+    });
+
+  return userGuideFeaturePromise;
+}
+
 function go(page) {
-  if (page === 'user-guide') {
-    toast('Panduan Pengguna sedang dinonaktifkan sementara untuk pemulihan aplikasi.');
+  if (page === 'user-guide' && !window.UserGuideInitialized) {
+    loadUserGuideFeature()
+      .then(() => go(page))
+      .catch(error => {
+        console.error('Panduan Pengguna gagal dimuat:', error);
+        toast('Panduan Pengguna gagal dimuat. Coba buka lagi.');
+      });
     return;
   }
   if (page === 'daily-stock' && !window.DailyStockUI) {
