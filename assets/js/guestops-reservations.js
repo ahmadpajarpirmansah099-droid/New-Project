@@ -87,8 +87,16 @@ function renderDashboardReservations() {
           '<div class="dashboard-reservation-item-side">' +
             '<span class="reservation-status ' + esc(reservation.status) + '">' +
               reservationStatusLabel(reservation.status) + '</span>' +
-            '<button type="button" data-app-action="openReservationDetail" data-app-id="' +
-              esc(reservation.id) + '">Detail</button>' +
+            '<div class="dashboard-reservation-actions">' +
+              (reservation.phone
+                ? '<button type="button" class="dashboard-reservation-wa" data-app-action="callReservationWhatsApp" data-app-id="' + esc(reservation.id) + '">Panggil WA</button>'
+                : '') +
+              (reservation.status === 'pending'
+                ? '<button type="button" class="dashboard-reservation-seat" data-app-action="seatReservation" data-app-id="' + esc(reservation.id) + '">Dudukkan</button>'
+                : '') +
+              '<button type="button" data-app-action="openReservationDetail" data-app-id="' +
+                esc(reservation.id) + '">Detail</button>' +
+            '</div>' +
           '</div>' +
         '</article>'
       ).join('')
@@ -499,6 +507,27 @@ async function saveReservation(e) {
     return;
   }
   toast('Reservasi tersimpan · ' + reservation.code);
+}
+
+function callReservationWhatsApp(id) {
+  const reservation = state.reservations.find(item => item.id === id);
+  if (!reservation) return;
+
+  const digits = String(reservation.phone || '').replace(/[^0-9]/g, '');
+  let phone = digits;
+  if (phone.startsWith('0')) phone = '62' + phone.slice(1);
+  else if (phone.startsWith('8')) phone = '62' + phone;
+
+  if (!/^[0-9]{8,15}$/.test(phone)) {
+    toast('Nomor WhatsApp belum diisi atau formatnya belum valid');
+    return;
+  }
+
+  const message = 'Halo Kak ' + reservation.name + ', kami mengingatkan reservasi ' +
+    reservation.code + ' pada ' + reservationDateText(reservation.date) + ' pukul ' +
+    reservation.time + ' WIB. Sampai bertemu, terima kasih.';
+  const waUrl = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(message);
+  window.open(waUrl, '_blank', 'noopener,noreferrer');
 }
 
 function openReservationDetail(id){const r=state.reservations.find(x=>x.id===id);if(!r)return;openSheet('<div class="sheet-head"><h2>Detail reservasi</h2><button class="close" data-app-action="closeSheet">✕</button></div><div class="detail-ticket"><small>KODE RESERVASI</small><strong>'+esc(r.code)+'</strong><small>'+esc(reservationDateText(r.date))+'</small></div><div class="detail-name">'+esc(r.name)+'</div><div class="detail-grid"><div class="detail-cell"><small>Jam reservasi</small><b>'+esc(r.time)+' WIB</b></div><div class="detail-cell"><small>Jumlah pack</small><b>'+r.pack+' pack</b></div><div class="detail-cell"><small>Status</small><b>'+reservationStatusLabel(r.status)+'</b></div><div class="detail-cell"><small>Smoking</small><b>'+esc(r.smoking)+'</b></div><div class="detail-cell detail-cell-full"><small>WhatsApp</small><b>'+esc(r.phone||'—')+'</b></div><div class="detail-cell detail-cell-full"><small>Catatan</small><b>'+esc(r.note||'—')+'</b></div></div><div class="sheet-actions"><button class="secondary" data-app-action="closeSheet">Tutup</button></div>')}
