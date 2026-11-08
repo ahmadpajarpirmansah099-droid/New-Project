@@ -1,10 +1,8 @@
 # New Project
 
-Aplikasi web operasional untuk membantu pengelolaan kedatangan tamu, antrean, reservasi, dan kegiatan operasional outlet. Antarmuka dikembangkan dengan pendekatan mobile-first.
+Aplikasi web operasional untuk membantu pengelolaan kedatangan tamu, antrean, reservasi, serta data master outlet. Antarmuka dikembangkan dengan pendekatan mobile-first.
 
-## Tentang aplikasi
-
-New Project menyediakan beberapa area kerja:
+## Fitur
 
 ### Guest Operations
 - Dashboard ringkasan tamu dan antrean aktif.
@@ -13,14 +11,14 @@ New Project menyediakan beberapa area kerja:
 - Reservasi, kalender, dan pengelolaan status kedatangan.
 - Pengaturan operasional dan ekspor data.
 
-### Master Data dan operasional
+### Master Data
 - Master Barang untuk mengelola data bahan/barang.
 - Resep WIP untuk menyusun komposisi dan hasil produksi.
 - Menu untuk mengelola komposisi menu dan informasi biaya.
-- Daily Stock Opname untuk mendukung pencatatan stok dan aktivitas terkait.
 
 ### Monitoring
-- Fitur monitoring operasional untuk pengguna dengan hak akses yang sesuai.
+- User Monitoring untuk pengguna dengan hak akses yang sesuai.
+- Ringkasan data lintas divisi untuk Developer sesuai ruang aksesnya.
 
 ## Teknologi
 
@@ -75,9 +73,3 @@ Status workflow yang berhasil tidak menggantikan pemeriksaan aplikasi secara lan
 - Jangan menghapus atau mengubah data pengguna tanpa persetujuan.
 - Simpan konfigurasi rahasia di tempat penyimpanan rahasia yang sesuai; jangan commit file rahasia ke repository.
 - Jalankan pemeriksaan dan pengujian yang relevan sebelum mengajukan perubahan.
-
-## Daily SO
-
-- Menu Daily SO sudah ditampilkan kembali pada navigasi aplikasi.
-- Halaman Daily SO dan file fiturnya tetap dimuat secara dinamis saat menu dibuka.
-- Operasi data menggunakan konteks workspace dan divisi aktif; perubahan ini hanya mengaktifkan kembali akses melalui navigasi dan tidak mengubah aturan database, hak akses, atau data.
