@@ -1235,3 +1235,14 @@
     box-shadow: 0 10px 22px rgba(20,35,63,.13);
   }
 }
+
+
+/* DESKTOP — remove only the outer surface behind the reservation calendar and guest list. */
+@media (min-width: 900px) {
+  #page-dashboard > .dashboard-reservations {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
