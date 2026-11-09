@@ -1216,3 +1216,22 @@
     border: 0;
   }
 }
+
+
+/* DESKTOP — responsive hover feedback for active queue and reservation guest cards. */
+@media (min-width: 900px) and (hover: hover) and (pointer: fine) {
+  #page-dashboard > #dashboardList > .guest,
+  .dashboard-reservation-list > .dashboard-reservation-item {
+    transition:
+      transform .2s cubic-bezier(.2,.75,.25,1),
+      box-shadow .2s ease,
+      border-color .2s ease;
+  }
+
+  #page-dashboard > #dashboardList > .guest:hover,
+  .dashboard-reservation-list > .dashboard-reservation-item:hover {
+    transform: translateY(-3px);
+    border-color: rgba(137,155,77,.38);
+    box-shadow: 0 10px 22px rgba(20,35,63,.13);
+  }
+}
