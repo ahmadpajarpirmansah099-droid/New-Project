@@ -431,16 +431,38 @@
   .desktop-sidebar-toggle:active { transform: scale(.96); }
   .desktop-sidebar-toggle svg { width: 19px; height: 19px; }
   .app { transition: width .25s ease, margin-left .25s ease; }
-  .menu-drawer { transition: transform .25s ease, box-shadow .25s ease; }
+  .menu-drawer { transition: width .25s ease, transform .25s ease, box-shadow .25s ease; }
+
+  /* Collapsed = icon rail: the drawer stays visible and only the icons remain. */
+  :root { --desktop-rail-width: 76px; }
   body.desktop-sidebar-collapsed .app {
-    width: 100%;
-    margin-left: 0;
+    width: calc(100% - var(--desktop-rail-width));
+    margin-left: var(--desktop-rail-width);
   }
   body.desktop-sidebar-collapsed .menu-drawer {
-    transform: translateX(-100%) !important;
-    visibility: hidden !important;
+    width: var(--desktop-rail-width);
+    padding: 22px 0 16px;
+    transform: none !important;
+    visibility: visible !important;
     box-shadow: none;
   }
+  body.desktop-sidebar-collapsed .drawer-head { display: none; }
+  body.desktop-sidebar-collapsed .drawer-nav { padding-top: 0; justify-items: center; }
+  body.desktop-sidebar-collapsed .drawer-item {
+    width: 48px;
+    height: 46px;
+    min-height: 46px;
+    padding: 0;
+    justify-content: center;
+  }
+  body.desktop-sidebar-collapsed .drawer-item > span { display: none; }
+  body.desktop-sidebar-collapsed .drawer-item.active::before { left: -14px; }
+  body.desktop-sidebar-collapsed .drawer-foot {
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 0 0;
+  }
+  body.desktop-sidebar-collapsed .drawer-foot > span { display: none; }
   body.desktop-sidebar-collapsed .desktop-sidebar-toggle { color: var(--blue); }
 }
 @media (max-width: 899px) {
