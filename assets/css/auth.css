@@ -190,3 +190,12 @@ body.auth-ready .auth-screen{display:none}
 @media (prefers-reduced-motion: reduce) {
   .logout-confirm-overlay, .logout-confirm-dialog { transition: none; }
 }
+
+
+/* DESKTOP — hide the browser's built-in password reveal control; keep the app toggle. */
+@media (min-width: 900px) {
+  .auth-input-wrap input[type="password"]::-ms-reveal,
+  .auth-input-wrap input[type="password"]::-ms-clear {
+    display: none;
+  }
+}
