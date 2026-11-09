@@ -446,8 +446,12 @@
     visibility: visible !important;
     box-shadow: none;
   }
-  body.desktop-sidebar-collapsed .drawer-head { display: none; }
-  body.desktop-sidebar-collapsed .drawer-nav { padding-top: 0; justify-items: center; }
+  /* Keep the header's vertical space so collapsed icons stay aligned with expanded mode. */
+  body.desktop-sidebar-collapsed .drawer-head {
+    visibility: hidden;
+    border-bottom-color: transparent;
+  }
+  body.desktop-sidebar-collapsed .drawer-nav { padding-top: 20px; justify-items: center; }
   body.desktop-sidebar-collapsed .drawer-item {
     width: 48px;
     height: 46px;
