@@ -1272,3 +1272,59 @@
     box-shadow: none;
   }
 }
+
+
+/* DESKTOP — keep the icon rail as the only sidebar state. */
+@media (min-width: 900px) {
+  :root {
+    --desktop-sidebar-width: 76px;
+    --desktop-rail-width: 76px;
+  }
+
+  .app {
+    width: calc(100% - var(--desktop-rail-width));
+    margin-left: var(--desktop-rail-width);
+  }
+
+  .menu-drawer {
+    width: var(--desktop-rail-width);
+    padding: 22px 0 16px;
+    transform: none !important;
+    visibility: visible !important;
+    box-shadow: none;
+  }
+
+  .drawer-head {
+    visibility: hidden;
+    border-bottom-color: transparent;
+  }
+
+  .drawer-nav {
+    padding-top: 20px;
+    justify-items: center;
+  }
+
+  .drawer-item {
+    position: relative;
+    width: 48px;
+    height: 46px;
+    min-height: 46px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .drawer-item > span { display: none; }
+  .drawer-item.active::before { left: -14px; }
+
+  .drawer-foot {
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 0 0;
+  }
+
+  .drawer-foot > span { display: none; }
+  .desktop-sidebar-toggle { display: none !important; }
+
+  /* Native title tooltips on each existing navigation icon remain available on hover. */
+  .drawer-item[title] { cursor: pointer; }
+}
