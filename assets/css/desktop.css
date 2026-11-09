@@ -1203,3 +1203,16 @@
   68% { transform: scaleY(1.035); }
   100% { transform: scaleY(1); }
 }
+
+
+/* DESKTOP — flatten date and logout controls in the top bar. */
+@media (min-width: 900px) {
+  .top-actions .desktop-queue-date {
+    border: 0;
+    box-shadow: none;
+  }
+
+  .top-actions .auth-logout-button {
+    border: 0;
+  }
+}
