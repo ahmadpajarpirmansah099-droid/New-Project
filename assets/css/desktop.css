@@ -1110,7 +1110,16 @@
   .dashboard-trend-bar {
     transform-origin: center bottom;
     animation: dashboard-trend-grow .72s cubic-bezier(.2,.75,.25,1) both;
-    transition: height .25s ease, transform .22s ease, filter .22s ease, box-shadow .22s ease;
+    transition: height .25s ease, filter .22s ease, box-shadow .22s ease;
+  }
+
+  .dashboard-trend-bar {
+    position: relative;
+  }
+
+  .dashboard-trend-bar:hover {
+    filter: saturate(1.18) brightness(1.025);
+    box-shadow: 0 5px 13px rgba(125,166,65,.27);
   }
 
   .dashboard-trend-column:focus-visible {
@@ -1127,7 +1136,6 @@
     .dashboard-trend-column:hover .dashboard-trend-value,
     .dashboard-trend-column:focus-visible .dashboard-trend-value {
       color: #789d32;
-      transform: translateY(-2px);
     }
 
     .dashboard-trend-column:hover .dashboard-trend-track,
@@ -1139,7 +1147,6 @@
     .dashboard-trend-column:hover .dashboard-trend-bar,
     .dashboard-trend-column:focus-visible .dashboard-trend-bar {
       filter: saturate(1.18) brightness(1.025);
-      transform: translateY(-3px) scaleX(1.12);
       box-shadow: 0 5px 13px rgba(125,166,65,.27);
     }
 
