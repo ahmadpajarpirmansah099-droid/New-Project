@@ -113,13 +113,6 @@ async function saveSeatingDuration() {
   toast('Durasi Seating Time disimpan');
 }
 
-function nextTicket(day) {
-  const number = (state.counters[day] || 0) + 1;
-  state.counters[day] = number;
-
-  return 'WL-' + String(number).padStart(3, '0');
-}
-
 function toast(message) {
   const element = $('toast');
   element.textContent = message;
@@ -134,15 +127,6 @@ function toast(message) {
     ========================================================= */
 function returnToGuestOperational() {
   go('dashboard');
-}
-
-function openDashboardQueue() {
-  go('dashboard');
-  const page = $('page-dashboard');
-  if (!page || !page.classList.contains('active')) return;
-  const queueHeading = page.querySelector('.section-head');
-  const queueList = $('dashboardList');
-  (queueHeading || queueList)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function setWorkspaceHeader(page) {
