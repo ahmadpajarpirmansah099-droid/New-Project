@@ -710,7 +710,7 @@
 .md-advanced summary b { font-size: 13px; }
 .md-advanced summary small { font-size: 11px; }
 .md-advanced-content { gap: 10px; }
-.md-advanced-content .md-section-heading b { font-size: 10px; }
+
 .md-advanced-content .md-section-heading small { font-size: 10px; }
 .md-advanced-content .md-add-unit {
   min-height: 38px;
