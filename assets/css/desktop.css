@@ -500,11 +500,7 @@
     -ms-overflow-style: none;
   }
 
-  #page-dashboard > #dashboardList::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-  }
+  
 
   #page-dashboard > #dashboardList > .guest {
     min-height: 108px;

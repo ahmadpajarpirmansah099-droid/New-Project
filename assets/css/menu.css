@@ -140,14 +140,14 @@
 .menu-sheet .app-select-trigger { min-height: 44px; border-radius: 10px; font-size: 12px; box-shadow: 0 2px 5px rgba(17,18,37,.04), 0 1px 2px rgba(17,18,37,.03); }
 .menu-sheet .app-select-option { min-height: 40px; font-size: 12px; }
 .menu-recipe-section { gap: 8px; padding: 10px; border-radius: 12px; box-shadow: 0 2px 5px rgba(17,18,37,.025); }
-.menu-recipe-heading b { font-size: 10px; }
+
 .menu-recipe-heading small { font-size: 8px; }
 .menu-add-row { min-height: 36px; padding: 0 9px; font-size: 9px; box-shadow: 0 2px 5px rgba(17,18,37,.035); }
 #menuRecipeRows { gap: 7px; }
 .menu-recipe-row { gap: 7px; padding: 9px; border-radius: 11px; box-shadow: 0 1px 4px rgba(17,18,37,.025); }
 .menu-row-top,.menu-row-bottom { gap: 7px; }
-.menu-row-top { grid-template-columns: minmax(0,1fr) 36px; }
-.menu-row-bottom { grid-template-columns: repeat(2,minmax(0,1fr)); }
+
+
 .menu-remove-row { width: 36px; height: 42px; border-radius: 9px; font-size: 17px; box-shadow: 0 1px 3px rgba(17,18,37,.035); }
 .menu-form-note { font-size: 9px; line-height: 1.4; }
 .menu-sheet-actions { gap: 7px; }
@@ -168,7 +168,7 @@
   .menu-card-footer span { font-size: 8px; }
   .menu-card-actions { gap: 2px; }
   .menu-card-actions button { min-height: 35px; padding: 0 6px; font-size: 9px; }
-  .menu-field input { height: 44px; }
+  
 }
 
 /* Compact entry form — align dimensions with Master Barang */
@@ -252,7 +252,7 @@
   text-align:left;
   font-size:13px !important;
 }
-.menu-component-option:active { background:#f0f3e7; }
+
 .menu-component-empty {
   padding:9px 7px;
   color:#85838f;

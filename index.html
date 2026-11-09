@@ -17,7 +17,7 @@
 
 </head>
 <body class="auth-locked desktop-sidebar-collapsed">
-<section class="auth-screen" id="authScreen" aria-labelledby="authTitle">
+<section class="auth-screen" aria-labelledby="authTitle">
   <div class="auth-orb auth-orb-one" aria-hidden="true"></div><div class="auth-orb auth-orb-two" aria-hidden="true"></div>
   <div class="auth-panel">
     <div class="auth-intro"><span class="auth-eyebrow">SELAMAT DATANG KEMBALI</span><h1 id="authTitle">Masuk ke workspace.</h1><p>Gunakan akun yang sudah terdaftar untuk melanjutkan pekerjaan operasional.</p></div>
@@ -80,7 +80,7 @@
     <div id="pendingWrap"></div>
     <div class="section-head"><h2>Antrean aktif</h2><button class="text-btn" data-action="go" data-action-args='["waiting"]'>Lihat semua →</button></div>
     <div class="queue-list" id="dashboardList"></div>
-    <section class="dashboard-reservations" id="dashboardReservations" aria-label="Kalender reservasi">
+    <section class="dashboard-reservations" aria-label="Kalender reservasi">
       <div class="dashboard-reservations-head">
         <div><span class="eyebrow">GUEST OPERATIONS</span><h2>Kalender reservasi</h2></div>
         <div class="dashboard-reservations-head-actions">
@@ -118,7 +118,7 @@
   <section class="page" id="page-history">
     <button class="page-back" type="button" data-action="returnToGuestOperational" aria-label="Kembali ke Guest Operational"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Guest Operational</span></button>
     <div class="page-title">Riwayat</div><p class="page-sub">Semua antrean berdasarkan tanggal pendaftaran.</p>
-    <button class="history-date" id="historyDateDisplay" type="button" data-action="openHistoryDatePicker" aria-label="Pilih tanggal riwayat">
+    <button class="history-date" type="button" data-action="openHistoryDatePicker" aria-label="Pilih tanggal riwayat">
       <span class="history-date-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></span>
       <span class="history-date-copy"><small>Tanggal riwayat</small><strong id="historyDateLabel">Pilih tanggal</strong></span>
       <svg class="history-date-chevron" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
@@ -357,7 +357,7 @@
 
   <button class="drawer-item" title="User Monitoring" data-page="user-monitoring" data-action="navigateFromMenu" data-action-args='["user-monitoring"]' style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>User Monitoring</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
   <button class="drawer-item" type="button" title="Master Barang" data-page="master-items" data-md-action="nav" aria-label="Master Barang"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="M4 7.5 12 12l8-4.5M12 12v9M8 5.3l8 4.5"/></svg><span>Master Barang</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
-  </nav><div class="drawer-foot"><span>ADMIN WORKSPACE</span>  <button class="drawer-guide-icon" id="drawerGuideButton" type="button" data-action="navigateFromMenu" data-action-args='["user-guide"]' aria-label="Panduan Pengguna" title="Panduan Pengguna">
+  </nav><div class="drawer-foot"><span>ADMIN WORKSPACE</span>  <button class="drawer-guide-icon" type="button" data-action="navigateFromMenu" data-action-args='["user-guide"]' aria-label="Panduan Pengguna" title="Panduan Pengguna">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18V5a2 2 0 0 1 2-2h3a4 4 0 0 1 4 4 4 4 0 0 1 4-4h3a2 2 0 0 1 2 2v13"/><path d="M3 18a2 2 0 0 0 2 2h3a4 4 0 0 1 4 1 4 4 0 0 1 4-1h3a2 2 0 0 0 2-2"/></svg>
   </button></div></aside><div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>

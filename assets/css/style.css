@@ -2498,9 +2498,7 @@ button.history-date {
 
 /* DRAGGABLE BOTTOM SHEET HANDLE */
 
-.sheet {
-  touch-action:pan-y;
-}
+
 
 .handle {
   display:block;
@@ -4060,7 +4058,7 @@ button.history-date {
   width: 100%;
   min-width: 0;
 }
-.app-select-wrap.is-open { z-index: 120; }
+
 .app-select-native {
   position: absolute !important;
   width: 1px !important;
