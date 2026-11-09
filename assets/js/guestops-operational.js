@@ -183,7 +183,15 @@ function renderDashboardTrend() {
 
   chart.innerHTML = totals.map(item => {
     const height = item.value ? Math.max(2, Math.round((item.value / max) * 100)) : 0;
-    return '<div class="dashboard-trend-column">' +
+    const dateLabel = new Intl.DateTimeFormat('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC'
+    }).format(new Date(Date.UTC(year, month - 1, item.day)));
+    const metricLabel = dashboardTrendMode === 'pack' ? 'pack' : 'nama';
+    const detailLabel = dateLabel + ' · ' + item.value + ' ' + metricLabel;
+    return '<div class="dashboard-trend-column" tabindex="0" role="img" aria-label="' + detailLabel + '" title="' + detailLabel + '">' +
       '<b class="dashboard-trend-value">' + item.value + '</b>' +
       '<div class="dashboard-trend-track"><i class="dashboard-trend-bar" style="height:' + height + '%"></i></div>' +
       '<small class="dashboard-trend-day">' + item.day + '</small>' +
