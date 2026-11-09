@@ -1365,3 +1365,13 @@
     box-shadow: 0 4px 12px rgba(104,126,43,.10);
   }
 }
+
+
+/* DESKTOP — extend the workspace header across the sidebar rail. */
+@media (min-width: 900px) {
+  .top {
+    width: calc(100% + var(--desktop-rail-width));
+    margin-left: calc(-1 * var(--desktop-rail-width));
+    padding-left: calc(32px + var(--desktop-rail-width));
+  }
+}
