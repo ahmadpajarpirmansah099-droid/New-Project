@@ -16,6 +16,7 @@ function operationalAverageWait(guests) {
   return fmtElapsed(average);
 }
 function openOperationalDetail() {
+  if (window.matchMedia('(min-width: 900px)').matches) return;
   operationalChartMode = 'hour';
   operationalStatusFilter = 'all';
   $('sheet').classList.add('operational-modal');
