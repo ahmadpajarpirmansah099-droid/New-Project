@@ -1172,3 +1172,17 @@
   }
   .dashboard-trend-toggle button.active::after { animation: none !important; }
 }
+
+
+/* DESKTOP — enlarge reservation calendar dates to suit the calendar card. */
+@media (min-width: 900px) {
+  .dashboard-reservation-calendar .reservation-day {
+    min-height: 50px;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .dashboard-reservation-calendar .reservation-weekday {
+    font-size: 11px;
+  }
+}
