@@ -4234,3 +4234,11 @@ textarea::-webkit-input-placeholder {
     transition: none;
   }
 }
+
+
+/* DESKTOP — hero summary is informational; operational detail popup remains mobile-only. */
+@media (min-width: 900px) {
+  .hero-detail-trigger { cursor: default; }
+  .hero-detail-trigger .hero-action { display: none; }
+  .hero-detail-trigger:focus-visible { outline: none; }
+}
