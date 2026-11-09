@@ -1065,3 +1065,110 @@
 @media (max-width: 899px) {
   #page-dashboard > .dashboard-trend-card { display: none !important; }
 }
+
+
+/* DESKTOP — liquid lime feedback and hover response for the monthly guest trend. */
+@media (min-width: 900px) {
+  .dashboard-trend-toggle button {
+    position: relative;
+    overflow: hidden;
+    transition: color .28s ease, background-color .28s ease, box-shadow .28s ease, transform .28s ease;
+  }
+
+  .dashboard-trend-toggle button.active {
+    background: linear-gradient(135deg, #d9ed80 0%, #c5e86a 58%, #b7df58 100%);
+    color: #283516;
+    box-shadow: 0 4px 13px rgba(132, 166, 55, .22);
+    animation: dashboard-trend-drop .62s cubic-bezier(.2,.8,.25,1);
+  }
+
+  .dashboard-trend-toggle button.active::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 125%;
+    aspect-ratio: 1;
+    border: 1px solid rgba(255,255,255,.72);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(.2);
+    animation: dashboard-trend-ripple .72s ease-out;
+  }
+
+  .dashboard-trend-column {
+    position: relative;
+    cursor: default;
+    outline: none;
+  }
+
+  .dashboard-trend-track {
+    transition: background-color .2s ease;
+  }
+
+  .dashboard-trend-bar {
+    transform-origin: center bottom;
+    transition: height .25s ease, transform .22s ease, filter .22s ease, box-shadow .22s ease;
+  }
+
+  .dashboard-trend-column:focus-visible {
+    border-radius: 8px;
+    outline: 2px solid #a8cf4d;
+    outline-offset: 3px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .dashboard-trend-column:hover {
+      z-index: 2;
+    }
+
+    .dashboard-trend-column:hover .dashboard-trend-value,
+    .dashboard-trend-column:focus-visible .dashboard-trend-value {
+      color: #789d32;
+      transform: translateY(-2px);
+    }
+
+    .dashboard-trend-column:hover .dashboard-trend-track,
+    .dashboard-trend-column:focus-visible .dashboard-trend-track {
+      background: rgba(198, 230, 119, .13);
+      border-radius: 8px 8px 0 0;
+    }
+
+    .dashboard-trend-column:hover .dashboard-trend-bar,
+    .dashboard-trend-column:focus-visible .dashboard-trend-bar {
+      filter: saturate(1.18) brightness(1.025);
+      transform: translateY(-3px) scaleX(1.12);
+      box-shadow: 0 5px 13px rgba(125,166,65,.27);
+    }
+
+    .dashboard-trend-column:hover .dashboard-trend-day,
+    .dashboard-trend-column:focus-visible .dashboard-trend-day {
+      color: #536f27;
+      font-weight: 800;
+    }
+  }
+}
+
+@keyframes dashboard-trend-drop {
+  0% { transform: scale(.94, 1.06); }
+  42% { transform: translateY(1px) scale(1.035, .96); }
+  72% { transform: translateY(-1px) scale(.99, 1.015); }
+  100% { transform: scale(1, 1); }
+}
+
+@keyframes dashboard-trend-ripple {
+  0% { opacity: .5; transform: translate(-50%, -50%) scale(.2); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.25); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-trend-toggle button,
+  .dashboard-trend-bar,
+  .dashboard-trend-track,
+  .dashboard-trend-value {
+    animation: none !important;
+    transition: none !important;
+  }
+  .dashboard-trend-toggle button.active::after { animation: none !important; }
+}
