@@ -1328,3 +1328,40 @@
   /* Native title tooltips on each existing navigation icon remain available on hover. */
   .drawer-item[title] { cursor: pointer; }
 }
+
+
+/* DESKTOP — remove the rail surface; retain compact backgrounds only on icon controls. */
+@media (min-width: 900px) {
+  .menu-drawer {
+    background: transparent;
+    border-right-color: transparent;
+    box-shadow: none;
+  }
+
+  .drawer-item {
+    background: transparent;
+    border-radius: 12px;
+  }
+
+  .drawer-item.active {
+    background: #eff6c7;
+    box-shadow: 0 3px 10px rgba(104,126,43,.09);
+  }
+
+  .drawer-foot {
+    border-top-color: transparent;
+  }
+}
+
+@media (min-width: 900px) and (hover: hover) and (pointer: fine) {
+  .drawer-item:not(.active):hover {
+    background: #f4f6fa;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .drawer-item.active:hover {
+    background: #e6efad;
+    box-shadow: 0 4px 12px rgba(104,126,43,.10);
+  }
+}
