@@ -133,3 +133,60 @@ function renderOperationalGuestList() {
   element.innerHTML = guests.length ? guests.map(operationalGuestRow).join('') : '<div class="operational-empty">Tidak ada tamu yang cocok dengan pencarian atau filter ini.</div>';
 }
 
+
+
+/* Monthly guest trend on the desktop dashboard. */
+let dashboardTrendMode = 'pack';
+
+function setDashboardTrendMode(mode) {
+  if (!['pack', 'names'].includes(mode)) return;
+  dashboardTrendMode = mode;
+  document.querySelectorAll('.dashboard-trend-toggle button').forEach(button => {
+    const active = button.dataset.appValue === mode;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+  renderDashboardTrend();
+}
+
+function renderDashboardTrend() {
+  const chart = $('dashboardTrendChart');
+  if (!chart) return;
+
+  const monthKey = typeof reservationMonth === 'string' ? reservationMonth : todayKey().slice(0, 7);
+  const [year, month] = monthKey.split('-').map(Number);
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const guests = state.guests.filter(guest =>
+    typeof guest.day === 'string' &&
+    guest.day.startsWith(monthKey) &&
+    guest.status !== 'missed'
+  );
+  const totals = Array.from({ length: daysInMonth }, (_, index) => {
+    const day = String(index + 1).padStart(2, '0');
+    const dailyGuests = guests.filter(guest => guest.day === monthKey + '-' + day);
+    return {
+      day: index + 1,
+      value: dashboardTrendMode === 'pack'
+        ? dailyGuests.reduce((sum, guest) => sum + Number(guest.pack || 0), 0)
+        : dailyGuests.length
+    };
+  });
+  const max = Math.max(1, ...totals.map(item => item.value));
+  const label = $('dashboardTrendMonthLabel');
+  if (label) {
+    label.textContent = new Intl.DateTimeFormat('id-ID', {
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC'
+    }).format(new Date(Date.UTC(year, month - 1, 1)));
+  }
+
+  chart.innerHTML = totals.map(item => {
+    const height = item.value ? Math.max(2, Math.round((item.value / max) * 100)) : 0;
+    return '<div class="dashboard-trend-column">' +
+      '<b class="dashboard-trend-value">' + item.value + '</b>' +
+      '<div class="dashboard-trend-track"><i class="dashboard-trend-bar" style="height:' + height + '%"></i></div>' +
+      '<small class="dashboard-trend-day">' + item.day + '</small>' +
+    '</div>';
+  }).join('');
+}
