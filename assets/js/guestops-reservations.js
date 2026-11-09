@@ -101,6 +101,8 @@ function renderDashboardReservations() {
         '</article>'
       ).join('')
     : '<div class="reservation-empty"><strong>Belum ada reservasi</strong>Tidak ada reservasi pada tanggal ini.</div>';
+
+  if (typeof renderDashboardTrend === 'function') renderDashboardTrend();
 }
 
 function changeReservationMonth(delta) {
