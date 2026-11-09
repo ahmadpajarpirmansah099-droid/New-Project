@@ -1109,6 +1109,7 @@
 
   .dashboard-trend-bar {
     transform-origin: center bottom;
+    animation: dashboard-trend-grow .72s cubic-bezier(.2,.75,.25,1) both;
     transition: height .25s ease, transform .22s ease, filter .22s ease, box-shadow .22s ease;
   }
 
@@ -1185,4 +1186,11 @@
   .dashboard-reservation-calendar .reservation-weekday {
     font-size: 11px;
   }
+}
+
+
+@keyframes dashboard-trend-grow {
+  0% { transform: scaleY(.025); }
+  68% { transform: scaleY(1.035); }
+  100% { transform: scaleY(1); }
 }
