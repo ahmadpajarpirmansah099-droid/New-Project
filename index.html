@@ -17,6 +17,7 @@
 
 <link rel="stylesheet" href="assets/css/visual-tokens.css?v=20261110-polish-1">
 <link rel="stylesheet" href="assets/css/visual-polish.css?v=20261110-polish-1">
+<link rel="stylesheet" href="assets/css/stock-opname.css?v=1">
 </head>
 <body class="auth-locked desktop-sidebar-collapsed">
 <section class="auth-screen" aria-labelledby="authTitle">
@@ -241,6 +242,7 @@
 <section class="page user-guide-page" id="page-user-guide" aria-label="Panduan Pengguna">
   <div id="userGuideRoot"></div>
 </section>
+<section class="page" id="page-stock-opname" aria-label="Stock Opname"></section>
 </main>
 <button class="fab" id="fab" type="button" data-action="toggleQuickMenu" aria-label="Buka menu cepat" aria-expanded="false" aria-controls="quickMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 
@@ -248,7 +250,7 @@
 <!-- Quick actions use Lucide Icons. Keep all future interface icons from Lucide. -->
 <div class="quick-menu-backdrop" id="quickMenuBackdrop" data-action="closeQuickMenu" aria-hidden="true"></div>
 <nav class="quick-menu" id="quickMenu" aria-label="Guest Operational" aria-hidden="true">
-  <div class="quick-menu-heading">GUEST OPERATIONAL</div>
+  <div class="quick-menu-heading">GUEST OPERATIONAL</div><button class="quick-menu-item" data-quick-context="stock" style="display:none" type="button" data-action="runQuickAction" data-action-args='["stock:initial"]'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="18" x="5" y="4" rx="2"/><path d="M9 4V2h6v2M9 12l2 2 4-4M9 18h6"/></svg><span>Stock Awal</span></button><button class="quick-menu-item" data-quick-context="stock" style="display:none" type="button" data-action="runQuickAction" data-action-args='["stock:expense"]'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="18" x="5" y="4" rx="2"/><path d="M9 4V2h6v2M9 12l2 2 4-4M9 18h6"/></svg><span>Pengeluaran</span></button><button class="quick-menu-item" data-quick-context="stock" style="display:none" type="button" data-action="runQuickAction" data-action-args='["stock:receipt"]'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="18" x="5" y="4" rx="2"/><path d="M9 4V2h6v2M9 12l2 2 4-4M9 18h6"/></svg><span>Barang Masuk</span></button><button class="quick-menu-item" data-quick-context="stock" style="display:none" type="button" data-action="runQuickAction" data-action-args='["stock:production"]'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="18" x="5" y="4" rx="2"/><path d="M9 4V2h6v2M9 12l2 2 4-4M9 18h6"/></svg><span>Produksi WIP</span></button><button class="quick-menu-item" data-quick-context="stock" style="display:none" type="button" data-action="runQuickAction" data-action-args='["stock:sales"]'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="18" x="5" y="4" rx="2"/><path d="M9 4V2h6v2M9 12l2 2 4-4M9 18h6"/></svg><span>Sales</span></button>
   <button class="quick-menu-item" data-quick-context="guest" type="button" data-action="runQuickAction" data-action-args='["waiting"]'>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg>
     <span>Antrean</span>
@@ -364,6 +366,7 @@
 <aside class="menu-drawer" id="menuDrawer" aria-label="Navigasi utama" aria-hidden="true">
 <div class="drawer-head"><div><span class="drawer-kicker">MENU UTAMA</span><strong>Guest Operations</strong></div><button type="button" class="drawer-close" data-action="closeMenu" aria-label="Tutup menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
 <nav class="drawer-nav">
+<button class="drawer-item" type="button" title="Stock Opname" data-page="stock-opname" data-action="navigateFromMenu" data-action-args='["stock-opname"]' style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="18" x="5" y="4" rx="2"/><path d="M9 4V2h6v2M9 12l2 2 4-4M9 18h6"/></svg><span>Stock Opname</span></button>
   <button class="drawer-item active" title="Guest Operational" data-page="dashboard" data-action="navigateFromMenu" data-action-args='["dashboard"]' aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Guest Operational</span></button>
   <button class="drawer-item" title="Pengaturan" data-page="settings" data-action="navigateFromMenu" data-action-args='["settings"]'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg><span>Pengaturan</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
 
@@ -391,6 +394,8 @@
 <script src="assets/js/guestops-detail.js?v=20261109-auto-close-wl-p1" defer></script>
 <script src="assets/js/user-monitoring.js?v=20261106-user-monitoring-p1" defer></script>
 
+<script src="assets/js/stock-opname-service.js?v=1" defer></script>
+<script src="assets/js/stock-opname-ui.js?v=1" defer></script>
 <script src="assets/js/app-startup.js?v=20261109-workspace-init-cache-fix-p1" defer></script>
 </body>
 </html>

@@ -130,7 +130,7 @@ function returnToGuestOperational() {
 }
 
 function setWorkspaceHeader(page) {
-  const isMasterWorkspace = ['master-items', 'wips', 'menus', 'all-divisions'].includes(page);
+  const isMasterWorkspace = ['master-items', 'wips', 'menus', 'all-divisions', 'stock-opname'].includes(page);
   const mark = $('workspaceBrandmark');
   const name = $('workspaceBrandname');
   const meta = $('workspaceBrandmeta');
@@ -143,7 +143,8 @@ function setWorkspaceHeader(page) {
       'all-divisions': 'RINGKASAN DIVISI',
       'master-items': 'MASTER BARANG',
       'wips': 'WIP PRODUKSI',
-      'menus': 'MENU & RESEP'
+      'menus': 'MENU & RESEP',
+      'stock-opname': 'STOCK OPNAME'
     };
     name.textContent = pageTitles[page] || 'MASTER BARANG';
     const context = window.AppAuth?.getContext();
@@ -183,6 +184,7 @@ function canAccessGuestOperations() {
 }
 
 function applyRoleNavigation() {
+  window.StockOpnameUI?.navigation();
   const canUseGuestOps = canAccessGuestOperations();
   document.querySelectorAll('.drawer-item[data-page]').forEach(item => {
     if (GUEST_OPERATION_PAGES.includes(item.dataset.page)) item.style.display = canUseGuestOps ? '' : 'none';
@@ -231,6 +233,7 @@ function loadUserGuideFeature() {
 }
 
 function go(page) {
+  if (page === 'stock-opname' && !window.StockOpnameService?.available()) { toast('Stock Opname belum aktif untuk akun/divisi ini.'); return; }
   if (page === 'user-guide' && !window.UserGuideInitialized) {
     loadUserGuideFeature()
       .then(() => go(page))
@@ -274,6 +277,7 @@ function go(page) {
   if (window.MasterDataUI && page === 'master-items') window.MasterDataUI.renderPage(page);
   if (window.WipUI && page === 'wips') window.WipUI.renderPage(page);
   if (window.MenuUI && page === 'menus') window.MenuUI.renderPage(page);
+  if (page === 'stock-opname') window.StockOpnameUI?.render();
   window.scrollTo({ top: 0, behavior: 'auto' });
 
 }
@@ -281,7 +285,7 @@ function go(page) {
 function toggleQuickMenu() {
   const menu = $('quickMenu');
   const open = !menu.classList.contains('show');
-  const context = ['master-items','wips','menus'].some(page => $('page-' + page).classList.contains('active')) ? 'master' : 'guest';
+  const context = $('page-stock-opname')?.classList.contains('active') ? 'stock' : ['master-items','wips','menus'].some(page => $('page-' + page).classList.contains('active')) ? 'master' : 'guest';
 
   if (open && $('menuDrawer').classList.contains('show')) {
     closeMenu();
@@ -290,7 +294,9 @@ function toggleQuickMenu() {
   menu.querySelectorAll('.quick-menu-item[data-quick-context]').forEach(item => {
     item.style.display = item.dataset.quickContext === context ? 'flex' : 'none';
   });
-  menu.setAttribute('aria-label', context === 'master' ? 'Master Barang' : 'Guest Operational');
+  menu.setAttribute('aria-label', context === 'stock' ? 'Stock Opname' : context === 'master' ? 'Master Barang' : 'Guest Operational');
+  const heading=menu.querySelector('.quick-menu-heading');
+  if(heading) heading.textContent=context === 'stock' ? 'STOCK OPNAME' : context === 'master' ? 'MASTER DATA' : 'GUEST OPERATIONAL';
 
   menu.classList.toggle('show', open);
   $('quickMenuBackdrop').classList.toggle('show', open);
@@ -319,6 +325,7 @@ function closeQuickMenu() {
 
 function runQuickAction(action) {
   closeQuickMenu();
+  if (action.startsWith('stock:')) { window.StockOpnameUI?.open(action.slice(6)); return; }
 
   if (action === 'add') {
     openAdd();

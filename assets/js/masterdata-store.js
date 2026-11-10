@@ -6,7 +6,7 @@
   const ARRAY_FIELDS = ['masterItems', 'wips', 'wipRecipeLines', 'menus', 'menuRecipeLines'];
   let client = null, workspaceId = null, divisionId = null, moduleKey = null;
   let cache = createEmpty(), ready = false, writeQueue = Promise.resolve();
-  let sessionGeneration = 0, sessionAbortController = null;
+  let sessionGeneration = 0, sessionAbortController = null, persistedAt = null;
 
   function createEmpty() {
     return {
@@ -107,7 +107,7 @@
 
     await assertSession(generation);
     const query = withSessionSignal(
-      client.from('workspace_module_state').select('payload')
+      client.from('workspace_module_state').select('payload,updated_at')
         .eq('workspace_id', workspaceId).eq('module_key', moduleKey).eq('division_id', divisionId),
       generation
     );
@@ -116,6 +116,7 @@
     if (result.error) throw result.error;
     await assertSession(generation);
     assertCurrent(generation, client, workspaceId, divisionId);
+    persistedAt = result.data?.updated_at || null;
     cache = result.data ? normalizeData(result.data.payload) : createEmpty();
     ready = true;
     return cache;
@@ -146,21 +147,28 @@
     writeQueue = writeQueue.catch(function () { return undefined; }).then(async function () {
       await assertSession(generation);
       assertCurrent(generation, capturedClient, capturedWorkspaceId, capturedDivisionId);
-      const query = withSessionSignal(
-        capturedClient.from('workspace_module_state').upsert({
-          workspace_id: capturedWorkspaceId, module_key: capturedModuleKey, division_id: capturedDivisionId,
-          payload: normalized, updated_at: normalized.updated_at
-        }, { onConflict: 'workspace_id,module_key' }),
-        generation
-      );
-      const result = await query;
+      const row = {
+        workspace_id: capturedWorkspaceId, module_key: capturedModuleKey, division_id: capturedDivisionId,
+        payload: normalized, updated_at: normalized.updated_at
+      };
+      // An invoice can update prices from another tab. Never overwrite that catalog
+      // with an editor opened before the invoice was posted.
+      const table = capturedClient.from('workspace_module_state');
+      const mutation = persistedAt
+        ? table.update(row).eq('workspace_id', capturedWorkspaceId).eq('module_key', capturedModuleKey)
+          .eq('division_id', capturedDivisionId).eq('updated_at', persistedAt)
+        : table.insert(row);
+      const result = await withSessionSignal(mutation.select('updated_at'), generation).maybeSingle();
+      assertCurrent(generation, capturedClient, capturedWorkspaceId, capturedDivisionId);
       if (result.error) throw result.error;
+      if (!result.data?.updated_at) throw new Error('Master Data berubah, mungkin karena invoice terbaru. Muat ulang sebelum menyimpan kembali.');
+      persistedAt = result.data.updated_at;
       await assertSession(generation);
       return normalized;
     }).catch(function (error) {
       if (generation === sessionGeneration) {
         console.error('Master Data database save failed:', error);
-        if (typeof root.toast === 'function') root.toast('Master Data belum tersimpan ke database.');
+        if (typeof root.toast === 'function') root.toast(error.message || 'Master Data belum tersimpan ke database.');
       }
       return false;
     });
@@ -178,7 +186,7 @@
     if (sessionAbortController) sessionAbortController.abort();
     sessionAbortController = null;
     client = null; workspaceId = null; divisionId = null; moduleKey = null;
-    cache = createEmpty(); ready = false; writeQueue = Promise.resolve();
+    cache = createEmpty(); ready = false; persistedAt = null; writeQueue = Promise.resolve();
   }
 
   root.MasterDataStore = {
