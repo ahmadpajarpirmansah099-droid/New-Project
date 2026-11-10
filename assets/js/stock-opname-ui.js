@@ -58,8 +58,10 @@
  }
  function pickerDialog(title,content,actions=''){
   const dialog=document.createElement('dialog');dialog.className='so-picker-dialog';
+  dialog.setAttribute('aria-label',title);
   dialog.innerHTML='<header><h2>'+e(title)+'</h2><button type="button" data-picker-close>Tutup</button></header><div class="so-picker-content">'+content+'</div>'+actions;
   document.body.appendChild(dialog);dialog.showModal();
+  dialog.addEventListener('close',()=>dialog.remove(),{once:true});
   dialog.querySelector('[data-picker-close]').addEventListener('click',()=>dialog.close());
   dialog.addEventListener('click',ev=>{if(ev.target===dialog)dialog.close();});
   return dialog;
