@@ -34,5 +34,6 @@ Admin mengisi Produksi WIP, menyimpan draft, berpindah ke Pengeluaran, lalu kemb
 
 ## 6. Status verifikasi dan penerapan
 
-- Kode sudah disiapkan pada branch perbaikan. Tes otomatis dan uji akun admin Bar belum dijalankan untuk perubahan ini.
-- Perubahan hanya frontend; tidak ada migration database. Status PR, merge, dan deploy harus diperbarui setelah GitHub mengonfirmasinya.
+- PR [#230](https://github.com/ahmadpajarpirmansah099-droid/New-Project/pull/230) terbuka dan mergeable; head implementasi `8d1562dfea5d891bf3568a135167a97a2a46f0d4`. Belum merged dan belum live.
+- Tes otomatis dan uji akun admin Bar belum dijalankan untuk perubahan ini.
+- Perubahan hanya frontend; tidak ada migration database. Merge dan deploy perlu dicatat setelah GitHub mengonfirmasinya.
