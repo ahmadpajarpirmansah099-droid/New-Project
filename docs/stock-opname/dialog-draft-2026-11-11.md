@@ -9,7 +9,7 @@ Baseline: main commit `49e06c6266772dddb9a05690ae1aec16cab1c2e1`. Perubahan ini 
 ## 1. Perilaku yang disengaja
 
 - Berpindah dari form kosong tidak meminta konfirmasi. Form dan draft kosong yang lama boleh digantikan.
-- Jumlah yang diisi, termasuk angka `0`, serta invoice, kategori Pengeluaran nondefault, tujuan Move, mapping, atau dokumen yang sedang diedit tetap dilindungi. Pindah form meminta persetujuan di dialog dalam aplikasi; Batal mempertahankan draft dan isian.
+- Jumlah yang diisi, termasuk angka `0`, serta invoice, tanggal yang diedit, kategori Pengeluaran nondefault, tujuan Move, mapping, atau dokumen yang sedang diedit tetap dilindungi. Pindah form meminta persetujuan di dialog dalam aplikasi; Batal mempertahankan draft dan isian.
 - Semua konfirmasi Stock Opname menggunakan dialog bergaya New-Project, termasuk transaksi, Sales bertumpuk, pembatalan, koreksi Move, aktivasi, dan Stock Awal berikutnya. Tombol Batal, Escape, sentuhan area luar, dan sign-out menutupnya sebagai penolakan.
 - Simpan Transaksi memproses kejadian yang sudah terjadi dan memperbarui stok. Simpan Draft hanya menyimpan isian di perangkat. Form tiga transaksi operasional menjelaskan perbedaannya.
 
@@ -30,7 +30,7 @@ Baseline: main commit `49e06c6266772dddb9a05690ae1aec16cab1c2e1`. Perubahan ini 
 ## 4. Keterbatasan yang diketahui
 
 - Pengujian VM/DOM sederhana memeriksa alur persetujuan, bukan tampilan nyata Android. Dialog dan pengaturan fokus pada browser produksi masih perlu diperiksa melalui akun admin Bar.
-- Blank draft lama tetap dapat dipulihkan, tetapi tidak memicu peringatan pergantian. Isian tanggal saja tanpa jumlah atau pilihan transaksi belum diperlakukan sebagai draft berisi.
+- Blank draft lama tetap dapat dipulihkan, tetapi tidak memicu peringatan pergantian. Perubahan field baru ditandai pada form dan tersimpan dalam draft; draft lama sebelum revisi ini tetap dilindungi berdasarkan jumlah/kategori/tujuan yang ada.
 
 ## 5. Risiko yang masih perlu diuji
 
@@ -40,5 +40,5 @@ Baseline: main commit `49e06c6266772dddb9a05690ae1aec16cab1c2e1`. Perubahan ini 
 
 ## 6. Status verifikasi
 
-- 79 tes Node lulus, 0 gagal. Syntax check JavaScript, grammar CSS, dan `git diff --check` lulus.
+- 80 tes Node lulus, 0 gagal. Syntax check JavaScript, grammar CSS, dan `git diff --check` lulus.
 - Perubahan belum dinyatakan merged/deployed sebelum status GitHub mengonfirmasinya. Tidak ada migration baru.

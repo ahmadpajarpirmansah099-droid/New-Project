@@ -116,6 +116,15 @@ test('entered zero is still protected when changing forms', async () => {
   assert.match(t.confirmations[0], /akan diganti/);
 });
 
+test('changed date alone is protected as an unfinished draft', async () => {
+  const t = runtime(); await t.ui.open('sales');
+  t.input({ soField: 'start' }, '2026-10-20');
+  t.confirm(false); await t.ui.open('receipt');
+  assert.equal(t.draft().kind, 'sales');
+  assert.equal(t.draft().start, '2026-10-20');
+  assert.match(t.confirmations[0], /akan diganti/);
+});
+
 test('storage failure keeps the form open and never claims a draft was saved', async () => {
   const t = runtime(); await t.ui.open('expense'); t.storageFails(true);
   t.input({ soKey: 'm:a', soProp: 'qty' }, '9');
