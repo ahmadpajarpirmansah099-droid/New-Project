@@ -96,7 +96,7 @@ window.addEventListener('app:auth-signed-out', function () {
   };
   remoteSaveQueue = Promise.resolve();
   window.GuestOpsService?.reset();
-  window.MasterDataStore?.reset();
+  window.MasterDataStore?.reset(); window.StockOpnameUI?.reset();
   closeQuickMenu();
   closeMenu();
   closeSheet();
@@ -109,7 +109,7 @@ async function initializeWorkspace(event, switchingContext) {
     clearSessionIntervals();
     state = {schemaVersion:3,guests:[],counters:{},reservations:[],reservationCounters:{},settings:{seatingDurationMinutes:90}};
     remoteSaveQueue = Promise.resolve();
-    window.GuestOpsService?.reset(); window.MasterDataStore?.reset();
+    window.GuestOpsService?.reset(); window.MasterDataStore?.reset(); window.StockOpnameUI?.reset();
     closeQuickMenu(); closeMenu(); closeSheet();
   }
   if (appDataReady || appInitializing) return;
@@ -122,6 +122,8 @@ async function initializeWorkspace(event, switchingContext) {
     if(!isCurrent()) return;
     await window.MasterDataStore.assertSession();
     if(!isCurrent()) return;
+    try { await window.StockOpnameUI?.initialize(supabaseClient,authContext); } catch(error) { console.warn("Stock Opname unavailable:",error.message); }
+    if(!isCurrent()) return;
     applyRoleNavigation();
     if(canAccessGuestOperations()) {
       const remoteState=await window.GuestOpsService.initialize(supabaseClient,authContext.workspaceId);
@@ -129,7 +131,7 @@ async function initializeWorkspace(event, switchingContext) {
       state=remoteState; syncSeatingSettingInput();
       const requestedPage = workspaceReturnPage;
       workspaceReturnPage = null;
-      const requestedPageExists = requestedPage && $('page-' + requestedPage);
+      const requestedPageExists = requestedPage && $('page-' + requestedPage) && (requestedPage !== 'stock-opname' || window.StockOpnameService?.available());
       const guestPageUnavailable = GUEST_OPERATION_PAGES.includes(requestedPage) && !canAccessGuestOperations();
       const divisionsOverviewUnavailable = requestedPage === 'all-divisions' && authContext.divisionMode !== 'all';
       const targetPage = requestedPageExists && !guestPageUnavailable && !divisionsOverviewUnavailable
@@ -142,7 +144,7 @@ async function initializeWorkspace(event, switchingContext) {
       if(!isCurrent()) return;
       const requestedPage = workspaceReturnPage;
       workspaceReturnPage = null;
-      const requestedPageExists = requestedPage && $('page-' + requestedPage);
+      const requestedPageExists = requestedPage && $('page-' + requestedPage) && (requestedPage !== 'stock-opname' || window.StockOpnameService?.available());
       const guestPageUnavailable = GUEST_OPERATION_PAGES.includes(requestedPage);
       const divisionsOverviewUnavailable = requestedPage === 'all-divisions' && authContext.divisionMode !== 'all';
       const targetPage = requestedPageExists && !guestPageUnavailable && !divisionsOverviewUnavailable

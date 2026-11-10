@@ -16,6 +16,14 @@ Aplikasi web operasional untuk membantu pengelolaan kedatangan tamu, antrean, re
 - Resep WIP untuk menyusun komposisi dan hasil produksi.
 - Menu untuk mengelola komposisi menu dan informasi biaya.
 
+### Stock Opname (tahap 1)
+- Stock Awal, Pengeluaran, Barang Masuk, Produksi WIP, dan Sales massal.
+- Opname dengan selisih unit/rupiah dan konfirmasi Stock Awal periode berikutnya.
+- Form HP satu bahan per baris; draft dapat dipulihkan dari perangkat.
+- Aktivasi per outlet/divisi oleh Developer; awalnya Lazy Jennie – Bar.
+- Impor dan ekspor Excel dijadwalkan pada tahap 2.
+- PRD dan urutan aktivasi tersedia di `docs/stock-opname/`.
+
 ### Monitoring
 - User Monitoring untuk pengguna dengan hak akses yang sesuai.
 - Ringkasan data lintas divisi untuk Developer sesuai ruang aksesnya.
