@@ -17,14 +17,14 @@ begin
  insert into public.workspace_module_state(workspace_id,division_id,module_key,payload) values(w,d,'master_data:'||d,c),(w,t,'master_data:'||t,c);
  v:=public.stock_opname_write(d,0,gen_random_uuid(),'initial',jsonb_build_object('date',start_day,'counts','{"m:a":{"qty":"1000","unit":"ML"},"m:b":{"qty":"1000","unit":"GR"},"w:x":{"qty":"100","unit":"ML"}}'::jsonb));
  perform public.stock_opname_write(t,0,gen_random_uuid(),'initial',jsonb_build_object('date',start_day,'counts','{"m:a":{"qty":"1000","unit":"ML"},"m:b":{"qty":"1000","unit":"GR"},"w:x":{"qty":"100","unit":"ML"}}'::jsonb));
- req:=gen_random_uuid();v:=public.stock_opname_write(d,(v->>'revision')::bigint,req,'save',jsonb_build_object('type','production','start',day,'end',day,'lines','[{"key":"w:x","qty":"2"}]'::jsonb));
+ req:=gen_random_uuid();v:=public.stock_opname_write(d,(v->>'revision')::bigint,req,'save',jsonb_build_object('type','production','category','Waste','start',day,'end',day,'lines','[{"key":"w:x","qty":"2"}]'::jsonb));
  if (v->'balance'->>'m:a')::numeric<>980 or (v->'balance'->>'w:x')::numeric<>300 then raise exception 'Production calculation failed';end if;n:=n+1;
- rev:=(v->>'revision')::bigint;v:=public.stock_opname_write(d,0,req,'save',jsonb_build_object('type','production','start',day,'end',day,'lines','[{"key":"w:x","qty":"2"}]'::jsonb));
+ rev:=(v->>'revision')::bigint;v:=public.stock_opname_write(d,0,req,'save',jsonb_build_object('type','production','category','Waste','start',day,'end',day,'lines','[{"key":"w:x","qty":"2"}]'::jsonb));
  if (v->>'revision')::bigint<>rev then raise exception 'Request retry duplicated';end if;n:=n+1;
- v:=public.stock_opname_write(d,rev,gen_random_uuid(),'save',jsonb_build_object('type','sales','start',day,'end',day,'lines','[{"key":"s:coffee","qty":"10"}]'::jsonb));
+ v:=public.stock_opname_write(d,rev,gen_random_uuid(),'save',jsonb_build_object('type','sales','category','Waste','start',day,'end',day,'lines','[{"key":"s:coffee","qty":"10"}]'::jsonb));
  if (v->'balance'->>'m:a')::numeric<>980 or (v->'balance'->>'w:x')::numeric<>250 or (v->'balance'->>'m:b')::numeric<>980 then raise exception 'Sales double-consumed WIP ingredients';end if;n:=n+1;
- begin perform public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save',jsonb_build_object('type','sales','start',day,'end',day,'lines','[{"key":"s:coffee","qty":"1"}]'::jsonb));raise exception 'Expected overlap failure';exception when others then if sqlerrm not like 'SALES_OVERLAP:%' then raise;end if;end;n:=n+1;
- v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save',jsonb_build_object('type','receipt','start',day,'end',day,'lines','[{"key":"m:a","qty":"2","unit":"BOX","invoice_total":"1000"}]'::jsonb));
+ begin perform public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save',jsonb_build_object('type','sales','category','Waste','start',day,'end',day,'lines','[{"key":"s:coffee","qty":"1"}]'::jsonb));raise exception 'Expected overlap failure';exception when others then if sqlerrm not like 'SALES_OVERLAP:%' then raise;end if;end;n:=n+1;
+ v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save',jsonb_build_object('type','receipt','category','Waste','start',day,'end',day,'lines','[{"key":"m:a","qty":"2","unit":"BOX","invoice_total":"1000"}]'::jsonb));
  if (v->'balance'->>'m:a')::numeric<>1180 then raise exception 'Receipt conversion failed';end if;
  if (private.so_catalog(d)->'masterItems'->0->>'harga_per_satuan_dasar')::numeric<>5 then raise exception 'Invoice price update failed';end if;n:=n+1;
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save',jsonb_build_object('type','expense','category','Waste','start',day,'end',day,'lines','[{"key":"w:x","qty":"10","unit":"ML"}]'::jsonb));
@@ -35,11 +35,15 @@ begin
  begin perform public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'close',jsonb_build_object('date',day,'counts','{}'::jsonb));raise exception 'Expected incomplete count error';exception when others then if sqlerrm not like 'Jumlah/harga%' then raise;end if;end;n:=n+1;
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'close',jsonb_build_object('date',day,'counts','{"m:a":{"qty":"1170","unit":"ML"},"m:b":{"qty":"960","unit":"GR"},"w:x":{"qty":"240","unit":"ML"}}'::jsonb));
  if (v->'state'->'periods'->0->'result'->0->>'variance_value')::numeric<>-50 then raise exception 'Variance price failed';end if;n:=n+1;
+ -- Non-expense categories from older clients must not become Waste movements.
+ if exists(select 1 from jsonb_array_elements(v->'state'->'documents') doc where doc->>'type' in ('production','sales','receipt') and doc->>'category' is not null) then raise exception 'Non-expense saved an expense category';end if;
+ if (v->'state'->'periods'->0->'result'->0->'movements'->>'production')::numeric is distinct from -20 or (v->'state'->'periods'->0->'result'->0->'movements'->>'receipt')::numeric is distinct from 200 or (v->'state'->'periods'->0->'result'->2->'movements'->>'sales')::numeric is distinct from -50 then raise exception 'Movement types were not preserved';end if;n:=n+1;
  begin perform public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save','{}');raise exception 'Expected inactive opening error';exception when others then if sqlerrm not like 'Stock Awal belum aktif%' then raise;end if;end;n:=n+1;
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'activate','{}');
  if (v->'balance'->>'m:a')::numeric<>1170 or (v->'balance'->>'w:x')::numeric<>240 then raise exception 'Previous transactions counted twice';end if;n:=n+1;
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'reopen','{}');
  if v->'state'->'periods'->1->>'status'<>'held' or v->'state'->'periods'->0->>'status'<>'reopened' then raise exception 'Reopen chain failed';end if;n:=n+1;
+ begin perform public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'adjust_move',jsonb_build_object('id',moveid));raise exception 'Expected active-period adjustment guard';exception when others then if sqlerrm not like 'Penyesuaian Move hanya boleh%' then raise;end if;end;n:=n+1;
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'close',jsonb_build_object('date',day,'counts','{"m:a":{"qty":"1160","unit":"ML"},"m:b":{"qty":"960","unit":"GR"},"w:x":{"qty":"240","unit":"ML"}}'::jsonb));
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'reactivate','{}');
  if (v->'balance'->>'m:a')::numeric<>1160 then raise exception 'Reconfirmed opening mismatch';end if;n:=n+1;
@@ -58,7 +62,7 @@ begin
  -- A saved recipe does not change retroactively when the master recipe changes.
  if (v->'state'->'documents'->0->'postings'->0->>'qty')::numeric<>-20 then raise exception 'Historical recipe snapshot changed';end if;n:=n+1;
  -- Sales crossing an opname cutoff is blocked, even with fully entered counts.
- v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save',jsonb_build_object('type','sales','start',day,'end',(now() at time zone 'Asia/Jakarta')::date,'lines','[{"key":"s:coffee","qty":"1"}]'::jsonb));
+ v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save',jsonb_build_object('type','sales','category','Waste','start',day,'end',(now() at time zone 'Asia/Jakarta')::date,'lines','[{"key":"s:coffee","qty":"1"}]'::jsonb));
  begin perform public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'close',jsonb_build_object('date',day));raise exception 'Expected crossing Sales failure';exception when others then if sqlerrm not like 'Rentang Sales melewati%' then raise;end if;end;n:=n+1;
  update public.stock_opname_scopes set enabled=false where division_id=t;
  begin perform public.stock_opname_read(t);raise exception 'Expected disabled scope denial';exception when others then if sqlerrm not like 'Akses Stock Opname%' then raise;end if;end;n:=n+1;

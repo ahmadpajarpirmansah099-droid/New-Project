@@ -6,21 +6,28 @@
  const money=v=>'Rp'+Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:0});
  const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  const labels={initial:'Stock Awal',receipt:'Barang Masuk',expense:'Pengeluaran',production:'Produksi WIP',sales:'Sales',close:'Stock Opname',move_in:'Move Masuk',adjustment:'Penyesuaian Move',adjustment_in:'Penyesuaian Move Masuk'};
- let form=null,busy=false,notice='',targetRows=[],viewGeneration=0;
+ let form=null,busy=false,notice='',targetRows=[],viewGeneration=0,draftSaved=false;
  const page=()=>document.getElementById('page-stock-opname');
  const get=()=>service.current();
  function period(){const ps=get()?.state?.periods||[];const p=ps.at(-1);return p?.status==='held'?ps.at(-2):p;}
  function isPending(){return period()?.status!=='reopened' && ['closed','held'].includes(get()?.state?.periods?.at(-1)?.status);}
  function balances(){const s=get()?.state||{},p=period();const b={...p?.opening};for(const d of s.documents||[])if(d.period_id===p?.id&&!d.void)for(const l of d.postings||[])b[l.key]=(Number(b[l.key])||0)+Number(l.qty);return b;}
  function catalog(){const all=[...(get()?.catalog||[])];for(const r of period()?.opening_catalog||[])if(!all.some(x=>x.key===r.key))all.push(r);for(const d of get()?.state?.documents||[])if(d.period_id===period()?.id&&!d.void)for(const r of d.postings||[])if(!all.some(x=>x.key===r.key))all.push(r);return all;}
- function snapshot(){if(!form)return;try{service.saveDraft(form);const n=document.getElementById('soDraftStatus');if(n)n.textContent='Draft tersimpan di perangkat ini.';}catch(_){notice='Penyimpanan perangkat penuh/tidak tersedia. Jangan tutup halaman sebelum berhasil menyimpan.';const n=document.getElementById('soDraftStatus');if(n)n.textContent=notice;}}
- function reset(){viewGeneration++;form=null;notice='';targetRows=[];busy=false;service.reset();}
- async function initialize(client,context){viewGeneration++;form=null;notice='';targetRows=[];await service.initialize(client,context);navigation();}
+ function draftStatus(){return draftSaved?'Draft lokal tersimpan di perangkat ini; belum masuk database.':'Draft lokal belum tersimpan. Jangan tutup halaman sebelum berhasil menyimpan.';}
+ function snapshot(){
+  if(!form)return true;
+  try{service.saveDraft(form);draftSaved=true;}
+  catch(_){draftSaved=false;notice='Penyimpanan perangkat penuh/tidak tersedia. Jangan tutup halaman sebelum berhasil menyimpan.';}
+  const n=document.getElementById('soDraftStatus');if(n)n.textContent=draftStatus();
+  return draftSaved;
+ }
+ function reset(){viewGeneration++;form=null;notice='';targetRows=[];busy=false;draftSaved=false;service.reset();}
+ async function initialize(client,context){viewGeneration++;form=null;notice='';targetRows=[];draftSaved=false;await service.initialize(client,context);navigation();}
  function navigation(){const n=document.querySelector('[data-page="stock-opname"]');if(n)n.style.display=service.available()?'':'none';}
  function button(label,action,extra='',primary=false){return '<button type="button" data-so-action="'+action+'" '+extra+' class="'+(primary?'so-primary':'')+'" '+(busy?'disabled':'')+'>'+e(label)+'</button>';}
  function open(kind,existing){
   if(kind==='initial'&&period()){notice='Stock Awal pertama sudah diisi. Berikutnya gunakan konfirmasi hasil opname.';render();return;}
-  if(form&&!root.confirm('Draft sebelumnya sudah tersimpan. Ganti form input?'))return;
+  if((form||service.loadDraft())&&!root.confirm('Draft sebelumnya akan ditimpa oleh form baru. Lanjutkan? Pilih Batal lalu Pulihkan Draft untuk melanjutkan isian lama.'))return false;
   const d=existing?(get().state.documents||[]).find(x=>x.id===existing):null;
   form={kind,request:crypto.randomUUID(),id:d?.id||null,start:d?.start||today(),end:d?.end||today(),counts:{},category:d?.category||'Waste',target:d?.target||'',mapping:{},basePeriod:period()?.id||null};
   if(d)for(const l of d.lines||[])form.counts[l.key]={qty:String(l.qty),unit:l.unit||'',invoice_total:l.invoice_total??''};
@@ -28,11 +35,11 @@
    form.end=period().end;form.start=period().start;
    for(const row of period().result||[])form.counts[row.key]={qty:String(row.physical),unit:row.unit};
   }
-  snapshot();notice='';render();
+  notice='';snapshot();render();return true;
  }
  async function restore(){const draft=service.loadDraft();if(!draft){notice='Belum ada draft di perangkat ini.';render();return;}
   if(draft.basePeriod && draft.basePeriod!==period()?.id && ['initial','close'].includes(draft.kind)){notice='Draft berasal dari periode berbeda. Periksa melalui riwayat; draft tidak dipindahkan otomatis.';render();return;}
-  form=draft;notice='Draft perangkat dipulihkan. Periksa tanggal dan jumlah sebelum menyimpan.';if(form.target)targetRows=await service.targetCatalog(form.target);render();
+  form=draft;draftSaved=true;notice='Draft perangkat dipulihkan. Periksa tanggal dan jumlah sebelum menyimpan.';if(form.target)targetRows=await service.targetCatalog(form.target);render();
  }
  function rowsForForm(){let rows=catalog();const k=form.kind;
   if(k==='sales')rows=rows.filter(x=>x.key.startsWith('s:'));
@@ -41,6 +48,12 @@
   else rows=rows.filter(x=>!x.key.startsWith('s:'));
   return rows.sort((a,b)=>a.name.localeCompare(b.name,'id'));
  }
+ function countConversion(row){
+  const value=form.counts[row.key]||{},factor=(row.units||[]).find(u=>u.unit===(value.unit||row.unit))?.factor;
+  if(row.error||value.qty==null||value.qty===''||!Number.isFinite(Number(value.qty))||Number(value.qty)<0||!(Number(factor)>0))return '—';
+  return number(Number(value.qty)*Number(factor))+' '+row.unit;
+ }
+ function masterLinks(){return '<p class="so-notice">Lengkapi master atau resep yang belum tersedia agar input dapat digunakan.</p><div class="so-actions">'+button('Master Barang','master','data-so-page="master-items"')+button('Resep WIP','master','data-so-page="wips"')+button('Menu','master','data-so-page="menus"')+'</div>';}
  function formHTML(){
   if(!form)return '';
   const k=form.kind,rows=rowsForForm(),b=balances(),isCount=['initial','close'].includes(k),withUnit=!['sales','production'].includes(k),receipt=k==='receipt';
@@ -48,23 +61,24 @@
   let extra='';
   if(k==='expense')extra='<div class="so-toolbar"><label>Kategori<select data-so-field="category">'+['Kalibrasi','RnD','QC','Suplies','Move','Waste','Lainnya'].map(x=>'<option '+(x===form.category?'selected':'')+'>'+x+'</option>').join('')+'</select></label></div>';
   if(form.category==='Move'&&k==='expense')extra+='<div class="so-toolbar"><label>Tujuan<select data-so-field="target"><option value="">Pilih tujuan aktif</option>'+(get().targets||[]).map(x=>'<option value="'+e(x.id)+'" '+(form.target===x.id?'selected':'')+'>'+e(x.name)+'</option>').join('')+'</select></label></div>'+(!(get().targets||[]).length?'<p class="so-notice">Belum ada outlet/divisi tujuan yang aktif.</p>':'');
-  const head='<tr><th>Bahan / stok sistem</th><th>'+(k==='production'?'Batch':k==='sales'?'Terjual':isCount?'Fisik':'Jumlah')+'</th>'+(withUnit?'<th>Satuan</th>':'')+(receipt?'<th>Total invoice</th>':'')+'</tr>';
+  const head='<tr><th>'+(isCount?'Barang':'Bahan / stok sistem')+'</th>'+(isCount?'<th class="so-desktop-only so-stock">Stok sistem</th>':'')+'<th class="so-quantity">'+(k==='production'?'Batch':k==='sales'?'Terjual':isCount?'Fisik':'Jumlah')+'</th>'+(withUnit?'<th class="so-unit">Satuan</th>':'')+(isCount?'<th class="so-desktop-only so-conversion">Konversi fisik</th>':'')+(receipt?'<th class="so-invoice">Total invoice</th>':'')+'</tr>';
   const body=rows.map(r=>{
    const v=form.counts[r.key]||{},units=r.units||[],disabled=!!r.error;
    let meta=disabled?r.error:k==='sales'?'Total selama rentang pilihan':k==='production'?'Hasil: '+number(Number(v.qty||0)*Number(r.yield))+' '+r.unit+' · 1 batch = '+number(r.yield)+' '+r.unit:'Sistem: '+number(b[r.key])+' '+(r.unit||'');
-   let html='<tr><td><strong>'+e(r.name)+'</strong><small data-so-output="'+e(r.key)+'" class="'+(disabled?'so-error':'')+'">'+e(meta)+'</small>';
+   let html='<tr><td><strong>'+e(r.name)+'</strong><small data-so-output="'+e(r.key)+'" class="'+(disabled?'so-error':isCount?'so-system-mobile':'')+'">'+e(meta)+'</small>';
    if(form.category==='Move'&&k==='expense')html+='<label><small>Barang tujuan</small><select data-so-map="'+e(r.key)+'" aria-label="Padanan tujuan '+e(r.name)+'"><option value="">Pilih padanan</option>'+targetRows.filter(t=>!t.error&&t.unit===r.unit).map(t=>'<option value="'+e(t.key)+'" '+(form.mapping[r.key]===t.key?'selected':'')+'>'+e(t.name)+'</option>').join('')+'</select></label>';
-   html+='</td><td><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="qty" aria-label="'+e(labels[k]+' '+r.name)+'" value="'+e(v.qty??'')+'" '+(disabled?'disabled':'')+'></td>';
+   html+='</td>'+(isCount?'<td class="so-desktop-only so-stock">'+(disabled?'—':number(b[r.key])+' '+e(r.unit))+'</td>':'')+'<td><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="qty" aria-label="'+e(labels[k]+' '+r.name)+'" value="'+e(v.qty??'')+'" '+(disabled?'disabled':'')+'></td>';
    if(withUnit)html+='<td><select data-so-key="'+e(r.key)+'" data-so-prop="unit" aria-label="Satuan '+e(r.name)+'" '+(disabled?'disabled':'')+'>'+units.map(u=>'<option value="'+e(u.unit)+'" '+((v.unit||r.unit)===u.unit?'selected':'')+'>'+e(u.unit)+'</option>').join('')+'</select></td>';
+   if(isCount)html+='<td class="so-desktop-only so-conversion" data-so-conversion="'+e(r.key)+'">'+e(countConversion(r))+'</td>';
    if(receipt)html+='<td><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="invoice_total" aria-label="Total invoice '+e(r.name)+'" value="'+e(v.invoice_total??'')+'" placeholder="Opsional"></td>';
    return html+'</tr>';
   }).join('');
-  return '<section class="so-panel"><h2>'+e(labels[k])+'</h2>'+dates+extra+(isPending()&&k!=='close'?'<p class="so-notice">Stock Awal berikutnya belum dikonfirmasi. Isian ini disimpan sebagai draft.</p>':'')+(rows.length?'<table class="so-ledger"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>':'<p class="so-notice">Data belum tersedia. Lengkapi Master Barang, Resep WIP, atau Menu terlebih dahulu.</p>'+button('Buka Master Barang','master'))+'<p id="soDraftStatus" class="so-status" role="status">Draft disimpan di perangkat ini.</p><div class="so-actions">'+button('Simpan Draft','draft')+button('Tutup Form','cancel')+button(isCount?'Konfirmasi':'Simpan Transaksi','submit','',true)+'</div></section>';
+  return '<section class="so-panel"><h2>'+e(labels[k])+'</h2>'+dates+extra+(rows.some(r=>r.error)?masterLinks():'')+(isPending()&&k!=='close'?'<p class="so-notice">Stock Awal berikutnya belum dikonfirmasi. Isian ini disimpan sebagai draft.</p>':'')+(rows.length?'<table class="so-ledger'+(isCount?' so-count-ledger':'')+'"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>':'<p class="so-notice">Data belum tersedia.</p>')+(!rows.length?masterLinks():'')+'<p id="soDraftStatus" class="so-status" role="status">'+e(draftStatus())+'</p><div class="so-actions">'+button('Simpan Draft','draft')+button('Tutup Form','cancel')+button(isCount?'Konfirmasi':'Simpan Transaksi','submit','',true)+'</div></section>';
  }
  function historyHTML(){
   const s=get().state,p=period();let out='<section class="so-panel"><h2>Riwayat</h2>';
   out+='<ul class="so-history">'+[...s.periods].reverse().filter(x=>x.result).map(x=>'<li><strong>Opname '+e(x.end)+' · '+(x.status==='reopened'?'Sedang dikoreksi':'Selesai')+'</strong><details><summary>Lihat hasil dan selisih</summary><div class="so-result">'+x.result.map(r=>'<article><strong>'+e(r.name)+'</strong><dl><dt>Stock Awal</dt><dd>'+number(r.opening)+' '+e(r.unit)+'</dd>'+Object.entries(r.movements||{}).map(([kind,qty])=>'<dt>'+e(labels[kind]||kind)+'</dt><dd>'+number(qty)+' '+e(r.unit)+'</dd>').join('')+'<dt>Stok sistem</dt><dd>'+number(r.system)+' '+e(r.unit)+'</dd><dt>Stok fisik</dt><dd>'+number(r.physical)+' '+e(r.unit)+'</dd><dt>Selisih</dt><dd>'+number(r.variance)+' '+e(r.unit)+'</dd><dt>Harga / '+e(r.unit)+'</dt><dd>'+money(r.price)+'</dd><dt>Selisih rupiah</dt><dd>'+money(r.variance_value)+'</dd></dl></article>').join('')+'</div></details></li>').join('')+'</ul>';
-  out+='<ul class="so-history">'+[...s.documents].reverse().map(d=>'<li><strong>'+e(labels[d.type]||d.type)+(d.category?' · '+e(d.category):'')+(d.void?' · Dibatalkan':'')+'</strong><small>'+e(d.start)+(d.end!==d.start?' – '+e(d.end):'')+'</small><details><summary>Rincian transaksi</summary>'+(d.postings||[]).map(l=>'<p>'+e(l.name)+': '+number(l.qty)+' '+e(l.unit)+'</p>').join('')+'</details>'+(!d.void&&d.period_id===p?.id&&['active','reopened'].includes(p?.status)&&!['move_in','adjustment_in','adjustment'].includes(d.type)?button('Edit','edit','data-so-id="'+e(d.id)+'"')+button('Batalkan','void','data-so-id="'+e(d.id)+'"'):'')+(!d.void&&d.category==='Move'&&d.type==='expense'?button('Penyesuaian Move','adjust','data-so-id="'+e(d.id)+'"'):'')+'</li>').join('')+'</ul>';
+  out+='<ul class="so-history">'+[...s.documents].reverse().map(d=>'<li><strong>'+e(labels[d.type]||d.type)+(d.category&&['expense','adjustment'].includes(d.type)?' · '+e(d.category):'')+(d.void?' · Dibatalkan':'')+'</strong><small>'+e(d.start)+(d.end!==d.start?' – '+e(d.end):'')+'</small><details><summary>Rincian transaksi</summary>'+(d.postings||[]).map(l=>'<p>'+e(l.name)+': '+number(l.qty)+' '+e(l.unit)+'</p>').join('')+'</details>'+(!d.void&&d.period_id===p?.id&&['active','reopened'].includes(p?.status)&&!['move_in','adjustment_in','adjustment'].includes(d.type)?button('Edit','edit','data-so-id="'+e(d.id)+'"')+button('Batalkan','void','data-so-id="'+e(d.id)+'"'):'')+(!d.void&&d.category==='Move'&&d.type==='expense'?button('Penyesuaian Move','adjust','data-so-id="'+e(d.id)+'"'):'')+'</li>').join('')+'</ul>';
   return out+(!s.documents.length&&!s.periods.some(x=>x.result)?'<p class="so-status">Belum ada transaksi atau hasil opname.</p>':'')+'</section>';
  }
  function render(){
@@ -94,8 +108,10 @@
     lines.push({key:r.key,qty:String(qty),unit:v.unit||r.unit,invoice_total:v.invoice_total??''});
    }
   }
-  snapshot();if(isPending()&&!['close','initial'].includes(k)){notice='Transaksi tersimpan sebagai draft. Konfirmasi Stock Awal, lalu simpan draft ini.';return;}
-  const input={id:form.id||undefined,type:k,start:k==='sales'?form.start:form.end,end:form.end,date:form.end,counts,lines,category:form.category,target:form.target||null,mapping:Object.entries(form.mapping||{}).map(([source,target])=>({source,target}))};
+  const saved=snapshot();if(isPending()&&!['close','initial'].includes(k)){if(saved)notice='Transaksi tersimpan sebagai draft. Konfirmasi Stock Awal, lalu simpan draft ini.';return;}
+  const isMove=k==='expense'&&form.category==='Move';
+  if(isMove&&!form.target)throw Error('Pilih tujuan Move yang sudah aktif sebelum menyimpan.');
+  const input={id:form.id||undefined,type:k,start:k==='sales'?form.start:form.end,end:form.end,date:form.end,counts,lines,category:k==='expense'?form.category:null,target:isMove?form.target:null,mapping:isMove?Object.entries(form.mapping||{}).map(([source,target])=>({source,target})):[]};
   if(!['initial','close'].includes(k)&&!lines.length)throw Error('Isi minimal satu jumlah lebih dari 0.');
   if(!root.confirm(k==='close'?'Hitung seluruh transaksi periode ini dan selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal pertama?':'Simpan transaksi ini?'))return;
   try{await service.write(['initial','close'].includes(k)?k:'save',input,form.request);}
@@ -109,13 +125,13 @@
   const token=viewGeneration;busy=true;
   try{
    if(name==='open'){open(el.dataset.soKind);return;}
-   if(name==='cancel'){snapshot();form=null;return;}
-   if(name==='draft'){snapshot();notice='Draft tersimpan di perangkat.';return;}
+   if(name==='cancel'){if(snapshot())form=null;return;}
+   if(name==='draft'){if(snapshot())notice='Draft tersimpan di perangkat.';return;}
    if(name==='restore'){await restore();return;}
-   if(name==='master'){root.go('master-items');return;}
-   if(name==='refresh'){snapshot();await service.read();notice='Data terbaru dimuat. Draft tetap tersedia.';return;}
+   if(name==='master'){root.go(el.dataset.soPage||'master-items');return;}
+   if(name==='refresh'){const saved=snapshot();await service.read();if(saved)notice='Data terbaru dimuat. Draft tetap tersedia.';return;}
    if(name==='configure'){if(root.confirm('Ubah aktivasi Stock Opname pada divisi yang dipilih?'))await service.configure(!get().enabled);return;}
-   if(name==='edit'){const doc=get().state.documents.find(d=>d.id===el.dataset.soId);open(doc.type,doc.id);if(doc.target)targetRows=await service.targetCatalog(doc.target);return;}
+   if(name==='edit'){const doc=get().state.documents.find(d=>d.id===el.dataset.soId);if(open(doc.type,doc.id)&&doc.target)targetRows=await service.targetCatalog(doc.target);return;}
    if(name==='submit'){await submit();return;}
    if(name==='adjust'){
     const doc=get().state.documents.find(d=>d.id===el.dataset.soId);
@@ -139,6 +155,7 @@
   if(el.dataset.soKey){const key=el.dataset.soKey;form.counts[key]={...form.counts[key],[el.dataset.soProp]:el.value};if(form.kind==='production'){const row=catalog().find(x=>x.key===key);const output=el.closest('tr')?.querySelector('[data-so-output]');if(row&&output)output.textContent='Hasil: '+number(Number(el.value||0)*Number(row.yield))+' '+row.unit+' · 1 batch = '+number(row.yield)+' '+row.unit;}}
   else if(el.dataset.soMap)form.mapping[el.dataset.soMap]=el.value;
   else if(el.dataset.soField)form[el.dataset.soField]=el.value;
+  if(el.dataset.soKey&&['initial','close'].includes(form.kind)){const row=catalog().find(r=>r.key===el.dataset.soKey),output=el.closest('tr')?.querySelector('[data-so-conversion]');if(row&&output)output.textContent=countConversion(row);}
   snapshot();
  });
  document.addEventListener('change',async ev=>{const el=ev.target;if(!form||!page()?.contains(el))return;
