@@ -196,6 +196,8 @@ button, input, select, textarea { font-family: var(--ui-font); }
 
 /* Master Barang, WIP and Menu share one reading rhythm. */
 .md-page, .wip-page, .menu-page { gap: 16px; }
+.wip-page > .md-export-toolbar + .wip-list-heading,
+.menu-page > .md-export-toolbar + .menu-list-heading { margin-top: 20px; }
 .md-item-list, .wip-list, .menu-list { gap: 12px; }
 .md-item-card, .wip-card, .menu-card {
   padding: 16px;
