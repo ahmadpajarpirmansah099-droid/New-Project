@@ -1,0 +1,23 @@
+/* Shared visual vocabulary; no layout, state or behavior rules. */
+:root {
+  --ui-bg: #f6f6f1;
+  --ui-surface: #fff;
+  --ui-surface-soft: #f3f4ee;
+  --ui-ink: #111225;
+  --ui-muted: #656775;
+  --ui-line: #e5e7df;
+  --ui-lime: #d9ee8c;
+  --ui-lime-soft: #eef7c7;
+  --ui-lime-strong: #c5df74;
+  --ui-olive: #53682c;
+  --ui-font: 'DM Sans', system-ui, sans-serif;
+  --ui-heading-font: Manrope, 'DM Sans', sans-serif;
+  --ui-radius-control: 12px;
+  --ui-radius-card: 18px;
+  --ui-radius-dialog: 24px;
+  --ui-shadow-control: 0 2px 4px rgba(17,18,37,.04), 0 4px 10px rgba(17,18,37,.04);
+  --ui-shadow-card: 0 3px 7px rgba(17,18,37,.045), 0 12px 26px -8px rgba(17,18,37,.15);
+  --ui-shadow-raised: 0 5px 10px rgba(17,18,37,.055), 0 18px 34px -10px rgba(17,18,37,.20);
+  --ui-shadow-overlay: 0 8px 20px rgba(17,18,37,.08), 0 28px 64px -16px rgba(17,18,37,.26);
+  --ui-ease: cubic-bezier(.22, .75, .25, 1);
+}

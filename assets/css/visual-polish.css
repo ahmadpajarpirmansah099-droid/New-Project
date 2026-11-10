@@ -1,0 +1,348 @@
+/* Presentation only. Loaded last; preserve visibility, actions, animation names,
+   timing, overlay placement and the application's responsive navigation. */
+:root {
+  --bg: var(--ui-bg);
+  --surface: var(--ui-surface);
+  --ink: var(--ui-ink);
+  --navy: var(--ui-ink);
+  --muted: var(--ui-muted);
+  --line: var(--ui-line);
+  --lime: var(--ui-lime);
+  --lime-soft: var(--ui-lime-soft);
+  --shadow: var(--ui-shadow-card);
+  --card-shadow: var(--ui-shadow-card);
+  --card-shadow-strong: var(--ui-shadow-raised);
+}
+body { font-family: var(--ui-font); }
+button, input, select, textarea { font-family: var(--ui-font); }
+.page-title, .greeting h1,
+:is(.md-page-heading, .wip-page-heading, .menu-page-heading) h1 {
+  font-family: var(--ui-heading-font);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -.035em;
+  line-height: 1.25;
+}
+.page-sub, :is(.md-page-heading, .wip-page-heading, .menu-page-heading) p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.eyebrow, .md-eyebrow, .wip-eyebrow, .menu-eyebrow {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+  letter-spacing: .1em;
+}
+.section-head h2, .reservation-day-head h2,
+:is(.md-list-heading, .wip-list-heading, .menu-list-heading) h2 {
+  font-family: var(--ui-heading-font);
+  font-size: 18px;
+  letter-spacing: -.025em;
+  line-height: 1.35;
+}
+.text-btn, .page-back { font-size: 12px; }
+:is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--ui-olive);
+  outline-offset: 3px;
+}
+
+/* Login: same entrance motion, readable labels and a stronger grounded surface. */
+.auth-panel {
+  border-color: var(--line);
+  border-radius: var(--ui-radius-dialog);
+  box-shadow: var(--ui-shadow-raised);
+}
+.auth-intro h1 { color: var(--ink); line-height: 1.2; }
+.auth-intro p, .auth-security-note { color: var(--muted); }
+.auth-eyebrow { color: var(--ui-olive); font-size: 10px; }
+.auth-form { gap: 12px; }
+.auth-form label { font-size: 13px; }
+.auth-input-wrap { border-color: var(--line); border-radius: var(--ui-radius-control); }
+.auth-input-wrap:focus-within {
+  border-color: var(--ui-olive);
+  box-shadow: 0 0 0 3px rgba(83,104,44,.12);
+}
+.auth-input-wrap input::placeholder { color: #777985; }
+.auth-submit { font-size: 14px; border-radius: var(--ui-radius-control); }
+.auth-message { font-size: 12px; line-height: 1.5; }
+.auth-security-icon { background: var(--lime-soft); color: var(--ui-olive); }
+
+/* Shared controls; semantic destructive/success treatments remain separate. */
+.primary, .secondary, .md-primary, .wip-primary, .menu-primary,
+.md-export-button, .monitor-refresh, .division-overview-refresh {
+  border-radius: var(--ui-radius-control);
+  box-shadow: var(--ui-shadow-control);
+}
+.filter.active, .monitor-tab.is-active,
+.md-filter-row button.is-selected, .wip-filter-row button.is-selected,
+.menu-filter-row button.is-selected {
+  background: var(--lime);
+  border-color: var(--ui-lime-strong);
+  color: var(--ink);
+}
+.drawer-item.active { background: var(--lime-soft); color: var(--ink); }
+.drawer-item.active::before { background: var(--ui-olive); }
+.scope-trigger { color: var(--ink); background: var(--ui-surface-soft); box-shadow: var(--ui-shadow-control); }
+.quick-menu { border-color: var(--line); box-shadow: var(--ui-shadow-overlay); }
+.quick-menu-item { border-radius: var(--ui-radius-control); }
+.search input, .md-search, .wip-search, .menu-search,
+.monitor-select-trigger, .app-select-trigger {
+  border-color: var(--line);
+  border-radius: var(--ui-radius-control);
+  box-shadow: var(--ui-shadow-control);
+}
+.md-search input, .wip-search input, .menu-search input { font-size: 14px; }
+.md-search:focus-within, .wip-search:focus-within, .menu-search:focus-within {
+  border-color: var(--ui-olive);
+  box-shadow: 0 0 0 3px rgba(83,104,44,.12);
+}
+.app-select-option.is-selected, .scope-dropdown-option.is-selected {
+  background: var(--lime-soft); color: var(--ink);
+}
+.monitor-select-option[aria-selected="true"] { background: var(--lime-soft); color: var(--ink); }
+
+/* Guest Operations: ticket remains the signature; depth has a clear hierarchy. */
+.hero { box-shadow: var(--ui-shadow-raised); }
+.metric, .guest, .reservation-card, .settings-card {
+  border-color: var(--line);
+  box-shadow: var(--ui-shadow-card);
+}
+.metric, .guest, .reservation-card { border-radius: var(--ui-radius-card); }
+.guest-name { font-size: 14px; line-height: 1.4; }
+.guest-meta { font-size: 12px; flex-wrap: wrap; row-gap: 4px; }
+.guest .ticket { background: var(--lime); color: var(--ink); }
+.guest .actions .mini { font-size: 12px; }
+.hero-total, .metric strong, .detail-cell b,
+.reservation-time-display, .dashboard-trend-value { font-variant-numeric: tabular-nums; }
+.metric small { color: var(--muted); line-height: 1.45; }
+.metric-top { flex-wrap: wrap; }
+.metric-top .eyebrow { font-size: 10px; letter-spacing: .05em; }
+.empty p, .reservation-empty p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.history-date { border-color: var(--line); box-shadow: var(--ui-shadow-control); }
+.history-date-copy small { color: var(--muted); font-size: 11px; }
+.history-date-copy strong { font-size: 14px; }
+.filters { gap: 8px; }
+.filter { font-size: 12px; }
+.reservation-toolbar, .reservation-calendar { border-color: var(--line); box-shadow: var(--ui-shadow-card); }
+.reservation-legend { color: var(--muted); font-size: 11px; }
+.reservation-day.selected, .calendar-day.selected {
+  background: var(--lime);
+  color: var(--ink);
+  border-color: var(--ui-lime-strong);
+}
+.reservation-day-head { gap: 12px; }
+.reservation-day-head p { color: var(--muted); font-size: 12px; }
+.setting-copy b { font-size: 14px; line-height: 1.4; }
+.setting-copy small { font-size: 12px; line-height: 1.55; }
+.setting-icon { background: var(--ui-surface-soft); color: var(--ink); }
+.setting-row { gap: 12px; }
+
+/* Sheets and nested forms: no changes to the opening/closing transforms. */
+.sheet, .sheet.operational-modal, .calendar-dialog, .logout-confirm-dialog,
+.monitor-account-modal { box-shadow: var(--ui-shadow-overlay); }
+.sheet-head h2, .md-sheet-heading h2, .md-sheet-simple .md-sheet-heading h2,
+.wip-sheet-heading h2, .menu-sheet-heading h2, .monitor-modal-title {
+  font-family: var(--ui-heading-font);
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: -.025em;
+}
+#sheet .field label, .md-field, .md-sheet-simple .md-field, .wip-field, .menu-field {
+  font-size: 12px;
+  line-height: 1.5;
+}
+#sheet .field input, #sheet .field select, #sheet .field textarea,
+.md-field input, .md-field select, .wip-field input, .wip-field select,
+.menu-field input, .menu-field select {
+  border-color: var(--line);
+  border-radius: var(--ui-radius-control);
+  background: var(--surface);
+  color: var(--ink);
+}
+#sheet .field input:focus, #sheet .field select:focus, #sheet .field textarea:focus,
+.md-field input:focus, .md-field select:focus, .wip-field input:focus,
+.wip-field select:focus, .menu-field input:focus, .menu-field select:focus {
+  border-color: var(--ui-olive);
+  box-shadow: 0 0 0 3px rgba(83,104,44,.12);
+}
+.md-sheet, .wip-sheet, .menu-sheet { gap: 16px; }
+.md-sheet-simple form, .wip-sheet form, .menu-sheet form { gap: 12px; }
+.md-form-note, .md-sheet-simple .md-form-note, .wip-form-note, .menu-form-note {
+  color: var(--muted); font-size: 12px; line-height: 1.5;
+}
+.md-sheet-simple .md-supply-toggle small, .md-advanced summary small,
+.md-sheet-simple .md-price-result span, .md-sheet-simple .md-price-result small {
+  color: var(--muted); font-size: 11px; line-height: 1.5;
+}
+.md-sheet-simple .md-supply-toggle b, .md-advanced summary b,
+.md-advanced-content .md-field, .md-advanced-content .md-add-unit { font-size: 12px; }
+.md-sheet-simple .md-price-result strong { font-size: 16px; }
+.wip-recipe-section, .menu-recipe-section {
+  padding: 16px;
+  border-color: var(--line);
+  background: var(--ui-surface-soft);
+  border-radius: 16px;
+}
+.wip-recipe-row, .menu-recipe-row { padding: 12px; background: var(--surface); border-color: var(--line); }
+.md-sheet-actions button, .wip-sheet-actions button, .menu-sheet-actions button {
+  min-height: 44px; font-size: 13px; border-radius: var(--ui-radius-control);
+}
+.md-sheet-actions-simple .md-save { background: var(--ink); color: #fff; }
+.detail-cell { background: var(--ui-surface-soft); border-radius: var(--ui-radius-control); }
+.detail-cell small { font-size: 11px; color: var(--muted); }
+.logout-confirm-mark { background: var(--lime-soft); color: var(--ink); }
+.logout-confirm-dialog p { color: var(--muted); }
+
+/* Master Barang, WIP and Menu share one reading rhythm. */
+.md-page, .wip-page, .menu-page { gap: 16px; }
+.md-item-list, .wip-list, .menu-list { gap: 12px; }
+.md-item-card, .wip-card, .menu-card {
+  padding: 16px;
+  border-color: var(--line);
+  border-radius: var(--ui-radius-card);
+  box-shadow: var(--ui-shadow-card);
+}
+.md-item-copy h3, .wip-card-copy h3, .menu-card-copy h3 {
+  font-family: var(--ui-heading-font); font-size: 15px; line-height: 1.4;
+}
+.md-base-unit-label, .wip-card-base, .menu-card-base { font-size: 12px; line-height: 1.5; }
+.md-item-prices small, .wip-card-metrics small, .menu-card-prices small {
+  font-size: 11px; line-height: 1.4; color: var(--muted);
+}
+.md-item-prices b, .wip-card-metrics b, .menu-card-prices b {
+  font-size: 13px; line-height: 1.4; font-variant-numeric: tabular-nums;
+}
+.md-item-prices > div, .wip-card-metrics > div, .menu-card-prices > div {
+  padding: 10px; background: var(--ui-surface-soft); border-radius: 12px;
+}
+.md-item-footer, .wip-card-footer, .menu-card-footer {
+  gap: 12px; margin-top: 12px; padding-top: 12px; border-color: var(--line);
+}
+.md-item-footer > span, .wip-card-footer > span, .menu-card-footer > span { font-size: 11px; line-height: 1.5; }
+.md-count-grid, .wip-count-grid, .menu-count-grid { gap: 12px; }
+.md-count-grid > div, .wip-count-grid > div, .menu-count-grid > div {
+  padding: 14px; border-color: var(--line); border-radius: 16px; box-shadow: var(--ui-shadow-card);
+}
+.md-count-grid span, .wip-count-grid span, .menu-count-grid span { font-size: 11px; line-height: 1.4; }
+.md-count-grid b, .wip-count-grid b, .menu-count-grid b { font-variant-numeric: tabular-nums; }
+.md-export-toolbar, .md-export-toolbar-actions { gap: 12px; flex-wrap: wrap; }
+.md-export-toolbar-actions > :is(.md-filter-row, .wip-filter-row, .menu-filter-row) { gap: 6px; flex-wrap: wrap; }
+.md-export-toolbar-actions > :is(.md-filter-row, .wip-filter-row, .menu-filter-row) button,
+.md-export-toolbar-actions > :is(.md-export-button, .md-primary, .wip-primary, .menu-primary) {
+  min-height: 40px; height: auto; padding: 10px 12px; font-size: 12px; line-height: 1.3;
+}
+.md-item-actions .md-more, .md-item-actions .md-status-action,
+.wip-card-actions button, .menu-card-actions button { min-height: 40px; font-size: 12px; }
+.md-empty p, .md-error p, .wip-empty p, .menu-empty p { font-size: 12px; line-height: 1.6; }
+
+/* Monitoring and division summaries keep their original status meanings. */
+.monitor-stat, .monitor-account, .monitor-activity-item, .division-overview-card {
+  border-color: var(--line); border-radius: var(--ui-radius-card); box-shadow: var(--ui-shadow-card);
+}
+.monitor-stat span, .monitor-updated, .monitor-role, .monitor-outlet,
+.monitor-device-detail, .monitor-activity-time, .monitor-activity-reason { font-size: 12px; line-height: 1.5; }
+.monitor-activity-title, .monitor-device-title { font-size: 14px; line-height: 1.4; }
+.monitor-activity-detail { color: var(--muted); font-size: 13px; line-height: 1.5; }
+.monitor-stat strong, .division-overview-metrics strong { font-variant-numeric: tabular-nums; }
+.monitor-role, .monitor-outlet, .monitor-device-icon { background: var(--ui-surface-soft); color: var(--muted); }
+.monitor-modal-device-group { border-color: var(--line); background: var(--ui-surface-soft); }
+.division-overview-card h2 { color: var(--ink); font-family: var(--ui-heading-font); font-size: 18px; }
+.division-overview-metrics div { background: var(--ui-surface-soft); padding: 12px; }
+.division-overview-metrics span { color: var(--muted); font-size: 11px; }
+.division-overview-note { color: var(--muted); font-size: 12px; }
+
+/* Desktop: align sections without changing rail geometry or list capacity. */
+@media (min-width: 900px) {
+  .content { padding: 32px 32px 48px; }
+  #page-dashboard.page.active {
+    column-gap: 24px; row-gap: 20px;
+    grid-template-rows: auto 112px minmax(112px, auto) auto auto;
+  }
+  #page-dashboard > .metrics { height: auto; align-self: stretch; }
+  #page-dashboard > .greeting h1 { font-size: 28px; line-height: 1.25; }
+  #page-dashboard > .section-head h2 { font-size: 22px; line-height: 1.3; }
+  #page-dashboard > .hero {
+    background: linear-gradient(135deg, var(--lime), var(--ui-lime-strong));
+    box-shadow: var(--ui-shadow-raised); border-radius: var(--ui-radius-card);
+  }
+  #page-dashboard > .metrics .metric {
+    border-color: var(--line); border-radius: var(--ui-radius-card); box-shadow: var(--ui-shadow-card);
+  }
+  #page-dashboard > .metrics .metric-top .eyebrow { font-size: 11px; letter-spacing: .07em; }
+  #page-dashboard > .metrics .metric small { font-size: 12px; }
+  #page-dashboard > .metrics .metric-icon { background: var(--ui-surface-soft); color: var(--ink); }
+  #page-dashboard > #dashboardList .guest { box-shadow: var(--ui-shadow-control); border-color: var(--line); }
+  #page-dashboard > #dashboardList .guest .ticket { background: var(--lime); color: var(--ink); }
+  .dashboard-reservations-layout { gap: 20px; }
+  .dashboard-reservations-head h2, .dashboard-trend-head h2 { font-size: 20px; line-height: 1.3; }
+  .dashboard-reservation-calendar-panel, .dashboard-reservation-details, .dashboard-trend-card {
+    border-color: var(--line); border-radius: var(--ui-radius-card); box-shadow: var(--ui-shadow-card);
+  }
+  .dashboard-reservation-item { box-shadow: var(--ui-shadow-control); border-color: var(--line); }
+  .dashboard-reservation-item-main small { font-size: 12px; line-height: 1.45; }
+  .dashboard-trend-day, .dashboard-trend-value { font-size: 11px; }
+  .dashboard-trend-toggle button.active {
+    background: linear-gradient(135deg, var(--lime), var(--ui-lime-strong));
+    color: var(--ink); box-shadow: var(--ui-shadow-control);
+  }
+  .dashboard-trend-bar {
+    background: linear-gradient(180deg, #9aba56, var(--lime));
+  }
+  #page-dashboard > .hero, #page-dashboard > .metrics .metric { min-width: 0; }
+  .md-item-card, .wip-card, .menu-card { padding: 20px; }
+}
+
+/* Mobile: wrap controls instead of shrinking text to 8px. */
+@media (max-width: 899px) {
+  .content { padding-left: 20px; padding-right: 20px; }
+  .auth-panel { padding: 28px 24px; }
+  .search input, .md-search input, .wip-search input, .menu-search input,
+  #sheet .field input, #sheet .field select, #sheet .field textarea,
+  .md-field input, .md-field select, .wip-field input, .wip-field select,
+  .menu-field input, .menu-field select { font-size: 16px; }
+  .md-sheet-simple .md-field input { font-size: 16px; }
+  .md-export-toolbar-actions { gap: 8px; }
+  .md-export-toolbar-actions > :is(.md-filter-row, .wip-filter-row, .menu-filter-row) {
+    flex: 1 1 100%;
+  }
+  .md-export-toolbar-actions > :is(.md-filter-row, .wip-filter-row, .menu-filter-row) button,
+  .md-export-toolbar-actions > :is(.md-export-button, .md-primary, .wip-primary, .menu-primary) {
+    min-height: 44px; font-size: 12px; padding: 10px 12px;
+  }
+  .guest .actions .mini { min-height: 40px; }
+  #monitorLiveUsers .monitor-account-email { font-size: 12px; }
+  #monitorLiveUsers .monitor-detail-button { min-height: 44px; font-size: 13px; }
+  .monitor-modal-device-group .monitor-device-detail { font-size: 12px; }
+  .monitor-summary { gap: 8px; }
+}
+@media (max-width: 390px) {
+  .content { padding-left: 16px; padding-right: 16px; }
+  .page-title, .greeting h1,
+  :is(.md-page-heading, .wip-page-heading, .menu-page-heading) h1 { font-size: 24px; }
+  .md-item-heading, .wip-card-heading, .menu-card-heading { grid-template-columns: minmax(0,1fr); gap: 12px; }
+  .md-item-footer, .wip-card-footer, .menu-card-footer { flex-wrap: wrap; }
+  .md-count-grid, .wip-count-grid, .menu-count-grid { gap: 8px; }
+  .md-count-grid > div, .wip-count-grid > div, .menu-count-grid > div { padding: 12px 8px; }
+  .md-item-copy h3 { font-size: 15px; }
+  .md-item-prices small { font-size: 11px; }
+  .md-item-prices b { font-size: 13px; }
+  .monitor-activity-top { flex-wrap: wrap; }
+}
+
+/* Only refine easing on existing transitions. Keep original delays/durations,
+   keyframes and reduced-motion behavior; no JS animation lifecycle changes. */
+@media (prefers-reduced-motion: no-preference) {
+  .auth-panel, .auth-intro, .auth-input-wrap, .auth-submit,
+  .guest, .metric, .reservation-card, .reservation-day, .calendar-day,
+  .dashboard-reservation-item, .dashboard-trend-bar, .dashboard-trend-toggle button,
+  .monitor-account, .monitor-select-trigger, .md-primary, .wip-primary, .menu-primary {
+    transition-timing-function: var(--ui-ease);
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  #page-dashboard > #dashboardList > .guest:hover,
+  .dashboard-reservation-list > .dashboard-reservation-item:hover,
+  .monitor-account:hover { box-shadow: var(--ui-shadow-raised); border-color: #c6d5a7; }
+  .drawer-item.active:hover { background: var(--lime); }
+}

@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/visual-tokens.css?v=20261110-polish-1">
 <style>
 :root{
   --bg:#f4f5ed;--ink:#17182b;--muted:#858694;--line:#e8e9e0;
@@ -241,6 +242,13 @@ a:focus-visible,summary:focus-visible{outline:3px solid #627e24;outline-offset:4
 @media(max-width:900px){.step,.step.flip,.step.wide{gap:28px;padding:48px 0}.hero-art{min-height:300px}.hero-orbit.two{width:280px;height:280px}}
 @media(max-width:520px){.guide-brand{font-size:12px}.guide-menu summary{font-size:12px;padding:10px}.index{grid-template-columns:1fr;gap:8px}.index a{min-height:66px;padding:16px}.index a:hover{padding-left:16px}.hero{padding:30px 22px}.hero h1{font-size:38px}.manifesto{padding-top:44px}.hero-art{min-height:280px}.hero-orbit.two{width:250px;height:250px}.intro-strip{font-size:12px}}
 
+/* Match the workspace palette and elevation inside this isolated guide. */
+:root{--bg:var(--ui-bg);--ink:var(--ui-ink);--muted:var(--ui-muted);--line:var(--ui-line);--lime:var(--ui-lime);--lime-deep:var(--ui-lime-strong);--navy:var(--ui-ink);--shadow:var(--ui-shadow-raised);--soft-shadow:var(--ui-shadow-control)}
+body{font-family:var(--ui-font)}
+h1,h2,h3{font-family:var(--ui-heading-font)}
+.guide-nav{background:var(--bg);border-color:var(--line)}
+.copy > p,.note{color:var(--muted)}
+.hero{box-shadow:var(--ui-shadow-card)}
 </style>
 </head>
 <body>
