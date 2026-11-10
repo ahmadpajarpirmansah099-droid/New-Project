@@ -84,7 +84,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .drawer-item.active { background: var(--lime-soft); color: var(--ink); }
 .drawer-item.active::before { background: var(--ui-olive); }
 .scope-trigger { color: var(--ink); background: var(--ui-surface-soft); box-shadow: var(--ui-shadow-control); }
-.quick-menu { border-color: var(--line); box-shadow: var(--ui-shadow-overlay); }
+.quick-menu-item > svg:first-child { border-color: var(--line); box-shadow: var(--ui-shadow-control); }
 .quick-menu-item { border-radius: var(--ui-radius-control); }
 .search input, .md-search, .wip-search, .menu-search,
 .monitor-select-trigger, .app-select-trigger {

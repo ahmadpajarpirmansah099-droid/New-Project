@@ -1,5 +1,9 @@
 # Implementation and rollout
 
+## UI follow-up — 11 November 2026
+
+See `ui-polish-2026-11-11.md` for the FAB overlap/icon fix and shared form styling requested after rollout. This is a frontend-only follow-up with no new migration; its merge/deploy status is tracked separately in the implementing PR. It does not change the database deployment recorded below.
+
 ## Follow-up review — 11 November 2026
 
 See `review-followup-2026-11-11.md` for user decisions, intended behavior, security boundaries, fixes, regression coverage, and remaining verification. Following explicit owner approval, PR #227 was merged as `e9b4f752648ac9a2b7001233bf80863afe3a4415`. The corrected `schema.sql` was installed as Supabase migration `20261110183229_stock_opname_phase_one_reviewed_v1` before the merge. Do not apply the original PR #226 SQL.

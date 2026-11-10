@@ -3701,9 +3701,7 @@ button.history-date {
   }
 }
 
-/* BAGIAN: Menu cepat model kipas
-    Aturan ini menjadi override terakhir dari struktur menu cepat di atas.
-    Pertahankan posisinya di sini agar urutan CSS dan tampilannya tetap sama. */
+/* Floating action stack: visible actions determine the height, not DOM indexes. */
 .quick-menu-backdrop {
   background: rgba(17,18,37,.08);
   backdrop-filter: blur(2px) saturate(.96);
@@ -3713,11 +3711,19 @@ button.history-date {
 .quick-menu {
   position: fixed;
   z-index: 16;
-  right: calc(max(20px, (100vw - 520px) / 2 + 20px) + 27px);
-  bottom: 100px;
-  width: 0;
-  height: 0;
-  padding: 0;
+  right: calc(max(20px, (100vw - 520px) / 2 + 20px) - 5px);
+  bottom: calc(82px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: 10px;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  height: auto;
+  max-height: calc(100dvh - 98px - env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px;
   margin: 0;
   border: 0;
   border-radius: 0;
@@ -3737,17 +3743,20 @@ button.history-date {
   transform: none;
 }
 
+.quick-menu[data-context="stock"] {
+  flex-direction: column;
+}
+
 .quick-menu-heading {
   display: none;
 }
 
 .quick-menu-item {
-  position: absolute;
-  right: 0;
-  bottom: 0;
+  position: relative;
   display: flex;
   width: max-content;
   min-height: 48px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: flex-start;
   flex-direction: row-reverse;
@@ -3764,26 +3773,13 @@ button.history-date {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Posisi empat tombol mengikuti urutan di HTML menu cepat. */
-.quick-menu-item:nth-child(2) { right: -15px; bottom: 0; }
-.quick-menu-item:nth-child(3) { right: -15px; bottom: 58px; }
-.quick-menu-item:nth-child(4) { right: -15px; bottom: 116px; }
-.quick-menu-item:nth-child(5) { right: -15px; bottom: 174px; }
-.quick-menu-item:nth-child(6) { right: -15px; bottom: 0; }
-.quick-menu-item:nth-child(7) { right: -15px; bottom: 58px; }
+.quick-menu-item + .quick-menu-item { margin-top: 0; }
 
 .quick-menu.show .quick-menu-item {
   opacity: 1;
   transform: translateY(0) scale(1);
+  transition-delay: calc(var(--quick-order, 0) * 35ms);
 }
-
-/* Jeda bertahap agar tombol muncul berurutan. */
-.quick-menu.show .quick-menu-item:nth-child(2) { transition-delay: 0ms; }
-.quick-menu.show .quick-menu-item:nth-child(3) { transition-delay: 35ms; }
-.quick-menu.show .quick-menu-item:nth-child(4) { transition-delay: 70ms; }
-.quick-menu.show .quick-menu-item:nth-child(5) { transition-delay: 105ms; }
-.quick-menu.show .quick-menu-item:nth-child(6) { transition-delay: 0ms; }
-.quick-menu.show .quick-menu-item:nth-child(7) { transition-delay: 35ms; }
 
 .quick-menu-item > svg:first-child {
   width: 48px;
@@ -3823,6 +3819,14 @@ button.history-date {
   background: transparent;
   transform: scale(.97);
 }
+
+@media (hover: hover) and (pointer: fine) {
+  .quick-menu-item:hover > svg:first-child {
+    background: var(--ui-lime-soft, #eef7c7);
+  }
+}
+
+.quick-menu-item:focus-visible { outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
   .fab svg,
