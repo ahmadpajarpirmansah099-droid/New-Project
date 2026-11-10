@@ -201,11 +201,63 @@ h1,h2,h3{font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Robot
   .reveal,.rise,.w,.sw,.hcard,.callout{opacity:1;transform:none;filter:none}
   .frame{transform:none!important}
 }
+
+/* Guided reading: clear chapters and a compact, persistent table of contents. */
+html{scroll-padding-top:100px}
+:root{--muted:#626577}
+.guide-nav{position:sticky;top:3px;z-index:70;background:#f4f5ed;border-bottom:1px solid #dcded2}
+.guide-nav-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px}
+.guide-brand{font-family:'Manrope',sans-serif;font-weight:800;font-size:13px;letter-spacing:-.02em}
+.guide-menu{position:relative}
+.guide-menu summary{cursor:pointer;font-size:13px;font-weight:700;padding:12px 16px;border:1px solid #dcded2;border-radius:12px;background:#fff}
+.guide-menu nav{position:absolute;right:0;top:52px;width:min(300px,calc(100vw - 40px));padding:8px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);max-height:65vh;overflow:auto}
+.guide-menu nav a{display:block;padding:12px;border-radius:8px;font-size:14px}
+.guide-menu nav a:hover,.guide-menu nav a:focus-visible{background:var(--lime)}
+a:focus-visible,summary:focus-visible{outline:3px solid #627e24;outline-offset:4px}
+.hero-wrap{padding-top:28px}
+.hero{box-shadow:none;border:1px solid #cddd9d}
+.hero h1{font-size:clamp(38px,5vw,62px);line-height:1.1;letter-spacing:-.045em}
+.hero p{font-size:16px}
+.hero-device{animation:none;transform:rotate(3deg)}
+.manifesto{padding-top:64px}
+.manifesto p{font-size:clamp(24px,3vw,34px);line-height:1.35;max-width:800px}
+.index{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;border:0;margin-top:32px;margin-bottom:56px}
+.index a{grid-template-columns:32px minmax(0,1fr) auto;gap:10px;padding:20px;border:1px solid #dcded2;border-radius:16px;background:#fff;transition:background .2s ease,border-color .2s ease}
+.index a:hover{padding-left:20px;background:#edf3de;border-color:#b6cd83}
+.index em{font-size:18px;letter-spacing:-.02em}
+.index span{color:#52632f}
+.step,.step.flip,.step.wide{padding:72px 0;gap:48px;scroll-margin-top:12px}
+.step h2{font-size:clamp(30px,3.8vw,44px);line-height:1.15}
+.num{color:#536237;font-size:11px}
+.copy > p{font-size:16px;color:#53576b}
+.legend{gap:0;margin-top:24px}
+.legend li{padding:14px 0;border-bottom:1px solid var(--line);line-height:1.7}
+.hdevice{animation:none;transform:none;box-shadow:0 12px 32px rgba(23,24,43,.12)}
+.hcard{background:#e9eddf;box-shadow:none;border:1px solid #dce2ce;padding:36px 24px 56px}
+.hring,.hcard:before,.hcard:after,.hglow{display:none}
+.hchip{animation:none;font-size:11px}
+.callout:after{animation:none;opacity:.4}
+.outro{padding-top:48px}
+@media(max-width:900px){.step,.step.flip,.step.wide{gap:28px;padding:48px 0}.hero-art{min-height:300px}.hero-orbit.two{width:280px;height:280px}}
+@media(max-width:520px){.guide-brand{font-size:12px}.guide-menu summary{font-size:12px;padding:10px}.index{grid-template-columns:1fr;gap:8px}.index a{min-height:66px;padding:16px}.index a:hover{padding-left:16px}.hero{padding:30px 22px}.hero h1{font-size:38px}.manifesto{padding-top:44px}.hero-art{min-height:280px}.hero-orbit.two{width:250px;height:250px}.intro-strip{font-size:12px}}
+
 </style>
 </head>
 <body>
 
 <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<div class="guide-nav"><div class="wrap guide-nav-inner">
+  <a class="guide-brand" href="#top">Guest Operational / Panduan</a>
+  <details class="guide-menu"><summary>Daftar langkah</summary><nav aria-label="Navigasi cepat panduan">
+    <a href="#s1">01 · Dashboard</a>
+    <a href="#s2">02 · Detail operasional</a>
+    <a href="#s3">03 · Tambah tamu</a>
+    <a href="#s4">04 · Reservasi</a>
+    <a href="#s5">05 · Kalender reservasi</a>
+    <a href="#s6">06 · Tambah reservasi</a>
+  </nav></details>
+</div></div>
 
 <header class="wrap hero-wrap" id="top">
   <div class="hero">
@@ -213,7 +265,7 @@ h1,h2,h3{font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Robot
     <div class="hero-copy">
       <div class="eyebrow rise">PANDUAN PENGGUNA · LAZY JENNIE</div>
       <h1><span class="w" style="--i:0">Panduan</span> <span class="w" style="--i:1">Guest</span> <span class="w" style="--i:2">Operational.</span></h1>
-      <p class="rise d2">Cara pakai aplikasi untuk mengelola tamu, antrean, dan reservasi, dari dashboard sampai tambah reservasi.</p>
+      <p class="rise d2">Kenali alurnya, lalu ikuti langkahnya. Panduan untuk membantu tim mengelola kedatangan tamu, antrean, dan reservasi setiap hari.</p>
       <div class="hero-cta rise d3">
         <a class="btn dark" href="#s1">Mulai panduan <span>↘</span></a>
         <a class="btn light" href="#daftar">Langsung ke daftar</a>
@@ -234,17 +286,10 @@ h1,h2,h3{font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Robot
   </div>
 </header>
 
-<div class="marquee" aria-hidden="true">
-  <div class="track">
-    <div class="set"><span>Dashboard</span><i>✦</i><span>Detail operasional</span><i>✦</i><span>Tambah tamu</span><i>✦</i><span>Reservasi</span><i>✦</i><span>Kalender reservasi</span><i>✦</i><span>Tambah reservasi</span><i>✦</i></div>
-    <div class="set"><span>Dashboard</span><i>✦</i><span>Detail operasional</span><i>✦</i><span>Tambah tamu</span><i>✦</i><span>Reservasi</span><i>✦</i><span>Kalender reservasi</span><i>✦</i><span>Tambah reservasi</span><i>✦</i></div>
-  </div>
-</div>
-
 <main class="wrap">
 
   <section class="manifesto reveal">
-    <p>Tamu yang datang, antrean yang berjalan, dan reservasi yang sudah masuk, <b>semuanya ada di satu aplikasi.</b> Ikuti enam langkah ini sesuai urutannya.</p>
+    <p>Tamu yang datang, antrean yang berjalan, dan reservasi yang sudah masuk, <b>semuanya ada di satu aplikasi.</b> Mulai dari langkah pertama, atau langsung pilih bagian yang kamu butuhkan.</p>
   </section>
 
   <nav class="index reveal" id="daftar" aria-label="Daftar langkah">
@@ -476,6 +521,18 @@ h1,h2,h3{font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Robot
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var canHover = window.matchMedia('(hover: hover)').matches;
 
+  // Close the chapter menu as soon as a destination is selected.
+  var guideMenu = document.querySelector('.guide-menu');
+  guideMenu.querySelectorAll('a').forEach(function(link){
+    link.addEventListener('click', function(){ guideMenu.open = false; });
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && guideMenu.open) {
+      guideMenu.open = false;
+      guideMenu.querySelector('summary').focus();
+    }
+  });
+
   // Progress bar
   var bar = document.getElementById('progressBar');
   function updateProgress(){
@@ -526,9 +583,7 @@ h1,h2,h3{font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Robot
   if (!reduced && canHover) {
     var hero = document.querySelector('.hero');
     bindTilt(hero, document.querySelector('.tilt'));
-    document.querySelectorAll('.hcard').forEach(function(card){
-      bindTilt(card, card.querySelector('.htilt'));
-    });
+
   }
 
   // Legenda disorot bareng nomor di gambar
