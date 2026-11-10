@@ -29,9 +29,28 @@
   }
   async function configure(enabled){await rpc('stock_opname_configure',{division:context.activeDivisionId,enabled});data.enabled=enabled;}
   const draftKey=()=>context?'stock-opname:draft:v1:'+context.userId+':'+context.workspaceId+':'+context.activeDivisionId:null;
-  function saveDraft(value){const key=draftKey();if(!key)throw Error('Sesi belum siap.');root.localStorage.setItem(key,JSON.stringify(value));}
-  function loadDraft(){try{return JSON.parse(root.localStorage.getItem(draftKey())||'null');}catch(_){return null;}}
-  function clearDraft(){const key=draftKey();if(key)root.localStorage.removeItem(key);}
+  function readDraftStore(){
+    try{
+      const value=JSON.parse(root.localStorage.getItem(draftKey())||'null');
+      if(value?.version===2&&value.drafts&&typeof value.drafts==='object')return value;
+      if(value&&typeof value.kind==='string')return {version:2,activeKind:value.kind,drafts:{[value.kind]:value}};
+    }catch(_){}
+    return {version:2,activeKind:null,drafts:{}};
+  }
+  function saveDraft(value){
+    const key=draftKey();if(!key)throw Error('Sesi belum siap.');
+    const store=readDraftStore();store.version=2;store.activeKind=value.kind;store.drafts[value.kind]=value;
+    root.localStorage.setItem(key,JSON.stringify(store));
+  }
+  function loadDraft(kind){const store=readDraftStore();return store.drafts[kind||store.activeKind]||null;}
+  function clearDraft(kind){
+    const key=draftKey();if(!key)return;
+    if(!kind){root.localStorage.removeItem(key);return;}
+    const store=readDraftStore();delete store.drafts[kind];
+    if(store.activeKind===kind){const kinds=Object.keys(store.drafts);store.activeKind=kinds[kinds.length-1]||null;}
+    if(Object.keys(store.drafts).length)root.localStorage.setItem(key,JSON.stringify(store));
+    else root.localStorage.removeItem(key);
+  }
   async function targetCatalog(destination){return rpc('stock_opname_target_catalog',{origin:context.activeDivisionId,destination});}
   root.StockOpnameService={initialize,reset,current,available,read,write,configure,saveDraft,loadDraft,clearDraft,targetCatalog};
 })(window);
