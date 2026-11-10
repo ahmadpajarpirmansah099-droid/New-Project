@@ -7,7 +7,8 @@ const fs = require('node:fs');
 function runtime() {
   const handlers = {}, writes = [], confirmations = [];
   const page = { innerHTML: '', contains: () => true };
-  let draft = null, allowConfirm = true, storageFails = false, writeFails = false;
+  const drafts = {}, letHolder = { active: null };
+  let allowConfirm = true, storageFails = false, writeFails = false;
   const data = {
     state: { periods: [{ id: 'period', start: '2026-11-01', status: 'active', opening: {} }], documents: [] },
     catalog: [
@@ -42,9 +43,9 @@ function runtime() {
     MasterDataStore: { initialize: async () => {} },
     StockOpnameService: {
       current: () => data,
-      saveDraft(value) { if (storageFails) throw Error('Quota exceeded'); draft = copy(value); },
-      loadDraft: () => draft && copy(draft),
-      clearDraft: () => draft = null,
+      saveDraft(value) { if (storageFails) throw Error('Quota exceeded'); drafts[value.kind] = copy(value); letHolder.active = value.kind; },
+      loadDraft: kind => { const value = drafts[kind || letHolder.active]; return value && copy(value); },
+      clearDraft(kind) { if (kind) delete drafts[kind]; else for (const key of Object.keys(drafts)) delete drafts[key]; if (!kind || letHolder.active === kind) letHolder.active = Object.keys(drafts).at(-1) || null; },
       async write(action, input, request) {
         writes.push({ action, input: copy(input), request });
         if (writeFails) throw Error('Koneksi terputus');
@@ -56,7 +57,7 @@ function runtime() {
   vm.runInContext(fs.readFileSync('assets/js/stock-opname-ui.js', 'utf8'), w);
   return {
     ui: w.StockOpnameUI, data, writes, confirmations, page,
-    draft: () => draft,
+    draft: kind => { const value = drafts[kind || letHolder.active]; return value && copy(value); },
     confirm: value => allowConfirm = value,
     storageFails: value => storageFails = value,
     writeFails: value => writeFails = value,
@@ -78,25 +79,17 @@ for (const [kind, key] of [['receipt', 'm:a'], ['production', 'w:a'], ['sales', 
   });
 }
 
-test('closed local draft survives declining a replacement and can be restored', async () => {
+test('switching forms retains each local draft and restores the selected form', async () => {
   const t = runtime(); await t.ui.open('expense');
   t.input({ soKey: 'm:a', soProp: 'qty' }, '9');
-  await t.click('cancel'); t.confirm(false); await t.ui.open('receipt');
-  assert.equal(t.draft().kind, 'expense');
-  assert.equal(t.draft().counts['m:a'].qty, '9');
-  assert.match(t.confirmations.at(-1), /akan diganti/);
-  await t.click('restore'); t.confirm(true); await t.click('submit');
+  await t.ui.open('receipt');
+  assert.equal(t.draft('expense').counts['m:a'].qty, '9');
+  await t.ui.open('expense');
+  assert.equal(t.page.innerHTML.includes('value="9"'), true);
+  t.confirm(true); await t.click('submit');
   assert.equal(t.writes[0].input.type, 'expense');
   assert.equal(t.writes[0].input.category, 'Waste');
   assert.equal(t.writes[0].input.lines[0].qty, '9');
-});
-
-test('explicit replacement confirmation allows a new draft', async () => {
-  const t = runtime(); await t.ui.open('expense');
-  t.input({ soKey: 'm:a', soProp: 'qty' }, '9');
-  await t.click('cancel'); await t.ui.open('receipt');
-  assert.equal(t.draft().kind, 'receipt');
-  assert.match(t.confirmations.at(-1), /akan diganti/);
 });
 
 test('switching blank forms does not ask to replace a draft', async () => {
@@ -105,24 +98,25 @@ test('switching blank forms does not ask to replace a draft', async () => {
   await t.click('cancel');
   await t.ui.open('sales');
   assert.equal(t.confirmations.length, 0);
-  assert.equal(t.draft().kind, 'sales');
+  assert.equal(t.draft('production').kind, 'production');
+  assert.equal(t.draft('receipt').kind, 'receipt');
+  assert.equal(t.draft('sales').kind, 'sales');
 });
 
 test('entered zero is still protected when changing forms', async () => {
   const t = runtime(); await t.ui.open('close');
   t.input({ soKey: 'm:a', soProp: 'qty' }, '0');
-  t.confirm(false); await t.ui.open('expense');
-  assert.equal(t.draft().kind, 'close');
-  assert.match(t.confirmations[0], /akan diganti/);
+  await t.ui.open('expense');
+  assert.equal(t.draft('close').counts['m:a'].qty, '0');
+  assert.equal(t.confirmations.length, 0);
 });
 
 test('changed date alone is protected as an unfinished draft', async () => {
   const t = runtime(); await t.ui.open('sales');
   t.input({ soField: 'start' }, '2026-10-20');
-  t.confirm(false); await t.ui.open('receipt');
-  assert.equal(t.draft().kind, 'sales');
-  assert.equal(t.draft().start, '2026-10-20');
-  assert.match(t.confirmations[0], /akan diganti/);
+  await t.ui.open('receipt');
+  assert.equal(t.draft('sales').start, '2026-10-20');
+  assert.equal(t.confirmations.length, 0);
 });
 
 test('storage failure keeps the form open and never claims a draft was saved', async () => {
@@ -156,7 +150,7 @@ test('failed transaction keeps its draft and reuses the same request on retry', 
   t.writeFails(false); await t.click('submit');
   assert.equal(t.writes[0].request, t.writes[1].request);
   assert.deepEqual(t.writes[0].input, t.writes[1].input);
-  assert.equal(t.draft(), null);
+  assert.equal(t.draft('expense'), undefined);
 });
 
 test('counting form separates system stock and converted physical quantity for desktop', async () => {
