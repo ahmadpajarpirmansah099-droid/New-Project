@@ -119,6 +119,16 @@ test('changed date alone is protected as an unfinished draft', async () => {
   assert.equal(t.confirmations.length, 0);
 });
 
+test('stock opname dates and selections render as in-app web controls', async () => {
+  const t = runtime(); await t.ui.open('close');
+  assert.match(t.page.innerHTML, /data-so-action="pick-date"/);
+  assert.match(t.page.innerHTML, /data-so-action="pick-choice"/);
+  assert.doesNotMatch(t.page.innerHTML, /type="date"|<select\b/);
+  await t.ui.open('expense');
+  assert.match(t.page.innerHTML, /Pilih kategori/);
+  assert.doesNotMatch(t.page.innerHTML, /<select\b/);
+});
+
 test('storage failure keeps the form open and never claims a draft was saved', async () => {
   const t = runtime(); await t.ui.open('expense'); t.storageFails(true);
   t.input({ soKey: 'm:a', soProp: 'qty' }, '9');

@@ -44,6 +44,30 @@
 #page-stock-opname input:disabled, #page-stock-opname select:disabled { background: var(--ui-surface-soft); box-shadow: none; color: var(--so-muted); }
 #page-stock-opname :focus-visible { outline: 2px solid var(--ui-olive); outline-offset: 3px; }
 #page-stock-opname input:focus, #page-stock-opname select:focus { border-color: var(--ui-olive); box-shadow: 0 0 0 3px rgba(83,104,44,.1); }
+.so-picker-trigger { display: flex !important; align-items: center; justify-content: space-between !important; gap: 12px !important; width: 100%; text-align: left; font-weight: 500 !important; }
+.so-picker-trigger:disabled { background: var(--ui-surface-soft) !important; box-shadow: none !important; color: var(--so-muted) !important; }
+.so-picker-chevron { width: 8px; height: 8px; flex: 0 0 auto; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); opacity: .7; }
+.so-picker-dialog { position: fixed; width: min(440px,calc(100vw - 32px)); max-width: none; max-height: min(720px,calc(100dvh - 32px)); margin: auto; padding: 0; overflow: hidden; border: 1px solid var(--ui-line); border-radius: var(--ui-radius-dialog); background: var(--ui-surface); color: var(--ui-ink); box-shadow: var(--ui-shadow-overlay); font-family: var(--ui-font); box-sizing: border-box; }
+.so-picker-dialog::backdrop { background: rgba(17,18,37,.48); backdrop-filter: blur(4px); }
+.so-picker-dialog > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--ui-line); }
+.so-picker-dialog > header h2 { margin: 0; font: 800 17px/1.35 var(--ui-heading-font); }
+.so-picker-dialog > header button, .so-picker-dialog footer button { min-height: 42px; padding: 8px 14px; border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface); color: var(--ui-ink); font: 700 13px var(--ui-font); cursor: pointer; }
+.so-picker-dialog > header button { width: 38px; min-height: 38px; padding: 0; font-size: 22px; }
+.so-picker-content { max-height: min(580px,calc(100dvh - 150px)); overflow-y: auto; padding: 16px 20px; }
+.so-choice-list { display: grid; gap: 6px; }
+.so-choice-list button { display: flex; justify-content: space-between !important; width: 100%; min-height: 48px !important; text-align: left; box-shadow: none !important; }
+.so-choice-list button.is-selected, .so-calendar-grid button.is-selected { background: var(--ui-lime) !important; border-color: var(--ui-lime-strong) !important; }
+.so-choice-check { color: var(--ui-olive); font-weight: 800; }
+.so-picker-dialog footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--ui-line); }
+.so-picker-dialog footer .so-primary { background: var(--ui-lime); border-color: var(--ui-lime-strong); }
+.so-calendar-nav { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 8px; margin-bottom: 16px; }
+.so-calendar-nav strong { text-align: center; text-transform: capitalize; font-size: 15px; }
+.so-calendar-nav button, .so-calendar-grid button { min-height: 42px !important; padding: 6px !important; box-shadow: none !important; }
+.so-calendar-grid { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 5px; text-align: center; }
+.so-calendar-grid > span { display: grid; min-height: 34px; place-items: center; color: var(--so-muted); font-size: 11px; font-weight: 700; }
+.so-calendar-grid button { width: 100%; border-color: transparent !important; background: transparent !important; }
+.so-calendar-grid button.is-selected { background: var(--ui-lime) !important; border-color: var(--ui-lime-strong) !important; }
+.so-calendar-selected { margin: 14px 0 0; color: var(--so-muted); font-size: 13px; }
 .so-ledger { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .so-ledger th { text-align: left; font-size: 11px; font-weight: 700; line-height: 1.4; color: var(--so-muted); padding: 12px 6px; }
 .so-ledger td { padding: 12px 6px; border-top: 1px solid var(--so-line); vertical-align: middle; overflow-wrap: anywhere; }
