@@ -41,4 +41,11 @@ Baseline: main commit `49e06c6266772dddb9a05690ae1aec16cab1c2e1`. Perubahan ini 
 ## 6. Status verifikasi
 
 - 80 tes Node lulus, 0 gagal. Syntax check JavaScript, grammar CSS, dan `git diff --check` lulus.
-- Perubahan belum dinyatakan merged/deployed sebelum status GitHub mengonfirmasinya. Tidak ada migration baru.
+- Sebelum merge, perubahan belum dinyatakan live. Tidak ada migration baru.
+
+## 7. Status setelah penggabungan
+
+- User menginstruksikan merge [PR #229](https://github.com/ahmadpajarpirmansah099-droid/New-Project/pull/229); commit merge `a39eb36b77ca3319178e5250b9401d1d2658a9fa`.
+- [GitHub Actions #42883214152](https://github.com/ahmadpajarpirmansah099-droid/New-Project/actions/runs/42883214152) lulus validasi dan deploy GitHub Pages.
+- Halaman live mengembalikan HTTP 200 dan memakai versi cache commit merge; JavaScript dialog dan CSS yang dilayani situs cocok byte demi byte dengan PR.
+- Pengujian Android melalui sesi admin Bar belum dijalankan setelah merge. Data Supabase, hak akses, dan key localStorage tidak diubah.
