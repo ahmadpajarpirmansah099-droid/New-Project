@@ -302,13 +302,35 @@ button, input, select, textarea { font-family: var(--ui-font); }
   .md-field input, .md-field select, .wip-field input, .wip-field select,
   .menu-field input, .menu-field select { font-size: 16px; }
   .md-sheet-simple .md-field input { font-size: 16px; }
-  .md-export-toolbar-actions { gap: 8px; }
-  .md-export-toolbar-actions > :is(.md-filter-row, .wip-filter-row, .menu-filter-row) {
-    flex: 1 1 100%;
+  .md-export-toolbar .md-export-toolbar-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
   }
-  .md-export-toolbar-actions > :is(.md-filter-row, .wip-filter-row, .menu-filter-row) button,
+  .md-export-toolbar-actions > :is(.md-filter-row, .wip-filter-row, .menu-filter-row) {
+    grid-column: 1 / -1;
+    display: flex;
+    flex: none;
+    gap: 8px;
+    min-width: 0;
+  }
+  .md-export-toolbar-actions > :is(.md-filter-row, .wip-filter-row, .menu-filter-row) button {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
   .md-export-toolbar-actions > :is(.md-export-button, .md-primary, .wip-primary, .menu-primary) {
-    min-height: 44px; font-size: 12px; padding: 10px 12px;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    margin-left: 0;
+    padding: 8px;
+    font-size: 12px;
+    line-height: 1.25;
+    text-align: center;
+    white-space: normal;
   }
   .guest .actions .mini { min-height: 40px; }
   #monitorLiveUsers .monitor-account-email { font-size: 12px; }
