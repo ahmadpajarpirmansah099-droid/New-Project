@@ -214,7 +214,7 @@ begin
     if factor is null or factor<=0 then raise exception 'Satuan % tidak valid.',item->>'name';end if;
     qty:=qty*factor;price:=(item->>'price')::numeric;
     counts:=jsonb_set(counts,array[k],to_jsonb(qty),true);
-    select coalesce(jsonb_object_agg(kind,amount),'{}') into movements from (select coalesce(v->>'category',v->>'type') as kind,sum((z->>'qty')::numeric) amount from jsonb_array_elements(docs) v cross join lateral jsonb_array_elements(v->'postings') z where v->>'period_id'=pid and coalesce(v->>'void','false')<>'true' and z->>'key'=k group by 1) totals;
+    select coalesce(jsonb_object_agg(kind,amount),'{}') into movements from (select case when v->>'type'='expense' then coalesce(v->>'category','expense') else v->>'type' end as kind,sum((z->>'qty')::numeric) amount from jsonb_array_elements(docs) v cross join lateral jsonb_array_elements(v->'postings') z where v->>'period_id'=pid and coalesce(v->>'void','false')<>'true' and z->>'key'=k group by 1) totals;
     result:=result||jsonb_build_array(item||jsonb_build_object('movements',movements,'opening',coalesce((p->'opening'->>k)::numeric,0),'system',coalesce((b->>k)::numeric,0),'physical',qty,'variance',qty-coalesce((b->>k)::numeric,0),'variance_value',(qty-coalesce((b->>k)::numeric,0))*price));
    end loop;
    if counts='{}' then raise exception 'Tidak ada barang untuk opname.';end if;
@@ -223,12 +223,14 @@ begin
   else
    docid:=coalesce(nullif(input->>'id',''),request::text);
    select value,ordinality::int-1 into old_doc,idx from jsonb_array_elements(docs) with ordinality where value->>'id'=docid;
+   if coalesce((old_doc->>'void')::boolean,false) then raise exception 'Transaksi sudah dibatalkan dan tidak dapat dikoreksi atau disesuaikan lagi.';end if;
    if old_doc is not null and old_doc->>'period_id'<>pid and action<>'adjust_move' then raise exception 'Transaksi periode lama terkunci.';end if;
    if old_doc is not null and action<>'adjust_move' and exists(select 1 from jsonb_array_elements(docs) v where v->>'adjusts'=docid) then raise exception 'Move sudah disesuaikan; transaksi asal terkunci.';end if;
    if old_doc->>'type' in ('move_in','adjustment_in','adjustment') then raise exception 'Koreksi dilakukan dari transaksi asal.';end if;
    if action='void' and old_doc is null then raise exception 'Transaksi tidak ditemukan.';end if;
    if action='adjust_move' then
-    if old_doc is null or old_doc->>'category'<>'Move' then raise exception 'Pilih transaksi Move asal.';end if;
+    if p->>'status'<>'active' then raise exception 'Penyesuaian Move hanya boleh di periode aktif kedua divisi.';end if;
+    if old_doc is null or old_doc->>'type' is distinct from 'expense' or old_doc->>'category' is distinct from 'Move' then raise exception 'Pilih transaksi Move asal.';end if;
     if exists(select 1 from jsonb_array_elements(docs) v where v->>'adjusts'=docid) then raise exception 'Move sudah memiliki penyesuaian.';end if;
     -- Reverse old transfer in both active periods. A corrected new Move is separate.
     postings:='[]';for l in select value from jsonb_array_elements(old_doc->'postings') loop postings:=postings||jsonb_build_array(l||jsonb_build_object('qty',-(l->>'qty')::numeric));end loop;
@@ -273,10 +275,11 @@ begin
       end if;
      end loop;
      if jsonb_array_length(postings)=0 then raise exception 'Isi minimal satu barang/menu.';end if;
-     doc:=jsonb_build_object('id',docid,'period_id',pid,'type',typ,'category',input->>'category','start',start_date,'end',end_date,'lines',input->'lines','postings',postings,'catalog_snapshot',c,'created_at',coalesce(old_doc->>'created_at',now()::text),'updated_at',now(),'actor',auth.uid());
+     doc:=jsonb_build_object('id',docid,'period_id',pid,'type',typ,'category',case when typ='expense' then input->>'category' else null end,'start',start_date,'end',end_date,'lines',input->'lines','postings',postings,'catalog_snapshot',c,'created_at',coalesce(old_doc->>'created_at',now()::text),'updated_at',now(),'actor',auth.uid());
     end if;
     if doc->>'category'='Move' then target:=coalesce((input->>'target')::uuid,(old_doc->>'target')::uuid);end if;
    end if;
+   if doc->>'category'='Move' and target is null then raise exception 'Pilih tujuan Move yang sudah aktif.';end if;
    if target is not null then
     if target=d or not exists(select 1 from public.stock_opname_scopes sc join public.divisions dv on dv.id=sc.division_id where sc.division_id=target and sc.enabled and dv.is_active) then raise exception 'Tujuan Move belum aktif.';end if;
     if old_doc ? 'target' and old_doc->>'target'<>target::text then raise exception 'Tujuan Move tidak dapat diganti. Batalkan lalu buat baru.';end if;

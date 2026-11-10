@@ -1,5 +1,11 @@
 # Implementation and rollout
 
+## Follow-up review — 11 November 2026
+
+See `review-followup-2026-11-11.md` for user decisions, intended behavior, security boundaries, fixes, regression coverage, and remaining verification. PR #226 has merged and its post-merge workflow succeeded. A read-only database check confirms the Stock Opname schema is still absent. Use the reviewed, corrected `schema.sql` from the follow-up PR for the initial installation after owner approval; do not apply the original PR #226 SQL.
+
+The follow-up adds guards for cancelled/targetless Moves, separates expense categories from receipt/production/Sales, protects local drafts from silent replacement, and completes the desktop counting columns/master-data guidance. SQL tests ran against disposable local Postgres/WASM with a minimal foundation fixture, not the production Supabase schema. Full production-account and responsive browser verification remain pending.
+
 ## Deployment order
 
 1. Review `schema.sql` and apply it as one additive Supabase migration before merging the frontend. The change creates only the Stock Opname tables/functions and enables the existing Lazy Jennie / Bar scope by name. No initial quantities or transactions are seeded.

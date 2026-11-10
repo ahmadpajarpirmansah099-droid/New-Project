@@ -41,6 +41,7 @@ jobs:
         run: |
           node --test tests/guestops-service.test.js
           node --test tests/stock-opname-service.test.js
+          node --test tests/stock-opname-ui.test.js
           node --test tests/masterdata-invoice-conflict.test.js
           node --test tests/masterdata-phase1.test.js
           node --test tests/workspace-session.test.js

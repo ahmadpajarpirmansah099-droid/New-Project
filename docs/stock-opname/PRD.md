@@ -46,7 +46,7 @@ HP: satu bahan satu baris, input langsung, tanpa membuka kartu dan tanpa geser h
 | Susu Full Cream · 3.000 ml | [2,5] | [Botol] |
 | Gula Pasir · 2.000 gr | [1,8] | [Kg] |
 
-Desktop: tabel input langsung. Hasil opname menampilkan Stock Awal, pergerakan transaksi, stok sistem/fisik, harga, selisih unit dan rupiah per barang.
+Desktop: tabel input langsung dengan kolom Barang, Stok sistem, Fisik, Satuan, dan Konversi fisik. Hasil opname menampilkan Stock Awal, pergerakan transaksi, stok sistem/fisik, harga, selisih unit dan rupiah per barang.
 
 ## Hak akses dan batasan
 
