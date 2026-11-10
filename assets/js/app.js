@@ -291,8 +291,12 @@ function toggleQuickMenu() {
     closeMenu();
   }
 
+  let visibleIndex = 0;
+  menu.dataset.context = context;
   menu.querySelectorAll('.quick-menu-item[data-quick-context]').forEach(item => {
-    item.style.display = item.dataset.quickContext === context ? 'flex' : 'none';
+    const visible = item.dataset.quickContext === context;
+    item.style.display = visible ? 'flex' : 'none';
+    if (visible) item.style.setProperty('--quick-order', visibleIndex++);
   });
   menu.setAttribute('aria-label', context === 'stock' ? 'Stock Opname' : context === 'master' ? 'Master Barang' : 'Guest Operational');
   const heading=menu.querySelector('.quick-menu-heading');

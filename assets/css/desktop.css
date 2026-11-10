@@ -396,7 +396,7 @@
   }
 
   .fab { right: 32px; bottom: 28px; }
-  .quick-menu { right: 86px; bottom: 98px; }
+  .quick-menu { right: 27px; bottom: 86px; max-height: calc(100dvh - 102px); }
   .sheet.operational-modal { left: calc(50% + 125px); }
 }
 
