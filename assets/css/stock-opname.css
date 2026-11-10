@@ -122,3 +122,34 @@
 @media (prefers-reduced-motion: reduce) {
   #page-stock-opname * { transition: none !important; animation: none !important; }
 }
+
+/* Stock Opname confirmations stay inside the app on Android and desktop. */
+.so-confirm-dialog {
+  position: fixed;
+  width: min(390px, calc(100vw - 40px));
+  max-width: none;
+  margin: auto;
+  padding: 24px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-dialog);
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  box-shadow: var(--ui-shadow-overlay);
+  font-family: var(--ui-font);
+  box-sizing: border-box;
+}
+.so-confirm-dialog[open] { animation: so-confirm-in .2s var(--ui-ease) both; }
+.so-confirm-dialog::backdrop { background: rgba(17,18,37,.48); backdrop-filter: blur(4px); }
+.so-confirm-dialog h2 { margin: 0; font: 800 20px/1.3 var(--ui-heading-font); letter-spacing: -.025em; }
+.so-confirm-dialog p { margin: 10px 0 22px; color: var(--ui-muted); font-size: 13px; line-height: 1.6; }
+.so-confirm-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.so-confirm-actions button {
+  min-height: 46px; padding: 10px;
+  border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control);
+  background: var(--ui-surface-soft); color: var(--ui-ink);
+  font: 700 13px var(--ui-font); cursor: pointer;
+}
+.so-confirm-actions [data-so-accept] { background: var(--ui-lime); border-color: var(--ui-lime-strong); }
+.so-confirm-actions button:focus-visible { outline: 2px solid var(--ui-olive); outline-offset: 3px; }
+@keyframes so-confirm-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .so-confirm-dialog[open] { animation: none; } }

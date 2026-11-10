@@ -6,8 +6,8 @@
  const money=v=>'Rp'+Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:0});
  const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  const labels={initial:'Stock Awal',receipt:'Barang Masuk',expense:'Pengeluaran',production:'Produksi WIP',sales:'Sales',close:'Stock Opname',move_in:'Move Masuk',adjustment:'Penyesuaian Move',adjustment_in:'Penyesuaian Move Masuk'};
- const formHelp={initial:'Isi stok pertama untuk seluruh bahan, suplies, dan WIP, termasuk angka 0.',receipt:'Catat bahan dan suplies yang diterima. Total harga invoice per barang boleh dikosongkan.',expense:'Catat barang yang digunakan atau dipindahkan sesuai kategori pengeluaran.',production:'Isi jumlah batch. Hasil WIP dihitung otomatis sesuai resep.',sales:'Pilih rentang tanggal, lalu isi total terjual setiap menu dalam satu form.',close:'Cocokkan stok sistem dengan fisik. Isi seluruh barang, termasuk angka 0.'};
- let form=null,busy=false,notice='',targetRows=[],viewGeneration=0,draftSaved=false;
+ const formHelp={initial:'Isi stok pertama untuk seluruh bahan, suplies, dan WIP, termasuk angka 0.',receipt:'Catat bahan dan suplies yang diterima. Simpan Transaksi langsung menambah stok; Simpan Draft untuk isian yang belum selesai.',expense:'Catat barang yang digunakan atau dipindahkan. Simpan Transaksi langsung mengurangi stok; Simpan Draft belum mengubah stok.',production:'Isi jumlah batch. Simpan Transaksi langsung memproses bahan dan hasil WIP; Simpan Draft belum mengubah stok.',sales:'Pilih rentang tanggal, lalu isi total terjual setiap menu dalam satu form.',close:'Cocokkan stok sistem dengan fisik. Isi seluruh barang, termasuk angka 0.'};
+ let form=null,busy=false,notice='',targetRows=[],viewGeneration=0,draftSaved=false,activeConfirm=null;
  const page=()=>document.getElementById('page-stock-opname');
  const get=()=>service.current();
  function period(){const ps=get()?.state?.periods||[];const p=ps.at(-1);return p?.status==='held'?ps.at(-2):p;}
@@ -22,15 +22,45 @@
   const n=document.getElementById('soDraftStatus');if(n)n.textContent=draftStatus();
   return draftSaved;
  }
- function reset(){viewGeneration++;form=null;notice='';targetRows=[];busy=false;draftSaved=false;service.reset();}
- async function initialize(client,context){viewGeneration++;form=null;notice='';targetRows=[];draftSaved=false;await service.initialize(client,context);navigation();}
+ function reset(){activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];busy=false;draftSaved=false;service.reset();}
+ async function initialize(client,context){activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];draftSaved=false;await service.initialize(client,context);navigation();}
  function navigation(){const n=document.querySelector('[data-page="stock-opname"]');if(n)n.style.display=service.available()?'':'none';}
  function button(label,action,extra='',primary=false){return '<button type="button" data-so-action="'+action+'" '+extra+' class="'+(primary?'so-primary':'')+'" '+(busy?'disabled':'')+'>'+e(label)+'</button>';}
- function open(kind,existing){
+ function hasDraftContent(draft){
+  return !!draft&&(!!draft.id||!!draft.touched||Object.values(draft.counts||{}).some(value=>value&&[value.qty,value.invoice_total].some(v=>v!=null&&String(v).trim()!==''))||draft.kind==='expense'&&draft.category&&draft.category!=='Waste'||!!draft.target||Object.values(draft.mapping||{}).some(Boolean));
+ }
+ function confirmStock(message,title='Konfirmasi Stock Opname',acceptLabel='Lanjutkan'){
+  activeConfirm?.(false);
+  return new Promise(resolve=>{
+   const previous=document.activeElement,dialog=document.createElement('dialog');
+   dialog.className='so-confirm-dialog';
+   dialog.setAttribute('aria-labelledby','soConfirmTitle');
+   dialog.setAttribute('aria-describedby','soConfirmMessage');
+   dialog.innerHTML='<h2 id="soConfirmTitle"></h2><p id="soConfirmMessage"></p><div class="so-confirm-actions"><button type="button" data-so-decline>Batal</button><button type="button" data-so-accept></button></div>';
+   dialog.querySelector('#soConfirmTitle').textContent=title;
+   dialog.querySelector('#soConfirmMessage').textContent=message;
+   dialog.querySelector('[data-so-accept]').textContent=acceptLabel;
+   let finished=false;
+   const finish=approved=>{
+    if(finished)return;finished=true;activeConfirm=null;
+    dialog.close();dialog.remove();
+    if(previous?.isConnected)previous.focus();
+    resolve(approved);
+   };
+   activeConfirm=finish;
+   dialog.querySelector('[data-so-decline]').addEventListener('click',()=>finish(false));
+   dialog.querySelector('[data-so-accept]').addEventListener('click',()=>finish(true));
+   dialog.addEventListener('cancel',ev=>{ev.preventDefault();finish(false);});
+   dialog.addEventListener('click',ev=>{if(ev.target===dialog)finish(false);});
+   document.body.appendChild(dialog);dialog.showModal();
+   dialog.querySelector('[data-so-decline]').focus();
+  });
+ }
+ async function open(kind,existing){
   if(kind==='initial'&&period()){notice='Stock Awal pertama sudah diisi. Berikutnya gunakan konfirmasi hasil opname.';render();return;}
-  if((form||service.loadDraft())&&!root.confirm('Draft sebelumnya akan ditimpa oleh form baru. Lanjutkan? Pilih Batal lalu Pulihkan Draft untuk melanjutkan isian lama.'))return false;
+  if((hasDraftContent(form)||hasDraftContent(service.loadDraft()))&&!await confirmStock('Draft yang sudah diisi akan diganti. Pilih Batal lalu Pulihkan Draft untuk melanjutkan isian lama.','Ganti form yang sedang diisi?','Ganti form'))return false;
   const d=existing?(get().state.documents||[]).find(x=>x.id===existing):null;
-  form={kind,request:crypto.randomUUID(),id:d?.id||null,start:d?.start||today(),end:d?.end||today(),counts:{},category:d?.category||'Waste',target:d?.target||'',mapping:{},basePeriod:period()?.id||null};
+  form={kind,request:crypto.randomUUID(),id:d?.id||null,start:d?.start||today(),end:d?.end||today(),counts:{},category:d?.category||'Waste',target:d?.target||'',mapping:{},basePeriod:period()?.id||null,touched:false};
   if(d)for(const l of d.lines||[])form.counts[l.key]={qty:String(l.qty),unit:l.unit||'',invoice_total:l.invoice_total??''};
   if(kind==='close'&&period()?.status==='reopened'){
    form.end=period().end;form.start=period().start;
@@ -114,9 +144,9 @@
   if(isMove&&!form.target)throw Error('Pilih tujuan Move yang sudah aktif sebelum menyimpan.');
   const input={id:form.id||undefined,type:k,start:k==='sales'?form.start:form.end,end:form.end,date:form.end,counts,lines,category:k==='expense'?form.category:null,target:isMove?form.target:null,mapping:isMove?Object.entries(form.mapping||{}).map(([source,target])=>({source,target})):[]};
   if(!['initial','close'].includes(k)&&!lines.length)throw Error('Isi minimal satu jumlah lebih dari 0.');
-  if(!root.confirm(k==='close'?'Hitung seluruh transaksi periode ini dan selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal pertama?':'Simpan transaksi ini?'))return;
+  if(!await confirmStock(k==='close'?'Hitung seluruh transaksi periode ini dan selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal pertama?':'Simpan transaksi ini?',k==='close'?'Selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal?':'Simpan transaksi?',k==='close'?'Selesaikan':'Simpan'))return;
   try{await service.write(['initial','close'].includes(k)?k:'save',input,form.request);}
-  catch(error){if(error.message.includes('SALES_OVERLAP')&&root.confirm('Rentang Sales bertumpuk. Simpan sebagai tambahan, bukan pengganti?'))await service.write('save',{...input,confirm_overlap:true},form.request);else throw error;}
+  catch(error){if(error.message.includes('SALES_OVERLAP')&&await confirmStock('Rentang Sales bertumpuk. Simpan sebagai tambahan, bukan pengganti?','Rentang Sales bertumpuk','Simpan tambahan'))await service.write('save',{...input,confirm_overlap:true},form.request);else throw error;}
   service.clearDraft();form=null;notice='Berhasil tersimpan.';
   // Reload shared catalog after invoice updates so other master pages see the new price.
   if(k==='receipt'){const ctx=root.AppAuth.getContext();await root.MasterDataStore.initialize(root.AppAuth.getClient(),ctx.workspaceId,ctx.activeDivisionId);}
@@ -125,26 +155,26 @@
   if(busy)return;
   const token=viewGeneration;busy=true;
   try{
-   if(name==='open'){open(el.dataset.soKind);return;}
+   if(name==='open'){await open(el.dataset.soKind);return;}
    if(name==='cancel'){if(snapshot())form=null;return;}
    if(name==='draft'){if(snapshot())notice='Draft tersimpan di perangkat.';return;}
    if(name==='restore'){await restore();return;}
    if(name==='master'){root.go(el.dataset.soPage||'master-items');return;}
    if(name==='refresh'){const saved=snapshot();await service.read();if(saved)notice='Data terbaru dimuat. Draft tetap tersedia.';return;}
-   if(name==='configure'){if(root.confirm('Ubah aktivasi Stock Opname pada divisi yang dipilih?'))await service.configure(!get().enabled);return;}
-   if(name==='edit'){const doc=get().state.documents.find(d=>d.id===el.dataset.soId);if(open(doc.type,doc.id)&&doc.target)targetRows=await service.targetCatalog(doc.target);return;}
+   if(name==='configure'){if(await confirmStock('Ubah aktivasi Stock Opname pada divisi yang dipilih?','Ubah akses Stock Opname?','Ubah akses'))await service.configure(!get().enabled);return;}
+   if(name==='edit'){const doc=get().state.documents.find(d=>d.id===el.dataset.soId);if(await open(doc.type,doc.id)&&doc.target)targetRows=await service.targetCatalog(doc.target);return;}
    if(name==='submit'){await submit();return;}
    if(name==='adjust'){
     const doc=get().state.documents.find(d=>d.id===el.dataset.soId);
-    if(root.confirm('Buat pembalikan Move di periode aktif kedua divisi? Setelah itu buat Move baru dengan jumlah yang benar.')){
+    if(await confirmStock('Buat pembalikan Move di periode aktif kedua divisi? Setelah itu buat Move baru dengan jumlah yang benar.','Penyesuaian Move?','Buat penyesuaian')){
      await service.write('adjust_move',{id:doc.id},crypto.randomUUID());notice='Penyesuaian Move tersimpan. Buat Move baru jika diperlukan.';
     }return;
    }
    if(name==='void'){
     const doc=get().state.documents.find(d=>d.id===el.dataset.soId);
-    if(root.confirm('Batalkan transaksi ini? Stok akan dihitung kembali.'))await service.write('void',{id:doc.id},crypto.randomUUID());return;
+    if(await confirmStock('Batalkan transaksi ini? Stok akan dihitung kembali.','Batalkan transaksi?','Batalkan transaksi'))await service.write('void',{id:doc.id},crypto.randomUUID());return;
    }
-   if(['activate','reactivate','reopen'].includes(name)&&root.confirm(name==='reopen'?'Buka kembali opname terakhir? Periode berikutnya ditahan sampai koreksi dikonfirmasi.':'Konfirmasi stok fisik sebagai Stock Awal periode berikutnya?')){
+   if(['activate','reactivate','reopen'].includes(name)&&await confirmStock(name==='reopen'?'Buka kembali opname terakhir? Periode berikutnya ditahan sampai koreksi dikonfirmasi.':'Konfirmasi stok fisik sebagai Stock Awal periode berikutnya?',name==='reopen'?'Buka kembali opname?':'Aktifkan Stock Awal?',name==='reopen'?'Buka kembali':'Aktifkan')){
     await service.write(name,{},crypto.randomUUID());notice=name==='reopen'?'Opname dibuka kembali. Koreksi transaksi atau stok fisik, lalu selesaikan ulang.':'Stock Awal dikonfirmasi. Draft transaksi dapat dipulihkan dan disimpan.';
    }
   }catch(error){if(token===viewGeneration)notice=error.message;}
@@ -156,6 +186,7 @@
   if(el.dataset.soKey){const key=el.dataset.soKey;form.counts[key]={...form.counts[key],[el.dataset.soProp]:el.value};if(form.kind==='production'){const row=catalog().find(x=>x.key===key);const output=el.closest('tr')?.querySelector('[data-so-output]');if(row&&output)output.textContent='Hasil: '+number(Number(el.value||0)*Number(row.yield))+' '+row.unit+' · 1 batch = '+number(row.yield)+' '+row.unit;}}
   else if(el.dataset.soMap)form.mapping[el.dataset.soMap]=el.value;
   else if(el.dataset.soField)form[el.dataset.soField]=el.value;
+  form.touched=true;
   if(el.dataset.soKey&&['initial','close'].includes(form.kind)){const row=catalog().find(r=>r.key===el.dataset.soKey),output=el.closest('tr')?.querySelector('[data-so-conversion]');if(row&&output)output.textContent=countConversion(row);}
   snapshot();
  });

@@ -19,11 +19,24 @@ function runtime() {
   const copy = value => JSON.parse(JSON.stringify(value));
   const w = {
     Intl, Date, Number, crypto: { randomUUID: () => 'request' },
-    confirm: message => { confirmations.push(message); return allowConfirm; },
+    confirm: () => { throw Error('Stock Opname must not use a browser confirmation'); },
     addEventListener() {},
     document: {
       getElementById: id => id === 'page-stock-opname' ? page : null,
-      addEventListener: (name, fn) => handlers[name] = fn
+      addEventListener: (name, fn) => handlers[name] = fn,
+      body: { appendChild() {} },
+      createElement(name) {
+        assert.equal(name, 'dialog');
+        const buttons = Object.fromEntries(['[data-so-accept]', '[data-so-decline]'].map(key => [key, {
+          addEventListener(type, fn) { this[type] = fn; },
+          focus() { queueMicrotask(() => buttons[allowConfirm ? '[data-so-accept]' : '[data-so-decline]'].click()); }
+        }]));
+        const message = { set textContent(value) { confirmations.push(value); } };
+        return {
+          setAttribute() {}, close() {}, remove() {}, showModal() {}, addEventListener() {},
+          querySelector(key) { return key === '#soConfirmMessage' ? message : buttons[key] || {}; }
+        };
+      }
     },
     AppAuth: { getContext: () => ({}), getClient: () => ({}) },
     MasterDataStore: { initialize: async () => {} },
@@ -57,7 +70,7 @@ function runtime() {
 
 for (const [kind, key] of [['receipt', 'm:a'], ['production', 'w:a'], ['sales', 's:a']]) {
   test(kind + ' does not send an expense category', async () => {
-    const t = runtime(); t.ui.open(kind);
+    const t = runtime(); await t.ui.open(kind);
     t.input({ soKey: key, soProp: 'qty' }, '5');
     await t.click('submit');
     assert.equal(t.writes.length, 1);
@@ -66,12 +79,12 @@ for (const [kind, key] of [['receipt', 'm:a'], ['production', 'w:a'], ['sales', 
 }
 
 test('closed local draft survives declining a replacement and can be restored', async () => {
-  const t = runtime(); t.ui.open('expense');
+  const t = runtime(); await t.ui.open('expense');
   t.input({ soKey: 'm:a', soProp: 'qty' }, '9');
-  await t.click('cancel'); t.confirm(false); t.ui.open('receipt');
+  await t.click('cancel'); t.confirm(false); await t.ui.open('receipt');
   assert.equal(t.draft().kind, 'expense');
   assert.equal(t.draft().counts['m:a'].qty, '9');
-  assert.match(t.confirmations.at(-1), /ditimpa/);
+  assert.match(t.confirmations.at(-1), /akan diganti/);
   await t.click('restore'); t.confirm(true); await t.click('submit');
   assert.equal(t.writes[0].input.type, 'expense');
   assert.equal(t.writes[0].input.category, 'Waste');
@@ -79,15 +92,41 @@ test('closed local draft survives declining a replacement and can be restored', 
 });
 
 test('explicit replacement confirmation allows a new draft', async () => {
-  const t = runtime(); t.ui.open('expense');
+  const t = runtime(); await t.ui.open('expense');
   t.input({ soKey: 'm:a', soProp: 'qty' }, '9');
-  await t.click('cancel'); t.ui.open('receipt');
+  await t.click('cancel'); await t.ui.open('receipt');
   assert.equal(t.draft().kind, 'receipt');
-  assert.match(t.confirmations.at(-1), /ditimpa/);
+  assert.match(t.confirmations.at(-1), /akan diganti/);
+});
+
+test('switching blank forms does not ask to replace a draft', async () => {
+  const t = runtime(); await t.ui.open('production');
+  await t.ui.open('receipt');
+  await t.click('cancel');
+  await t.ui.open('sales');
+  assert.equal(t.confirmations.length, 0);
+  assert.equal(t.draft().kind, 'sales');
+});
+
+test('entered zero is still protected when changing forms', async () => {
+  const t = runtime(); await t.ui.open('close');
+  t.input({ soKey: 'm:a', soProp: 'qty' }, '0');
+  t.confirm(false); await t.ui.open('expense');
+  assert.equal(t.draft().kind, 'close');
+  assert.match(t.confirmations[0], /akan diganti/);
+});
+
+test('changed date alone is protected as an unfinished draft', async () => {
+  const t = runtime(); await t.ui.open('sales');
+  t.input({ soField: 'start' }, '2026-10-20');
+  t.confirm(false); await t.ui.open('receipt');
+  assert.equal(t.draft().kind, 'sales');
+  assert.equal(t.draft().start, '2026-10-20');
+  assert.match(t.confirmations[0], /akan diganti/);
 });
 
 test('storage failure keeps the form open and never claims a draft was saved', async () => {
-  const t = runtime(); t.ui.open('expense'); t.storageFails(true);
+  const t = runtime(); await t.ui.open('expense'); t.storageFails(true);
   t.input({ soKey: 'm:a', soProp: 'qty' }, '9');
   await t.click('draft');
   assert.match(t.page.innerHTML, /Penyimpanan perangkat penuh/);
@@ -99,7 +138,7 @@ test('storage failure keeps the form open and never claims a draft was saved', a
 });
 
 test('Move with no active destination never submits a one-sided expense', async () => {
-  const t = runtime(); t.ui.open('expense');
+  const t = runtime(); await t.ui.open('expense');
   t.input({ soField: 'category' }, 'Move');
   t.input({ soKey: 'm:a', soProp: 'qty' }, '9');
   await t.click('submit');
@@ -109,7 +148,7 @@ test('Move with no active destination never submits a one-sided expense', async 
 });
 
 test('failed transaction keeps its draft and reuses the same request on retry', async () => {
-  const t = runtime(); t.ui.open('expense');
+  const t = runtime(); await t.ui.open('expense');
   t.input({ soKey: 'm:a', soProp: 'qty' }, '9'); t.writeFails(true);
   await t.click('submit');
   assert.equal(t.draft().counts['m:a'].qty, '9');
@@ -120,9 +159,9 @@ test('failed transaction keeps its draft and reuses the same request on retry', 
   assert.equal(t.draft(), null);
 });
 
-test('counting form separates system stock and converted physical quantity for desktop', () => {
+test('counting form separates system stock and converted physical quantity for desktop', async () => {
   const t = runtime(); t.data.catalog[0].units.push({ unit: 'Botol', factor: 1000 });
-  t.ui.open('close');
+  await t.ui.open('close');
   assert.match(t.page.innerHTML, /so-desktop-only so-stock">Stok sistem/);
   assert.match(t.page.innerHTML, /so-desktop-only so-conversion">Konversi fisik/);
   assert.match(t.page.innerHTML, /data-so-conversion="m:a">—/);
@@ -132,9 +171,9 @@ test('counting form separates system stock and converted physical quantity for d
   assert.match(t.page.innerHTML, /class="so-system-mobile">Sistem:/);
 });
 
-test('missing recipe disables its input and offers master-data navigation', () => {
+test('missing recipe disables its input and offers master-data navigation', async () => {
   const t = runtime(); t.data.catalog[1].error = 'Resep WIP belum lengkap';
-  t.ui.open('production');
+  await t.ui.open('production');
   assert.match(t.page.innerHTML, /Resep WIP belum lengkap/);
   assert.match(t.page.innerHTML, /aria-label="Produksi WIP WIP" value="" disabled/);
   assert.match(t.page.innerHTML, /data-so-page="wips"/);
