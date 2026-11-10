@@ -4,6 +4,10 @@
 
 See `dialog-draft-2026-11-11.md` for the Android confirmation fix, blank-draft behavior, operational transaction guidance, security boundaries, and remaining device checks. Merge/deploy status is recorded in its implementing PR. No database change is involved.
 
+## Draft retention follow-up — 11 November 2026
+
+See `draft-retention-2026-11-11.md` for the fix that keeps separate local drafts for each Stock Opname form type when users switch between forms. It retains the existing account/workspace/division-scoped localStorage key. PR and deployment status are recorded in that follow-up; there is no database change.
+
 ## UI follow-up — 11 November 2026
 
 See `ui-polish-2026-11-11.md` for the FAB overlap/icon fix and shared form styling requested after rollout. This is a frontend-only follow-up with no new migration; its merge/deploy status is tracked separately in the implementing PR. It does not change the database deployment recorded below.

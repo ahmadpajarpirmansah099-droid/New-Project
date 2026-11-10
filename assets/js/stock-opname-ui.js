@@ -58,7 +58,15 @@
  }
  async function open(kind,existing){
   if(kind==='initial'&&period()){notice='Stock Awal pertama sudah diisi. Berikutnya gunakan konfirmasi hasil opname.';render();return;}
-  if((hasDraftContent(form)||hasDraftContent(service.loadDraft()))&&!await confirmStock('Draft yang sudah diisi akan diganti. Pilih Batal lalu Pulihkan Draft untuk melanjutkan isian lama.','Ganti form yang sedang diisi?','Ganti form'))return false;
+  if(form&&!snapshot())return false;
+  const saved=service.loadDraft(kind);
+  if(existing&&hasDraftContent(saved)&&saved.id!==existing&&!await confirmStock('Draft '+labels[kind]+' yang tersimpan akan diganti.','Ganti draft tersimpan?','Ganti draft'))return false;
+  if(existing&&saved?.id!==existing)service.clearDraft(kind);
+  if(saved&&!existing){
+   form=saved;draftSaved=true;notice='Draft '+labels[kind]+' dipulihkan. Lanjutkan isian.';
+   if(form.target)targetRows=await service.targetCatalog(form.target);
+   render();return true;
+  }
   const d=existing?(get().state.documents||[]).find(x=>x.id===existing):null;
   form={kind,request:crypto.randomUUID(),id:d?.id||null,start:d?.start||today(),end:d?.end||today(),counts:{},category:d?.category||'Waste',target:d?.target||'',mapping:{},basePeriod:period()?.id||null,touched:false};
   if(d)for(const l of d.lines||[])form.counts[l.key]={qty:String(l.qty),unit:l.unit||'',invoice_total:l.invoice_total??''};
@@ -70,7 +78,7 @@
  }
  async function restore(){const draft=service.loadDraft();if(!draft){notice='Belum ada draft di perangkat ini.';render();return;}
   if(draft.basePeriod && draft.basePeriod!==period()?.id && ['initial','close'].includes(draft.kind)){notice='Draft berasal dari periode berbeda. Periksa melalui riwayat; draft tidak dipindahkan otomatis.';render();return;}
-  form=draft;draftSaved=true;notice='Draft perangkat dipulihkan. Periksa tanggal dan jumlah sebelum menyimpan.';if(form.target)targetRows=await service.targetCatalog(form.target);render();
+  form=draft;draftSaved=true;notice='Draft perangkat '+labels[form.kind]+' dipulihkan. Periksa tanggal dan jumlah sebelum menyimpan.';if(form.target)targetRows=await service.targetCatalog(form.target);render();
  }
  function rowsForForm(){let rows=catalog();const k=form.kind;
   if(k==='sales')rows=rows.filter(x=>x.key.startsWith('s:'));
@@ -147,7 +155,7 @@
   if(!await confirmStock(k==='close'?'Hitung seluruh transaksi periode ini dan selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal pertama?':'Simpan transaksi ini?',k==='close'?'Selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal?':'Simpan transaksi?',k==='close'?'Selesaikan':'Simpan'))return;
   try{await service.write(['initial','close'].includes(k)?k:'save',input,form.request);}
   catch(error){if(error.message.includes('SALES_OVERLAP')&&await confirmStock('Rentang Sales bertumpuk. Simpan sebagai tambahan, bukan pengganti?','Rentang Sales bertumpuk','Simpan tambahan'))await service.write('save',{...input,confirm_overlap:true},form.request);else throw error;}
-  service.clearDraft();form=null;notice='Berhasil tersimpan.';
+  service.clearDraft(k);form=null;notice='Berhasil tersimpan.';
   // Reload shared catalog after invoice updates so other master pages see the new price.
   if(k==='receipt'){const ctx=root.AppAuth.getContext();await root.MasterDataStore.initialize(root.AppAuth.getClient(),ctx.workspaceId,ctx.activeDivisionId);}
  }
