@@ -246,13 +246,23 @@
      const qty=Number(l.qty),unit=String(l.unit||'');
      if(!Number.isFinite(qty)||!qty)continue;
      const direction=qty<0?'out':'in';
-     const key=String(l.key||l.name)+'|'+unit+'|'+direction;
-     if(!totals.has(key))totals.set(key,{name:l.name||l.key||'Barang',unit,qty:0,direction});
+     const category=historyKind==='expense'?(d.category||({'move_in':'Move Masuk','adjustment':'Penyesuaian Move','adjustment_in':'Penyesuaian Move Masuk'}[d.type])||'Lainnya'):'';
+     const key=JSON.stringify([category,l.key||l.name,unit,direction]);
+     if(!totals.has(key))totals.set(key,{name:l.name||l.key||'Barang',unit,qty:0,direction,category});
      totals.get(key).qty+=Math.abs(qty);
     }
    }
    const materials=[...totals.values()].filter(v=>v.qty>0).sort((a,b)=>a.name.localeCompare(b.name,'id'));
-   const lines=materials.map(m=>'<div class="so-date-material-row"><span>'+e(m.name)+(historyKind==='expense'&&m.direction==='in'?'<small>Masuk / penyesuaian</small>':'')+'</span><strong>'+number(m.qty)+' '+e(m.unit)+'</strong></div>').join('');
+   const row=m=>'<div class="so-date-material-row"><span>'+e(m.name)+(historyKind==='expense'&&m.direction==='in'?'<small>Masuk / penyesuaian</small>':'')+'</span><strong>'+number(m.qty)+' '+e(m.unit)+'</strong></div>';
+   let lines='';
+   if(historyKind==='expense'){
+    const categories=new Map();
+    for(const material of materials){
+     if(!categories.has(material.category))categories.set(material.category,[]);
+     categories.get(material.category).push(material);
+    }
+    lines=[...categories.entries()].sort((a,b)=>a[0].localeCompare(b[0],'id')).map(([category,items])=>'<section class="so-date-material-category"><h4>'+e(category)+'</h4>'+items.map(row).join('')+'</section>').join('');
+   }else lines=materials.map(row).join('');
    const transactions=entries.map(d=>'<li class="so-history-compact"><div class="so-history-entry"><div><strong>'+e(labels[d.type]||d.type)+(d.category&&['expense','adjustment'].includes(d.type)?' · '+e(d.category):'')+'</strong></div>'+(d.void?'<span class="so-history-tag is-void">Dibatalkan</span>':'')+'</div><details><summary>Rincian transaksi</summary><div class="so-opening-lines">'+(d.postings||[]).map(l=>'<div><span>'+e(l.name)+'</span><strong>'+number(l.qty)+' '+e(l.unit)+'</strong></div>').join('')+'</div></details>'+(!d.void&&d.period_id===p?.id&&['active','reopened'].includes(p?.status)&&!['move_in','adjustment_in','adjustment'].includes(d.type)?'<div class="so-history-actions">'+button('Edit','edit','data-so-id="'+e(d.id)+'"')+button('Batalkan','void','data-so-id="'+e(d.id)+'"')+'</div>':'')+(!d.void&&d.category==='Move'&&d.type==='expense'?'<div class="so-history-actions">'+button('Penyesuaian Move','adjust','data-so-id="'+e(d.id)+'"')+'</div>':'')+'</li>').join('');
    return '<li class="so-history-date"><details><summary><span>'+e(dateLabel(day))+'</span><small>'+number(entries.length)+' transaksi</small></summary><div class="so-date-materials">'+(lines||'<p class="so-sales-unavailable">Tidak ada pemakaian aktif pada tanggal ini.</p>')+'</div><details class="so-date-original-transactions"><summary>Transaksi asli ('+number(entries.length)+')</summary><ul class="so-history so-history-nested">'+transactions+'</ul></details></details></li>';
   }).join('');
