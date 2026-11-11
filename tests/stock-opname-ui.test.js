@@ -129,6 +129,15 @@ test('stock opname dates and selections render as in-app web controls', async ()
   assert.doesNotMatch(t.page.innerHTML, /<select\b/);
 });
 
+test('opname results show two compact rows and keep full movements expandable', () => {
+  const t = runtime();
+  t.data.state.periods[0].result = [{ name: 'Apple Juice', unit: 'ML', opening: 2388, movements: { sales: -300, receipt: 6000 }, system: 8088, physical: 5781, variance: -2307, price: 47, variance_value: -108429 }];
+  t.ui.render();
+  assert.match(t.page.innerHTML, /class="so-result-item"><summary><span class="so-result-top"/);
+  assert.match(t.page.innerHTML, /class="so-result-bottom"><span>Sistem 8\.088 → Fisik 5\.781 ML<\/span><span>Selisih -2\.307 ML/);
+  assert.match(t.page.innerHTML, /<dt>Stock Awal<\/dt>.*<dt>Sales<\/dt>.*<dt>Barang Masuk<\/dt>.*<dt>Harga \/ ML<\/dt>/);
+});
+
 test('storage failure keeps the form open and never claims a draft was saved', async () => {
   const t = runtime(); await t.ui.open('expense'); t.storageFails(true);
   t.input({ soKey: 'm:a', soProp: 'qty' }, '9');
