@@ -31,5 +31,6 @@ Popup pemilih tanggal dan satuan pada Android tampil dengan tema gelap sistem, b
 ## Verifikasi, keterbatasan, dan rollout
 
 - `node --check assets/js/stock-opname-ui.js` lulus; `node --test tests/*.test.js` lulus 80/80; `git diff --check` lulus.
-- Tes memastikan struktur kontrol, bukan interaksi visual browser Android. Perlu cek setelah deploy pada HP: pilih tanggal, batalkan, ganti bulan, pilih satuan, kategori, serta tujuan/mapping Move.
-- Belum merged atau live saat catatan ini dibuat. Tidak ada migration database.
+- Tes memastikan struktur kontrol, bukan interaksi visual browser Android. PR #232 merged pada `75587b8f32f21d0964a362510b1bea3ccc16764b`; deploy Actions #1006 sukses.
+- Pemeriksaan pada HP menemukan tombol Tutup terpotong dan baris pilihan terlalu tinggi. Follow-up CSS PR #233 mengatur lebar tombol Tutup dan tinggi kalender/daftar; cek langsung Android tetap diperlukan setelah follow-up deploy.
+- Tidak ada migration database.

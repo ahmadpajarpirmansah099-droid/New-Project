@@ -53,7 +53,10 @@
 .so-picker-dialog > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--ui-line); }
 .so-picker-dialog > header h2 { margin: 0; font: 800 17px/1.35 var(--ui-heading-font); }
 .so-picker-dialog > header button, .so-picker-dialog footer button { min-height: 42px; padding: 8px 14px; border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface); color: var(--ui-ink); font: 700 13px var(--ui-font); cursor: pointer; }
-.so-picker-dialog > header button { width: 38px; min-height: 38px; padding: 0; font-size: 22px; }
+.so-picker-dialog > header button { flex: 0 0 auto; width: auto; min-width: 64px; min-height: 36px; height: 36px; padding: 0 10px; font-size: 12px; line-height: 1; white-space: nowrap; }
+.so-choice-list button { height: 48px !important; min-height: 48px !important; padding: 8px 12px !important; }
+.so-calendar-nav button { height: 42px !important; min-height: 42px !important; padding: 0 !important; }
+.so-calendar-grid button { height: 44px !important; min-height: 44px !important; padding: 0 !important; }
 .so-picker-content { max-height: min(580px,calc(100dvh - 150px)); overflow-y: auto; padding: 16px 20px; }
 .so-choice-list { display: grid; gap: 6px; }
 .so-choice-list button { display: flex; justify-content: space-between !important; width: 100%; min-height: 48px !important; text-align: left; box-shadow: none !important; }
