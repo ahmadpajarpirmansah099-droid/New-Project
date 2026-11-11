@@ -8,6 +8,13 @@ Aplikasi web operasional outlet untuk mengelola kedatangan tamu, data master, da
 - Gunakan menu cepat `+` untuk Tambah Tamu, Waiting List, Riwayat, dan Reservasi. Data antrean hari ini dapat diekspor sebagai CSV.
 - Pengaturan memuat preferensi operasional. Panduan Pengguna dapat dibuka dari menu aplikasi.
 
+## Tampilan dan navigasi
+
+- Pada desktop lebar (1280 px ke atas), area kerja menggunakan layout tanpa header atas dan navigasi kiri tetap tersedia.
+- Dropdown Outlet dan Divisi hanya ditampilkan di Dashboard agar tidak menutupi judul atau kontrol di halaman fitur lain.
+- Tampilan mobile tetap mengikuti layout responsif aplikasi.
+
+
 ## Master Data
 
 - **Master Barang** menyimpan bahan, satuan, konversi, dan harga.
@@ -23,7 +30,7 @@ Aplikasi web operasional outlet untuk mengelola kedatangan tamu, data master, da
 
 Riwayat tersedia per fitur dan dikelompokkan per tanggal. Barang Masuk menampilkan total per bahan. Pengeluaran menampilkan total per bahan dan kategori. Ringkasan kedua fitur mencakup seluruh transaksi aktif pada tanggal tersebut, sementara catatan asli tetap dapat dibuka. Sales menampilkan menu dan jumlah terjual serta rincian pemakaian bahan jika catatan transaksi menyediakannya.
 
-Form hitung fisik menampilkan satu bahan per baris di HP. Draft form tersimpan pada perangkat yang sama. Developer mengatur aktivasi per outlet dan divisi, sementara admin divisi yang ditugaskan mengerjakan transaksi. Aktivasi awal tercatat untuk Lazy Jennie / Bar. Impor dan ekspor Excel Stock Opname direncanakan untuk tahap 2. [Dokumentasi Stock Opname](docs/stock-opname/implementation.md)
+Form hitung fisik menampilkan satu bahan per baris di HP. Draft form tersimpan pada perangkat yang sama. Developer mengatur aktivasi per outlet dan divisi, sementara admin divisi yang ditugaskan mengerjakan transaksi. Impor dan ekspor Excel Stock Opname direncanakan untuk tahap 2. [Dokumentasi Stock Opname](docs/stock-opname/implementation.md)
 
 ## Akses dan monitoring
 
@@ -45,7 +52,14 @@ Jalankan pemeriksaan otomatis dengan Node.js.
 node --test tests/*.test.js
 ```
 
-Fitur yang terhubung ke backend memerlukan akun berizin di lingkungan yang sesuai. Simpan kredensial di penyimpanan rahasia yang sesuai.
+Fitur yang terhubung ke backend memerlukan akun berizin di lingkungan yang sesuai.
+
+## Rahasia dan akses
+
+- Browser menggunakan URL proyek Supabase dan `SUPABASE_PUBLISHABLE_KEY` untuk koneksi. Publishable key memang ditujukan untuk aplikasi klien dan bukan kunci rahasia.
+- Jangan menaruh nilai `service_role`, kata sandi database, token privat, atau kredensial operator di HTML, CSS, JavaScript, README, atau commit Git.
+- Edge Function `auth-login` membaca kredensial privat dari environment Supabase Functions. Simpan nilainya di pengaturan secrets Supabase, bukan di source code.
+- Hak akses harus ditegakkan oleh backend dan kebijakan RLS; menyembunyikan tombol atau halaman di frontend bukan batas keamanan.
 
 | Lokasi | Isi |
 | --- | --- |
