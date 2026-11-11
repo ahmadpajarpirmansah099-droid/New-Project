@@ -214,3 +214,9 @@
 .so-confirm-actions button:focus-visible { outline: 2px solid var(--ui-olive); outline-offset: 3px; }
 @keyframes so-confirm-in { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .so-confirm-dialog[open] { animation: none; } }
+
+/* Group operational history by date without changing transaction details. */
+.so-history-date > details > summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;font-weight:700;padding:14px 16px}
+.so-history-date > details > summary small{font-size:.8em;font-weight:500;opacity:.7}
+.so-history-nested{margin:0 12px 12px;padding:0;list-style:none}
+.so-history-nested > li{margin-bottom:8px}
