@@ -230,3 +230,15 @@
 .so-sales-menu .so-opening-lines{border-top:1px solid var(--so-line);border-radius:0;padding:4px 12px}
 .so-sales-unavailable{margin:0;padding:12px;color:var(--so-muted);font-size:12px}
 .so-history .so-sales-fallback{margin:0}
+
+/* Barang Masuk: add one searched item at a time, then edit its transaction line. */
+.so-receipt-search{position:relative;margin:16px 0;padding:14px;border:1px solid var(--so-line);border-radius:var(--ui-radius-control);background:var(--ui-surface-soft)}
+.so-receipt-search label{display:block;margin-bottom:8px;font-size:13px;font-weight:700}
+#page-stock-opname .so-receipt-search input{width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--so-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);font:inherit;box-sizing:border-box}
+#page-stock-opname .so-receipt-search input:focus-visible{outline:2px solid var(--ui-olive);outline-offset:2px}
+.so-receipt-search-results{display:grid;gap:4px;margin-top:8px;max-height:265px;overflow-y:auto}
+.so-receipt-search-results p{margin:3px 0;color:var(--so-muted);font-size:12px}
+#page-stock-opname .so-receipt-search-results button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:42px;text-align:left;padding:9px 12px;border:1px solid var(--so-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);box-shadow:none}
+.so-receipt-search-results button span{min-width:0;overflow-wrap:anywhere}
+.so-receipt-search-results button small{flex:0 0 auto;color:var(--so-muted)}
+#page-stock-opname .so-receipt-remove{min-height:30px;padding:4px 9px;margin-top:7px;border:1px solid var(--so-line);border-radius:var(--ui-radius-control);background:transparent;box-shadow:none;font-size:11px}
