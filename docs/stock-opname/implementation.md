@@ -101,3 +101,12 @@ Dense operational ledger, inherited New-Project typography and lime/navy identit
 4. Keterbatasan: pilihan riwayat kembali ke Stock Opname setelah halaman/login dimuat ulang; hal ini tidak memengaruhi data. Tidak ada migrasi, RPC, RLS, autentikasi, atau kunci penyimpanan yang berubah.
 5. Risiko yang masih perlu diuji: tampilan fisik pada akun admin Bar dan perangkat Android 320px setelah deploy; Chromium lokal tidak dapat dijalankan karena sandbox menolak socket.
 6. Verifikasi: 91 tes Node lulus, 0 gagal; `node --check` lulus. Status PR, merge, dan Pages dilaporkan terpisah setelah penerapan.
+
+## 11 November 2026: pergantian Stock Awal harian dan pencarian Barang Masuk
+
+1. Intended behavior: hasil Stock Opname tanggal X menjadi Stock Awal tanggal X+1. Barang Masuk memilih nama barang satu per satu melalui saran pencarian; beberapa barang tetap disimpan bersama sebagai satu transaksi.
+2. Security boundaries: tidak ada perubahan role, RLS, hak akses, RPC publik, struktur tabel, atau data historis transaksi. Fungsi private.so_mutate tetap SECURITY DEFINER dan privilege lama. Kunci waitlist_frontend_demo_v1 tidak disentuh.
+3. Implementation: migrasi Supabase 20261111072028 / stock_opname_next_day_opening_and_lj_bar_date_fix_20261111 memperbaiki activate dan reactivate. Koreksi terjaga pada Bar / Lazy Jennie mengubah hanya tanggal mulai periode kedua dari 2026-11-08 ke 2026-11-09, dan menaikkan revision dari 18 ke 19. Sumber aturan di docs/stock-opname/schema.sql. Form receipt mencari katalog divisi yang sudah berizin dan memelihara pilihan dalam draft lokal; pencarian tidak mengubah stok sebelum submit.
+4. Known limitations: saran pencarian menampilkan hingga delapan barang cocok sekaligus; katalog bergantung pada data yang dimuat untuk divisi aktif. Data lama tidak didistribusikan ulang.
+5. Risk checks: sebelum perubahan, 105 barang tepat sama dengan hasil fisik opname dan belum ada transaksi periode baru. Migrasi mengunci state dan memeriksa revision, status, outlet/divisi, hubungan periode, kesamaan jumlah stok dan ketiadaan transaksi sebelum memperbaiki tanggal. Reactivation menolak transaksi yang lebih awal daripada tanggal Stock Awal baru.
+6. Verification: setelah migrasi tanggal 2026-11-09, 105 barang tidak berubah, total 215 dokumen historis tetap tersimpan, tanpa transaksi pada periode kedua, serta privilege fungsi tetap authenticated:EXECUTE dan postgres:EXECUTE. Pengujian UI ada di tests/stock-opname-ui.test.js. Pemeriksaan manual mobile/desktop masih diperlukan; PR/merge/deploy frontend dicatat di GitHub.
