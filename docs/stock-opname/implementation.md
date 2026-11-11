@@ -8,6 +8,10 @@ See `dialog-draft-2026-11-11.md` for the Android confirmation fix, blank-draft b
 
 See `draft-retention-2026-11-11.md` for the fix that keeps separate local drafts for each Stock Opname form type when users switch between forms. It retains the existing account/workspace/division-scoped localStorage key. PR and deployment status are recorded in that follow-up; there is no database change.
 
+## Web picker follow-up — 11 November 2026
+
+See `web-pickers-2026-11-11.md` for replacing Android-native date and selection popups in Stock Opname with web-styled in-app dialogs. Values and backend flows remain unchanged; rollout is tracked in its implementing PR.
+
 ## UI follow-up — 11 November 2026
 
 See `ui-polish-2026-11-11.md` for the FAB overlap/icon fix and shared form styling requested after rollout. This is a frontend-only follow-up with no new migration; its merge/deploy status is tracked separately in the implementing PR. It does not change the database deployment recorded below.

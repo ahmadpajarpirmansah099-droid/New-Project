@@ -56,6 +56,43 @@
    dialog.querySelector('[data-so-decline]').focus();
   });
  }
+ function pickerDialog(title,content,actions=''){
+  const dialog=document.createElement('dialog');dialog.className='so-picker-dialog';
+  dialog.setAttribute('aria-label',title);
+  dialog.innerHTML='<header><h2>'+e(title)+'</h2><button type="button" data-picker-close>Tutup</button></header><div class="so-picker-content">'+content+'</div>'+actions;
+  document.body.appendChild(dialog);dialog.showModal();
+  dialog.addEventListener('close',()=>dialog.remove(),{once:true});
+  dialog.querySelector('[data-picker-close]').addEventListener('click',()=>dialog.close());
+  dialog.addEventListener('click',ev=>{if(ev.target===dialog)dialog.close();});
+  return dialog;
+ }
+ function dateLabel(value){const d=new Date(value+'T12:00:00');return Number.isNaN(d.getTime())?value:new Intl.DateTimeFormat('id-ID',{day:'numeric',month:'long',year:'numeric'}).format(d);}
+ function openDatePicker(field){
+  let selected=form[field],cursor=new Date((selected||today())+'T12:00:00');cursor.setDate(1);
+  const draw=dialog=>{
+   const year=cursor.getFullYear(),month=cursor.getMonth(),first=(new Date(year,month,1).getDay()+6)%7,days=new Date(year,month+1,0).getDate();
+   let cells='';for(let i=0;i<first;i++)cells+='<span class="so-calendar-empty"></span>';
+   for(let day=1;day<=days;day++){const value=year+'-'+String(month+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');cells+='<button type="button" data-date-value="'+value+'" class="'+(value===selected?'is-selected':'')+'">'+day+'</button>';}
+   dialog.querySelector('.so-calendar-title').textContent=new Intl.DateTimeFormat('id-ID',{month:'long',year:'numeric'}).format(cursor);
+   dialog.querySelector('.so-calendar-grid').innerHTML='<span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span>'+cells;
+  };
+  const d=pickerDialog('Pilih '+(field==='start'?'tanggal awal':'tanggal'),'<div class="so-calendar-nav"><button type="button" data-month="-1" aria-label="Bulan sebelumnya">‹</button><strong class="so-calendar-title"></strong><button type="button" data-month="1" aria-label="Bulan berikutnya">›</button></div><div class="so-calendar-grid"></div><p class="so-calendar-selected"></p>','<footer><button type="button" data-picker-cancel>Batal</button><button type="button" class="so-primary" data-picker-apply>Gunakan tanggal</button></footer>');
+  draw(d);d.querySelector('.so-calendar-selected').textContent=dateLabel(selected);
+  d.querySelectorAll('[data-month]').forEach(btn=>btn.addEventListener('click',()=>{cursor.setMonth(cursor.getMonth()+Number(btn.dataset.month));draw(d);}));
+  d.querySelector('.so-calendar-grid').addEventListener('click',ev=>{const btn=ev.target.closest('[data-date-value]');if(!btn)return;selected=btn.dataset.dateValue;draw(d);d.querySelector('.so-calendar-selected').textContent=dateLabel(selected);});
+  d.querySelector('[data-picker-cancel]').addEventListener('click',()=>d.close());
+  d.querySelector('[data-picker-apply]').addEventListener('click',()=>{if(selected){form[field]=selected;form.touched=true;snapshot();notice='';render();}d.close();});
+ }
+ function openChoicePicker(el){
+  const options=JSON.parse(el.dataset.soOptions||'[]'),field=el.dataset.soField,map=el.dataset.soMap,key=map||el.dataset.soKey;
+  const current=map?form.mapping[key]:key?form.counts[key]?.unit:form[field];
+  const content='<div class="so-choice-list">'+options.map(o=>'<button type="button" data-choice-value="'+e(o.value)+'" class="'+(o.value===current?'is-selected':'')+'"><span>'+e(o.label)+'</span><span class="so-choice-check">'+(o.value===current?'✓':'')+'</span></button>').join('')+'</div>';
+  const d=pickerDialog(el.dataset.soTitle||'Pilih '+(el.getAttribute('aria-label')||''),content);
+  d.querySelector('.so-choice-list').addEventListener('click',async ev=>{const btn=ev.target.closest('[data-choice-value]');if(!btn)return;const value=btn.dataset.choiceValue;
+   if(map)form.mapping[key]=value;else if(key)form.counts[key]={...form.counts[key],unit:value};else form[field]=value;
+   form.touched=true;snapshot();d.close();if(field==='target')try{targetRows=value?await service.targetCatalog(value):[];}catch(error){notice=error.message;}render();
+  });
+ }
  async function open(kind,existing){
   if(kind==='initial'&&period()){notice='Stock Awal pertama sudah diisi. Berikutnya gunakan konfirmasi hasil opname.';render();return;}
   if(form&&!snapshot())return false;
@@ -93,21 +130,23 @@
   return number(Number(value.qty)*Number(factor))+' '+row.unit;
  }
  function masterLinks(){return '<p class="so-notice">Lengkapi master atau resep yang belum tersedia agar input dapat digunakan.</p><div class="so-actions">'+button('Master Barang','master','data-so-page="master-items"')+button('Resep WIP','master','data-so-page="wips"')+button('Menu','master','data-so-page="menus"')+'</div>';}
+ function pickerButton(label,attrs,options){return '<button type="button" class="so-picker-trigger" aria-haspopup="dialog" data-so-action="pick-choice" '+attrs+' data-so-options="'+e(JSON.stringify(options))+'"><span>'+e(label)+'</span><span class="so-picker-chevron" aria-hidden="true"></span></button>';}
  function formHTML(){
   if(!form)return '';
   const k=form.kind,rows=rowsForForm(),b=balances(),isCount=['initial','close'].includes(k),withUnit=!['sales','production'].includes(k),receipt=k==='receipt';
-  const dates='<div class="so-toolbar">'+(k==='sales'?'<label>Dari tanggal<input type="date" data-so-field="start" value="'+e(form.start)+'" required></label>':'')+'<label>'+(k==='sales'?'Sampai tanggal':'Tanggal')+'<input type="date" data-so-field="end" value="'+e(form.end)+'" required></label></div>';
+  const dateButton=(field,title)=>'<button type="button" class="so-picker-trigger" aria-haspopup="dialog" data-so-action="pick-date" data-so-field="'+field+'" data-so-title="'+title+'"><span>'+e(dateLabel(form[field]))+'</span><span class="so-picker-chevron" aria-hidden="true"></span></button>';
+  const dates='<div class="so-toolbar">'+(k==='sales'?'<label>Dari tanggal'+dateButton('start','Pilih tanggal awal')+'</label>':'')+'<label>'+(k==='sales'?'Sampai tanggal':'Tanggal')+dateButton('end','Pilih tanggal')+'</label></div>';
   let extra='';
-  if(k==='expense')extra='<div class="so-toolbar"><label>Kategori<select data-so-field="category">'+['Kalibrasi','RnD','QC','Suplies','Move','Waste','Lainnya'].map(x=>'<option '+(x===form.category?'selected':'')+'>'+x+'</option>').join('')+'</select></label></div>';
-  if(form.category==='Move'&&k==='expense')extra+='<div class="so-toolbar"><label>Tujuan<select data-so-field="target"><option value="">Pilih tujuan aktif</option>'+(get().targets||[]).map(x=>'<option value="'+e(x.id)+'" '+(form.target===x.id?'selected':'')+'>'+e(x.name)+'</option>').join('')+'</select></label></div>'+(!(get().targets||[]).length?'<p class="so-notice">Belum ada outlet/divisi tujuan yang aktif.</p>':'');
+  if(k==='expense')extra='<div class="so-toolbar"><label>Kategori'+pickerButton(form.category,'data-so-field="category" data-so-title="Pilih kategori"',['Kalibrasi','RnD','QC','Suplies','Move','Waste','Lainnya'].map(x=>({value:x,label:x})))+'</label></div>';
+  if(form.category==='Move'&&k==='expense')extra+='<div class="so-toolbar"><label>Tujuan'+pickerButton((get().targets||[]).find(x=>x.id===form.target)?.name||'Pilih tujuan aktif','data-so-field="target" data-so-title="Pilih tujuan outlet/divisi"',[{value:'',label:'Pilih tujuan aktif'},...(get().targets||[]).map(x=>({value:x.id,label:x.name}))])+'</label></div>'+(!(get().targets||[]).length?'<p class="so-notice">Belum ada outlet/divisi tujuan yang aktif.</p>':'');
   const head='<tr><th>'+(isCount?'Barang':k==='sales'?'Menu':k==='production'?'WIP / hasil otomatis':'Barang / stok sistem')+'</th>'+(isCount?'<th class="so-desktop-only so-stock">Stok sistem</th>':'')+'<th class="so-quantity">'+(k==='production'?'Batch':k==='sales'?'Terjual':isCount?'Fisik':'Jumlah')+'</th>'+(withUnit?'<th class="so-unit">Satuan</th>':'')+(isCount?'<th class="so-desktop-only so-conversion">Konversi fisik</th>':'')+(receipt?'<th class="so-invoice">Total invoice</th>':'')+'</tr>';
   const body=rows.map(r=>{
    const v=form.counts[r.key]||{},units=r.units||[],disabled=!!r.error;
    let meta=disabled?r.error:k==='sales'?'Total selama rentang pilihan':k==='production'?'Hasil: '+number(Number(v.qty||0)*Number(r.yield))+' '+r.unit+' · 1 batch = '+number(r.yield)+' '+r.unit:'Sistem: '+number(b[r.key])+' '+(r.unit||'');
    let html='<tr><td><strong>'+e(r.name)+'</strong><small data-so-output="'+e(r.key)+'" class="'+(disabled?'so-error':isCount?'so-system-mobile':'')+'">'+e(meta)+'</small>';
-   if(form.category==='Move'&&k==='expense')html+='<label><small>Barang tujuan</small><select data-so-map="'+e(r.key)+'" aria-label="Padanan tujuan '+e(r.name)+'"><option value="">Pilih padanan</option>'+targetRows.filter(t=>!t.error&&t.unit===r.unit).map(t=>'<option value="'+e(t.key)+'" '+(form.mapping[r.key]===t.key?'selected':'')+'>'+e(t.name)+'</option>').join('')+'</select></label>';
+   if(form.category==='Move'&&k==='expense')html+='<label><small>Barang tujuan</small>'+pickerButton(targetRows.find(t=>t.key===form.mapping[r.key])?.name||'Pilih padanan','data-so-map="'+e(r.key)+'" data-so-title="Pilih padanan barang"',[{value:'',label:'Pilih padanan'},...targetRows.filter(t=>!t.error&&t.unit===r.unit).map(t=>({value:t.key,label:t.name}))])+'</label>';
    html+='</td>'+(isCount?'<td class="so-desktop-only so-stock">'+(disabled?'—':number(b[r.key])+' '+e(r.unit))+'</td>':'')+'<td data-so-label="Jumlah"><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="qty" aria-label="'+e(labels[k]+' '+r.name)+'" value="'+e(v.qty??'')+'" '+(disabled?'disabled':'')+'></td>';
-   if(withUnit)html+='<td data-so-label="Satuan"><select data-so-key="'+e(r.key)+'" data-so-prop="unit" aria-label="Satuan '+e(r.name)+'" '+(disabled?'disabled':'')+'>'+units.map(u=>'<option value="'+e(u.unit)+'" '+((v.unit||r.unit)===u.unit?'selected':'')+'>'+e(u.unit)+'</option>').join('')+'</select></td>';
+   if(withUnit)html+='<td data-so-label="Satuan">'+pickerButton(v.unit||r.unit,'data-so-key="'+e(r.key)+'" data-so-title="Pilih satuan" aria-label="Satuan '+e(r.name)+'" '+(disabled?'disabled':''),units.map(u=>({value:u.unit,label:u.unit})))+'</td>';
    if(isCount)html+='<td class="so-desktop-only so-conversion" data-so-conversion="'+e(r.key)+'">'+e(countConversion(r))+'</td>';
    if(receipt)html+='<td data-so-label="Total invoice"><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="invoice_total" aria-label="Total invoice '+e(r.name)+'" value="'+e(v.invoice_total??'')+'" placeholder="Opsional"></td>';
    return html+'</tr>';
@@ -163,6 +202,8 @@
   if(busy)return;
   const token=viewGeneration;busy=true;
   try{
+   if(name==='pick-date'){openDatePicker(el.dataset.soField);return;}
+   if(name==='pick-choice'){openChoicePicker(el);return;}
    if(name==='open'){await open(el.dataset.soKind);return;}
    if(name==='cancel'){if(snapshot())form=null;return;}
    if(name==='draft'){if(snapshot())notice='Draft tersimpan di perangkat.';return;}
