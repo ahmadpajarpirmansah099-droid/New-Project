@@ -144,6 +144,18 @@ test('opname results show two compact rows and keep full movements expandable', 
   assert.match(t.page.innerHTML, /<dt>Stock Awal<\/dt>.*<dt>Sales<\/dt>.*<dt>Barang Masuk<\/dt>.*<dt>Harga \/ ML<\/dt>/);
 });
 
+test('total selisih rupiah nets gains and losses at the bottom of each result', () => {
+  const t = runtime();
+  t.data.state.periods[0].result = [
+    { name: 'Bahan A', unit: 'GR', movements: {}, system: 2, physical: 1, variance: -1, variance_value: -2705 },
+    { name: 'Bahan B', unit: 'GR', movements: {}, system: 1, physical: 3, variance: 2, variance_value: 7680 },
+    { name: 'Bahan C', unit: 'GR', movements: {}, system: 1, physical: 1, variance: 0, variance_value: 0 }
+  ];
+  t.ui.render();
+  assert.match(t.page.innerHTML, /<div class="so-result-total"><span>Total selisih rupiah<\/span><strong>Rp4\.975<\/strong><\/div>/);
+  assert.ok(t.page.innerHTML.indexOf('Bahan C') < t.page.innerHTML.indexOf('so-result-total'));
+});
+
 test('resetting Stock Awal preserves transactions and requires complete manual input', async () => {
   const t = runtime(); t.data.state.periods[0].status = 'reopened';
   t.data.state.documents = [{ id: 'sale-1', period_id: 'period', type: 'sales', postings: [] }];
