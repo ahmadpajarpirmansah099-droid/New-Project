@@ -269,3 +269,17 @@
  .so-history-compact-meta { font-size: 10px; }
 }
 @media(prefers-reduced-motion:reduce){ .so-history-compact-cue::after { transition:none; } }
+
+/* Daily material summary first; optional original transactions retain edit/void controls. */
+.so-date-materials{padding:0 12px 8px}
+.so-date-material-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:38px;padding:8px 0;border-bottom:1px solid var(--so-line);font-size:13px}
+.so-date-material-row:last-child{border-bottom:0}
+.so-date-material-row span{min-width:0;overflow-wrap:anywhere}
+.so-date-material-row span small{display:block;color:var(--so-muted);font-size:11px}
+.so-date-material-row strong{flex:0 0 auto;white-space:nowrap;font-size:13px;font-variant-numeric:tabular-nums}
+.so-history-date .so-date-original-transactions{margin:2px 12px 14px;border-top:1px solid var(--so-line)}
+.so-history-date .so-date-original-transactions>summary{min-height:36px;padding:8px 0;color:var(--so-muted);font-size:11px;font-weight:600}
+.so-date-original-transactions .so-history-entry{padding:6px 0 0}
+.so-date-original-transactions .so-history-entry strong{font-size:12px}
+.so-date-original-transactions .so-history-nested>li{padding:8px 0}
+@media(max-width:600px){.so-date-materials{padding-inline:8px}.so-date-material-row{min-height:34px;padding:7px 0;font-size:12px}.so-date-material-row strong{font-size:12px}}
