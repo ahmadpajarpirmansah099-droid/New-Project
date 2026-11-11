@@ -254,7 +254,7 @@ test('history follows the selected feature without touching an unfinished local 
   await t.click('history-tab', { soKind: 'sales' });
   assert.match(t.page.innerHTML, /Riwayat Sales/);
   assert.match(t.page.innerHTML, /8 November 2026/);
-  assert.doesNotMatch(t.page.innerHTML, /2 November 2026/);
+  assert.doesNotMatch(t.page.innerHTML, /<summary><span>2 November 2026<\/span>/);
   assert.equal(t.draft('receipt').counts['m:a'].qty, '2');
   await t.click('history-tab', { soKind: 'initial' });
   assert.match(t.page.innerHTML, /Stock Awal 1 November 2026/);

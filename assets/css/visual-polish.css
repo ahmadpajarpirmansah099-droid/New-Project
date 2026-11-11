@@ -389,3 +389,26 @@ button, input, select, textarea { font-family: var(--ui-font); }
     grid-row: 5;
   }
 }
+
+/* Desktop dashboard: make operational details easier to scan. */
+@media (min-width: 900px) {
+  #page-dashboard > .hero { box-shadow: 0 8px 22px rgba(20, 35, 63, .12); }
+  #page-dashboard > .metrics .metric strong { font-variant-numeric: tabular-nums; }
+  #page-dashboard > #dashboardList {
+    scrollbar-width: thin;
+    scrollbar-color: #c5cbb7 transparent;
+  }
+  #page-dashboard > #dashboardList::-webkit-scrollbar { display: block; width: 7px; }
+  #page-dashboard > #dashboardList::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: #c5cbb7;
+  }
+  #page-dashboard .dashboard-reservation-time { height: 36px; }
+  #page-dashboard .dashboard-reservation-time small { font-size: 10px; line-height: 1.1; }
+  #page-dashboard .dashboard-reservation-time strong { line-height: 1.15; }
+  #page-dashboard .dashboard-reservation-item-main strong { font-size: 14px; }
+  #page-dashboard .dashboard-reservation-item-side .dashboard-reservation-actions button {
+    min-height: 32px;
+    font-size: 11px;
+  }
+}
