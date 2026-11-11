@@ -220,3 +220,13 @@
 .so-history-date > details > summary small{font-size:.8em;font-weight:500;opacity:.7}
 .so-history-nested{margin:0 12px 12px;padding:0;list-style:none}
 .so-history-nested > li{margin-bottom:8px}
+
+/* Sales history: saved menus first, recorded ingredient consumption on demand. */
+.so-sales-menu-list{display:grid;gap:8px;margin:6px 0 10px}
+.so-history .so-sales-menu{margin:0;border:1px solid var(--so-line);border-radius:var(--ui-radius-control);background:var(--ui-surface-soft);overflow:hidden}
+.so-history .so-sales-menu>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:46px;padding:10px 12px}
+.so-sales-menu>summary span{min-width:0;overflow-wrap:anywhere}
+.so-sales-menu>summary strong{flex:0 0 auto;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.so-sales-menu .so-opening-lines{border-top:1px solid var(--so-line);border-radius:0;padding:4px 12px}
+.so-sales-unavailable{margin:0;padding:12px;color:var(--so-muted);font-size:12px}
+.so-history .so-sales-fallback{margin:0}
