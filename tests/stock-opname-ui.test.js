@@ -163,6 +163,22 @@ test('refresh restores physical counts in an already open correction form and fi
   assert.match(t.page.innerHTML, /value="200"/);
 });
 
+test('cancelled correction closes its old form and does not reuse its draft for the next period', async () => {
+  const t = runtime(), p = t.data.state.periods[0];
+  p.status = 'reopened'; p.end = '2026-11-08';
+  await t.ui.open('close');
+  t.input({ soKey: 'm:a', soProp: 'qty' }, '5781');
+  p.status = 'closed';
+  t.data.state.periods.push({ id: 'next-period', start: '2026-11-08', status: 'active', opening: {} });
+  await t.click('refresh');
+  assert.equal(t.draft('close'), undefined);
+  assert.match(t.page.innerHTML, /Koreksi opname sudah dibatalkan/);
+  assert.doesNotMatch(t.page.innerHTML, /class="so-panel so-form"/);
+  await t.ui.open('close');
+  assert.equal(t.draft('close').basePeriod, 'next-period');
+  assert.equal(t.draft('close').counts['m:a'], undefined);
+});
+
 test('Pulihkan Draft also fills missing correction rows without losing edited values', async () => {
   const t = runtime(), p = t.data.state.periods[0];
   p.status = 'reopened'; p.end = '2026-11-08';
