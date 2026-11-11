@@ -1375,3 +1375,12 @@
     padding-left: calc(32px + var(--desktop-rail-width));
   }
 }
+
+
+/* DESKTOP — prevent page-level horizontal overflow from the full-width header. */
+@media (min-width: 900px) {
+  html,
+  body {
+    overflow-x: clip;
+  }
+}
