@@ -231,6 +231,32 @@
   const fallback=unmatched||offset!==postings.length?'<details class="so-sales-fallback"><summary>Lihat total pemakaian bahan transaksi</summary><div class="so-opening-lines">'+postings.map(p=>'<div><span>'+e(p.name||p.key)+'</span><strong>'+number(Math.abs(Number(p.qty)))+' '+e(p.unit||'')+'</strong></div>').join('')+'</div></details>':'';
   return '<div class="so-sales-menu-list">'+rows.join('')+fallback+'</div>';
  }
+ function materialHistoryByDate(docs,p){
+  const dates=new Map();
+  for(const d of docs){
+   const day=String(d.start||'').slice(0,10);
+   if(!dates.has(day))dates.set(day,[]);
+   dates.get(day).push(d);
+  }
+  return [...dates.entries()].sort((a,b)=>b[0].localeCompare(a[0])).map(([day,entries])=>{
+   const totals=new Map();
+   for(const d of entries){
+    if(d.void)continue;
+    for(const l of d.postings||[]){
+     const qty=Number(l.qty),unit=String(l.unit||'');
+     if(!Number.isFinite(qty)||!qty)continue;
+     const direction=qty<0?'out':'in';
+     const key=String(l.key||l.name)+'|'+unit+'|'+direction;
+     if(!totals.has(key))totals.set(key,{name:l.name||l.key||'Barang',unit,qty:0,direction});
+     totals.get(key).qty+=Math.abs(qty);
+    }
+   }
+   const materials=[...totals.values()].filter(v=>v.qty>0).sort((a,b)=>a.name.localeCompare(b.name,'id'));
+   const lines=materials.map(m=>'<div class="so-date-material-row"><span>'+e(m.name)+(historyKind==='expense'&&m.direction==='in'?'<small>Masuk / penyesuaian</small>':'')+'</span><strong>'+number(m.qty)+' '+e(m.unit)+'</strong></div>').join('');
+   const transactions=entries.map(d=>'<li class="so-history-compact"><div class="so-history-entry"><div><strong>'+e(labels[d.type]||d.type)+(d.category&&['expense','adjustment'].includes(d.type)?' · '+e(d.category):'')+'</strong></div>'+(d.void?'<span class="so-history-tag is-void">Dibatalkan</span>':'')+'</div><details><summary>Rincian transaksi</summary><div class="so-opening-lines">'+(d.postings||[]).map(l=>'<div><span>'+e(l.name)+'</span><strong>'+number(l.qty)+' '+e(l.unit)+'</strong></div>').join('')+'</div></details>'+(!d.void&&d.period_id===p?.id&&['active','reopened'].includes(p?.status)&&!['move_in','adjustment_in','adjustment'].includes(d.type)?'<div class="so-history-actions">'+button('Edit','edit','data-so-id="'+e(d.id)+'"')+button('Batalkan','void','data-so-id="'+e(d.id)+'"')+'</div>':'')+(!d.void&&d.category==='Move'&&d.type==='expense'?'<div class="so-history-actions">'+button('Penyesuaian Move','adjust','data-so-id="'+e(d.id)+'"')+'</div>':'')+'</li>').join('');
+   return '<li class="so-history-date"><details><summary><span>'+e(dateLabel(day))+'</span><small>'+number(entries.length)+' transaksi</small></summary><div class="so-date-materials">'+(lines||'<p class="so-sales-unavailable">Tidak ada pemakaian aktif pada tanggal ini.</p>')+'</div><details class="so-date-original-transactions"><summary>Transaksi asli ('+number(entries.length)+')</summary><ul class="so-history so-history-nested">'+transactions+'</ul></details></details></li>';
+  }).join('');
+ }
  function historyHTML(){
   const s=get().state,p=period(),kinds=['initial','expense','receipt','production','sales','close'];
   const docs=[...s.documents].reverse().filter(d=>({expense:['expense','move_in','adjustment','adjustment_in']}[historyKind]||[historyKind]).includes(d.type));
@@ -248,6 +274,8 @@
    })+'</ul>';
   }else if(historyKind==='close'){
    out+='<ul class="so-history">'+groupedHistory(periods.slice(0,historyLimit),x=>x.end,x=>'<li><div class="so-history-entry"><div><strong>Opname '+e(dateLabel(x.end))+'</strong><small>'+number(x.result.length)+' barang dihitung</small></div><span class="so-history-tag">'+(x.status==='reopened'?'Sedang dikoreksi':'Selesai')+'</span></div><details><summary>Lihat hasil dan selisih</summary><div class="so-result">'+x.result.map(r=>'<details class="so-result-item"><summary><span class="so-result-top"><strong>'+e(r.name)+'</strong><b>'+money(r.variance_value)+'</b></span><span class="so-result-bottom"><span>Sistem '+number(r.system)+' → Fisik '+number(r.physical)+' '+e(r.unit)+'</span><span>Selisih '+number(r.variance)+' '+e(r.unit)+'</span></span></summary><dl><dt>Stock Awal</dt><dd>'+number(r.opening)+' '+e(r.unit)+'</dd>'+Object.entries(r.movements||{}).map(([kind,qty])=>'<dt>'+e(labels[kind]||kind)+'</dt><dd>'+number(qty)+' '+e(r.unit)+'</dd>').join('')+'<dt>Stok sistem</dt><dd>'+number(r.system)+' '+e(r.unit)+'</dd><dt>Stok fisik</dt><dd>'+number(r.physical)+' '+e(r.unit)+'</dd><dt>Selisih</dt><dd>'+number(r.variance)+' '+e(r.unit)+'</dd><dt>Harga / '+e(r.unit)+'</dt><dd>'+money(r.price)+'</dd><dt>Selisih rupiah</dt><dd>'+money(r.variance_value)+'</dd></dl></details>').join('')+'<div class="so-result-total"><span>Total selisih rupiah</span><strong>'+money(x.result.reduce((total,r)=>total+Number(r.variance_value||0),0))+'</strong></div></div></details></li>')+'</ul>';
+  }else if(historyKind==='expense'||historyKind==='receipt'){
+   out+='<ul class="so-history">'+materialHistoryByDate(docs.slice(0,historyLimit),p)+'</ul>';
   }else{
    out+='<ul class="so-history">'+groupedHistory(docs.slice(0,historyLimit),d=>d.start,d=>'<li class="so-history-compact"><details class="so-history-compact-details"><summary><span class="so-history-compact-name">'+e(labels[d.type]||d.type)+(d.category&&['expense','adjustment'].includes(d.type)?' · '+e(d.category):'')+'</span><span class="so-history-compact-meta">'+(d.end!==d.start?e(dateLabel(d.start))+' – '+e(dateLabel(d.end)):'')+(d.void?'<span class="so-history-tag is-void">Dibatalkan</span>':'')+'</span><span class="so-history-compact-cue">Rincian</span></summary>'+(d.type==='sales'?salesHistoryRows(d):'<div class="so-opening-lines">'+(d.postings||[]).map(l=>'<div><span>'+e(l.name)+'</span><strong>'+number(l.qty)+' '+e(l.unit)+'</strong></div>').join('')+'</div>')+'</details>'+(!d.void&&d.period_id===p?.id&&['active','reopened'].includes(p?.status)&&!['move_in','adjustment_in','adjustment'].includes(d.type)?'<div class="so-history-actions">'+button('Edit','edit','data-so-id="'+e(d.id)+'"')+button('Batalkan','void','data-so-id="'+e(d.id)+'"')+'</div>':'')+(!d.void&&d.category==='Move'&&d.type==='expense'?'<div class="so-history-actions">'+button('Penyesuaian Move','adjust','data-so-id="'+e(d.id)+'"')+'</div>':'')+'</li>')+'</ul>';
   }
