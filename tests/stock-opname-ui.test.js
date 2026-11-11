@@ -161,6 +161,18 @@ test('resetting Stock Awal preserves transactions and requires complete manual i
   assert.equal(t.data.state.documents.length, 1);
 });
 
+test('an old device draft cannot refill Stock Awal after an external reset', async () => {
+  const t = runtime(); const p = t.data.state.periods[0];
+  p.status = 'opening_pending'; p.opening_reset_at = 'reset-1';
+  await t.ui.open('initial'); t.input({ soKey: 'm:a', soProp: 'qty' }, '9');
+  assert.equal(t.draft('initial').counts['m:a'].qty, '9');
+  p.opening_reset_at = 'reset-2'; t.ui.render();
+  assert.equal(t.draft('initial'), undefined);
+  await t.ui.open('initial');
+  assert.doesNotMatch(t.page.innerHTML, /data-so-key="m:a"[^>]*value="9"/);
+  assert.equal(t.draft('initial').resetMarker, 'reset-2');
+});
+
 test('storage failure keeps the form open and never claims a draft was saved', async () => {
   const t = runtime(); await t.ui.open('expense'); t.storageFails(true);
   t.input({ soKey: 'm:a', soProp: 'qty' }, '9');
