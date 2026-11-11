@@ -7,6 +7,7 @@ const fs = require('node:fs');
 function runtime() {
   const handlers = {}, writes = [], confirmations = [];
   const page = { innerHTML: '', contains: () => true };
+  const searchResults = { innerHTML: '' };
   const drafts = {}, letHolder = { active: null };
   let allowConfirm = true, storageFails = false, writeFails = false;
   const data = {
@@ -64,11 +65,12 @@ function runtime() {
   vm.runInContext(fs.readFileSync('assets/js/stock-opname-ui.js', 'utf8'), w);
   return {
     ui: w.StockOpnameUI, data, writes, confirmations, page,
+    searchResults,
     draft: kind => { const value = drafts[kind || letHolder.active]; return value && copy(value); },
     confirm: value => allowConfirm = value,
     storageFails: value => storageFails = value,
     writeFails: value => writeFails = value,
-    input(dataset, value) { handlers.input({ target: { dataset, value, closest: () => null } }); },
+    input(dataset, value) { handlers.input({ target: { dataset, value, parentElement: { querySelector: () => searchResults }, closest: () => null } }); },
     async click(name, dataset = {}) {
       handlers.click({ target: { closest: () => ({ dataset: { soAction: name, ...dataset } }) }, preventDefault() {} });
       await new Promise(resolve => setImmediate(resolve));
@@ -79,6 +81,7 @@ function runtime() {
 for (const [kind, key] of [['receipt', 'm:a'], ['production', 'w:a'], ['sales', 's:a']]) {
   test(kind + ' does not send an expense category', async () => {
     const t = runtime(); await t.ui.open(kind);
+    if(kind==='receipt')await t.click('receipt-add',{soItemKey:key});
     t.input({ soKey: key, soProp: 'qty' }, '5');
     await t.click('submit');
     assert.equal(t.writes.length, 1);
@@ -243,6 +246,7 @@ test('history follows the selected feature without touching an unfinished local 
   assert.match(t.page.innerHTML, /Riwayat Stock Opname/);
   assert.doesNotMatch(t.page.innerHTML, /Rincian transaksi/);
   await t.ui.open('receipt');
+  await t.click('receipt-add',{soItemKey:'m:a'});
   t.input({ soKey: 'm:a', soProp: 'qty' }, '2');
   assert.match(t.page.innerHTML, /Riwayat Barang Masuk/);
   assert.match(t.page.innerHTML, /2 November 2026/);
@@ -350,4 +354,46 @@ test('missing recipe disables its input and offers master-data navigation', asyn
   assert.match(t.page.innerHTML, /Resep WIP belum lengkap/);
   assert.match(t.page.innerHTML, /aria-label="Produksi WIP WIP" value="" disabled/);
   assert.match(t.page.innerHTML, /data-so-page="wips"/);
+});
+
+test('Barang Masuk only displays selected items and searches names while typing', async()=>{
+ const t=runtime();
+ await t.ui.open('receipt');
+ assert.match(t.page.innerHTML,/Cari barang masuk/);
+ assert.doesNotMatch(t.page.innerHTML,/data-so-prop="qty" aria-label="Barang Masuk Susu"/);
+ t.input({soReceiptSearch:''},'su');
+ assert.match(t.searchResults.innerHTML,/Susu/);
+ assert.match(t.searchResults.innerHTML,/data-so-item-key="m:a"/);
+ await t.click('receipt-add',{soItemKey:'m:a'});
+ assert.match(t.page.innerHTML,/data-so-prop="qty" aria-label="Barang Masuk Susu"/);
+ assert.equal((t.draft('receipt').receiptItems||[]).length,1);
+ t.input({soReceiptSearch:''},'su');
+ assert.doesNotMatch(t.searchResults.innerHTML,/data-so-item-key="m:a"/);
+ await t.click('receipt-add',{soItemKey:'m:a'});
+ assert.equal(t.draft('receipt').receiptItems.length,1);
+});
+
+test('Barang Masuk preserves selected entries and invoice values in draft and edit',async()=>{
+ const t=runtime();
+ await t.ui.open('receipt');await t.click('receipt-add',{soItemKey:'m:a'});
+ t.input({soKey:'m:a',soProp:'qty'},'3');
+ t.input({soKey:'m:a',soProp:'invoice_total'},'25000');
+ await t.ui.open('expense');await t.ui.open('receipt');
+ assert.match(t.page.innerHTML,/value="25000"/);
+ assert.deepEqual(t.draft('receipt').receiptItems,['m:a']);
+ await t.click('submit');
+ assert.equal(t.writes.at(-1).input.lines.length,1);
+ assert.equal(t.writes.at(-1).input.lines[0].invoice_total,'25000');
+});
+
+test('Barang Masuk removes an item from its local draft and avoids sending it',async()=>{
+ const t=runtime();await t.ui.open('receipt');
+ await t.click('receipt-add',{soItemKey:'m:a'});
+ t.input({soKey:'m:a',soProp:'qty'},'4');
+ await t.click('receipt-remove',{soItemKey:'m:a'});
+ assert.equal(t.draft('receipt').counts['m:a'],undefined);
+ assert.equal(t.draft('receipt').receiptItems.length,0);
+ assert.doesNotMatch(t.page.innerHTML,/data-so-prop="qty" aria-label="Barang Masuk Susu"/);
+ await t.click('submit');
+ assert.equal(t.writes.length,0);
 });

@@ -3,7 +3,7 @@ do $$
 declare
  u uuid;w uuid:=gen_random_uuid();d uuid:=gen_random_uuid();t uuid:=gen_random_uuid();c jsonb;
  v jsonb;req uuid;docid text;moveid text;rev bigint;start_day text:=((now() at time zone 'Asia/Jakarta')::date-10)::text;
- day text:=((now() at time zone 'Asia/Jakarta')::date-1)::text; n int:=0;
+ day text:=((now() at time zone 'Asia/Jakarta')::date-2)::text; active_day text:=((now() at time zone 'Asia/Jakarta')::date-1)::text; n int:=0;
 begin
  select id into u from public.profiles where role='admin' limit 1;
  if u is null then raise exception 'No test administrator available';end if;
@@ -40,12 +40,14 @@ begin
  if (v->'state'->'periods'->0->'result'->0->'movements'->>'production')::numeric is distinct from -20 or (v->'state'->'periods'->0->'result'->0->'movements'->>'receipt')::numeric is distinct from 200 or (v->'state'->'periods'->0->'result'->2->'movements'->>'sales')::numeric is distinct from -50 then raise exception 'Movement types were not preserved';end if;n:=n+1;
  begin perform public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save','{}');raise exception 'Expected inactive opening error';exception when others then if sqlerrm not like 'Stock Awal belum aktif%' then raise;end if;end;n:=n+1;
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'activate','{}');
+ if v->'state'->'periods'->1->>'start'<>active_day then raise exception 'Next Stock Awal must start the following date';end if;n:=n+1;
  if (v->'balance'->>'m:a')::numeric<>1170 or (v->'balance'->>'w:x')::numeric<>240 then raise exception 'Previous transactions counted twice';end if;n:=n+1;
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'reopen','{}');
  if v->'state'->'periods'->1->>'status'<>'held' or v->'state'->'periods'->0->>'status'<>'reopened' then raise exception 'Reopen chain failed';end if;n:=n+1;
  begin perform public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'adjust_move',jsonb_build_object('id',moveid));raise exception 'Expected active-period adjustment guard';exception when others then if sqlerrm not like 'Penyesuaian Move hanya boleh%' then raise;end if;end;n:=n+1;
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'close',jsonb_build_object('date',day,'counts','{"m:a":{"qty":"1160","unit":"ML"},"m:b":{"qty":"960","unit":"GR"},"w:x":{"qty":"240","unit":"ML"}}'::jsonb));
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'reactivate','{}');
+ if v->'state'->'periods'->1->>'start'<>active_day then raise exception 'Reconfirmed Stock Awal date mismatch';end if;n:=n+1;
  if (v->'balance'->>'m:a')::numeric<>1160 then raise exception 'Reconfirmed opening mismatch';end if;n:=n+1;
 
  -- Close destination then reverse original Move in the current periods.
@@ -53,17 +55,18 @@ begin
  perform public.stock_opname_write(t,rev,gen_random_uuid(),'close',jsonb_build_object('date',day,'counts','{"m:a":{"qty":"1000","unit":"ML"},"m:b":{"qty":"1020","unit":"GR"},"w:x":{"qty":"100","unit":"ML"}}'::jsonb));
  rev:=(public.stock_opname_read(t)->>'revision')::bigint;
  perform public.stock_opname_write(t,rev,gen_random_uuid(),'activate','{}');
+ if (public.stock_opname_read(t)->'state'->'periods'->1->>'start')<>active_day then raise exception 'Destination Stock Awal date mismatch';end if;n:=n+1;
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'adjust_move',jsonb_build_object('id',moveid));
  if (v->'balance'->>'m:b')::numeric<>980 or (public.stock_opname_read(t)->'balance'->>'m:b')::numeric<>1000 then raise exception 'Linked adjustment failed';end if;n:=n+1;
  -- Negative balance remains valid and visible.
- v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save',jsonb_build_object('type','expense','category','QC','start',day,'end',day,'lines','[{"key":"m:b","qty":"2000","unit":"GR"}]'::jsonb));
+ v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save',jsonb_build_object('type','expense','category','QC','start',active_day,'end',active_day,'lines','[{"key":"m:b","qty":"2000","unit":"GR"}]'::jsonb));
  if (v->'balance'->>'m:b')::numeric<>-1020 then raise exception 'Negative balance was hidden';end if;n:=n+1;
 
  -- A saved recipe does not change retroactively when the master recipe changes.
  if (v->'state'->'documents'->0->'postings'->0->>'qty')::numeric<>-20 then raise exception 'Historical recipe snapshot changed';end if;n:=n+1;
  -- Sales crossing an opname cutoff is blocked, even with fully entered counts.
- v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save',jsonb_build_object('type','sales','category','Waste','start',day,'end',(now() at time zone 'Asia/Jakarta')::date,'lines','[{"key":"s:coffee","qty":"1"}]'::jsonb));
- begin perform public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'close',jsonb_build_object('date',day));raise exception 'Expected crossing Sales failure';exception when others then if sqlerrm not like 'Rentang Sales melewati%' then raise;end if;end;n:=n+1;
+ v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save',jsonb_build_object('type','sales','category','Waste','start',active_day,'end',(now() at time zone 'Asia/Jakarta')::date,'lines','[{"key":"s:coffee","qty":"1"}]'::jsonb));
+ begin perform public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'close',jsonb_build_object('date',active_day));raise exception 'Expected crossing Sales failure';exception when others then if sqlerrm not like 'Rentang Sales melewati%' then raise;end if;end;n:=n+1;
  update public.stock_opname_scopes set enabled=false where division_id=t;
  begin perform public.stock_opname_read(t);raise exception 'Expected disabled scope denial';exception when others then if sqlerrm not like 'Akses Stock Opname%' then raise;end if;end;n:=n+1;
  update public.stock_opname_scopes set enabled=true where division_id=t;

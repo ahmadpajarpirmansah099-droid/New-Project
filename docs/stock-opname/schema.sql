@@ -174,7 +174,7 @@ begin
   ps:=jsonb_build_array(jsonb_build_object('id',request,'start',start_date,'status','active','opening',counts,'opening_catalog',rows,'created_at',now()));
  elsif action='activate' then
   if p->>'status'<>'closed' then raise exception 'Selesaikan opname terlebih dahulu.'; end if;
-  ps:=ps||jsonb_build_array(jsonb_build_object('id',request,'start',p->>'end','status','active','opening',p->'physical','opening_catalog',p->'catalog','previous_id',p->>'id','created_at',now()));
+  ps:=ps||jsonb_build_array(jsonb_build_object('id',request,'start',((p->>'end')::date+1)::text,'status','active','opening',p->'physical','opening_catalog',p->'catalog','previous_id',p->>'id','created_at',now()));
  elsif action='reopen' then
   if p->>'status'='active' and pi>0 then
    -- Keep the following period and its transactions on hold; no historical writes.
@@ -186,7 +186,8 @@ begin
   p:=p||jsonb_build_object('status','reopened');ps:=jsonb_set(ps,array[pi::text],p);
  elsif action='reactivate' then
   if p->>'status'<>'held' or pi<1 or ps->(pi-1)->>'status'<>'closed' then raise exception 'Selesaikan koreksi opname terlebih dahulu.'; end if;
-  p:=p||jsonb_build_object('status','active','opening',ps->(pi-1)->'physical','opening_catalog',ps->(pi-1)->'catalog');
+  if exists(select 1 from jsonb_array_elements(coalesce(docs,'[]'::jsonb)) v where v->>'period_id'=p->>'id' and coalesce(v->>'void','false')<>'true' and (v->>'start')::date<=(ps->(pi-1)->>'end')::date) then raise exception 'Transaksi periode berikutnya mendahului tanggal Stock Awal. Periksa sebelum mengonfirmasi.';end if;
+  p:=p||jsonb_build_object('status','active','start',((ps->(pi-1)->>'end')::date+1)::text,'opening',ps->(pi-1)->'physical','opening_catalog',ps->(pi-1)->'catalog');
   ps:=jsonb_set(ps,array[pi::text],p);
  elsif action in ('save','void','close','adjust_move') then
   if p->>'status'='held' then pi:=pi-1;p:=ps->pi; end if;
