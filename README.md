@@ -1,83 +1,66 @@
-# New Project
+# New-Project
 
-Aplikasi web operasional untuk membantu pengelolaan kedatangan tamu, antrean, reservasi, serta data master outlet. Antarmuka dikembangkan dengan pendekatan mobile-first.
+Aplikasi web operasional outlet untuk mengelola kedatangan tamu, data master, dan stok. Antarmuka dirancang untuk HP dan desktop.
 
-## Fitur
+## Guest Operational
 
-### Guest Operations
-- Dashboard ringkasan tamu dan antrean aktif.
-- Waiting List untuk mencatat tamu dan mengelola antrean.
-- Riwayat kedatangan tamu.
-- Reservasi, kalender, dan pengelolaan status kedatangan.
-- Pengaturan operasional dan ekspor data.
+- Dashboard menampilkan ringkasan tamu, antrean aktif, dan reservasi. Tampilan desktop juga menampilkan kalender reservasi dan grafik bulanan.
+- Gunakan menu cepat `+` untuk Tambah Tamu, Waiting List, Riwayat, dan Reservasi. Data antrean hari ini dapat diekspor sebagai CSV.
+- Pengaturan memuat preferensi operasional. Panduan Pengguna dapat dibuka dari menu aplikasi.
 
-### Master Data
-- Master Barang untuk mengelola data bahan/barang.
-- Resep WIP untuk menyusun komposisi dan hasil produksi.
-- Menu untuk mengelola komposisi menu dan informasi biaya.
+## Master Data
 
-### Stock Opname (tahap 1)
-- Stock Awal, Pengeluaran, Barang Masuk, Produksi WIP, dan Sales massal.
-- Opname dengan selisih unit/rupiah dan konfirmasi Stock Awal periode berikutnya.
-- Form HP satu bahan per baris; draft dapat dipulihkan dari perangkat.
-- Aktivasi per outlet/divisi oleh Developer; awalnya Lazy Jennie – Bar.
-- Impor dan ekspor Excel dijadwalkan pada tahap 2.
-- PRD dan urutan aktivasi tersedia di `docs/stock-opname/`.
+- **Master Barang** menyimpan bahan, satuan, konversi, dan harga.
+- **Resep WIP** mengatur komposisi, hasil per batch, dan biaya produksi.
+- **Menu** mengatur komposisi menu dan HPP. Ketiga halaman memiliki tombol unduh Excel masing-masing.
 
-### Monitoring
-- User Monitoring untuk pengguna dengan hak akses yang sesuai.
-- Ringkasan data lintas divisi untuk Developer sesuai ruang aksesnya.
+## Stock Opname
 
-## Teknologi
+1. Isi **Stock Awal** pertama untuk semua barang dan WIP, termasuk angka 0.
+2. Catat **Barang Masuk**, **Pengeluaran**, **Produksi WIP**, dan **Sales** selama periode berjalan. Di Barang Masuk, cari nama barang dan pilih satu per satu. Beberapa barang bisa disimpan dalam satu transaksi. Sales menerima jumlah menu terjual untuk satu rentang tanggal.
+3. Isi **Stock Opname** untuk mencocokkan stok fisik dengan stok sistem. Rincian hasil menampilkan pergerakan stok, selisih per barang, dan total selisih rupiah.
+4. Konfirmasi hasil fisik sebagai **Stock Awal** periode berikutnya. Jika opname ditutup tanggal 8 November, periode berikutnya mulai tanggal 9 November. Saat konfirmasi tertunda, transaksi baru dapat disimpan sebagai draft dan dikirim setelah Stock Awal dikonfirmasi.
 
-- Frontend: HTML, CSS, dan JavaScript.
-- Backend dan penyimpanan data: Supabase.
-- Hosting: GitHub Pages melalui GitHub Actions.
-- Ikon antarmuka: Lucide Icons.
+Riwayat tersedia per fitur dan dikelompokkan per tanggal. Barang Masuk menampilkan total per bahan. Pengeluaran menampilkan total per bahan dan kategori. Ringkasan kedua fitur mencakup seluruh transaksi aktif pada tanggal tersebut, sementara catatan asli tetap dapat dibuka. Sales menampilkan menu dan jumlah terjual serta rincian pemakaian bahan jika catatan transaksi menyediakannya.
 
-Repository ini menggunakan struktur frontend tanpa proses build khusus. Vite tidak diperlukan untuk menjalankan struktur aplikasi saat ini.
+Form hitung fisik menampilkan satu bahan per baris di HP. Draft form tersimpan pada perangkat yang sama. Developer mengatur aktivasi per outlet dan divisi, sementara admin divisi yang ditugaskan mengerjakan transaksi. Aktivasi awal tercatat untuk Lazy Jennie / Bar. Impor dan ekspor Excel Stock Opname direncanakan untuk tahap 2. [Dokumentasi Stock Opname](docs/stock-opname/implementation.md)
 
-## Hak akses
+## Akses dan monitoring
 
-Aplikasi menggunakan sistem autentikasi dan pembatasan akses berdasarkan peran serta ruang kerja. Pengguna hanya boleh mengakses fitur dan data sesuai izin yang diberikan.
+Akses fitur dan data mengikuti peran, outlet, dan divisi yang dipilih. Developer memiliki tampilan User Monitoring dan ringkasan Semua Divisi sesuai izin akun.
 
-Rincian konfigurasi internal, struktur database, dan mekanisme keamanan tidak dicantumkan dalam dokumentasi publik.
+## Pengembangan
 
-## Struktur proyek
+Frontend menggunakan HTML, CSS, JavaScript, dan Lucide Icons. Supabase menangani autentikasi dan penyimpanan data. Aplikasi dapat dijalankan tanpa build atau Vite.
 
-```
-index.html
-assets/
-  css/       Stylesheet aplikasi
-  js/        Logika antarmuka dan integrasi layanan
-docs/        Dokumentasi pengembangan
-supabase/    Kode fungsi dan file perubahan database
-tests/       Pengujian otomatis
-.github/
-  workflows/ Otomatisasi pemeriksaan dan deployment
+Dari direktori repo, jalankan server lokal lalu buka [http://localhost:8000](http://localhost:8000).
+
+```sh
+python3 -m http.server 8000
 ```
 
-## Menjalankan proyek
+Jalankan pemeriksaan otomatis dengan Node.js.
 
-1. Clone repository.
-2. Buka folder proyek melalui editor atau server lokal.
-3. Jalankan aplikasi melalui server lokal agar pemuatan file dan modul berjalan sesuai kebutuhan.
-4. Siapkan konfigurasi layanan yang diperlukan melalui cara yang aman sebelum menguji fitur yang terhubung ke backend.
+```sh
+node --test tests/*.test.js
+```
 
-Jangan memasukkan password, private key, service-role key, token, atau kredensial pribadi ke dalam file frontend maupun dokumentasi.
+Fitur yang terhubung ke backend memerlukan akun berizin di lingkungan yang sesuai. Simpan kredensial di penyimpanan rahasia yang sesuai.
+
+| Lokasi | Isi |
+| --- | --- |
+| `index.html` | Halaman utama dan pemuatan aset |
+| `assets/css/` | Gaya tampilan dan aturan responsif |
+| `assets/js/` | Antarmuka dan integrasi layanan |
+| `docs/` | Dokumentasi pengembangan dan Stock Opname |
+| `supabase/` | Fungsi dan catatan migrasi Supabase |
+| `tests/` | Pengujian JavaScript dan skenario SQL |
+| `.github/workflows/` | Validasi dan penerapan GitHub Pages |
 
 ## Deployment
 
-Perubahan pada branch utama akan menjalankan workflow GitHub Actions untuk pemeriksaan kode dan proses deployment GitHub Pages sesuai konfigurasi repository.
+Pull request ke `main` menjalankan validasi. Push ke `main` menjalankan validasi lalu deployment ke GitHub Pages. Periksa workflow dan halaman live untuk memastikan versi terbaru sudah tersedia. [Workflow deployment](.github/workflows/deploy-pages.yml)
 
-Status workflow yang berhasil tidak menggantikan pemeriksaan aplikasi secara langsung melalui browser.
+## Kontribusi
 
-## Pedoman kontribusi
-
-- Pertahankan pendekatan mobile-first dan perilaku fitur yang sudah ada.
-- Gunakan Lucide Icons untuk ikon antarmuka baru.
-- Hindari mengubah alur aplikasi di luar ruang lingkup pekerjaan.
-- Jangan mengubah autentikasi, hak akses, konfigurasi backend, atau struktur database tanpa persetujuan pemilik proyek.
-- Jangan menghapus atau mengubah data pengguna tanpa persetujuan.
-- Simpan konfigurasi rahasia di tempat penyimpanan rahasia yang sesuai; jangan commit file rahasia ke repository.
-- Jalankan pemeriksaan dan pengujian yang relevan sebelum mengajukan perubahan.
+Pertahankan perilaku fitur dan desain mobile-first. Gunakan Lucide untuk ikon baru. Perubahan autentikasi, hak akses, struktur database, dan data pengguna memerlukan persetujuan pemilik proyek.

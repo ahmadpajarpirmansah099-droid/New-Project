@@ -261,15 +261,28 @@ test('history follows the selected feature without touching an unfinished local 
   assert.match(t.page.innerHTML, /100 ML/);
 });
 
-test('transaction history shows ten records at a time and retains edits on the active period', async () => {
+test('daily receipt history paginates complete dates and retains active-period edits', async () => {
   const t = runtime();
-  t.data.state.documents = Array.from({ length: 12 }, (_, i) => ({ id: 'r' + i, period_id: 'period', type: 'receipt', start: '2026-11-02', end: '2026-11-02', postings: [{ name: 'Susu', qty: i + 1, unit: 'ML' }] }));
+  const receipt = (id, day, qty) => ({
+    id, period_id: 'period', type: 'receipt', start: day, end: day,
+    postings: [{ key: 'm:a', name: 'Susu', qty, unit: 'ML' }]
+  });
+  t.data.state.documents = [
+    ...Array.from({ length: 12 }, (_, i) => receipt('recent-' + i, '2026-11-11', i + 1)),
+    ...Array.from({ length: 10 }, (_, i) => receipt('older-' + i, '2026-11-' + String(i + 1).padStart(2, '0'), 1))
+  ];
   await t.click('history-tab', { soKind: 'receipt' });
-  assert.equal((t.page.innerHTML.match(/data-so-action="edit"/g) || []).length, 10);
-  assert.match(t.page.innerHTML, /data-so-action="history-more"/);
-  assert.match(t.page.innerHTML, /data-so-action="edit"/);
+  const html = t.page.innerHTML;
+  assert.equal((html.match(/class="so-history-date"/g) || []).length, 10);
+  assert.match(html, /class="so-history-date"><details open>/);
+  assert.match(html, /Susu<\/span><strong>78 ML/);
+  assert.match(html, /Transaksi asli \(12\)/);
+  assert.match(html, /data-so-id="recent-0"/);
+  assert.doesNotMatch(html, /data-so-id="older-0"/);
+  assert.match(html, /data-so-action="history-more"/);
   await t.click('history-more');
-  assert.equal((t.page.innerHTML.match(/data-so-action="edit"/g) || []).length, 12);
+  assert.equal((t.page.innerHTML.match(/class="so-history-date"/g) || []).length, 11);
+  assert.match(t.page.innerHTML, /data-so-id="older-0"/);
   assert.doesNotMatch(t.page.innerHTML, /data-so-action="history-more"/);
 });
 
