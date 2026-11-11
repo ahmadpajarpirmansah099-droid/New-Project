@@ -158,7 +158,7 @@
   const term=query.trim().toLocaleLowerCase('id-ID');
   if(!term)return '<p>Ketik nama barang untuk mencari.</p>';
   const available=receiptItems();
-  const matches=catalog().filter(r=>r.key.startsWith('m:')&&!available.includes(r.key)&&r.name.toLocaleLowerCase('id-ID').includes(term)).sort((a,b)=>a.name.localeCompare(b.name,'id')).slice(0,8);
+  const matches=catalog().filter(r=>r.key.startsWith('m:')&&!available.includes(r.key)&&String(r.name||'').toLocaleLowerCase('id-ID').includes(term)).sort((a,b)=>a.name.localeCompare(b.name,'id')).slice(0,8);
   if(!matches.length)return '<p>Tidak ada barang yang cocok atau barang sudah dipilih.</p>';
   return matches.map(r=>'<button type="button" data-so-action="receipt-add" data-so-item-key="'+e(r.key)+'" '+(r.error?'disabled':'')+'><span>'+e(r.name)+'</span><small>'+e(r.error||r.unit||'')+'</small></button>').join('');
  }
@@ -167,7 +167,7 @@
   else if(k==='production')rows=rows.filter(x=>x.key.startsWith('w:'));
   else if(k==='receipt')rows=rows.filter(x=>receiptItems().includes(x.key));
   else rows=rows.filter(x=>!x.key.startsWith('s:'));
-  return rows.sort((a,b)=>a.name.localeCompare(b.name,'id'));
+  return k==='receipt'?rows.sort((a,b)=>receiptItems().indexOf(a.key)-receiptItems().indexOf(b.key)):rows.sort((a,b)=>a.name.localeCompare(b.name,'id'));
  }
  function countConversion(row){
   const value=form.counts[row.key]||{},factor=(row.units||[]).find(u=>u.unit===(value.unit||row.unit))?.factor;
