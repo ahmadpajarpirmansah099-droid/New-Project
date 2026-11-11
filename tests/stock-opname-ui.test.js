@@ -265,11 +265,11 @@ test('transaction history shows ten records at a time and retains edits on the a
   const t = runtime();
   t.data.state.documents = Array.from({ length: 12 }, (_, i) => ({ id: 'r' + i, period_id: 'period', type: 'receipt', start: '2026-11-02', end: '2026-11-02', postings: [{ name: 'Susu', qty: i + 1, unit: 'ML' }] }));
   await t.click('history-tab', { soKind: 'receipt' });
-  assert.equal((t.page.innerHTML.match(/class="so-history-compact-details"/g) || []).length, 10);
+  assert.equal((t.page.innerHTML.match(/data-so-action="edit"/g) || []).length, 10);
   assert.match(t.page.innerHTML, /data-so-action="history-more"/);
   assert.match(t.page.innerHTML, /data-so-action="edit"/);
   await t.click('history-more');
-  assert.equal((t.page.innerHTML.match(/class="so-history-compact-details"/g) || []).length, 12);
+  assert.equal((t.page.innerHTML.match(/data-so-action="edit"/g) || []).length, 12);
   assert.doesNotMatch(t.page.innerHTML, /data-so-action="history-more"/);
 });
 
@@ -398,20 +398,70 @@ test('Barang Masuk removes an item from its local draft and avoids sending it',a
  assert.equal(t.writes.length,0);
 });
 
-test('dated expense history is compact and keeps expandable details and edit actions',async()=>{
+test('daily expense history sums materials and preserves original transaction controls',async()=>{
  const t=runtime();
  t.data.state.documents=[
-  {id:'e1',period_id:'period',type:'expense',category:'Kalibrasi',start:'2026-11-08',end:'2026-11-08',postings:[{name:'Susu',qty:-2,unit:'ML'}]},
-  {id:'e2',period_id:'period',type:'expense',category:'Lainnya',start:'2026-11-08',end:'2026-11-08',postings:[{name:'Susu',qty:-3,unit:'ML'}]}
+  {id:'e1',period_id:'period',type:'expense',category:'Kalibrasi',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-2,unit:'ML'}]},
+  {id:'e2',period_id:'period',type:'expense',category:'Lainnya',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-3,unit:'ML'},{key:'m:b',name:'Gula',qty:-100,unit:'GR'}]},
+  {id:'e3',period_id:'period',type:'expense',category:'QC',void:true,start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-99,unit:'ML'}]}
  ];
  await t.click('history-tab',{soKind:'expense'});
  const html=t.page.innerHTML;
  assert.match(html,/8 November 2026/);
- assert.equal((html.match(/class="so-history-compact-details"/g)||[]).length,2);
- assert.equal((html.match(/class="so-history-compact-name"/g)||[]).length,2);
+ assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,3);
+ assert.match(html,/Susu<\/span><strong>2 ML/);
+ assert.match(html,/Susu<\/span><strong>3 ML/);
+ assert.doesNotMatch(html,/Susu<\/span><strong>5 ML/);
+ assert.match(html,/<h4>Kalibrasi<\/h4>/);
+ assert.match(html,/<h4>Lainnya<\/h4>/);
+ assert.match(html,/Gula<\/span><strong>100 GR/);
+ assert.match(html,/Transaksi asli \(3\)/);
  assert.match(html,/Pengeluaran · Kalibrasi/);
  assert.match(html,/Pengeluaran · Lainnya/);
- assert.match(html,/class="so-history-compact-cue">Rincian/);
- assert.match(html,/data-so-action="edit"/);
- assert.match(html,/Susu/);
+ assert.equal((html.match(/data-so-action="edit"/g)||[]).length,2);
+ assert.match(html,/Dibatalkan/);
+});
+
+test('daily receipt history totals repeated materials by name and keeps original records',async()=>{
+ const t=runtime();
+ t.data.state.documents=[
+  {id:'r1',period_id:'period',type:'receipt',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:100,unit:'ML'}]},
+  {id:'r2',period_id:'period',type:'receipt',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:50,unit:'ML'},{key:'m:b',name:'Gula',qty:20,unit:'GR'}]}
+ ];
+ await t.click('history-tab',{soKind:'receipt'});
+ const html=t.page.innerHTML;
+ assert.match(html,/8 November 2026/);
+ assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
+ assert.match(html,/Susu<\/span><strong>150 ML/);
+ assert.match(html,/Gula<\/span><strong>20 GR/);
+ assert.equal((html.match(/Transaksi asli/g)||[]).length,1);
+ assert.equal((html.match(/data-so-action="edit"/g)||[]).length,2);
+});
+
+test('daily expense history distinguishes inward adjustments from outward expenses',async()=>{
+ const t=runtime();
+ t.data.state.documents=[
+ {id:'e1',period_id:'period',type:'expense',category:'Waste',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-5,unit:'ML'}]},
+ {id:'m1',period_id:'period',type:'move_in',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:3,unit:'ML'}]}
+ ];
+ await t.click('history-tab',{soKind:'expense'});
+ assert.match(t.page.innerHTML,/Susu<\/span><strong>5 ML/);
+ assert.match(t.page.innerHTML,/Masuk \/ penyesuaian/);
+ assert.match(t.page.innerHTML,/3 ML/);
+});
+
+test('expense material totals remain separated by category, including repeated material',async()=>{
+ const t=runtime();
+ t.data.state.documents=[
+ {id:'a',period_id:'period',type:'expense',category:'Waste',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-2,unit:'ML'}]},
+ {id:'b',period_id:'period',type:'expense',category:'Waste',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-4,unit:'ML'}]},
+ {id:'c',period_id:'period',type:'expense',category:'QC',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-5,unit:'ML'}]}
+ ];
+ await t.click('history-tab',{soKind:'expense'});
+ const html=t.page.innerHTML;
+ assert.match(html,/<h4>QC<\/h4>/);
+ assert.match(html,/<h4>Waste<\/h4>/);
+ assert.match(html,/Susu<\/span><strong>6 ML/);
+ assert.match(html,/Susu<\/span><strong>5 ML/);
+ assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
 });
