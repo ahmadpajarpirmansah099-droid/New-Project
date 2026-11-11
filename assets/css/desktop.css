@@ -1416,14 +1416,28 @@
   }
 
   body:has(#page-dashboard.active) .workspace-scope-switcher {
-    position: fixed;
+    position: absolute;
     z-index: 82;
     top: 32px;
     left: clamp(340px, 24vw, 430px);
     display: flex;
+    align-items: stretch;
     width: clamp(290px, 23vw, 410px);
     margin: 0;
-    gap: 10px;
+    gap: 12px;
+    box-sizing: border-box;
+  }
+
+  body:has(#page-dashboard.active) .workspace-scope-switcher .scope-field {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  body:has(#page-dashboard.active) .workspace-scope-switcher .scope-trigger {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
   }
 
   body:has(#page-dashboard.active) .workspace-scope-switcher[hidden] {
