@@ -30,6 +30,21 @@
  function hasDraftContent(draft){
   return !!draft&&(!!draft.id||!!draft.touched||Object.values(draft.counts||{}).some(value=>value&&[value.qty,value.invoice_total].some(v=>v!=null&&String(v).trim()!==''))||draft.kind==='expense'&&draft.category&&draft.category!=='Waste'||!!draft.target||Object.values(draft.mapping||{}).some(Boolean));
  }
+ function correctionCounts(){
+  const p=period(),counts={};
+  if(p?.status!=='reopened')return counts;
+  for(const row of p.result||[])counts[row.key]={qty:String(row.physical),unit:row.unit};
+  if(!p.result&&p.physical)for(const row of catalog().filter(x=>!x.key.startsWith('s:')))if(p.physical[row.key]!=null)counts[row.key]={qty:String(p.physical[row.key]),unit:row.unit};
+  return counts;
+ }
+ function restoreCorrectionCounts(draft){
+  if(draft.kind!=='close'||period()?.status!=='reopened'||draft.basePeriod&&draft.basePeriod!==period().id)return false;
+  const baseline=correctionCounts(),missing=Object.keys(baseline).filter(key=>!Object.prototype.hasOwnProperty.call(draft.counts||{},key));
+  const counts={...draft.counts};
+  for(const key of Object.keys(baseline))counts[key]={...baseline[key],...counts[key]};
+  draft.counts=counts;
+  return missing.length>0;
+ }
  function confirmStock(message,title='Konfirmasi Stock Opname',acceptLabel='Lanjutkan'){
   activeConfirm?.(false);
   return new Promise(resolve=>{
@@ -103,8 +118,10 @@
   if(existing&&hasDraftContent(saved)&&saved.id!==existing&&!await confirmStock('Draft '+labels[kind]+' yang tersimpan akan diganti.','Ganti draft tersimpan?','Ganti draft'))return false;
   if(existing&&saved?.id!==existing)service.clearDraft(kind);
   if(saved&&!existing){
-   form=saved;draftSaved=true;notice='Draft '+labels[kind]+' dipulihkan. Lanjutkan isian.';
+   form=saved;draftSaved=true;const recovered=restoreCorrectionCounts(form);
+   notice=recovered?'Draft Stock Opname dipulihkan; kolom yang kosong diisi dari stok fisik opname tersimpan. Periksa sebelum menyelesaikan.':'Draft '+labels[kind]+' dipulihkan. Lanjutkan isian.';
    if(kind==='initial'&&period()?.status==='opening_pending')form.start=form.end=period().start;
+   if(recovered)snapshot();
    if(form.target)targetRows=await service.targetCatalog(form.target);
    render();return true;
   }
@@ -114,15 +131,14 @@
   if(d)for(const l of d.lines||[])form.counts[l.key]={qty:String(l.qty),unit:l.unit||'',invoice_total:l.invoice_total??''};
   if(kind==='close'&&period()?.status==='reopened'){
    form.end=period().end;form.start=period().start;
-   for(const row of period().result||[])form.counts[row.key]={qty:String(row.physical),unit:row.unit};
-   if(!period().result&&period().physical)for(const row of catalog().filter(x=>!x.key.startsWith('s:')))if(period().physical[row.key]!=null)form.counts[row.key]={qty:String(period().physical[row.key]),unit:row.unit};
+   form.counts=correctionCounts();
   }
   notice='';snapshot();render();return true;
  }
  async function restore(){const draft=service.loadDraft();if(!draft){notice='Belum ada draft di perangkat ini.';render();return;}
   if(staleOpeningDraft(draft)){service.clearDraft('initial');notice='Draft Stock Awal lama diabaikan setelah reset. Isi ulang manual.';render();return;}
   if(draft.basePeriod && draft.basePeriod!==period()?.id && ['initial','close'].includes(draft.kind)){notice='Draft berasal dari periode berbeda. Periksa melalui riwayat; draft tidak dipindahkan otomatis.';render();return;}
-  form=draft;draftSaved=true;notice='Draft perangkat '+labels[form.kind]+' dipulihkan. Periksa tanggal dan jumlah sebelum menyimpan.';if(form.target)targetRows=await service.targetCatalog(form.target);render();
+  form=draft;draftSaved=true;const recovered=restoreCorrectionCounts(form);notice=recovered?'Draft Stock Opname dipulihkan; kolom yang kosong diisi dari stok fisik opname tersimpan. Periksa sebelum menyelesaikan.':'Draft perangkat '+labels[form.kind]+' dipulihkan. Periksa tanggal dan jumlah sebelum menyimpan.';if(recovered)snapshot();if(form.target)targetRows=await service.targetCatalog(form.target);render();
  }
  function rowsForForm(){let rows=catalog();const k=form.kind;
   if(k==='sales')rows=rows.filter(x=>x.key.startsWith('s:'));
