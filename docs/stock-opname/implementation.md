@@ -92,3 +92,12 @@ Dense operational ledger, inherited New-Project typography and lime/navy identit
 - **Implementasi data:** `stock_opname_state` revision 17 → 18. Status periode pertama `reopened → closed`, periode lanjutan `held → active`. Barang Masuk Scone Cake 600 GR tanggal 2 November yang tersimpan saat koreksi dipertahankan; satu baris hasil Scone Cake dihitung ulang: sistem 97 → 697 GR, fisik 568 GR, selisih 471 → −129 GR, nilai Rp76.537,5 → Rp−20.962,5. Seluruh 215 transaksi dipertahankan.
 - **Verifikasi:** 105 hasil dan 105 stok fisik tetap ada. Pengecekan seluruh barang terhadap perhitungan saldo, fisik, selisih unit, selisih rupiah, dan stok awal periode berikutnya menghasilkan 0 ketidakcocokan. Tes frontend lokal 89 lulus, 0 gagal; sintaks lulus.
 - **Keterbatasan dan risiko:** Draft koreksi lokal perangkat tidak dapat dihapus dari database; frontend menghapusnya saat pengguna memuat ulang atau mencoba membuka form lama. Angka yang hanya ada di draft lama tidak digunakan dalam hasil opname yang sudah selesai. Pemeriksaan langsung pada Android admin Bar setelah deploy masih diperlukan.
+
+## Riwayat per fitur — 11 November 2026
+
+1. Perilaku disengaja: Riwayat Stock Awal, Pengeluaran (termasuk Move), Barang Masuk, Produksi WIP, Sales, dan hasil Stock Opname dipilih masing-masing. Membuka form memilih riwayatnya; daftar lain dapat dipilih tanpa mengubah draft. Setiap daftar menampilkan 10 catatan terlebih dahulu, lalu tombol untuk menampilkan lebih banyak.
+2. Batas keamanan: tampilan hanya memfilter data lingkup yang sudah diperoleh lewat akses Stock Opname; hak Edit, Batalkan, dan penyesuaian Move tetap mengikuti batas periode dan status sebelumnya. Tidak mengubah otorisasi server.
+3. Implementasi: `assets/js/stock-opname-ui.js`, `assets/css/stock-opname.css`, `index.html`, dan `tests/stock-opname-ui.test.js`. Stock Awal dibaca dari snapshot periode; rincian transaksi dan hasil opname tetap dapat dibuka. Cache URL aset diperbarui.
+4. Keterbatasan: pilihan riwayat kembali ke Stock Opname setelah halaman/login dimuat ulang; hal ini tidak memengaruhi data. Tidak ada migrasi, RPC, RLS, autentikasi, atau kunci penyimpanan yang berubah.
+5. Risiko yang masih perlu diuji: tampilan fisik pada akun admin Bar dan perangkat Android 320px setelah deploy; Chromium lokal tidak dapat dijalankan karena sandbox menolak socket.
+6. Verifikasi: 91 tes Node lulus, 0 gagal; `node --check` lulus. Status PR, merge, dan Pages dilaporkan terpisah setelah penerapan.
