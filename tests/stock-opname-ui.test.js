@@ -408,8 +408,12 @@ test('daily expense history sums materials and preserves original transaction co
  await t.click('history-tab',{soKind:'expense'});
  const html=t.page.innerHTML;
  assert.match(html,/8 November 2026/);
- assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
- assert.match(html,/Susu<\/span><strong>5 ML/);
+ assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,3);
+ assert.match(html,/Susu<\/span><strong>2 ML/);
+ assert.match(html,/Susu<\/span><strong>3 ML/);
+ assert.doesNotMatch(html,/Susu<\/span><strong>5 ML/);
+ assert.match(html,/<h4>Kalibrasi<\/h4>/);
+ assert.match(html,/<h4>Lainnya<\/h4>/);
  assert.match(html,/Gula<\/span><strong>100 GR/);
  assert.match(html,/Transaksi asli \(3\)/);
  assert.match(html,/Pengeluaran · Kalibrasi/);
@@ -444,4 +448,20 @@ test('daily expense history distinguishes inward adjustments from outward expens
  assert.match(t.page.innerHTML,/Susu<\/span><strong>5 ML/);
  assert.match(t.page.innerHTML,/Masuk \/ penyesuaian/);
  assert.match(t.page.innerHTML,/3 ML/);
+});
+
+test('expense material totals remain separated by category, including repeated material',async()=>{
+ const t=runtime();
+ t.data.state.documents=[
+ {id:'a',period_id:'period',type:'expense',category:'Waste',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-2,unit:'ML'}]},
+ {id:'b',period_id:'period',type:'expense',category:'Waste',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-4,unit:'ML'}]},
+ {id:'c',period_id:'period',type:'expense',category:'QC',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-5,unit:'ML'}]}
+ ];
+ await t.click('history-tab',{soKind:'expense'});
+ const html=t.page.innerHTML;
+ assert.match(html,/<h4>QC<\/h4>/);
+ assert.match(html,/<h4>Waste<\/h4>/);
+ assert.match(html,/Susu<\/span><strong>6 ML/);
+ assert.match(html,/Susu<\/span><strong>5 ML/);
+ assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
 });
