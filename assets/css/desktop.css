@@ -1419,7 +1419,7 @@
     position: absolute;
     z-index: 82;
     top: 32px;
-    left: clamp(340px, 24vw, 430px);
+    left: clamp(300px, 20vw, 370px);
     display: flex;
     align-items: stretch;
     width: clamp(290px, 23vw, 410px);
@@ -1495,7 +1495,7 @@
 
 @media (min-width: 1280px) and (max-width: 1449px) {
   body:has(#page-dashboard.active) .workspace-scope-switcher {
-    left: clamp(340px, 25vw, 380px);
-    width: clamp(290px, 23vw, 340px);
+    left: clamp(320px, 23vw, 345px);
+    width: clamp(270px, 21vw, 310px);
   }
 }
