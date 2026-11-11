@@ -69,8 +69,8 @@ function runtime() {
     storageFails: value => storageFails = value,
     writeFails: value => writeFails = value,
     input(dataset, value) { handlers.input({ target: { dataset, value, closest: () => null } }); },
-    async click(name) {
-      handlers.click({ target: { closest: () => ({ dataset: { soAction: name } }) }, preventDefault() {} });
+    async click(name, dataset = {}) {
+      handlers.click({ target: { closest: () => ({ dataset: { soAction: name, ...dataset } }) }, preventDefault() {} });
       await new Promise(resolve => setImmediate(resolve));
     }
   };
@@ -228,6 +228,45 @@ test('total selisih rupiah nets gains and losses at the bottom of each result', 
   t.ui.render();
   assert.match(t.page.innerHTML, /<div class="so-result-total"><span>Total selisih rupiah<\/span><strong>Rp4\.975<\/strong><\/div>/);
   assert.ok(t.page.innerHTML.indexOf('Bahan C') < t.page.innerHTML.indexOf('so-result-total'));
+});
+
+test('history follows the selected feature without touching an unfinished local draft', async () => {
+  const t = runtime(), p = t.data.state.periods[0];
+  p.opening = { 'm:a': 100 };
+  p.opening_catalog = [{ key: 'm:a', name: 'Susu', unit: 'ML' }];
+  p.result = [{ key: 'm:a', name: 'Susu', unit: 'ML', movements: {}, system: 90, physical: 88, variance: -2, variance_value: -20 }];
+  t.data.state.documents = [
+    { id: 'r', period_id: 'period', type: 'receipt', start: '2026-11-02', end: '2026-11-02', postings: [{ key: 'm:a', name: 'Susu', qty: 10, unit: 'ML' }] },
+    { id: 's', period_id: 'period', type: 'sales', start: '2026-11-08', end: '2026-11-08', postings: [{ key: 'm:a', name: 'Susu', qty: -20, unit: 'ML' }] }
+  ];
+  t.ui.render();
+  assert.match(t.page.innerHTML, /Riwayat Stock Opname/);
+  assert.doesNotMatch(t.page.innerHTML, /Rincian transaksi/);
+  await t.ui.open('receipt');
+  t.input({ soKey: 'm:a', soProp: 'qty' }, '2');
+  assert.match(t.page.innerHTML, /Riwayat Barang Masuk/);
+  assert.match(t.page.innerHTML, /2 November 2026/);
+  assert.doesNotMatch(t.page.innerHTML, /8 November 2026/);
+  await t.click('history-tab', { soKind: 'sales' });
+  assert.match(t.page.innerHTML, /Riwayat Sales/);
+  assert.match(t.page.innerHTML, /8 November 2026/);
+  assert.doesNotMatch(t.page.innerHTML, /2 November 2026/);
+  assert.equal(t.draft('receipt').counts['m:a'].qty, '2');
+  await t.click('history-tab', { soKind: 'initial' });
+  assert.match(t.page.innerHTML, /Stock Awal 1 November 2026/);
+  assert.match(t.page.innerHTML, /100 ML/);
+});
+
+test('transaction history shows ten records at a time and retains edits on the active period', async () => {
+  const t = runtime();
+  t.data.state.documents = Array.from({ length: 12 }, (_, i) => ({ id: 'r' + i, period_id: 'period', type: 'receipt', start: '2026-11-02', end: '2026-11-02', postings: [{ name: 'Susu', qty: i + 1, unit: 'ML' }] }));
+  await t.click('history-tab', { soKind: 'receipt' });
+  assert.equal((t.page.innerHTML.match(/Rincian transaksi/g) || []).length, 10);
+  assert.match(t.page.innerHTML, /data-so-action="history-more"/);
+  assert.match(t.page.innerHTML, /data-so-action="edit"/);
+  await t.click('history-more');
+  assert.equal((t.page.innerHTML.match(/Rincian transaksi/g) || []).length, 12);
+  assert.doesNotMatch(t.page.innerHTML, /data-so-action="history-more"/);
 });
 
 test('resetting Stock Awal preserves transactions and requires complete manual input', async () => {
