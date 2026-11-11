@@ -1375,3 +1375,113 @@
     padding-left: calc(32px + var(--desktop-rail-width));
   }
 }
+
+/* Dashboard desktop — headerless workspace with the scope controls beside the greeting. */
+@media (min-width: 1280px) {
+  body:has(#page-dashboard.active) .app {
+    position: relative;
+  }
+
+  body:has(#page-dashboard.active) .top {
+    position: static;
+    display: block;
+    width: 0;
+    height: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  body:has(#page-dashboard.active) .top > .brand,
+  body:has(#page-dashboard.active) .top > .desktop-sidebar-toggle,
+  body:has(#page-dashboard.active) .top-actions > .desktop-queue-date,
+  body:has(#page-dashboard.active) .top-actions > .profile,
+  body:has(#page-dashboard.active) .top-actions > .menu-toggle {
+    display: none !important;
+  }
+
+  body:has(#page-dashboard.active) .top-actions {
+    display: block;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  body:has(#page-dashboard.active) .workspace-scope-switcher {
+    position: fixed;
+    z-index: 82;
+    top: 32px;
+    left: clamp(340px, 24vw, 430px);
+    display: flex;
+    width: clamp(290px, 23vw, 410px);
+    margin: 0;
+    gap: 10px;
+  }
+
+  body:has(#page-dashboard.active) .workspace-scope-switcher[hidden] {
+    display: none !important;
+  }
+
+  body.desktop-sidebar-collapsed:has(#page-dashboard.active) .drawer-head {
+    display: none;
+  }
+
+  body.desktop-sidebar-collapsed:has(#page-dashboard.active) .drawer-nav {
+    padding-top: 18px;
+  }
+
+  body:has(#page-dashboard.active) #authLogoutButton {
+    position: fixed;
+    z-index: 95;
+    left: 14px;
+    bottom: 122px;
+    display: grid !important;
+    place-items: center;
+    width: 48px;
+    height: 46px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #111225;
+    box-shadow: none;
+  }
+
+  body:has(#page-dashboard.active) #authLogoutButton svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  body.desktop-sidebar-collapsed:has(#page-dashboard.active) .drawer-guide-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 46px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #111225;
+    box-shadow: none;
+  }
+
+  body.desktop-sidebar-collapsed:has(#page-dashboard.active) .drawer-guide-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (min-width: 1280px) and (max-width: 1449px) {
+  body:has(#page-dashboard.active) .workspace-scope-switcher {
+    left: clamp(340px, 25vw, 380px);
+    width: clamp(290px, 23vw, 340px);
+  }
+}
