@@ -1499,3 +1499,8 @@
     width: clamp(270px, 21vw, 310px);
   }
 }
+
+/* Outlet and division selectors are available on the dashboard only. */
+body:not(:has(#page-dashboard.active)) .workspace-scope-switcher {
+  display: none !important;
+}
