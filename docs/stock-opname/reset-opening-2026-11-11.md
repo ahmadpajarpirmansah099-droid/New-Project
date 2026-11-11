@@ -23,6 +23,6 @@ RPC hanya menerima admin pada divisi aktif melalui `private.so_allowed`. Reset h
 
 ## Verifikasi dan status
 
-- Tes UI mencakup reset yang mempertahankan transaksi, form manual kosong, dan konfirmasi ulang.
+- Tes UI mencakup reset yang mempertahankan transaksi, form manual kosong, dan konfirmasi ulang. Seluruh 82 tes lokal lulus; sintaks JavaScript dan pemeriksaan diff lulus.
 - SQL perlu diuji dalam transaksi rollback dan dipasang setelah persetujuan user. Data produksi belum direset dan belum diuji melalui akun admin Bar.
-- PR, commit, migrasi permanen, dan deploy: belum dibuat saat catatan ini ditulis.
+- Draft PR #235 dibuat dari `main` 5de9987. RPC belum dipasang sebagai migrasi permanen; PR belum digabung dan frontend belum deploy.
