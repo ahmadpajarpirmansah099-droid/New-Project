@@ -1376,13 +1376,13 @@
   }
 }
 
-/* Dashboard desktop — headerless workspace with the scope controls beside the greeting. */
+/* Desktop application pages — headerless workspace with scope controls in the top content row. */
 @media (min-width: 1280px) {
-  body:has(#page-dashboard.active) .app {
+  body:has(.page.active) .app {
     position: relative;
   }
 
-  body:has(#page-dashboard.active) .top {
+  body:has(.page.active) .top {
     position: static;
     display: block;
     width: 0;
@@ -1398,15 +1398,15 @@
     backdrop-filter: none;
   }
 
-  body:has(#page-dashboard.active) .top > .brand,
-  body:has(#page-dashboard.active) .top > .desktop-sidebar-toggle,
-  body:has(#page-dashboard.active) .top-actions > .desktop-queue-date,
-  body:has(#page-dashboard.active) .top-actions > .profile,
-  body:has(#page-dashboard.active) .top-actions > .menu-toggle {
+  body:has(.page.active) .top > .brand,
+  body:has(.page.active) .top > .desktop-sidebar-toggle,
+  body:has(.page.active) .top-actions > .desktop-queue-date,
+  body:has(.page.active) .top-actions > .profile,
+  body:has(.page.active) .top-actions > .menu-toggle {
     display: none !important;
   }
 
-  body:has(#page-dashboard.active) .top-actions {
+  body:has(.page.active) .top-actions {
     display: block;
     width: 0;
     height: 0;
@@ -1415,7 +1415,7 @@
     overflow: visible;
   }
 
-  body:has(#page-dashboard.active) .workspace-scope-switcher {
+  body:has(.page.active) .workspace-scope-switcher {
     position: absolute;
     z-index: 82;
     top: 32px;
@@ -1428,31 +1428,31 @@
     box-sizing: border-box;
   }
 
-  body:has(#page-dashboard.active) .workspace-scope-switcher .scope-field {
+  body:has(.page.active) .workspace-scope-switcher .scope-field {
     flex: 1 1 0;
     min-width: 0;
   }
 
-  body:has(#page-dashboard.active) .workspace-scope-switcher .scope-trigger {
+  body:has(.page.active) .workspace-scope-switcher .scope-trigger {
     box-sizing: border-box;
     width: 100%;
     min-width: 0;
     max-width: none;
   }
 
-  body:has(#page-dashboard.active) .workspace-scope-switcher[hidden] {
+  body:has(.page.active) .workspace-scope-switcher[hidden] {
     display: none !important;
   }
 
-  body.desktop-sidebar-collapsed:has(#page-dashboard.active) .drawer-head {
+  body.desktop-sidebar-collapsed:has(.page.active) .drawer-head {
     display: none;
   }
 
-  body.desktop-sidebar-collapsed:has(#page-dashboard.active) .drawer-nav {
+  body.desktop-sidebar-collapsed:has(.page.active) .drawer-nav {
     padding-top: 18px;
   }
 
-  body:has(#page-dashboard.active) #authLogoutButton {
+  body:has(.page.active) #authLogoutButton {
     position: fixed;
     z-index: 95;
     left: 14px;
@@ -1469,12 +1469,12 @@
     box-shadow: none;
   }
 
-  body:has(#page-dashboard.active) #authLogoutButton svg {
+  body:has(.page.active) #authLogoutButton svg {
     width: 20px;
     height: 20px;
   }
 
-  body.desktop-sidebar-collapsed:has(#page-dashboard.active) .drawer-guide-icon {
+  body.desktop-sidebar-collapsed:has(.page.active) .drawer-guide-icon {
     display: grid;
     place-items: center;
     width: 48px;
@@ -1487,14 +1487,14 @@
     box-shadow: none;
   }
 
-  body.desktop-sidebar-collapsed:has(#page-dashboard.active) .drawer-guide-icon svg {
+  body.desktop-sidebar-collapsed:has(.page.active) .drawer-guide-icon svg {
     width: 20px;
     height: 20px;
   }
 }
 
 @media (min-width: 1280px) and (max-width: 1449px) {
-  body:has(#page-dashboard.active) .workspace-scope-switcher {
+  body:has(.page.active) .workspace-scope-switcher {
     left: clamp(320px, 23vw, 345px);
     width: clamp(270px, 21vw, 310px);
   }
