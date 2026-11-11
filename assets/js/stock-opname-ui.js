@@ -39,11 +39,15 @@
  }
  function restoreCorrectionCounts(draft){
   if(draft.kind!=='close'||period()?.status!=='reopened'||draft.basePeriod&&draft.basePeriod!==period().id)return false;
-  const baseline=correctionCounts(),missing=Object.keys(baseline).filter(key=>!Object.prototype.hasOwnProperty.call(draft.counts||{},key));
+  const baseline=correctionCounts();let recovered=false;
   const counts={...draft.counts};
-  for(const key of Object.keys(baseline))counts[key]={...baseline[key],...counts[key]};
+  for(const key of Object.keys(baseline)){
+   if(counts[key]?.qty==null||String(counts[key].qty).trim()===''){counts[key]={...baseline[key]};recovered=true;}
+   else counts[key]={...baseline[key],...counts[key]};
+  }
   draft.counts=counts;
-  return missing.length>0;
+  if(draft.end>period().end){draft.end=period().end;recovered=true;}
+  return recovered;
  }
  function confirmStock(message,title='Konfirmasi Stock Opname',acceptLabel='Lanjutkan'){
   activeConfirm?.(false);
@@ -234,7 +238,7 @@
    if(name==='draft'){if(snapshot())notice='Draft tersimpan di perangkat.';return;}
    if(name==='restore'){await restore();return;}
    if(name==='master'){root.go(el.dataset.soPage||'master-items');return;}
-   if(name==='refresh'){const saved=snapshot();await service.read();if(saved)notice='Data terbaru dimuat. Draft tetap tersedia.';return;}
+   if(name==='refresh'){const saved=snapshot();await service.read();const recovered=form&&restoreCorrectionCounts(form);if(recovered)snapshot();if(saved&&draftSaved)notice=recovered?'Data terbaru dimuat. Angka fisik opname tersimpan dipulihkan; periksa sebelum menyelesaikan.':'Data terbaru dimuat. Draft tetap tersedia.';return;}
    if(name==='configure'){if(await confirmStock('Ubah aktivasi Stock Opname pada divisi yang dipilih?','Ubah akses Stock Opname?','Ubah akses'))await service.configure(!get().enabled);return;}
    if(name==='reset-opening'){
     if(await confirmStock('Angka Stock Awal lama akan dikosongkan. Semua transaksi dan stok fisik opname terakhir tetap tersimpan; hasil selisih harus dihitung ulang setelah Stock Awal baru diisi.','Isi ulang Stock Awal?','Kosongkan Stock Awal')){

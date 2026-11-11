@@ -71,8 +71,16 @@ Dense operational ledger, inherited New-Project typography and lime/navy identit
 
 ## Koreksi draft opname kosong (2026-11-11)
 
-- **Perilaku yang disengaja:** Saat opname terakhir dibuka untuk koreksi, form mengambil angka fisik yang sudah tersimpan. Draft lokal untuk periode yang sama mempertahankan setiap angka yang sudah diisi, termasuk 0 dan isian yang sengaja dikosongkan; hanya barang yang belum punya entri draft yang diisi dari opname tersimpan.
+- **Perilaku yang disengaja:** Saat opname terakhir dibuka untuk koreksi, form mengambil angka fisik yang sudah tersimpan. Draft lokal untuk periode yang sama mempertahankan setiap angka yang sudah diisi, termasuk 0; barang dengan jumlah kosong atau belum ada di draft diisi dari opname tersimpan.
 - **Batas keamanan:** Pemulihan memakai data periode dari pembacaan divisi yang sudah dibatasi server. Tidak ada perubahan pada RPC, RLS, autentikasi, data transaksi, atau kunci localStorage.
 - **Implementasi:** `assets/js/stock-opname-ui.js` menggabungkan angka fisik tersimpan dengan draft koreksi saat membuka form dan saat menekan Pulihkan Draft. Draft yang diisi kembali disimpan pada perangkat; notifikasi menjelaskan sumber angka tersebut.
 - **Keterbatasan:** Angka baru yang sudah tertimpa di penyimpanan perangkat dan belum pernah dikirim ke database tidak bisa dipulihkan dari database. Angka fisik opname terakhir masih tersedia, tetapi koreksi yang belum tersimpan di sana harus diperiksa ulang.
 - **Risiko dan verifikasi:** Tes UI mencakup draft kosong, koreksi parsial, angka 0, kolom yang sengaja dikosongkan, dan pemulihan manual; suite lokal 87 lulus, 0 gagal, dan pemeriksaan sintaks lulus. Pengujian visual pada sesi Android admin Bar setelah deploy masih diperlukan. Perubahan frontend saja, tanpa migrasi database.
+
+## Koreksi tanggal 8 November dan form aktif (2026-11-11)
+
+- **Perilaku yang disengaja:** Opname Bar untuk transaksi hingga 8 November 2026 ditandai 8 November, dan periode berikutnya mulai pada batas yang sama. Saat form koreksi sudah terbuka, Muat Ulang mengisi jumlah fisik kosong dari opname tersimpan, mempertahankan jumlah yang sudah diketik (termasuk 0), serta mengembalikan tanggal form yang melewati akhir opname ke tanggal akhir tersebut.
+- **Batas keamanan:** Perubahan tampilan hanya menggunakan state dari RPC yang dibatasi divisi. Tidak mengubah hak akses, autentikasi, RLS, RPC, struktur database, atau kunci draft.
+- **Data:** Koreksi terarah pada `public.stock_opname_state` divisi Lazy Jennie · Bar dari revision 15 ke 16: `periods[0].end` dan `periods[1].start` diubah dari `2026-11-11` ke `2026-11-08`. Pembaruan memakai syarat revision, ID/status kedua periode, tanggal lama, tidak ada transaksi periode pertama setelah 8 November, dan tidak ada transaksi pada periode kedua. Verifikasi sesudahnya: 105 hasil, 105 stok fisik, 214 transaksi tetap ada.
+- **Implementasi dan risiko:** `assets/js/stock-opname-ui.js` memperbaiki pemulihan pada draft yang berisi baris dengan jumlah kosong dan pada tombol Muat Ulang. Jumlah kosong yang sengaja dibersihkan akan kembali ke angka opname sebelumnya; pengguna perlu mengetik `0` untuk fisik nol. Angka koreksi yang sebelumnya sudah tertimpa sebelum masuk database tidak dapat dipulihkan persis.
+- **Verifikasi:** 88 tes otomatis lokal lulus, 0 gagal; pemeriksaan sintaks lulus. Pemeriksaan form pada Android dengan akun admin Bar setelah deploy masih diperlukan. Perubahan antarmuka melalui PR lanjutan; data tanggal dikoreksi langsung tanpa migration.
