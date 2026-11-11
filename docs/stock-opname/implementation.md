@@ -68,3 +68,11 @@ Production schema installation is complete. The database scenarios run after ins
 ## Design review
 
 Dense operational ledger, inherited New-Project typography and lime/navy identity, 44px controls, functional transitions and reduced-motion support. AI-slop score 1/10; distinctiveness 8/10; implementation direction readiness 9/10. Remaining visual verification: the authenticated full app shell, beyond the isolated form fixture.
+
+## Koreksi draft opname kosong (2026-11-11)
+
+- **Perilaku yang disengaja:** Saat opname terakhir dibuka untuk koreksi, form mengambil angka fisik yang sudah tersimpan. Draft lokal untuk periode yang sama mempertahankan setiap angka yang sudah diisi, termasuk 0 dan isian yang sengaja dikosongkan; hanya barang yang belum punya entri draft yang diisi dari opname tersimpan.
+- **Batas keamanan:** Pemulihan memakai data periode dari pembacaan divisi yang sudah dibatasi server. Tidak ada perubahan pada RPC, RLS, autentikasi, data transaksi, atau kunci localStorage.
+- **Implementasi:** `assets/js/stock-opname-ui.js` menggabungkan angka fisik tersimpan dengan draft koreksi saat membuka form dan saat menekan Pulihkan Draft. Draft yang diisi kembali disimpan pada perangkat; notifikasi menjelaskan sumber angka tersebut.
+- **Keterbatasan:** Angka baru yang sudah tertimpa di penyimpanan perangkat dan belum pernah dikirim ke database tidak bisa dipulihkan dari database. Angka fisik opname terakhir masih tersedia, tetapi koreksi yang belum tersimpan di sana harus diperiksa ulang.
+- **Risiko dan verifikasi:** Tes UI mencakup draft kosong, koreksi parsial, angka 0, kolom yang sengaja dikosongkan, dan pemulihan manual; suite lokal 87 lulus, 0 gagal, dan pemeriksaan sintaks lulus. Pengujian visual pada sesi Android admin Bar setelah deploy masih diperlukan. Perubahan frontend saja, tanpa migrasi database.

@@ -117,6 +117,46 @@ test('entered zero is still protected when changing forms', async () => {
   assert.equal(t.confirmations.length, 0);
 });
 
+test('reopened opname restores saved physical counts behind an empty local draft', async () => {
+  const t = runtime(), p = t.data.state.periods[0];
+  await t.ui.open('close'); // Old blank draft saved before the period was reopened.
+  p.status = 'reopened'; p.end = '2026-11-08';
+  p.result = [{ key: 'm:a', unit: 'ML', physical: 5781 }, { key: 'w:a', unit: 'ML', physical: 0 }];
+  await t.ui.open('expense');
+  await t.ui.open('close');
+  assert.equal(t.draft('close').counts['m:a'].qty, '5781');
+  assert.equal(t.draft('close').counts['w:a'].qty, '0');
+  assert.match(t.page.innerHTML, /kolom yang kosong diisi dari stok fisik opname tersimpan/);
+});
+
+test('correction draft keeps edited counts and fills untouched items from saved opname', async () => {
+  const t = runtime(), p = t.data.state.periods[0];
+  p.status = 'reopened'; p.end = '2026-11-08';
+  p.result = [{ key: 'm:a', unit: 'ML', physical: 5781 }, { key: 'w:a', unit: 'ML', physical: 200 }];
+  await t.ui.open('close');
+  t.input({ soKey: 'm:a', soProp: 'qty' }, '0');
+  t.input({ soKey: 'w:a', soProp: 'qty' }, '');
+  await t.ui.open('expense');
+  p.result.push({ key: 'm:b', unit: 'GR', physical: 15 });
+  t.data.catalog.push({ key: 'm:b', name: 'Bahan B', unit: 'GR', units: [{ unit: 'GR', factor: 1 }] });
+  await t.ui.open('close');
+  assert.equal(t.draft('close').counts['m:a'].qty, '0');
+  assert.equal(t.draft('close').counts['w:a'].qty, '');
+  assert.equal(t.draft('close').counts['m:b'].qty, '15');
+});
+
+test('Pulihkan Draft also fills missing correction rows without losing edited values', async () => {
+  const t = runtime(), p = t.data.state.periods[0];
+  p.status = 'reopened'; p.end = '2026-11-08';
+  p.result = [{ key: 'm:a', unit: 'ML', physical: 5781 }, { key: 'w:a', unit: 'ML', physical: 200 }];
+  await t.ui.open('close');
+  t.input({ soKey: 'm:a', soProp: 'qty' }, '42');
+  p.result.push({ key: 'm:b', unit: 'GR', physical: 15 });
+  await t.click('restore');
+  assert.equal(t.draft('close').counts['m:a'].qty, '42');
+  assert.equal(t.draft('close').counts['m:b'].qty, '15');
+});
+
 test('changed date alone is protected as an unfinished draft', async () => {
   const t = runtime(); await t.ui.open('sales');
   t.input({ soField: 'start' }, '2026-10-20');
