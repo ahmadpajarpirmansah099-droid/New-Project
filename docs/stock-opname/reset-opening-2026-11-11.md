@@ -24,5 +24,7 @@ RPC hanya menerima admin pada divisi aktif melalui `private.so_allowed`. Reset h
 ## Verifikasi dan status
 
 - Tes UI mencakup reset yang mempertahankan transaksi, form manual kosong, dan konfirmasi ulang. Seluruh 82 tes lokal lulus; sintaks JavaScript dan pemeriksaan diff lulus.
-- SQL perlu diuji dalam transaksi rollback dan dipasang setelah persetujuan user. Data produksi belum direset dan belum diuji melalui akun admin Bar.
-- Draft PR #235 dibuat dari `main` 5de9987. RPC belum dipasang sebagai migrasi permanen; PR belum digabung dan frontend belum deploy.
+- Migrasi `stock_opname_reset_opening_20261111` telah diterapkan setelah persetujuan user. Uji RPC reset dan konfirmasi dengan rollback berhasil: 213 dokumen tetap ada, 105 barang dapat dikonfirmasi ulang, dan revisi produksi tidak berubah selama uji.
+- PR #235 digabung sebagai `c7b2e9b3de020026fc66f936338f587f74666ecd`. Workflow Pages #1013 berhasil; akses langsung ke berkas Pages dari browser pengujian terblokir, sehingga alur form lewat akun Bar belum teruji live.
+- Reset sebenarnya dijalankan via SQL connector memakai konteks admin Bar yang berwenang atas permintaan user, bukan klik pribadi admin di browser. Request log mencatat identitas admin tersebut. Revisi naik dari 5 ke 6; `opening` kini kosong dan status `opening_pending`. ID periode, tanggal 1–8 November, 213 dokumen, hash dokumen, serta 105 angka fisik tetap sama; `result` lama dihapus.
+- Salinan `opening` lama, katalog awal, revisi, jumlah dan hash dokumen disimpan sebagai `stock_opname_opening_before_reset_20261111.json` untuk pemulihan jika diperlukan. Form manual dan penyelesaian opname ulang masih perlu diuji lewat akun admin Bar.
