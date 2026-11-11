@@ -27,6 +27,10 @@
     const result=await rpc('stock_opname_write',{division:context.activeDivisionId,expected_revision:data.revision,request,action,input});
     data={...data,...result};return data;
   }
+  async function resetOpening(action,input,request){
+    const result=await rpc('stock_opname_reset_opening',{division:context.activeDivisionId,expected_revision:data.revision,request,action,input});
+    data={...data,...result};return data;
+  }
   async function configure(enabled){await rpc('stock_opname_configure',{division:context.activeDivisionId,enabled});data.enabled=enabled;}
   const draftKey=()=>context?'stock-opname:draft:v1:'+context.userId+':'+context.workspaceId+':'+context.activeDivisionId:null;
   function readDraftStore(){
@@ -52,5 +56,5 @@
     else root.localStorage.removeItem(key);
   }
   async function targetCatalog(destination){return rpc('stock_opname_target_catalog',{origin:context.activeDivisionId,destination});}
-  root.StockOpnameService={initialize,reset,current,available,read,write,configure,saveDraft,loadDraft,clearDraft,targetCatalog};
+  root.StockOpnameService={initialize,reset,current,available,read,write,resetOpening,configure,saveDraft,loadDraft,clearDraft,targetCatalog};
 })(window);

@@ -11,7 +11,7 @@
  const page=()=>document.getElementById('page-stock-opname');
  const get=()=>service.current();
  function period(){const ps=get()?.state?.periods||[];const p=ps.at(-1);return p?.status==='held'?ps.at(-2):p;}
- function isPending(){return period()?.status!=='reopened' && ['closed','held'].includes(get()?.state?.periods?.at(-1)?.status);}
+ function isPending(){return period()?.status!=='reopened' && ['closed','held','opening_pending'].includes(get()?.state?.periods?.at(-1)?.status);}
  function balances(){const s=get()?.state||{},p=period();const b={...p?.opening};for(const d of s.documents||[])if(d.period_id===p?.id&&!d.void)for(const l of d.postings||[])b[l.key]=(Number(b[l.key])||0)+Number(l.qty);return b;}
  function catalog(){const all=[...(get()?.catalog||[])];for(const r of period()?.opening_catalog||[])if(!all.some(x=>x.key===r.key))all.push(r);for(const d of get()?.state?.documents||[])if(d.period_id===period()?.id&&!d.void)for(const r of d.postings||[])if(!all.some(x=>x.key===r.key))all.push(r);return all;}
  function draftStatus(){return draftSaved?'Draft lokal tersimpan di perangkat ini; belum masuk database.':'Draft lokal belum tersimpan. Jangan tutup halaman sebelum berhasil menyimpan.';}
@@ -94,22 +94,25 @@
   });
  }
  async function open(kind,existing){
-  if(kind==='initial'&&period()){notice='Stock Awal pertama sudah diisi. Berikutnya gunakan konfirmasi hasil opname.';render();return;}
+  if(kind==='initial'&&period()&&period().status!=='opening_pending'){notice='Stock Awal pertama sudah diisi. Berikutnya gunakan konfirmasi hasil opname.';render();return;}
   if(form&&!snapshot())return false;
   const saved=service.loadDraft(kind);
   if(existing&&hasDraftContent(saved)&&saved.id!==existing&&!await confirmStock('Draft '+labels[kind]+' yang tersimpan akan diganti.','Ganti draft tersimpan?','Ganti draft'))return false;
   if(existing&&saved?.id!==existing)service.clearDraft(kind);
   if(saved&&!existing){
    form=saved;draftSaved=true;notice='Draft '+labels[kind]+' dipulihkan. Lanjutkan isian.';
+   if(kind==='initial'&&period()?.status==='opening_pending')form.start=form.end=period().start;
    if(form.target)targetRows=await service.targetCatalog(form.target);
    render();return true;
   }
   const d=existing?(get().state.documents||[]).find(x=>x.id===existing):null;
   form={kind,request:crypto.randomUUID(),id:d?.id||null,start:d?.start||today(),end:d?.end||today(),counts:{},category:d?.category||'Waste',target:d?.target||'',mapping:{},basePeriod:period()?.id||null,touched:false};
+  if(kind==='initial'&&period()?.status==='opening_pending')form.start=form.end=period().start;
   if(d)for(const l of d.lines||[])form.counts[l.key]={qty:String(l.qty),unit:l.unit||'',invoice_total:l.invoice_total??''};
   if(kind==='close'&&period()?.status==='reopened'){
    form.end=period().end;form.start=period().start;
    for(const row of period().result||[])form.counts[row.key]={qty:String(row.physical),unit:row.unit};
+   if(!period().result&&period().physical)for(const row of catalog().filter(x=>!x.key.startsWith('s:')))if(period().physical[row.key]!=null)form.counts[row.key]={qty:String(period().physical[row.key]),unit:row.unit};
   }
   notice='';snapshot();render();return true;
  }
@@ -134,7 +137,7 @@
  function formHTML(){
   if(!form)return '';
   const k=form.kind,rows=rowsForForm(),b=balances(),isCount=['initial','close'].includes(k),withUnit=!['sales','production'].includes(k),receipt=k==='receipt';
-  const dateButton=(field,title)=>'<button type="button" class="so-picker-trigger" aria-haspopup="dialog" data-so-action="pick-date" data-so-field="'+field+'" data-so-title="'+title+'"><span>'+e(dateLabel(form[field]))+'</span><span class="so-picker-chevron" aria-hidden="true"></span></button>';
+  const dateButton=(field,title)=>'<button type="button" class="so-picker-trigger" aria-haspopup="dialog" data-so-action="pick-date" data-so-field="'+field+'" data-so-title="'+title+'" '+(k==='initial'&&period()?.status==='opening_pending'?'disabled':'')+'><span>'+e(dateLabel(form[field]))+'</span><span class="so-picker-chevron" aria-hidden="true"></span></button>';
   const dates='<div class="so-toolbar">'+(k==='sales'?'<label>Dari tanggal'+dateButton('start','Pilih tanggal awal')+'</label>':'')+'<label>'+(k==='sales'?'Sampai tanggal':'Tanggal')+dateButton('end','Pilih tanggal')+'</label></div>';
   let extra='';
   if(k==='expense')extra='<div class="so-toolbar"><label>Kategori'+pickerButton(form.category,'data-so-field="category" data-so-title="Pilih kategori"',['Kalibrasi','RnD','QC','Suplies','Move','Waste','Lainnya'].map(x=>({value:x,label:x})))+'</label></div>';
@@ -167,10 +170,11 @@
   const p=period(),last=d.state.periods.at(-1),b=balances(),negative=Object.values(b).some(n=>n<0);
   let controls='';
   if(!p)controls=button('Isi Stock Awal','open','data-so-kind="initial"',true);
+  else if(p.status==='opening_pending')controls=button('Isi Ulang Stock Awal','open','data-so-kind="initial"',true);
   else if(last?.status==='closed')controls=button('Jadikan Stock Awal Berikutnya','activate','',true)+button('Buka Kembali Opname','reopen');
   else if(last?.status==='held'&&p?.status==='closed')controls=button('Konfirmasi Stock Awal Hasil Koreksi','reactivate','',true);
-  else controls=button('Isi Stock Opname','open','data-so-kind="close"',true)+(d.state.periods.some(x=>x.status==='closed')&&p?.status==='active'?button('Buka Opname Terakhir','reopen'):'');
-  page().innerHTML='<div class="so-head"><div><h1>Stock Opname</h1><p>'+e(root.AppAuth?.getContext()?.workspaceName||'')+' · '+e(root.AppAuth?.getContext()?.activeDivisionName||'')+'</p></div>'+button('Muat Ulang','refresh')+'</div><section class="so-overview" aria-label="Periode stok"><div class="so-notice">'+(p?'Periode mulai '+e(p.start)+' · '+({active:'Berjalan',reopened:'Koreksi opname',closed:'Menunggu konfirmasi Stock Awal',held:'Ditahan'}[p.status]||p.status):'Isi Stock Awal satu kali untuk memulai.')+'</div><div class="so-actions">'+controls+button('Pulihkan Draft','restore')+'</div></section>'+(notice?'<p class="so-notice" role="alert">'+e(notice)+'</p>':'')+(negative?'<p class="so-notice so-warning">Ada stok sistem minus. Periksa transaksi dan cocokkan saat opname.</p>':'')+formHTML()+historyHTML();
+  else controls=button('Isi Stock Opname','open','data-so-kind="close"',true)+(p.status==='reopened'&&d.state.periods.length===1?button('Isi Ulang Stock Awal','reset-opening'):'')+(d.state.periods.some(x=>x.status==='closed')&&p?.status==='active'?button('Buka Opname Terakhir','reopen'):'');
+  page().innerHTML='<div class="so-head"><div><h1>Stock Opname</h1><p>'+e(root.AppAuth?.getContext()?.workspaceName||'')+' · '+e(root.AppAuth?.getContext()?.activeDivisionName||'')+'</p></div>'+button('Muat Ulang','refresh')+'</div><section class="so-overview" aria-label="Periode stok"><div class="so-notice">'+(p?'Periode mulai '+e(p.start)+' · '+({active:'Berjalan',reopened:'Koreksi opname',opening_pending:'Stock Awal perlu diisi ulang',closed:'Menunggu konfirmasi Stock Awal',held:'Ditahan'}[p.status]||p.status):'Isi Stock Awal satu kali untuk memulai.')+'</div><div class="so-actions">'+controls+button('Pulihkan Draft','restore')+'</div></section>'+(notice?'<p class="so-notice" role="alert">'+e(notice)+'</p>':'')+(negative&&p?.status!=='opening_pending'?'<p class="so-notice so-warning">Ada stok sistem minus. Periksa transaksi dan cocokkan saat opname.</p>':'')+formHTML()+historyHTML();
  }
  async function submit(){
   if(!form)return;const k=form.kind,counts={},lines=[];
@@ -192,7 +196,7 @@
   const input={id:form.id||undefined,type:k,start:k==='sales'?form.start:form.end,end:form.end,date:form.end,counts,lines,category:k==='expense'?form.category:null,target:isMove?form.target:null,mapping:isMove?Object.entries(form.mapping||{}).map(([source,target])=>({source,target})):[]};
   if(!['initial','close'].includes(k)&&!lines.length)throw Error('Isi minimal satu jumlah lebih dari 0.');
   if(!await confirmStock(k==='close'?'Hitung seluruh transaksi periode ini dan selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal pertama?':'Simpan transaksi ini?',k==='close'?'Selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal?':'Simpan transaksi?',k==='close'?'Selesaikan':'Simpan'))return;
-  try{await service.write(['initial','close'].includes(k)?k:'save',input,form.request);}
+  try{if(k==='initial'&&period()?.status==='opening_pending')await service.resetOpening('confirm',{counts},form.request);else await service.write(['initial','close'].includes(k)?k:'save',input,form.request);}
   catch(error){if(error.message.includes('SALES_OVERLAP')&&await confirmStock('Rentang Sales bertumpuk. Simpan sebagai tambahan, bukan pengganti?','Rentang Sales bertumpuk','Simpan tambahan'))await service.write('save',{...input,confirm_overlap:true},form.request);else throw error;}
   service.clearDraft(k);form=null;notice='Berhasil tersimpan.';
   // Reload shared catalog after invoice updates so other master pages see the new price.
@@ -211,6 +215,12 @@
    if(name==='master'){root.go(el.dataset.soPage||'master-items');return;}
    if(name==='refresh'){const saved=snapshot();await service.read();if(saved)notice='Data terbaru dimuat. Draft tetap tersedia.';return;}
    if(name==='configure'){if(await confirmStock('Ubah aktivasi Stock Opname pada divisi yang dipilih?','Ubah akses Stock Opname?','Ubah akses'))await service.configure(!get().enabled);return;}
+   if(name==='reset-opening'){
+    if(await confirmStock('Angka Stock Awal lama akan dikosongkan. Semua transaksi dan stok fisik opname terakhir tetap tersimpan; hasil selisih harus dihitung ulang setelah Stock Awal baru diisi.','Isi ulang Stock Awal?','Kosongkan Stock Awal')){
+     if(form&&!snapshot())return;
+     await service.resetOpening('reset',{},crypto.randomUUID());service.clearDraft('initial');form=null;notice='Stock Awal dikosongkan. Isi ulang seluruh barang, termasuk angka 0.';
+    }return;
+   }
    if(name==='edit'){const doc=get().state.documents.find(d=>d.id===el.dataset.soId);if(await open(doc.type,doc.id)&&doc.target)targetRows=await service.targetCatalog(doc.target);return;}
    if(name==='submit'){await submit();return;}
    if(name==='adjust'){

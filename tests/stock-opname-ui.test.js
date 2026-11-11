@@ -49,6 +49,12 @@ function runtime() {
       async write(action, input, request) {
         writes.push({ action, input: copy(input), request });
         if (writeFails) throw Error('Koneksi terputus');
+      },
+      async resetOpening(action, input, request) {
+        writes.push({ action: 'opening_' + action, input: copy(input), request });
+        const p = data.state.periods[0];
+        if (action === 'reset') { p.opening = {}; p.status = 'opening_pending'; delete p.result; }
+        else { p.opening = Object.fromEntries(Object.entries(input.counts).map(([key, value]) => [key, Number(value.qty)])); p.status = 'reopened'; }
       }
     }
   };
@@ -136,6 +142,23 @@ test('opname results show two compact rows and keep full movements expandable', 
   assert.match(t.page.innerHTML, /class="so-result-item"><summary><span class="so-result-top"/);
   assert.match(t.page.innerHTML, /class="so-result-bottom"><span>Sistem 8\.088 → Fisik 5\.781 ML<\/span><span>Selisih -2\.307 ML/);
   assert.match(t.page.innerHTML, /<dt>Stock Awal<\/dt>.*<dt>Sales<\/dt>.*<dt>Barang Masuk<\/dt>.*<dt>Harga \/ ML<\/dt>/);
+});
+
+test('resetting Stock Awal preserves transactions and requires complete manual input', async () => {
+  const t = runtime(); t.data.state.periods[0].status = 'reopened';
+  t.data.state.documents = [{ id: 'sale-1', period_id: 'period', type: 'sales', postings: [] }];
+  await t.click('reset-opening');
+  assert.equal(t.data.state.periods[0].status, 'opening_pending');
+  assert.equal(t.data.state.documents.length, 1);
+  await t.ui.open('initial');
+  assert.match(t.page.innerHTML, /1 November 2026/);
+  assert.doesNotMatch(t.page.innerHTML, /data-so-key="m:a"[^>]*value="[1-9]/);
+  t.input({ soKey: 'm:a', soProp: 'qty' }, '0');
+  t.input({ soKey: 'w:a', soProp: 'qty' }, '5');
+  await t.click('submit');
+  assert.equal(t.writes.at(-1).action, 'opening_confirm');
+  assert.equal(t.writes.at(-1).input.counts['m:a'].qty, '0');
+  assert.equal(t.data.state.documents.length, 1);
 });
 
 test('storage failure keeps the form open and never claims a draft was saved', async () => {
