@@ -370,3 +370,22 @@ button, input, select, textarea { font-family: var(--ui-font); }
   .monitor-account:hover { box-shadow: var(--ui-shadow-raised); border-color: #c6d5a7; }
   .drawer-item.active:hover { background: var(--lime); }
 }
+
+/* Desktop dashboard — tighten the handoff between summary, reservations, and trend. */
+@media (min-width: 900px) {
+  #page-dashboard.page.active {
+    row-gap: 12px;
+  }
+
+  #page-dashboard > .dashboard-reservations {
+    margin-top: 0;
+  }
+
+  #page-dashboard:has(> #pendingWrap:empty) > .dashboard-reservations {
+    grid-row: 4;
+  }
+
+  #page-dashboard:has(> #pendingWrap:empty) > .dashboard-trend-card {
+    grid-row: 5;
+  }
+}
