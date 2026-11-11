@@ -13,6 +13,7 @@
  function period(){const ps=get()?.state?.periods||[];const p=ps.at(-1);return p?.status==='held'?ps.at(-2):p;}
  function isPending(){return period()?.status!=='reopened' && ['closed','held','opening_pending'].includes(get()?.state?.periods?.at(-1)?.status);}
  function staleOpeningDraft(draft){return draft?.kind==='initial'&&period()?.status==='opening_pending'&&draft.resetMarker!==period().opening_reset_at;}
+ function staleCorrectionDraft(draft){return draft?.kind==='close'&&draft.basePeriod&&draft.basePeriod!==period()?.id;}
  function balances(){const s=get()?.state||{},p=period();const b={...p?.opening};for(const d of s.documents||[])if(d.period_id===p?.id&&!d.void)for(const l of d.postings||[])b[l.key]=(Number(b[l.key])||0)+Number(l.qty);return b;}
  function catalog(){const all=[...(get()?.catalog||[])];for(const r of period()?.opening_catalog||[])if(!all.some(x=>x.key===r.key))all.push(r);for(const d of get()?.state?.documents||[])if(d.period_id===period()?.id&&!d.void)for(const r of d.postings||[])if(!all.some(x=>x.key===r.key))all.push(r);return all;}
  function draftStatus(){return draftSaved?'Draft lokal tersimpan di perangkat ini; belum masuk database.':'Draft lokal belum tersimpan. Jangan tutup halaman sebelum berhasil menyimpan.';}
@@ -116,9 +117,11 @@
  async function open(kind,existing){
   if(kind==='initial'&&period()&&period().status!=='opening_pending'){notice='Stock Awal pertama sudah diisi. Berikutnya gunakan konfirmasi hasil opname.';render();return;}
   if(staleOpeningDraft(form)){service.clearDraft('initial');form=null;}
+  if(staleCorrectionDraft(form)){service.clearDraft('close');form=null;}
   if(form&&!snapshot())return false;
   let saved=service.loadDraft(kind);
   if(staleOpeningDraft(saved)){service.clearDraft('initial');saved=null;}
+  if(staleCorrectionDraft(saved)){service.clearDraft('close');saved=null;}
   if(existing&&hasDraftContent(saved)&&saved.id!==existing&&!await confirmStock('Draft '+labels[kind]+' yang tersimpan akan diganti.','Ganti draft tersimpan?','Ganti draft'))return false;
   if(existing&&saved?.id!==existing)service.clearDraft(kind);
   if(saved&&!existing){
@@ -141,6 +144,7 @@
  }
  async function restore(){const draft=service.loadDraft();if(!draft){notice='Belum ada draft di perangkat ini.';render();return;}
   if(staleOpeningDraft(draft)){service.clearDraft('initial');notice='Draft Stock Awal lama diabaikan setelah reset. Isi ulang manual.';render();return;}
+  if(staleCorrectionDraft(draft)){service.clearDraft('close');notice='Koreksi opname sudah dibatalkan. Draft koreksi lama tidak digunakan lagi.';render();return;}
   if(draft.basePeriod && draft.basePeriod!==period()?.id && ['initial','close'].includes(draft.kind)){notice='Draft berasal dari periode berbeda. Periksa melalui riwayat; draft tidak dipindahkan otomatis.';render();return;}
   form=draft;draftSaved=true;const recovered=restoreCorrectionCounts(form);notice=recovered?'Draft Stock Opname dipulihkan; kolom yang kosong diisi dari stok fisik opname tersimpan. Periksa sebelum menyelesaikan.':'Draft perangkat '+labels[form.kind]+' dipulihkan. Periksa tanggal dan jumlah sebelum menyimpan.';if(recovered)snapshot();if(form.target)targetRows=await service.targetCatalog(form.target);render();
  }
@@ -192,6 +196,7 @@
   if(d.developer){page().innerHTML='<div class="so-head"><h1>Stock Opname</h1></div><section class="so-panel"><h2>Aktivasi divisi</h2><p>Atur akses untuk outlet dan divisi yang sedang dipilih. Transaksi dikerjakan admin divisi.</p><p>Status: '+(d.enabled?'Aktif':'Nonaktif')+'</p>'+button(d.enabled?'Nonaktifkan akses':'Aktifkan akses','configure','',true)+'</section>';return;}
   if(!d.state){page().innerHTML='<p class="so-notice">Stock Opname belum tersedia untuk akun/divisi ini.</p>';return;}
   if(staleOpeningDraft(form)){service.clearDraft('initial');form=null;draftSaved=false;notice='Draft Stock Awal lama diabaikan setelah reset. Isi ulang manual.';}
+  if(staleCorrectionDraft(form)){service.clearDraft('close');form=null;draftSaved=false;notice='Koreksi opname sudah dibatalkan. Form koreksi lama ditutup.';}
   const p=period(),last=d.state.periods.at(-1),b=balances(),negative=Object.values(b).some(n=>n<0);
   let controls='';
   if(!p)controls=button('Isi Stock Awal','open','data-so-kind="initial"',true);
