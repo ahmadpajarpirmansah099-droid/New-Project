@@ -244,7 +244,7 @@ test('history follows the selected feature without touching an unfinished local 
   ];
   t.ui.render();
   assert.match(t.page.innerHTML, /Riwayat Stock Opname/);
-  assert.doesNotMatch(t.page.innerHTML, /Rincian transaksi/);
+  assert.doesNotMatch(t.page.innerHTML, /class="so-history-compact-details"/);
   await t.ui.open('receipt');
   await t.click('receipt-add',{soItemKey:'m:a'});
   t.input({ soKey: 'm:a', soProp: 'qty' }, '2');
@@ -265,11 +265,11 @@ test('transaction history shows ten records at a time and retains edits on the a
   const t = runtime();
   t.data.state.documents = Array.from({ length: 12 }, (_, i) => ({ id: 'r' + i, period_id: 'period', type: 'receipt', start: '2026-11-02', end: '2026-11-02', postings: [{ name: 'Susu', qty: i + 1, unit: 'ML' }] }));
   await t.click('history-tab', { soKind: 'receipt' });
-  assert.equal((t.page.innerHTML.match(/Rincian transaksi/g) || []).length, 10);
+  assert.equal((t.page.innerHTML.match(/class="so-history-compact-details"/g) || []).length, 10);
   assert.match(t.page.innerHTML, /data-so-action="history-more"/);
   assert.match(t.page.innerHTML, /data-so-action="edit"/);
   await t.click('history-more');
-  assert.equal((t.page.innerHTML.match(/Rincian transaksi/g) || []).length, 12);
+  assert.equal((t.page.innerHTML.match(/class="so-history-compact-details"/g) || []).length, 12);
   assert.doesNotMatch(t.page.innerHTML, /data-so-action="history-more"/);
 });
 
@@ -396,4 +396,22 @@ test('Barang Masuk removes an item from its local draft and avoids sending it',a
  assert.doesNotMatch(t.page.innerHTML,/data-so-prop="qty" aria-label="Barang Masuk Susu"/);
  await t.click('submit');
  assert.equal(t.writes.length,0);
+});
+
+test('dated expense history is compact and keeps expandable details and edit actions',async()=>{
+ const t=runtime();
+ t.data.state.documents=[
+  {id:'e1',period_id:'period',type:'expense',category:'Kalibrasi',start:'2026-11-08',end:'2026-11-08',postings:[{name:'Susu',qty:-2,unit:'ML'}]},
+  {id:'e2',period_id:'period',type:'expense',category:'Lainnya',start:'2026-11-08',end:'2026-11-08',postings:[{name:'Susu',qty:-3,unit:'ML'}]}
+ ];
+ await t.click('history-tab',{soKind:'expense'});
+ const html=t.page.innerHTML;
+ assert.match(html,/8 November 2026/);
+ assert.equal((html.match(/class="so-history-compact-details"/g)||[]).length,2);
+ assert.equal((html.match(/class="so-history-compact-name"/g)||[]).length,2);
+ assert.match(html,/Pengeluaran · Kalibrasi/);
+ assert.match(html,/Pengeluaran · Lainnya/);
+ assert.match(html,/class="so-history-compact-cue">Rincian/);
+ assert.match(html,/data-so-action="edit"/);
+ assert.match(html,/Susu/);
 });
