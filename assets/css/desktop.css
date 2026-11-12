@@ -1531,3 +1531,41 @@ body:not(:has(#page-dashboard.active)) .workspace-scope-switcher {
 @media (min-width: 900px) and (prefers-reduced-motion: reduce) {
   #sheet:has(#guestName), #sheet:has(.detail-ticket) { transition: none; }
 }
+
+.sidebar-mascot { display: none; }
+@media (min-width: 900px) and (max-width: 1279px) {
+  body:has(.page.active) .top {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  body:has(.page.active) #authLogoutButton {
+    position: fixed;
+    z-index: 95;
+    left: 14px;
+    bottom: 68px;
+    width: 48px;
+    height: 46px;
+  }
+}
+@media (min-width: 900px) {
+  .sidebar-mascot {
+    position: fixed;
+    left: 19px;
+    bottom: 122px;
+    width: 40px;
+    height: 34px;
+    display: block;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--bg);
+  }
+  .sidebar-mascot img {
+    position: absolute;
+    left: -24px;
+    top: -25px;
+    width: 86px;
+    height: 86px;
+    max-width: none;
+    mix-blend-mode: multiply;
+  }
+}
