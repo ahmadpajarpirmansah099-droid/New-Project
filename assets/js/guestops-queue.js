@@ -168,14 +168,15 @@ function renderDashboardDateControls() {
   document.querySelector('[data-dashboard-date-label="end"]')?.replaceChildren(dashboardDateText(selectedDashboardEndDate));
 }
 function openDashboardRangePicker(trigger) {
-  let start = selectedDashboardStartDate;
-  let end = selectedDashboardEndDate;
+  const operational = trigger.dataset.dashboardDate === 'operational';
+  let start = operational ? selectedOperationalStartDate : selectedDashboardStartDate;
+  let end = operational ? selectedOperationalEndDate : selectedDashboardEndDate;
   let cursor = new Date(start + 'T00:00:00Z');
   cursor.setUTCDate(1);
   const dialog = document.createElement('dialog');
   dialog.className = 'dashboard-date-dialog';
-  dialog.setAttribute('aria-label', 'Pilih rentang tanggal');
-  dialog.innerHTML = '<header><div><small>TANGGAL RESERVASI</small><h2>Pilih rentang tanggal</h2></div><button type="button" class="dashboard-date-close" aria-label="Tutup">×</button></header>' +
+  dialog.setAttribute('aria-label', operational ? 'Pilih rentang tanggal operasional' : 'Pilih rentang tanggal dashboard');
+  dialog.innerHTML = '<header><div><small>' + (operational ? 'FILTER OPERASIONAL' : 'FILTER DASHBOARD') + '</small><h2>Pilih rentang tanggal</h2></div><button type="button" class="dashboard-date-close" aria-label="Tutup">×</button></header>' +
     '<div class="dashboard-range-summary"><div><small>Dari</small><strong data-range-start></strong></div><span aria-hidden="true">→</span><div><small>Sampai</small><strong data-range-end></strong></div></div>' +
     '<div class="dashboard-calendar-panel"><div class="dashboard-calendar-nav"><strong></strong><div><button type="button" data-dashboard-month="-1" aria-label="Bulan sebelumnya">‹</button><button type="button" data-dashboard-month="1" aria-label="Bulan berikutnya">›</button></div></div><div class="dashboard-calendar-grid"></div></div>' +
     '<p class="dashboard-calendar-limit" role="status">Pilih tanggal awal, lalu tanggal akhir. Maksimal 1 bulan.</p>' +
@@ -232,9 +233,15 @@ function openDashboardRangePicker(trigger) {
   });
   dialog.querySelector('.dashboard-range-apply').addEventListener('click', () => {
     if (!start || !end) return;
-    selectedDashboardStartDate = start;
-    selectedDashboardEndDate = end;
-    renderDashboardDateControls();
+    if (operational) {
+      selectedOperationalStartDate = start;
+      selectedOperationalEndDate = end;
+      selectedOperationalDate = end;
+    } else {
+      selectedDashboardStartDate = start;
+      selectedDashboardEndDate = end;
+      renderDashboardDateControls();
+    }
     renderAll();
     dialog.close();
   });
@@ -307,7 +314,7 @@ function renderAll() {
 function setFilter(f){activeFilter=f;document.querySelectorAll('#queueFilters .filter').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));renderQueue()}
 function renderQueue(){
   if(!$('queueList'))return;
-  const q=($('queueSearch')?.value||'').toLowerCase(),day=selectedOperationalDate;
+  const q=($('queueSearch')?.value||'').toLowerCase();
   const matchesFilter=g=>activeFilter==='waiting'
   ? ['waiting','called'].includes(g.status)
   : g.status===activeFilter;
@@ -315,7 +322,7 @@ function renderQueue(){
   .filter(g=>{
     const reservation=reservationIdentity(g);
     const searchText=(g.name+' '+g.ticket+' '+(reservation?.code||'')).toLowerCase();
-    return g.day===day&&matchesFilter(g)&&searchText.includes(q);
+    return g.day >= selectedOperationalStartDate && g.day <= selectedOperationalEndDate && matchesFilter(g) && searchText.includes(q);
   })
   .sort((a,b)=>a.created-b.created);
   $('queueList').innerHTML=list.length
