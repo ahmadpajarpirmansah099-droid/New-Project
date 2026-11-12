@@ -98,7 +98,7 @@
    dialog.querySelector('.so-calendar-title').textContent=new Intl.DateTimeFormat('id-ID',{month:'long',year:'numeric'}).format(cursor);
    dialog.querySelector('.so-calendar-grid').innerHTML='<span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span>'+cells;
   };
-  const d=pickerDialog('Pilih '+(field==='start'?'tanggal awal':'tanggal'),'<div class="so-calendar-nav"><button type="button" data-month="-1" aria-label="Bulan sebelumnya">â€¹</button><strong class="so-calendar-title"></strong><button type="button" data-month="1" aria-label="Bulan berikutnya">â€º</button></div><div class="so-calendar-grid"></div><p class="so-calendar-selected"></p>','<footer><button type="button" data-picker-cancel>Batal</button><button type="button" class="so-primary" data-picker-apply>Gunakan tanggal</button></footer>');
+  const d=pickerDialog('Pilih '+(field==='start'?'tanggal awal':'tanggal'),'<div class="so-calendar-nav"><button type="button" data-month="-1" aria-label="Bulan sebelumnya">‹</button><strong class="so-calendar-title"></strong><button type="button" data-month="1" aria-label="Bulan berikutnya">›</button></div><div class="so-calendar-grid"></div><p class="so-calendar-selected"></p>','<footer><button type="button" data-picker-cancel>Batal</button><button type="button" class="so-primary" data-picker-apply>Gunakan tanggal</button></footer>');
   draw(d);d.querySelector('.so-calendar-selected').textContent=dateLabel(selected);
   d.querySelectorAll('[data-month]').forEach(btn=>btn.addEventListener('click',()=>{cursor.setMonth(cursor.getMonth()+Number(btn.dataset.month));draw(d);}));
   d.querySelector('.so-calendar-grid').addEventListener('click',ev=>{const btn=ev.target.closest('[data-date-value]');if(!btn)return;selected=btn.dataset.dateValue;draw(d);d.querySelector('.so-calendar-selected').textContent=dateLabel(selected);});
@@ -108,7 +108,7 @@
  function openChoicePicker(el){
   const options=JSON.parse(el.dataset.soOptions||'[]'),field=el.dataset.soField,map=el.dataset.soMap,key=map||el.dataset.soKey;
   const current=map?form.mapping[key]:key?form.counts[key]?.unit:form[field];
-  const content='<div class="so-choice-list">'+options.map(o=>'<button type="button" data-choice-value="'+e(o.value)+'" class="'+(o.value===current?'is-selected':'')+'"><span>'+e(o.label)+'</span><span class="so-choice-check">'+(o.value===current?'âœ“':'')+'</span></button>').join('')+'</div>';
+  const content='<div class="so-choice-list">'+options.map(o=>'<button type="button" data-choice-value="'+e(o.value)+'" class="'+(o.value===current?'is-selected':'')+'"><span>'+e(o.label)+'</span><span class="so-choice-check">'+(o.value===current?'✓':'')+'</span></button>').join('')+'</div>';
   const d=pickerDialog(el.dataset.soTitle||'Pilih '+(el.getAttribute('aria-label')||''),content);
   d.querySelector('.so-choice-list').addEventListener('click',async ev=>{const btn=ev.target.closest('[data-choice-value]');if(!btn)return;const value=btn.dataset.choiceValue;
    if(map)form.mapping[key]=value;else if(key)form.counts[key]={...form.counts[key],unit:value};else form[field]=value;
@@ -172,7 +172,7 @@
  }
  function countConversion(row){
   const value=form.counts[row.key]||{},factor=(row.units||[]).find(u=>u.unit===(value.unit||row.unit))?.factor;
-  if(row.error||value.qty==null||value.qty===''||!Number.isFinite(Number(value.qty))||Number(value.qty)<0||!(Number(factor)>0))return 'â€”';
+  if(row.error||value.qty==null||value.qty===''||!Number.isFinite(Number(value.qty))||Number(value.qty)<0||!(Number(factor)>0))return '—';
   return number(Number(value.qty)*Number(factor))+' '+row.unit;
  }
  function masterLinks(){return '<p class="so-notice">Lengkapi master atau resep yang belum tersedia agar input dapat digunakan.</p><div class="so-actions">'+button('Master Barang','master','data-so-page="master-items"')+button('Resep WIP','master','data-so-page="wips"')+button('Menu','master','data-so-page="menus"')+'</div>';}
@@ -190,11 +190,11 @@
   const head='<tr><th>'+(isCount?'Barang':k==='sales'?'Menu':k==='production'?'WIP / hasil otomatis':'Barang / stok sistem')+'</th>'+(isCount?'<th class="so-desktop-only so-stock">Stok sistem</th>':'')+'<th class="so-quantity">'+(k==='production'?'Batch':k==='sales'?'Terjual':isCount?'Fisik':'Jumlah')+'</th>'+(withUnit?'<th class="so-unit">Satuan</th>':'')+(isCount?'<th class="so-desktop-only so-conversion">Konversi fisik</th>':'')+(receipt?'<th class="so-invoice">Total invoice</th>':'')+'</tr>';
   const body=rows.map(r=>{
    const v=form.counts[r.key]||{},units=r.units||[],disabled=!!r.error;
-   let meta=disabled?r.error:k==='sales'?'Total selama rentang pilihan':k==='production'?'Hasil: '+number(Number(v.qty||0)*Number(r.yield))+' '+r.unit+' Â· 1 batch = '+number(r.yield)+' '+r.unit:'Sistem: '+number(b[r.key])+' '+(r.unit||'');
+   let meta=disabled?r.error:k==='sales'?'Total selama rentang pilihan':k==='production'?'Hasil: '+number(Number(v.qty||0)*Number(r.yield))+' '+r.unit+' · 1 batch = '+number(r.yield)+' '+r.unit:'Sistem: '+number(b[r.key])+' '+(r.unit||'');
    let html='<tr><td><strong>'+e(r.name)+'</strong><small data-so-output="'+e(r.key)+'" class="'+(disabled?'so-error':isCount?'so-system-mobile':'')+'">'+e(meta)+'</small>';
    if(receipt)html+='<button type="button" class="so-receipt-remove" data-so-action="receipt-remove" data-so-item-key="'+e(r.key)+'" aria-label="Hapus '+e(r.name)+' dari transaksi">Hapus</button>';
    if(form.category==='Move'&&k==='expense')html+='<label><small>Barang tujuan</small>'+pickerButton(targetRows.find(t=>t.key===form.mapping[r.key])?.name||'Pilih padanan','data-so-map="'+e(r.key)+'" data-so-title="Pilih padanan barang"',[{value:'',label:'Pilih padanan'},...targetRows.filter(t=>!t.error&&t.unit===r.unit).map(t=>({value:t.key,label:t.name}))])+'</label>';
-   html+='</td>'+(isCount?'<td class="so-desktop-only so-stock">'+(disabled?'â€”':number(b[r.key])+' '+e(r.unit))+'</td>':'')+'<td data-so-label="Jumlah"><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="qty" aria-label="'+e(labels[k]+' '+r.name)+'" value="'+e(v.qty??'')+'" '+(disabled?'disabled':'')+'></td>';
+   html+='</td>'+(isCount?'<td class="so-desktop-only so-stock">'+(disabled?'—':number(b[r.key])+' '+e(r.unit))+'</td>':'')+'<td data-so-label="Jumlah"><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="qty" aria-label="'+e(labels[k]+' '+r.name)+'" value="'+e(v.qty??'')+'" '+(disabled?'disabled':'')+'></td>';
    if(withUnit)html+='<td data-so-label="Satuan">'+pickerButton(v.unit||r.unit,'data-so-key="'+e(r.key)+'" data-so-title="Pilih satuan" aria-label="Satuan '+e(r.name)+'" '+(disabled?'disabled':''),units.map(u=>({value:u.unit,label:u.unit})))+'</td>';
    if(isCount)html+='<td class="so-desktop-only so-conversion" data-so-conversion="'+e(r.key)+'">'+e(countConversion(r))+'</td>';
    if(receipt)html+='<td data-so-label="Total invoice"><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="invoice_total" aria-label="Total invoice '+e(r.name)+'" value="'+e(v.invoice_total??'')+'" placeholder="Opsional"></td>';
@@ -261,7 +261,7 @@
   return actions||adjust?`<div class="so-history-actions">${actions}${adjust}</div>`:'';
  }
  function historyDocument(doc,p,original=false){
-  const name=e(labels[doc.type]||doc.type)+(doc.category&&['expense','adjustment'].includes(doc.type)?' Â· '+e(doc.category):'');
+  const name=e(labels[doc.type]||doc.type)+(doc.category&&['expense','adjustment'].includes(doc.type)?' · '+e(doc.category):'');
   const voidTag=doc.void?'<span class="so-history-tag is-void">Dibatalkan</span>':'';
   const detail=doc.type==='sales'?salesHistoryRows(doc):quantityLines(doc.postings||[]);
   const actions=historyDocumentActions(doc,p);
@@ -269,7 +269,7 @@
    <div class="so-history-entry"><div><strong>${name}</strong></div>${voidTag}</div>
    <details><summary>Rincian transaksi</summary>${detail}</details>${actions}
   </li>`;
-  const range=doc.end!==doc.start?e(dateLabel(doc.start))+' â€“ '+e(dateLabel(doc.end)):'';
+  const range=doc.end!==doc.start?e(dateLabel(doc.start))+' – '+e(dateLabel(doc.end)):'';
   return `<li class="so-history-compact"><details class="so-history-compact-details">
    <summary><span class="so-history-compact-name">${name}</span><span class="so-history-compact-meta">${range}${voidTag}</span><span class="so-history-compact-cue">Rincian</span></summary>
    ${detail}</details>${actions}
@@ -320,7 +320,7 @@
    return {key,name:item?.name||key,unit:item?.unit||'',qty};
   }).sort((a,b)=>a.name.localeCompare(b.name,'id'));
   const source=entry.previous_id?'Dari stok fisik opname sebelumnya':'Pengisian pertama';
-  return `<li><div class="so-history-entry"><div><strong>Stock Awal ${e(dateLabel(entry.start))}</strong><small>${source} Â· ${number(rows.length)} barang</small></div><span class="so-history-tag">Tersimpan</span></div>
+  return `<li><div class="so-history-entry"><div><strong>Stock Awal ${e(dateLabel(entry.start))}</strong><small>${source} · ${number(rows.length)} barang</small></div><span class="so-history-tag">Tersimpan</span></div>
    <details><summary>Lihat stok per barang</summary>${quantityLines(rows)}</details>
   </li>`;
  }
@@ -333,7 +333,7 @@
    ['Stok sistem',quantity(row.system)],['Stok fisik',quantity(row.physical)],['Selisih',quantity(row.variance)],
    ['Harga / '+unit,money(row.price)],['Selisih rupiah',money(row.variance_value)]
   ];
-  return `<details class="so-result-item"><summary><span class="so-result-top"><strong>${e(row.name)}</strong><b data-so-variance="${Math.sign(Number(row.variance_value)||0)}">${money(row.variance_value)}</b></span><span class="so-result-bottom"><span>Sistem ${number(row.system)} â†’ Fisik ${quantity(row.physical)}</span><span>Selisih ${quantity(row.variance)}</span></span></summary>
+  return `<details class="so-result-item"><summary><span class="so-result-top"><strong>${e(row.name)}</strong><b data-so-variance="${Math.sign(Number(row.variance_value)||0)}">${money(row.variance_value)}</b></span><span class="so-result-bottom"><span>Sistem ${number(row.system)} → Fisik ${quantity(row.physical)}</span><span>Selisih ${quantity(row.variance)}</span></span></summary>
    <dl>${fields.map(([label,value])=>`<dt>${label}</dt><dd>${value}</dd>`).join('')}</dl></details>`;
  }
  function closeHistoryEntry(entry){
@@ -390,7 +390,7 @@
   else if(last?.status==='held'&&p?.status==='closed')controls=button('Konfirmasi Stock Awal Hasil Koreksi','reactivate','',true);
   else controls=button('Isi Stock Opname','open','data-so-kind="close"',true)+(p.status==='reopened'&&d.state.periods.length===1?button('Isi Ulang Stock Awal','reset-opening'):'')+(d.state.periods.some(x=>x.status==='closed')&&p?.status==='active'?button('Buka Opname Terakhir','reopen'):'');
   const context=root.AppAuth?.getContext();
-  const scope=[context?.workspaceName,context?.activeDivisionName].filter(Boolean).join(' Â· ');
+  const scope=[context?.workspaceName,context?.activeDivisionName].filter(Boolean).join(' · ');
   const status=p?periodStatus[p.status]||p.status:'Isi Stock Awal untuk memulai';
   page().innerHTML=`<header class="so-head">
    <div><h1>Stock Opname</h1>${scope?`<p>${e(scope)}</p>`:''}</div>
@@ -492,7 +492,7 @@
    if(results)results.innerHTML=receiptSuggestions(receiptQuery);
    return;
   }
-  if(el.dataset.soKey){const key=el.dataset.soKey;form.counts[key]={...form.counts[key],[el.dataset.soProp]:el.value};if(form.kind==='production'){const row=catalog().find(x=>x.key===key);const output=el.closest('tr')?.querySelector('[data-so-output]');if(row&&output)output.textContent='Hasil: '+number(Number(el.value||0)*Number(row.yield))+' '+row.unit+' Â· 1 batch = '+number(row.yield)+' '+row.unit;}}
+  if(el.dataset.soKey){const key=el.dataset.soKey;form.counts[key]={...form.counts[key],[el.dataset.soProp]:el.value};if(form.kind==='production'){const row=catalog().find(x=>x.key===key);const output=el.closest('tr')?.querySelector('[data-so-output]');if(row&&output)output.textContent='Hasil: '+number(Number(el.value||0)*Number(row.yield))+' '+row.unit+' · 1 batch = '+number(row.yield)+' '+row.unit;}}
   else if(el.dataset.soMap)form.mapping[el.dataset.soMap]=el.value;
   else if(el.dataset.soField)form[el.dataset.soField]=el.value;
   form.touched=true;
@@ -506,4 +506,3 @@
  root.addEventListener('app:auth-signed-out',reset);
  root.StockOpnameUI={initialize,reset,render,navigation,open};
 })(window);
-
