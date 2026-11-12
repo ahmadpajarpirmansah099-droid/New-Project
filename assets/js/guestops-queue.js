@@ -294,7 +294,7 @@ function renderAll() {
     );
 
     $('pendingWrap').innerHTML = pendingGuests.length
-      ? `<div class="pending"><h3>⚠ ${pendingGuests.length} tugas tertunda dari hari sebelumnya</h3><p>Periksa tamu yang belum diselesaikan. Data tidak dihapus otomatis.</p>${pendingGuests.map(guest => `<div class="pending-guest-row"><span><b>${guest.ticket}</b> · ${esc(guest.name)}</span><button class="mini green" data-app-action="openDetail" data-app-id="${guest.id}">Periksa</button></div>`).join('')}</div>`
+      ? `<div class="pending"><h3>⚠ ${pendingGuests.length} tugas tertunda dari hari sebelumnya</h3><p>Periksa tamu yang belum diselesaikan. Data tidak dihapus otomatis.</p>${pendingGuests.map(guest => `<div class="pending-guest-row"><span><b>${esc(guest.ticket)}</b> · ${esc(guest.name)}</span><button class="mini green" data-app-action="openDetail" data-app-id="${guest.id}">Periksa</button></div>`).join('')}</div>`
       : '';
 
     renderDashboardReservations();
