@@ -82,6 +82,30 @@
 .sd-dialog .sd-item-link { margin:0; padding:6px 0; min-height:44px; border:0; border-radius:0; background:transparent; text-align:left; font-size:14px; color:var(--ui-olive); text-decoration:underline; text-underline-offset:4px; }
 
 .sd-sales-dialog { width:min(940px,calc(100vw - 32px)); box-shadow:0 12px 32px rgba(24,37,31,.12); }
+.sd-production-dialog { width:min(860px,calc(100vw - 32px)); box-shadow:0 12px 32px rgba(24,37,31,.12); }
+.sd-production-dialog .sd-dialog-body { padding-top:20px; }
+.sd-production-summary { padding:16px; margin-bottom:12px; border:1px solid var(--ui-line); border-radius:var(--ui-radius-control); background:var(--ui-surface-soft); }
+.sd-production-summary > span { display:grid; gap:5px; }
+.sd-production-summary small { color:var(--ui-muted); font-size:12px; }
+.sd-production-summary b { font-size:clamp(20px,3vw,26px); font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.sd-production-dialog .sd-detail-list > .sd-detail-row { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,2fr); align-items:center; gap:16px; padding:16px 0; }
+.sd-production-dialog .sd-item-name { font-size:15px; }
+.sd-production-dialog .sd-detail-row > .sd-metrics { grid-template-columns:.75fr .75fr 1.5fr; gap:8px; margin:0; min-width:0; }
+.sd-production-dialog .sd-detail-row > .sd-metrics b { font-size:14px; }
+.sd-ledger-dialog { width:min(900px,calc(100vw - 32px)); box-shadow:0 12px 32px rgba(24,37,31,.12); }
+.sd-ledger-dialog .sd-dialog-body { padding-top:20px; }
+.sd-ledger-summary { padding:16px; margin-bottom:12px; border:1px solid var(--ui-line); border-radius:var(--ui-radius-control); background:var(--ui-surface-soft); }
+.sd-ledger-summary > span { display:grid; gap:5px; }
+.sd-ledger-summary small { color:var(--ui-muted); font-size:12px; }
+.sd-ledger-summary b { font-size:clamp(20px,3vw,26px); font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.sd-ledger-dialog .sd-detail-list > .sd-detail-row { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,2fr); align-items:center; gap:12px 16px; padding:16px 0; }
+.sd-ledger-dialog .sd-item-name { font-size:15px; }
+.sd-ledger-dialog .sd-detail-row > .sd-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:0; min-width:0; }
+.sd-ledger-dialog .sd-detail-row > .sd-metrics b { font-size:14px; }
+.sd-ledger-dialog.sd-ledger-expense .sd-detail-list > .sd-detail-row { grid-template-columns:minmax(0,1.3fr) minmax(0,1.4fr) auto; }
+.sd-ledger-dialog .sd-detail-action { margin:0; }
+.sd-ledger-variance .sd-detail-row > .sd-metrics { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.sd-ledger-variance .sd-dialog-body > .sd-note { margin:0 0 8px; }
 .sd-sales-dialog .sd-dialog-body { padding-top:20px; }
 .sd-sales-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; padding:16px; margin-bottom:12px; border:1px solid var(--ui-line); border-radius:var(--ui-radius-control); background:var(--ui-surface-soft); }
 .sd-sales-summary > span { display:grid; gap:5px; min-width:0; }
@@ -98,6 +122,16 @@
 .sd-sales-dialog .sd-detail-row details > .sd-detail-list { padding:0 12px; background:var(--ui-surface-soft); border-radius:var(--ui-radius-control); }
 .sd-sales-dialog details .sd-detail-row .sd-item-name { font-size:12px; font-weight:600; }
 @media(max-width:600px) {
+  .sd-ledger-dialog .sd-dialog-body { padding-top:12px; }
+  .sd-ledger-summary { padding:12px; }
+  .sd-ledger-dialog .sd-detail-list > .sd-detail-row,
+  .sd-ledger-dialog.sd-ledger-expense .sd-detail-list > .sd-detail-row { grid-template-columns:1fr; gap:10px; }
+  .sd-ledger-dialog .sd-detail-action { justify-self:start; }
+  .sd-ledger-variance .sd-detail-row > .sd-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .sd-production-dialog .sd-dialog-body { padding-top:12px; }
+  .sd-production-summary { padding:12px; }
+  .sd-production-dialog .sd-detail-list > .sd-detail-row { grid-template-columns:1fr; gap:10px; }
+  .sd-production-dialog .sd-detail-row > .sd-metrics { grid-template-columns:.7fr .7fr 1.6fr; }
   .sd-sales-dialog .sd-dialog-body { padding-top:12px; }
   .sd-sales-summary { grid-template-columns:.65fr 1.45fr 1fr; gap:6px; padding:10px; }
   .sd-sales-summary b { font-size:14px; }
@@ -106,3 +140,4 @@
   .sd-sales-dialog .sd-detail-list > .sd-detail-row > .sd-note,
   .sd-sales-dialog .sd-detail-list > .sd-detail-row > details { grid-column:1; }
 }
+
