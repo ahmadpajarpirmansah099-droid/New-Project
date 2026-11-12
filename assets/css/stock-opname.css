@@ -148,7 +148,11 @@
   text-align: left;
   font-size: 12px;
 }
-.so-history-tabs button span { overflow-wrap: anywhere; }
+.so-history-tabs button span {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
 .so-history-tabs button small { color: var(--so-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 #page-stock-opname .so-history-tabs button.is-active { background: var(--ui-lime); border-color: var(--ui-lime-strong); }
 .so-history { list-style: none; padding: 0; margin: 0; }
@@ -288,6 +292,12 @@
   .so-ledger strong { font-size: 12px; }
   .so-form-footer .so-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
   .so-form-footer .so-primary { grid-column: 1 / -1; margin-left: 0; }
+  #page-stock-opname .so-history-tabs button {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 3px;
+  }
   /* Receipt fields get a labelled line below the name; counting stays one line. */
   .so-receipt-ledger, .so-receipt-ledger tbody { display: block; }
   .so-receipt-ledger thead { display: none; }
@@ -393,3 +403,4 @@
   .so-history-compact-meta, .so-history-compact-cue { font-size: 10px; }
   .so-date-material-row { font-size: 12px; }
 }
+
