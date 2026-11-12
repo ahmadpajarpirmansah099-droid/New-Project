@@ -560,3 +560,80 @@ button, input, select, textarea { font-family: var(--ui-font); }
   }
 }
 
+/* Operational date filters: one web-style control for each guest list. */
+#page-waiting .operational-page-head,
+#page-history .operational-page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 10px 0 16px;
+}
+.operational-page-heading { min-width: 0; }
+.operational-page-heading .page-title { margin: 0; }
+.operational-page-heading .page-sub { margin: 5px 0 0; }
+.operational-page-head .operational-date-range-trigger {
+  width: min(100%, 370px);
+  min-height: 58px;
+  margin: 0;
+  padding: 8px 12px;
+  gap: 11px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: none;
+  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+.operational-page-head .operational-date-range-trigger:hover,
+.operational-page-head .operational-date-range-trigger:focus-visible {
+  border-color: #b6c978;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(190, 218, 113, .18);
+}
+.operational-date-range-trigger .history-date-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--ui-lime-soft);
+  color: var(--ui-olive);
+}
+.operational-date-range-trigger .history-date-copy { gap: 4px; }
+.operational-date-range-trigger .history-date-copy small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+.operational-date-range-trigger .history-date-copy strong {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.operational-date-range-meta {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+.operational-date-range-meta small {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.operational-date-range-meta .history-date-chevron { width: 15px; height: 15px; }
+.dashboard-calendar-day.is-in-range { border-radius: 9px; }
+.dashboard-calendar-day.is-range-start,
+.dashboard-calendar-day.is-range-end { border-radius: 11px; }
+@media (max-width: 899px) {
+  #page-waiting .operational-page-head,
+  #page-history .operational-page-head {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .operational-page-head .operational-date-range-trigger { width: 100%; max-width: 420px; }
+}
+
