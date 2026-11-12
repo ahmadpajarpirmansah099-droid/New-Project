@@ -167,35 +167,39 @@ function renderDashboardDateControls() {
   document.querySelector('[data-dashboard-date-label="start"]')?.replaceChildren(dashboardDateText(selectedDashboardStartDate));
   document.querySelector('[data-dashboard-date-label="end"]')?.replaceChildren(dashboardDateText(selectedDashboardEndDate));
 }
-function openDashboardDatePicker(field) {
-  const isStart = field === 'start';
-  const min = isStart ? '' : selectedDashboardStartDate;
-  const max = isStart ? todayKey() : dashboardDateLimit(selectedDashboardStartDate);
-  let selected = isStart ? selectedDashboardStartDate : selectedDashboardEndDate;
-  const [year, month] = selected.split('-').map(Number);
-  let cursor = new Date(Date.UTC(year, month - 1, 1));
+function openDashboardRangePicker(trigger) {
+  let start = selectedDashboardStartDate;
+  let end = selectedDashboardEndDate;
+  let cursor = new Date(start + 'T00:00:00Z');
+  cursor.setUTCDate(1);
   const dialog = document.createElement('dialog');
   dialog.className = 'dashboard-date-dialog';
-  dialog.setAttribute('aria-label', isStart ? 'Pilih tanggal awal' : 'Pilih tanggal akhir');
-  dialog.innerHTML = '<header><div><small>' + (isStart ? 'TANGGAL AWAL' : 'TANGGAL AKHIR') + '</small><h2>' + (isStart ? 'Pilih tanggal awal' : 'Pilih tanggal akhir') + '</h2></div><button type="button" class="dashboard-date-close" aria-label="Tutup">×</button></header><div class="dashboard-calendar-nav"><button type="button" data-dashboard-month="-1" aria-label="Bulan sebelumnya">‹</button><strong></strong><button type="button" data-dashboard-month="1" aria-label="Bulan berikutnya">›</button></div><div class="dashboard-calendar-grid"></div><p class="dashboard-calendar-limit">' + (isStart ? 'Pilih tanggal sampai hari ini.' : 'Rentang maksimal satu bulan.') + '</p>';
+  dialog.setAttribute('aria-label', 'Pilih rentang tanggal');
+  dialog.innerHTML = '<header><div><small>TANGGAL RESERVASI</small><h2>Pilih rentang tanggal</h2></div><button type="button" class="dashboard-date-close" aria-label="Tutup">×</button></header>' +
+    '<div class="dashboard-range-summary"><div><small>Dari</small><strong data-range-start></strong></div><span aria-hidden="true">→</span><div><small>Sampai</small><strong data-range-end></strong></div></div>' +
+    '<div class="dashboard-calendar-panel"><div class="dashboard-calendar-nav"><strong></strong><div><button type="button" data-dashboard-month="-1" aria-label="Bulan sebelumnya">‹</button><button type="button" data-dashboard-month="1" aria-label="Bulan berikutnya">›</button></div></div><div class="dashboard-calendar-grid"></div></div>' +
+    '<p class="dashboard-calendar-limit" role="status">Pilih tanggal awal, lalu tanggal akhir. Maksimal 1 bulan.</p>' +
+    '<footer><button type="button" class="dashboard-range-clear">Hapus</button><button type="button" class="dashboard-range-apply">Terapkan rentang</button></footer>';
   document.body.appendChild(dialog);
+  const note = dialog.querySelector('.dashboard-calendar-limit');
   const draw = () => {
-    const y = cursor.getUTCFullYear();
-    const m = cursor.getUTCMonth();
-    const offset = (new Date(Date.UTC(y, m, 1)).getUTCDay() + 6) % 7;
-    const days = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    const year = cursor.getUTCFullYear();
+    const month = cursor.getUTCMonth();
+    const offset = (cursor.getUTCDay() + 6) % 7;
+    const dayCount = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+    const max = start && !end ? dashboardDateLimit(start) : todayKey();
+    dialog.querySelector('[data-range-start]').textContent = start ? dashboardDateText(start) : 'Pilih tanggal';
+    dialog.querySelector('[data-range-end]').textContent = end ? dashboardDateText(end) : 'Pilih tanggal';
+    dialog.querySelector('.dashboard-range-apply').disabled = !start || !end;
     dialog.querySelector('.dashboard-calendar-nav strong').textContent = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(cursor);
-    const previousMonthEnd = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
-    const nextMonth = new Date(Date.UTC(y, m + 1, 1)).toISOString().slice(0, 10);
-    dialog.querySelector('[data-dashboard-month="-1"]').disabled = Boolean(min && previousMonthEnd < min);
-    dialog.querySelector('[data-dashboard-month="1"]').disabled = nextMonth > max;
+    dialog.querySelector('[data-dashboard-month="1"]').disabled = new Date(Date.UTC(year, month + 1, 1)).toISOString().slice(0, 10) > todayKey();
     let cells = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(day => '<span class="dashboard-calendar-weekday">' + day + '</span>').join('');
     for (let i = 0; i < offset; i++) cells += '<span class="dashboard-calendar-empty" aria-hidden="true"></span>';
-    for (let day = 1; day <= days; day++) {
-      const value = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
-      const disabled = (min && value < min) || value > max;
-      const classes = ['dashboard-calendar-day', value === selected ? 'is-selected' : '', value === todayKey() ? 'is-today' : ''].filter(Boolean).join(' ');
-      cells += '<button type="button" class="' + classes + '" aria-label="' + value + '" data-dashboard-day="' + value + '"' + (disabled ? ' disabled' : '') + (value === selected ? ' aria-pressed="true"' : ' aria-pressed="false"') + (value === todayKey() ? ' aria-current="date"' : '') + '>' + day + '</button>';
+    for (let day = 1; day <= dayCount; day++) {
+      const value = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+      const disabled = value > todayKey() || Boolean(start && !end && value > max);
+      const classes = ['dashboard-calendar-day', value === start ? 'is-range-start' : '', value === end ? 'is-range-end' : '', start && end && value > start && value < end ? 'is-in-range' : '', value === todayKey() ? 'is-today' : ''].filter(Boolean).join(' ');
+      cells += '<button type="button" class="' + classes + '" aria-label="' + dashboardDateText(value) + '" data-dashboard-day="' + value + '"' + (disabled ? ' disabled' : '') + (value === start || value === end ? ' aria-pressed="true"' : ' aria-pressed="false"') + (value === todayKey() ? ' aria-current="date"' : '') + '>' + day + '</button>';
     }
     dialog.querySelector('.dashboard-calendar-grid').innerHTML = cells;
   };
@@ -209,25 +213,37 @@ function openDashboardDatePicker(field) {
   dialog.querySelector('.dashboard-calendar-grid').addEventListener('click', event => {
     const button = event.target.closest('[data-dashboard-day]');
     if (!button || button.disabled) return;
-    selected = button.dataset.dashboardDay;
-    if (isStart) {
-      selectedDashboardStartDate = selected;
-      if (selectedDashboardEndDate < selected || selectedDashboardEndDate > dashboardDateLimit(selected)) {
-        selectedDashboardEndDate = [dashboardDateLimit(selected), todayKey()].sort()[0];
-      }
+    const value = button.dataset.dashboardDay;
+    if (!start || end || value < start) {
+      start = value;
+      end = '';
+      note.textContent = 'Pilih tanggal akhir, maksimal 1 bulan dari tanggal awal.';
     } else {
-      selectedDashboardEndDate = selected;
+      end = value;
+      note.textContent = 'Rentang siap diterapkan.';
     }
+    draw();
+  });
+  dialog.querySelector('.dashboard-range-clear').addEventListener('click', () => {
+    start = '';
+    end = '';
+    note.textContent = 'Pilih tanggal awal, lalu tanggal akhir. Maksimal 1 bulan.';
+    draw();
+  });
+  dialog.querySelector('.dashboard-range-apply').addEventListener('click', () => {
+    if (!start || !end) return;
+    selectedDashboardStartDate = start;
+    selectedDashboardEndDate = end;
     renderDashboardDateControls();
     renderAll();
     dialog.close();
   });
   dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
-  dialog.addEventListener('close', () => dialog.remove(), { once: true });
+  dialog.addEventListener('close', () => { dialog.remove(); trigger.focus(); }, { once: true });
 }
 document.addEventListener('click', event => {
   const trigger = event.target.closest('[data-dashboard-date]');
-  if (trigger) openDashboardDatePicker(trigger.dataset.dashboardDate);
+  if (trigger) openDashboardRangePicker(trigger);
 });
 function renderAll() {
   const dashboardDateText = historyDateLabel(selectedOperationalDate, {
