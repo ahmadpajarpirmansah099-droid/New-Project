@@ -209,7 +209,7 @@ function loadUserGuideFeature() {
   const loadStyle = new Promise((resolve, reject) => {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'assets/css/user-guide.css?v=20261110-guest-operational-replace-v1';
+    link.href = 'assets/css/user-guide.css?v=20261112-desktop-guide-frame-v1';
     link.onload = resolve;
     link.onerror = () => reject(new Error('Gagal memuat tampilan Panduan Pengguna.'));
     document.head.appendChild(link);
