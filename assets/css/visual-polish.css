@@ -321,15 +321,11 @@ button, input, select, textarea { font-family: var(--ui-font); }
   white-space: nowrap;
 }
 #page-dashboard .dashboard-date-icon {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
+  display: block;
+  width: 28px;
+  height: 28px;
   flex: 0 0 auto;
-  border: 1.5px solid currentColor;
-  border-radius: 8px;
 }
-#page-dashboard .dashboard-date-icon svg { width: 19px; height: 19px; }
 #page-dashboard .dashboard-date-trigger:hover,
 #page-dashboard .dashboard-date-trigger:focus-visible { border-color: #b6c978; outline: none; box-shadow: 0 0 0 3px rgba(190, 218, 113, .2); }
 
