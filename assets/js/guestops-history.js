@@ -15,18 +15,12 @@ function historyDateLabel(value, options = { day: 'numeric', month: 'long', year
   return new Intl.DateTimeFormat('id-ID', options).format(parseHistoryDate(value));
 }
 function updateHistoryDateLabel() {
-  const label = $('historyDateLabel');
-  if (label && $('historyDate').value) label.textContent = historyDateLabel($('historyDate').value);
+  updateOperationalDateLabels();
 }
 function openHistoryDatePicker() {
-  const current = selectedOperationalDate || todayKey();
-  historyCalendarDraft = current;
-  const date = parseHistoryDate(current);
-  historyCalendarMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-  renderHistoryCalendar();
-  $('calendarBackdrop').classList.add('show');
-  $('historyCalendarDialog').classList.add('show');
-  document.body.style.overflow = 'hidden';
+  const trigger = document.activeElement?.closest('[data-dashboard-date="operational"]') ||
+    document.querySelector('#page-waiting [data-dashboard-date="operational"], #page-history [data-dashboard-date="operational"]');
+  if (trigger) openDashboardRangePicker(trigger);
 }
 function closeHistoryDatePicker() {
   $('calendarBackdrop').classList.remove('show');
@@ -49,6 +43,8 @@ function selectTodayInHistoryCalendar() {
 }
 function applyHistoryCalendarDate() {
   selectedOperationalDate = historyCalendarDraft;
+  selectedOperationalStartDate = historyCalendarDraft;
+  selectedOperationalEndDate = historyCalendarDraft;
   $('historyDate').value = selectedOperationalDate;
   updateHistoryDateLabel();
   updateOperationalDateLabels();
@@ -57,7 +53,9 @@ function applyHistoryCalendarDate() {
 }
 
 function updateOperationalDateLabels() {
-  const label = historyDateLabel(selectedOperationalDate, { day: 'numeric', month: 'long', year: 'numeric' });
+  const start = selectedOperationalStartDate || selectedOperationalDate || todayKey();
+  const end = selectedOperationalEndDate || selectedOperationalDate || todayKey();
+  const label = start === end ? dashboardDateText(start) : dashboardDateText(start) + ' – ' + dashboardDateText(end);
   const dashboard = $('dashboardDateLabel');
   const queue = $('queueDateLabel');
   const history = $('historyDateLabel');
@@ -65,7 +63,7 @@ function updateOperationalDateLabels() {
   if (queue) queue.textContent = label;
   if (history) history.textContent = label;
   const hidden = $('historyDate');
-  if (hidden) hidden.value = selectedOperationalDate;
+  if (hidden) hidden.value = end;
 }
 function renderHistoryCalendar() {
   const year = historyCalendarMonth.getFullYear();
@@ -90,14 +88,15 @@ function renderHistoryCalendar() {
 function renderHistory() {
   if (!$('historyList')) return;
 
-  const selectedDay = selectedOperationalDate;
+  const start = selectedOperationalStartDate;
+  const end = selectedOperationalEndDate;
   const query = ($('historySearch')?.value || '').toLowerCase();
   const guests = state.guests
-    .filter(guest => guest.day === selectedDay && guest.name.toLowerCase().includes(query))
+    .filter(guest => guest.day >= start && guest.day <= end && guest.name.toLowerCase().includes(query))
     .sort((a, b) => b.created - a.created);
 
   $('historyList').innerHTML = guests.length
     ? guests.map((guest, index) => guestCard(guest, index, true)).join('')
-    : `<div class="empty"><div class="empty-icon">◷</div><h3>Belum ada riwayat</h3><p>Tidak ada tamu pada tanggal yang dipilih.</p></div>`;
+    : `<div class="empty"><div class="empty-icon">◷</div><h3>Belum ada riwayat</h3><p>Tidak ada tamu pada rentang tanggal yang dipilih.</p></div>`;
 }
 
