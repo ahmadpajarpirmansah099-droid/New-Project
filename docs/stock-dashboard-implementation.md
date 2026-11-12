@@ -13,6 +13,7 @@ Keputusan produk mengikuti PRD Final Dashboard Stock Opname dan klarifikasi peng
 - Sebelum opname akhir bulan tersedia, popup menampilkan stok sistem sementara dan kartu menampilkan tanda kosong. Setelah opname berstatus closed tepat pada tanggal terakhir bulan, sistem membandingkan dengan stok fisik dan harga/biaya snapshot opname tersebut.
 - Suplies dikecualikan dari selisih bulanan bahan dan WIP. Barang Masuk bernilai nol disembunyikan dari popup. Pengeluaran menggabungkan tanggal, barang, dan kategori yang sama.
 - Dokumen void dan transaksi pada periode held dikecualikan. Penyesuaian Move mengimbangi nilai Pengeluaran asal sesuai tanggal penyesuaian.
+- Legenda grafik memilih satu atau beberapa dari lima garis. Semua aktif saat pertama dibuka; minimal satu tetap aktif. Pilihan bertahan saat tanggal atau data dashboard dimuat ulang dalam sesi yang sama. Grafik dan rincian tanggal hanya menampilkan seri yang dipilih.
 
 ## Batas keamanan
 
@@ -25,6 +26,7 @@ Keputusan produk mengikuti PRD Final Dashboard Stock Opname dan klarifikasi peng
 
 - `assets/js/stock-dashboard-model.js` menghitung agregat kartu, grafik, rincian, dan stok bulanan dari snapshot.
 - `assets/js/stock-dashboard-ui.js` menangani halaman, popup, kalender, status pemuatan/gagal/kosong, dan grafik canvas dengan rincian keyboard/pointer.
+- Pilihan seri disimpan hanya dalam memori halaman dan dikosongkan ketika sesi Stock Opname direset; tidak mengubah transaksi, Supabase, atau kunci localStorage.
 - `assets/css/stock-dashboard.css` memakai token warna, font, jarak, radius, dan shadow aplikasi. Arah visual berupa dashboard operasional padat dengan angka tabular, kartu Sales lime, dan grafik di bawah kartu. Ikon tambahan menggunakan path Lucide Calendar dan ChartColumnIncreasing pada navigasi.
 - `assets/js/stock-opname-service.js` menyediakan pembacaan dashboard khusus. Navigasi ditautkan melalui `stock-opname-ui.js`, `app.js`, `app-startup.js`, dan `index.html`.
 - Migrasi `20261112121804_stock_opname_dashboard_read_v1.sql` menambahkan pembacaan tersebut serta `is_supply` pada hasil `private.so_item`. Field itu mengikuti snapshot baru untuk posting dan hasil opname. Dokumen dan periode lama tidak ditulis ulang.
@@ -51,6 +53,7 @@ Keputusan produk mengikuti PRD Final Dashboard Stock Opname dan klarifikasi peng
 - Tes database dashboard, operasi Stock Opname, dan regresi transaksi lulus dalam transaksi yang di-ROLLBACK. Fixture tidak tersimpan.
 - Hitungan dashboard dicocokkan dengan 215 transaksi operasional. Total kartu dan grafik cocok dengan sumber tersimpan, dengan toleransi pembulatan Rp1. Terdapat 96 item bahan/WIP dan 9 item Suplies.
 - Browser preview dengan data contoh memverifikasi navigasi dari halaman Stock Opname dan menu cepat tombol +, enam popup, rincian bertingkat, kalender satu bulan, kondisi kosong, error dan Coba lagi, serta popup pada viewport iframe 390px. Lebar dokumen mobile 375px sesuai lebar konten, tanpa overflow horizontal.
+- Pilihan garis diuji di desktop dan mobile: tekan untuk sembunyikan/tampilkan, rincian tanggal mengikuti pilihan, garis terakhir tetap tampil, dan mobile tetap tanpa overflow horizontal.
 - Pemeriksaan visual mengikuti token proyek. Penilaian internal anti-slop 1/10 dan distinctiveness 8/10. Uji UI memakai data contoh dan backend diuji terpisah melalui RPC serta SQL.
 - Migrasi sudah diterapkan ke Supabase pada 12 November 2026. RPC setelah penerapan mengembalikan data divisi yang sesuai dan 9 item bertanda Suplies.
 - Status commit, PR, CI, merge, dan GitHub Pages dicatat pada PR. Dashboard frontend tersedia di produksi setelah PR digabung dan deployment GitHub Pages berhasil.
