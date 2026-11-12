@@ -1,29 +1,34 @@
 # New-Project
 
-Aplikasi web operasional untuk mendukung pengelolaan tamu, reservasi, data menu, dan persediaan. Bisa dibuka lewat HP maupun desktop.
+Aplikasi web operasional untuk mengelola tamu, antrean, reservasi, menu, dan persediaan. Antarmukanya tersedia untuk layar desktop dan ponsel.
 
-## Fitur
+## Fitur utama
 
-- **Guest Operational** untuk melihat ringkasan operasional, antrean tamu, dan reservasi.
-- **Master Data** untuk mengelola barang, Resep WIP, dan menu.
-- **Stock Opname** untuk mencatat persediaan dan mencocokkan stok fisik.
-- **Panduan Pengguna** tersedia di dalam aplikasi.
+- **Guest Operational:** ringkasan operasional, antrean aktif, riwayat tamu, dan reservasi.
+- **Master Data:** pengelolaan barang, resep WIP, dan menu.
+- **Stock Opname:** pencatatan persediaan dan pencocokan stok fisik.
+- **Panduan Pengguna:** petunjuk penggunaan yang tersedia di dalam aplikasi.
 
-## Pengembangan lokal
+## Menjalankan secara lokal
 
-Aplikasi menggunakan HTML, CSS, dan JavaScript, serta dapat dijalankan tanpa proses build.
+Proyek ini menggunakan HTML, CSS, dan JavaScript tanpa proses build. Dari direktori utama proyek, jalankan server HTTP lokal:
 
 ```sh
 python3 -m http.server 8000
 ```
 
-Lalu buka http://localhost:8000 di browser.
+Buka `http://localhost:8000` di browser. Halaman aplikasi memiliki proses masuk; fitur yang memerlukan data workspace membutuhkan akun dan akses layanan yang sesuai.
 
-## Struktur folder
+## Struktur proyek
 
 ```text
-assets/    Tampilan, kode aplikasi, dan gambar
-docs/      Dokumentasi proyek
-supabase/  Komponen layanan data
-tests/     Berkas pengujian
+index.html  Halaman utama aplikasi
+assets/     CSS, JavaScript, dan aset tampilan
+docs/       Dokumentasi proyek
+supabase/   Komponen layanan data
+tests/      Berkas pengujian
 ```
+
+## Catatan keamanan
+
+Jangan menaruh token, kata sandi, kredensial, URL yang memuat kredensial, atau data pengguna di README maupun commit publik.
