@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="assets/css/user-monitoring.css?v=20261106-user-monitoring-p1">
 
 <link rel="stylesheet" href="assets/css/visual-tokens.css?v=20261110-polish-1">
-<link rel="stylesheet" href="assets/css/visual-polish.css?v=20261112-transparent-date-control-v1">
+<link rel="stylesheet" href="assets/css/visual-polish.css?v=20261112-hide-date-picker-scrollbar-v1">
 <link rel="stylesheet" href="assets/css/stock-opname.css?v=8">
 </head>
 <body class="auth-locked desktop-sidebar-collapsed">
@@ -54,7 +54,7 @@
 </header>
 <main class="content">
   <section class="page active" id="page-dashboard">
-    <div class="greeting"><div><div class="eyebrow">Admin</div><h1>Selamat datang.</h1></div><div class="greeting-dates"><button type="button" class="dashboard-date-trigger" data-dashboard-date aria-label="Pilih rentang tanggal"><svg class="dashboard-date-icon" data-lucide="calendar-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 17 4-4 4 4"/><path d="M16 2v3"/><path d="M18 21v-8"/><path d="M21 10.343V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9"/><path d="M3 9h18"/><path d="M8 2v3"/></svg><span>Select date</span></button><small>Maks. 1 bulan</small></div></div>
+    <div class="greeting"><div><div class="eyebrow">Admin</div><h1>Selamat datang.</h1></div><div class="greeting-dates"><button type="button" class="dashboard-date-trigger" data-dashboard-date aria-label="Pilih rentang tanggal"><svg class="dashboard-date-icon" data-lucide="calendar-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 17 4-4 4 4"/><path d="M16 2v3"/><path d="M18 21v-8"/><path d="M21 10.343V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9"/><path d="M3 9h18"/><path d="M8 2v3"/></svg><span>Select date</span></button></div></div>
     <div class="hero hero-detail-trigger" role="button" tabindex="0" aria-label="Buka detail operasional pada rentang tanggal dipilih" data-action="openOperationalDetail" data-keydown-action="openOperationalDetail"><div class="hero-head"><span class="hero-label">Total tamu pada rentang dipilih</span><span class="hero-action" aria-hidden="true">↗</span></div><div class="hero-total" id="totalCount">0</div><div class="hero-foot"><span><b id="packCount">0</b> total pack</span><span><b id="avgWait">—</b> rata-rata tunggu</span></div></div>
     <div class="metrics">
       <div class="metric"><div class="metric-top"><span class="eyebrow">Menunggu</span><span class="metric-icon i-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div><strong id="waitingCount">0</strong><small>Antrean aktif</small></div>
