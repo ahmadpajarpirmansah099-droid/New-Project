@@ -241,12 +241,14 @@
    offset+=recipe.length;
    if(!matches)unmatched=true;
    const menu=menus.find(m=>m.id===id),name=menu?.nama_menu||'Menu '+id;
-   const detail=matches?quantityLines(used,consumedQty):'<p class="so-sales-unavailable">Rincian bahan per menu tidak tersedia pada catatan ini.</p>';
-   return `<details class="so-sales-menu"><summary><span>${e(name)}</span><strong>${number(l.qty)} terjual</strong></summary>${detail}</details>`;
+   if(!matches)return `<div class="so-sales-menu so-sales-menu-static"><span>${e(name)}</span><strong>${number(l.qty)} terjual</strong></div>`;
+   return `<details class="so-sales-menu"><summary><span>${e(name)}</span><strong>${number(l.qty)} terjual</strong></summary>
+    <div class="so-sales-ingredients"><span>Bahan terpakai</span>${quantityLines(used,consumedQty)}</div></details>`;
   });
   if(!rows.length)return '<p class="so-sales-unavailable">Daftar menu terjual belum tersedia pada catatan ini.</p>';
   const fallback=unmatched||offset!==postings.length
-   ? `<details class="so-sales-fallback"><summary>Lihat total pemakaian bahan transaksi</summary>${quantityLines(postings,consumedQty)}</details>`
+   ? `${unmatched?'<p class="so-sales-unavailable">Rincian bahan beberapa menu tidak tersedia pada catatan ini.</p>':''}
+    <details class="so-sales-menu so-sales-fallback"><summary><span>Pemakaian bahan transaksi</span></summary>${quantityLines(postings,consumedQty)}</details>`
    : '';
   return `<div class="so-sales-menu-list">${rows.join('')}${fallback}</div>`;
  }
