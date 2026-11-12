@@ -20,3 +20,9 @@ const w=runtime(),s=w.StockOpnameService,calls=[];await s.initialize(client('a',
 test('developer config does not load operational records',async()=>{
 const w=runtime(),s=w.StockOpnameService;await s.initialize(client('a',()=>{throw Error('unexpected operational read');}),{...ctx,role:'developer'});assert.equal(s.current().developer,true);assert.equal(s.current().state,undefined);
 });
+test('dashboard developer reads use the dedicated RPC without loading operational state',async()=>{
+const w=runtime(),s=w.StockOpnameService,calls=[];await s.initialize(client('a',async(name,args)=>{calls.push({name,args});return {data:{state:{periods:[],documents:[]}}};}),{...ctx,role:'developer'});assert.equal(s.dashboardAvailable(),true);await s.readDashboard();assert.equal(calls[0].name,'stock_opname_dashboard_read');assert.equal(calls[0].args.division,'d');assert.equal(s.current().state,undefined);
+});
+test('dashboard response is discarded when account or division changes',async()=>{
+const w=runtime(),s=w.StockOpnameService;let resolve;await s.initialize(client('a',()=>new Promise(r=>resolve=r)),{...ctx,role:'developer'});const promise=s.readDashboard();await new Promise(r=>setImmediate(r));s.reset();resolve({data:{state:{private:true}}});await assert.rejects(promise,/Workspace berubah/);assert.equal(s.dashboardAvailable(),false);
+});

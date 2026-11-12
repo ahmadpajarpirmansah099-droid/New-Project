@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="assets/css/visual-tokens.css?v=20261110-polish-1">
 <link rel="stylesheet" href="assets/css/visual-polish.css?v=20261112-icon-only-date-trigger-deploy-retry-v1">
 <link rel="stylesheet" href="assets/css/stock-opname.css?v=8">
+<link rel="stylesheet" href="assets/css/stock-dashboard.css?v=1">
 </head>
 <body class="auth-locked desktop-sidebar-collapsed">
 <section class="auth-screen" aria-labelledby="authTitle">
@@ -235,6 +236,7 @@
 <section class="page user-guide-page" id="page-user-guide" aria-label="Panduan Pengguna">
   <div id="userGuideRoot"></div>
 </section>
+<section class="page" id="page-stock-dashboard" aria-label="Dashboard Stock Opname"></section>
 <section class="page" id="page-stock-opname" aria-label="Stock Opname"></section>
 </main>
 <button class="fab" id="fab" type="button" data-action="toggleQuickMenu" aria-label="Buka menu cepat" aria-expanded="false" aria-controls="quickMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -244,6 +246,7 @@
 <div class="quick-menu-backdrop" id="quickMenuBackdrop" data-action="closeQuickMenu" aria-hidden="true"></div>
 <nav class="quick-menu" id="quickMenu" aria-label="Guest Operational" aria-hidden="true">
   <div class="quick-menu-heading">GUEST OPERATIONAL</div>
+  <button class="quick-menu-item" data-quick-context="stock" style="display:none" type="button" data-action="runQuickAction" data-action-args='["stock:dashboard"]'><svg data-lucide="chart-column-increasing" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 17V9"/><path d="M18 17V5"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M8 17v-3"/></svg><span>Dashboard</span></button>
   <button class="quick-menu-item" data-quick-context="stock" style="display:none" type="button" data-action="runQuickAction" data-action-args='["stock:initial"]'>
     <svg data-lucide="package-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22v-9" /> <path d="M15.17 2.21a1.67 1.67 0 0 1 1.63 0L21 4.57a1.93 1.93 0 0 1 0 3.36L8.82 14.79a1.655 1.655 0 0 1-1.64 0L3 12.43a1.93 1.93 0 0 1 0-3.36z" /> <path d="M20 13v3.87a2.06 2.06 0 0 1-1.11 1.83l-6 3.08a1.93 1.93 0 0 1-1.78 0l-6-3.08A2.06 2.06 0 0 1 4 16.87V13" /> <path d="M21 12.43a1.93 1.93 0 0 0 0-3.36L8.83 2.2a1.64 1.64 0 0 0-1.63 0L3 4.57a1.93 1.93 0 0 0 0 3.36l12.18 6.86a1.636 1.636 0 0 0 1.63 0z" /></svg>
     <span>Stock Awal</span>
@@ -399,7 +402,7 @@
 <script src="assets/js/menu-ui.js?v=20261104-code-tidy-p1" defer></script>
 <script src="assets/js/masterdata-export.js?v=20261107-export-excel-p1" defer></script>
 <script src="assets/js/guestops-service.js?v=20261104-workspace-guard-v2" defer></script>
-<script src="assets/js/app.js?v=20261112-guide-frame-cache-v1" defer></script>
+<script src="assets/js/app.js?v=20261112-stock-dashboard-v1" defer></script>
 <script src="assets/js/guestops-queue.js?v=20261112-operational-range-picker-v1" defer></script>
 <script src="assets/js/guestops-operational.js?v=20261112-dashboard-date-range-v1" defer></script>
 <script src="assets/js/guestops-history.js?v=20261112-operational-range-picker-v1" defer></script>
@@ -407,9 +410,11 @@
 <script src="assets/js/guestops-detail.js?v=20261109-auto-close-wl-p1" defer></script>
 <script src="assets/js/user-monitoring.js?v=20261106-user-monitoring-p1" defer></script>
 
-<script src="assets/js/stock-opname-service.js?v=1" defer></script>
-<script src="assets/js/stock-opname-ui.js?v=8" defer></script>
-<script src="assets/js/app-startup.js?v=20261109-workspace-init-cache-fix-p1" defer></script>
+<script src="assets/js/stock-opname-service.js?v=2" defer></script>
+<script src="assets/js/stock-opname-ui.js?v=9" defer></script>
+<script src="assets/js/stock-dashboard-model.js?v=1" defer></script>
+<script src="assets/js/stock-dashboard-ui.js?v=1" defer></script>
+<script src="assets/js/app-startup.js?v=20261112-stock-dashboard-v1" defer></script>
 </body>
 </html>
 
