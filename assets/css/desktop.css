@@ -1468,3 +1468,27 @@
 body:not(:has(#page-dashboard.active)) .workspace-scope-switcher {
   display: none !important;
 }
+
+/* Desktop icon rail: navigation order and a compact card under every icon. */
+@media (min-width: 900px) {
+  .drawer-nav > .drawer-item[data-page="dashboard"] { order: 1; }
+  .drawer-nav > .drawer-item[data-page="user-monitoring"] { order: 2; }
+  .drawer-nav > .drawer-item[data-page="stock-opname"] { order: 3; }
+  .drawer-nav > .drawer-item[data-page="master-items"] { order: 4; }
+  .drawer-nav > .drawer-item[data-page="settings"] { order: 5; }
+
+  .drawer-nav > .drawer-item:not(.active),
+  body.desktop-sidebar-collapsed:has(.page.active) .drawer-guide-icon,
+  body:has(.page.active) #authLogoutButton {
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(20, 35, 63, .07);
+  }
+
+  .drawer-nav > .drawer-item.active {
+    box-shadow: 0 3px 10px rgba(104, 126, 43, .09);
+  }
+
+  body.desktop-sidebar-collapsed:has(.page.active) .drawer-guide-icon.active {
+    background: #eff6c7;
+  }
+}
