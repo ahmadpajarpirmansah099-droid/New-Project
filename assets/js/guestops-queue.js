@@ -185,7 +185,7 @@ function openDashboardRangePicker(trigger) {
   const draw = () => {
     const year = cursor.getUTCFullYear();
     const month = cursor.getUTCMonth();
-    const offset = (cursor.getUTCDay() + 6) % 7;
+    const offset = cursor.getUTCDay();
     const dayCount = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
     const max = start && !end ? dashboardDateLimit(start) : todayKey();
     dialog.querySelector('[data-range-start]').textContent = start ? dashboardDateText(start) : 'Pilih tanggal';
@@ -193,12 +193,12 @@ function openDashboardRangePicker(trigger) {
     dialog.querySelector('.dashboard-range-apply').disabled = !start || !end;
     dialog.querySelector('.dashboard-calendar-nav strong').textContent = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(cursor);
     dialog.querySelector('[data-dashboard-month="1"]').disabled = new Date(Date.UTC(year, month + 1, 1)).toISOString().slice(0, 10) > todayKey();
-    let cells = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(day => '<span class="dashboard-calendar-weekday">' + day + '</span>').join('');
+    let cells = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => '<span class="dashboard-calendar-weekday reservation-weekday">' + day + '</span>').join('');
     for (let i = 0; i < offset; i++) cells += '<span class="dashboard-calendar-empty" aria-hidden="true"></span>';
     for (let day = 1; day <= dayCount; day++) {
       const value = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
       const disabled = value > todayKey() || Boolean(start && !end && value > max);
-      const classes = ['dashboard-calendar-day', value === start ? 'is-range-start' : '', value === end ? 'is-range-end' : '', start && end && value > start && value < end ? 'is-in-range' : '', value === todayKey() ? 'is-today' : ''].filter(Boolean).join(' ');
+      const classes = ['dashboard-calendar-day', 'reservation-day', value === start ? 'is-range-start selected' : '', value === end ? 'is-range-end selected' : '', start && end && value > start && value < end ? 'is-in-range' : '', value === todayKey() ? 'is-today today' : ''].filter(Boolean).join(' ');
       cells += '<button type="button" class="' + classes + '" aria-label="' + dashboardDateText(value) + '" data-dashboard-day="' + value + '"' + (disabled ? ' disabled' : '') + (value === start || value === end ? ' aria-pressed="true"' : ' aria-pressed="false"') + (value === todayKey() ? ' aria-current="date"' : '') + '>' + day + '</button>';
     }
     dialog.querySelector('.dashboard-calendar-grid').innerHTML = cells;
@@ -322,4 +322,5 @@ function renderQueue(){
   ? list.map((g,i)=>guestCard(g,i)).join('')
   : `<div class="empty"><div class="empty-icon">⌕</div><h3>Tidak ada antrean</h3><p>Coba ubah filter atau kata pencarian.</p></div>`;
 }
+
 

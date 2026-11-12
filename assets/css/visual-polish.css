@@ -303,46 +303,48 @@ button, input, select, textarea { font-family: var(--ui-font); }
   gap: 8px;
   min-width: 0;
 }
-#page-dashboard .dashboard-date-field {
-  display: grid;
-  gap: 4px;
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 700;
-}
 #page-dashboard .dashboard-date-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  width: 145px;
+  width: 290px;
   min-width: 0;
-  height: 40px;
-  padding: 0 9px;
+  min-height: 56px;
+  padding: 8px 14px;
   border: 1px solid var(--line);
   border-radius: 11px;
   background: var(--surface);
   color: var(--ink);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 650;
   white-space: nowrap;
 }
+#page-dashboard .dashboard-date-trigger-copy { display: grid; gap: 3px; min-width: 0; text-align: left; }
+#page-dashboard .dashboard-date-trigger-copy small { color: var(--muted); font-size: 10px; font-weight: 700; }
+#page-dashboard .dashboard-date-trigger-copy strong { overflow: hidden; text-overflow: ellipsis; font-weight: 750; }
 #page-dashboard .dashboard-date-trigger svg { width: 16px; height: 16px; flex: 0 0 auto; color: var(--muted); }
 #page-dashboard .dashboard-date-trigger:hover,
 #page-dashboard .dashboard-date-trigger:focus-visible { border-color: #b6c978; outline: none; box-shadow: 0 0 0 3px rgba(190, 218, 113, .2); }
 .dashboard-date-dialog {
-  width: min(560px, calc(100vw - 28px));
+  width: min(470px, calc(100vw - 28px));
   max-width: none;
   max-height: 90dvh;
   padding: 20px;
   overflow: auto;
   border: 1px solid var(--line);
-  border-radius: 22px;
+  border-radius: 24px;
   background: var(--surface);
   color: var(--ink);
-  box-shadow: 0 24px 70px rgba(17, 18, 37, .2);
+  box-shadow: 0 18px 55px rgba(17, 18, 37, .16);
 }
 .dashboard-date-dialog::backdrop { background: rgba(17, 18, 37, .38); backdrop-filter: blur(3px); }
+@media (prefers-reduced-motion: no-preference) {
+  .dashboard-date-dialog[open] { animation: dashboard-range-enter .22s ease-out both; }
+  .dashboard-date-dialog[open]::backdrop { animation: dashboard-range-backdrop .2s ease-out both; }
+  @keyframes dashboard-range-enter { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes dashboard-range-backdrop { from { opacity: 0; } to { opacity: 1; } }
+}
 .dashboard-date-dialog > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .dashboard-date-dialog > header small { color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .1em; }
 .dashboard-date-dialog > header h2 { margin: 4px 0 0; font: 750 18px Manrope, sans-serif; }
@@ -351,11 +353,11 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .dashboard-calendar-nav { display: flex; align-items: center; justify-content: space-between; margin: 18px 0 12px; }
 .dashboard-calendar-nav strong { font-size: 14px; }
 .dashboard-calendar-nav button:disabled { opacity: .35; cursor: default; }
-.dashboard-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0; }
-.dashboard-calendar-weekday { display: grid; place-items: center; height: 30px; color: var(--muted); font-size: 10px; font-weight: 700; }
+.dashboard-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.dashboard-calendar-weekday { display: grid; place-items: center; height: 30px; color: #9997a4; font-size: 11px; font-weight: 800; }
 .dashboard-calendar-empty,
-.dashboard-calendar-day { display: grid; place-items: center; min-width: 0; height: 38px; }
-.dashboard-calendar-day { border: 0; border-radius: 12px; background: transparent; color: var(--ink); font-size: 12px; }
+.dashboard-calendar-day { display: grid; place-items: center; min-width: 0; height: 46px; }
+.dashboard-calendar-day { border: 0; border-radius: 12px; background: #fafaf7; color: var(--ink); font-size: 14px; font-weight: 700; }
 .dashboard-calendar-day:hover:not(:disabled) { background: #eff3e3; }
 .dashboard-calendar-day.is-today:not(.is-range-start):not(.is-range-end) { box-shadow: inset 0 0 0 1px #a9b968; font-weight: 800; }
 .dashboard-calendar-day:disabled { color: #c2c7cf; cursor: default; }
@@ -366,16 +368,14 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .dashboard-range-summary small { display: block; margin-bottom: 5px; color: var(--muted); font-size: 11px; font-weight: 700; }
 .dashboard-range-summary strong { font-size: 13px; white-space: nowrap; }
 .dashboard-range-summary > span { color: var(--muted); }
-.dashboard-calendar-panel { padding: 14px; border: 1px solid var(--line); border-radius: 17px; }
+.dashboard-calendar-panel { padding: 16px; border: 0; border-radius: 20px; background: #fff; box-shadow: 0 10px 26px rgba(17, 18, 37, .1); }
 .dashboard-calendar-panel .dashboard-calendar-nav { margin: 0 0 12px; }
 .dashboard-calendar-nav > div { display: flex; gap: 6px; }
-.dashboard-calendar-day { border-radius: 0; }
 .dashboard-calendar-day.is-in-range { background: var(--ui-lime-soft); }
 .dashboard-calendar-day.is-range-start,
-.dashboard-calendar-day.is-range-end { background: var(--lime); color: var(--ink); font-weight: 800; }
-.dashboard-calendar-day.is-range-start { border-radius: 11px 0 0 11px; }
-.dashboard-calendar-day.is-range-end { border-radius: 0 11px 11px 0; }
-.dashboard-calendar-day.is-range-start.is-range-end { border-radius: 11px; }
+.dashboard-calendar-day.is-range-end { background: #d9ee8c; color: #111225; font-weight: 800; }
+.dashboard-calendar-day.is-today:not(.is-range-start):not(.is-range-end) { box-shadow: inset 0 0 0 1px #aaa3e8; }
+.dashboard-calendar-day:disabled { opacity: .35; }
 .dashboard-calendar-day:focus-visible { outline: 2px solid var(--ui-olive); outline-offset: -2px; }
 .dashboard-date-dialog > footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
 .dashboard-date-dialog > footer button { min-height: 39px; padding: 0 14px; border: 0; border-radius: 11px; font-size: 12px; font-weight: 750; white-space: nowrap; }
@@ -385,9 +385,11 @@ button, input, select, textarea { font-family: var(--ui-font); }
 @media (max-width: 520px) {
   .dashboard-date-dialog { padding: 16px; }
   .dashboard-calendar-panel { padding: 9px; }
-  .dashboard-calendar-grid { gap: 0; }
-  .dashboard-calendar-day { height: 38px; }
+  .dashboard-calendar-grid { gap: 3px; }
+  .dashboard-calendar-day { height: 40px; }
   .dashboard-date-dialog > footer button { flex: 1; }
+  #page-dashboard > .greeting .greeting-dates { flex-wrap: wrap; }
+  #page-dashboard .greeting-dates > small { padding: 0; }
 }
 #page-dashboard .greeting-dates > small {
   padding-bottom: 11px;
@@ -433,8 +435,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 }
 @media (max-width: 420px) {
   #page-dashboard > .greeting .greeting-dates { gap: 6px; }
-  #page-dashboard .dashboard-date-field { flex: 1 1 0; min-width: 0; }
-  #page-dashboard .dashboard-date-trigger { width: 100%; gap: 4px; padding: 0 5px; font-size: 11px; }
+  #page-dashboard .dashboard-date-trigger { width: min(100%, 290px); gap: 4px; font-size: 12px; }
   #page-dashboard .dashboard-date-trigger svg { width: 14px; height: 14px; }
   #page-dashboard .greeting-dates > small { font-size: 9px; }
   #page-dashboard .queue-head-actions .workspace-scope-switcher { gap: 6px; }
@@ -558,3 +559,4 @@ button, input, select, textarea { font-family: var(--ui-font); }
     font-size: 11px;
   }
 }
+
