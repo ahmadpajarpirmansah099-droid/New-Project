@@ -358,7 +358,13 @@
 .so-sales-menu { border: 1px solid var(--so-line); border-radius: var(--ui-radius-control); }
 .so-sales-menu > summary { padding: 8px 10px; }
 .so-sales-menu > summary strong { flex: 0 0 auto; font-size: 12px; font-variant-numeric: tabular-nums; }
-.so-sales-menu .so-opening-lines { border-top: 1px solid var(--so-line); border-radius: 0 0 var(--ui-radius-control) var(--ui-radius-control); }
+.so-sales-menu-static { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; color: var(--so-muted); }
+.so-sales-menu-static span { min-width: 0; overflow-wrap: anywhere; }
+.so-sales-menu-static strong { flex: 0 0 auto; font-size: 12px; font-variant-numeric: tabular-nums; }
+.so-sales-ingredients { border-top: 1px solid var(--so-line); }
+.so-sales-ingredients > span { display: block; padding: 8px 12px 0; color: var(--so-muted); font-size: 11px; font-weight: 700; }
+.so-sales-ingredients .so-opening-lines { border-radius: 0 0 var(--ui-radius-control) var(--ui-radius-control); }
+.so-sales-fallback .so-opening-lines { border-top: 1px solid var(--so-line); border-radius: 0 0 var(--ui-radius-control) var(--ui-radius-control); }
 .so-sales-unavailable { margin: 0; padding: 10px; color: var(--so-muted); font-size: 12px; }
 
 /* Barang Masuk search shares the input styles used by the ledger. */
