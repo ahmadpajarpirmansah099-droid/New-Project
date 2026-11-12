@@ -304,28 +304,35 @@ button, input, select, textarea { font-family: var(--ui-font); }
   min-width: 0;
 }
 #page-dashboard .dashboard-date-trigger {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  width: 290px;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 210px;
   min-width: 0;
   min-height: 56px;
-  padding: 8px 14px;
-  border: 1px solid var(--line);
-  border-radius: 11px;
-  background: var(--surface);
-  color: var(--ink);
-  font-size: 13px;
-  font-weight: 650;
+  padding: 10px 16px;
+  border: 1px solid #e2e4e8;
+  border-radius: 14px;
+  background: #fff;
+  color: #171a2b;
+  font-size: 15px;
+  font-weight: 600;
   white-space: nowrap;
 }
-#page-dashboard .dashboard-date-trigger-copy { display: grid; gap: 3px; min-width: 0; text-align: left; }
-#page-dashboard .dashboard-date-trigger-copy small { color: var(--muted); font-size: 10px; font-weight: 700; }
-#page-dashboard .dashboard-date-trigger-copy strong { overflow: hidden; text-overflow: ellipsis; font-weight: 750; }
-#page-dashboard .dashboard-date-trigger svg { width: 16px; height: 16px; flex: 0 0 auto; color: var(--muted); }
+#page-dashboard .dashboard-date-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border: 1.5px solid currentColor;
+  border-radius: 8px;
+}
+#page-dashboard .dashboard-date-icon svg { width: 19px; height: 19px; }
 #page-dashboard .dashboard-date-trigger:hover,
 #page-dashboard .dashboard-date-trigger:focus-visible { border-color: #b6c978; outline: none; box-shadow: 0 0 0 3px rgba(190, 218, 113, .2); }
+
 .dashboard-date-dialog {
   width: min(470px, calc(100vw - 28px));
   max-width: none;
@@ -435,7 +442,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 }
 @media (max-width: 420px) {
   #page-dashboard > .greeting .greeting-dates { gap: 6px; }
-  #page-dashboard .dashboard-date-trigger { width: min(100%, 290px); gap: 4px; font-size: 12px; }
+  #page-dashboard .dashboard-date-trigger { width: min(100%, 210px); gap: 12px; font-size: 15px; }
   #page-dashboard .dashboard-date-trigger svg { width: 14px; height: 14px; }
   #page-dashboard .greeting-dates > small { font-size: 9px; }
   #page-dashboard .queue-head-actions .workspace-scope-switcher { gap: 6px; }
@@ -698,7 +705,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
     width: 100%;
     margin: 0 0 16px;
   }
-  #page-dashboard .dashboard-date-trigger { width: min(100%, 290px); }
+  #page-dashboard .dashboard-date-trigger { width: min(100%, 210px); }
   #page-dashboard > #dashboardList { grid-area: queue-list; }
   #page-dashboard > .dashboard-reservations { grid-area: reservations; }
   #page-dashboard > .dashboard-trend-card { grid-area: trend; }
