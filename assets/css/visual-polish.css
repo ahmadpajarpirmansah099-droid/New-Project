@@ -295,6 +295,125 @@ button, input, select, textarea { font-family: var(--ui-font); }
   .md-item-card, .wip-card, .menu-card { padding: 20px; }
 }
 
+/* Dashboard date range and workspace controls. */
+#page-dashboard > .greeting .greeting-dates {
+  display: flex;
+  align-items: end;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+#page-dashboard .dashboard-date-field {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+#page-dashboard .dashboard-date-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 145px;
+  min-width: 0;
+  height: 40px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+#page-dashboard .dashboard-date-trigger svg { width: 16px; height: 16px; flex: 0 0 auto; color: var(--muted); }
+#page-dashboard .dashboard-date-trigger:hover,
+#page-dashboard .dashboard-date-trigger:focus-visible { border-color: #b6c978; outline: none; box-shadow: 0 0 0 3px rgba(190, 218, 113, .2); }
+.dashboard-date-dialog {
+  width: min(360px, calc(100vw - 28px));
+  max-width: none;
+  max-height: min(90dvh, 560px);
+  padding: 20px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 24px 70px rgba(17, 18, 37, .2);
+}
+.dashboard-date-dialog::backdrop { background: rgba(17, 18, 37, .38); backdrop-filter: blur(3px); }
+.dashboard-date-dialog > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.dashboard-date-dialog > header small { color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .1em; }
+.dashboard-date-dialog > header h2 { margin: 4px 0 0; font: 750 18px Manrope, sans-serif; }
+.dashboard-date-close,
+.dashboard-calendar-nav button { display: grid; place-items: center; width: 38px; height: 38px; border: 0; border-radius: 12px; background: #f3f4f0; color: var(--ink); font-size: 21px; }
+.dashboard-calendar-nav { display: flex; align-items: center; justify-content: space-between; margin: 18px 0 12px; }
+.dashboard-calendar-nav strong { font-size: 14px; }
+.dashboard-calendar-nav button:disabled { opacity: .35; cursor: default; }
+.dashboard-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.dashboard-calendar-weekday { display: grid; place-items: center; height: 30px; color: var(--muted); font-size: 10px; font-weight: 700; }
+.dashboard-calendar-empty,
+.dashboard-calendar-day { display: grid; place-items: center; min-width: 0; height: 38px; }
+.dashboard-calendar-day { border: 0; border-radius: 12px; background: transparent; color: var(--ink); font-size: 12px; }
+.dashboard-calendar-day:hover:not(:disabled) { background: #eff3e3; }
+.dashboard-calendar-day.is-selected { background: var(--lime); color: var(--ink); font-weight: 800; }
+.dashboard-calendar-day.is-today:not(.is-selected) { box-shadow: inset 0 0 0 1px #a9b968; font-weight: 800; }
+.dashboard-calendar-day:disabled { color: #c2c7cf; cursor: default; }
+.dashboard-calendar-limit { margin: 14px 0 0; color: var(--muted); font-size: 11px; text-align: center;
+}
+#page-dashboard .greeting-dates > small {
+  padding-bottom: 11px;
+  color: var(--muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+#page-dashboard .dashboard-date-separator { padding-bottom: 10px; color: var(--muted); }
+#page-dashboard > .section-head .queue-head-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 0;
+  margin-left: auto;
+}
+#page-dashboard .queue-head-actions .workspace-scope-switcher {
+  flex: 0 1 330px;
+  width: 330px;
+  margin: 0;
+  gap: 8px;
+}
+#page-dashboard .queue-head-actions .workspace-scope-switcher .scope-field { flex: 1 1 0; }
+#page-dashboard .queue-head-actions .scope-trigger { width: 100%; min-width: 0; }
+
+@media (min-width: 900px) {
+  #page-dashboard > .greeting .greeting-dates { display: flex; }
+}
+@media (min-width: 900px) and (max-width: 1279px) {
+  #page-dashboard > .greeting { flex-wrap: wrap; gap: 8px; }
+  #page-dashboard > .greeting .greeting-dates { flex: 1 1 100%; justify-content: flex-start; }
+  #page-dashboard > .section-head { flex-wrap: wrap; row-gap: 8px; }
+  #page-dashboard > .section-head .queue-head-actions { flex: 1 1 100%; justify-content: flex-start; margin-left: 0; }
+  #page-dashboard .queue-head-actions .workspace-scope-switcher { flex: 1 1 auto; width: auto; }
+  #page-dashboard .queue-head-actions .workspace-scope-switcher { order: 0; }
+}
+@media (max-width: 899px) {
+  #page-dashboard > .greeting { flex-wrap: wrap; gap: 10px; }
+  #page-dashboard > .greeting .greeting-dates { flex: 1 1 100%; justify-content: flex-start; }
+  #page-dashboard > .section-head { flex-wrap: wrap; row-gap: 10px; }
+  #page-dashboard > .section-head .queue-head-actions { flex: 1 1 100%; justify-content: space-between; margin-left: 0; }
+  #page-dashboard .queue-head-actions .workspace-scope-switcher { flex: 1 1 auto; width: auto; order: 0; }
+}
+@media (max-width: 420px) {
+  #page-dashboard > .greeting .greeting-dates { gap: 6px; }
+  #page-dashboard .dashboard-date-field { flex: 1 1 0; min-width: 0; }
+  #page-dashboard .dashboard-date-trigger { width: 100%; gap: 4px; padding: 0 5px; font-size: 11px; }
+  #page-dashboard .dashboard-date-trigger svg { width: 14px; height: 14px; }
+  #page-dashboard .greeting-dates > small { font-size: 9px; }
+  #page-dashboard .queue-head-actions .workspace-scope-switcher { gap: 6px; }
+  #page-dashboard .queue-head-actions .scope-trigger { padding-right: 8px; padding-left: 8px; font-size: 12px; }
+}
+
 /* Mobile: wrap controls instead of shrinking text to 8px. */
 @media (max-width: 899px) {
   .content { padding-left: 20px; padding-right: 20px; }

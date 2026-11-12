@@ -152,19 +152,96 @@ function setDashboardCounter(id,targetValue,animate=false){
   element.textContent='0';
   requestAnimationFrame(step);
 }
+function dashboardDateLimit(start) {
+  const [year, month, day] = start.split('-').map(Number);
+  const nextMonth = new Date(Date.UTC(year, month, 1));
+  const lastDay = new Date(Date.UTC(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth() + 1, 0)).getUTCDate();
+  const limit = new Date(Date.UTC(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth(), Math.min(day, lastDay)));
+  return [limit.toISOString().slice(0, 10), todayKey()].sort()[0];
+}
+function dashboardDateText(value) {
+  return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
+    .format(new Date(value + 'T00:00:00Z'));
+}
+function renderDashboardDateControls() {
+  document.querySelector('[data-dashboard-date-label="start"]')?.replaceChildren(dashboardDateText(selectedDashboardStartDate));
+  document.querySelector('[data-dashboard-date-label="end"]')?.replaceChildren(dashboardDateText(selectedDashboardEndDate));
+}
+function openDashboardDatePicker(field) {
+  const isStart = field === 'start';
+  const min = isStart ? '' : selectedDashboardStartDate;
+  const max = isStart ? todayKey() : dashboardDateLimit(selectedDashboardStartDate);
+  let selected = isStart ? selectedDashboardStartDate : selectedDashboardEndDate;
+  const [year, month] = selected.split('-').map(Number);
+  let cursor = new Date(Date.UTC(year, month - 1, 1));
+  const dialog = document.createElement('dialog');
+  dialog.className = 'dashboard-date-dialog';
+  dialog.setAttribute('aria-label', isStart ? 'Pilih tanggal awal' : 'Pilih tanggal akhir');
+  dialog.innerHTML = '<header><div><small>' + (isStart ? 'TANGGAL AWAL' : 'TANGGAL AKHIR') + '</small><h2>' + (isStart ? 'Pilih tanggal awal' : 'Pilih tanggal akhir') + '</h2></div><button type="button" class="dashboard-date-close" aria-label="Tutup">×</button></header><div class="dashboard-calendar-nav"><button type="button" data-dashboard-month="-1" aria-label="Bulan sebelumnya">‹</button><strong></strong><button type="button" data-dashboard-month="1" aria-label="Bulan berikutnya">›</button></div><div class="dashboard-calendar-grid"></div><p class="dashboard-calendar-limit">' + (isStart ? 'Pilih tanggal sampai hari ini.' : 'Rentang maksimal satu bulan.') + '</p>';
+  document.body.appendChild(dialog);
+  const draw = () => {
+    const y = cursor.getUTCFullYear();
+    const m = cursor.getUTCMonth();
+    const offset = (new Date(Date.UTC(y, m, 1)).getUTCDay() + 6) % 7;
+    const days = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    dialog.querySelector('.dashboard-calendar-nav strong').textContent = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(cursor);
+    const previousMonthEnd = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+    const nextMonth = new Date(Date.UTC(y, m + 1, 1)).toISOString().slice(0, 10);
+    dialog.querySelector('[data-dashboard-month="-1"]').disabled = Boolean(min && previousMonthEnd < min);
+    dialog.querySelector('[data-dashboard-month="1"]').disabled = nextMonth > max;
+    let cells = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(day => '<span class="dashboard-calendar-weekday">' + day + '</span>').join('');
+    for (let i = 0; i < offset; i++) cells += '<span class="dashboard-calendar-empty" aria-hidden="true"></span>';
+    for (let day = 1; day <= days; day++) {
+      const value = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+      const disabled = (min && value < min) || value > max;
+      const classes = ['dashboard-calendar-day', value === selected ? 'is-selected' : '', value === todayKey() ? 'is-today' : ''].filter(Boolean).join(' ');
+      cells += '<button type="button" class="' + classes + '" aria-label="' + value + '" data-dashboard-day="' + value + '"' + (disabled ? ' disabled' : '') + (value === selected ? ' aria-pressed="true"' : ' aria-pressed="false"') + (value === todayKey() ? ' aria-current="date"' : '') + '>' + day + '</button>';
+    }
+    dialog.querySelector('.dashboard-calendar-grid').innerHTML = cells;
+  };
+  draw();
+  dialog.showModal();
+  dialog.querySelector('.dashboard-date-close').addEventListener('click', () => dialog.close());
+  dialog.querySelectorAll('[data-dashboard-month]').forEach(button => button.addEventListener('click', () => {
+    cursor.setUTCMonth(cursor.getUTCMonth() + Number(button.dataset.dashboardMonth));
+    draw();
+  }));
+  dialog.querySelector('.dashboard-calendar-grid').addEventListener('click', event => {
+    const button = event.target.closest('[data-dashboard-day]');
+    if (!button || button.disabled) return;
+    selected = button.dataset.dashboardDay;
+    if (isStart) {
+      selectedDashboardStartDate = selected;
+      if (selectedDashboardEndDate < selected || selectedDashboardEndDate > dashboardDateLimit(selected)) {
+        selectedDashboardEndDate = [dashboardDateLimit(selected), todayKey()].sort()[0];
+      }
+    } else {
+      selectedDashboardEndDate = selected;
+    }
+    renderDashboardDateControls();
+    renderAll();
+    dialog.close();
+  });
+  dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+  dialog.addEventListener('close', () => dialog.remove(), { once: true });
+}
+document.addEventListener('click', event => {
+  const trigger = event.target.closest('[data-dashboard-date]');
+  if (trigger) openDashboardDatePicker(trigger.dataset.dashboardDate);
+});
 function renderAll() {
   const dashboardDateText = historyDateLabel(selectedOperationalDate, {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
   });
-  $('dateLabel').textContent = dashboardDateText;
   const desktopQueueDate = document.getElementById('desktopQueueDate');
   if (desktopQueueDate) desktopQueueDate.textContent = dashboardDateText;
   updateOperationalDateLabels();
 
   if ($('page-dashboard')?.classList.contains('active')) {
-    const todayGuests = state.guests.filter(guest => guest.day === selectedOperationalDate && guest.status !== 'missed');
+    renderDashboardDateControls();
+    const todayGuests = state.guests.filter(guest => guest.day >= selectedDashboardStartDate && guest.day <= selectedDashboardEndDate && guest.status !== 'missed');
     const waitingGuests = todayGuests.filter(guest => ['waiting', 'called'].includes(guest.status));
     const doneGuests = todayGuests.filter(guest => guest.status === 'done');
     const cancelledGuests = todayGuests.filter(guest => guest.status === 'cancelled');
@@ -190,7 +267,7 @@ function renderAll() {
       : '—';
 
     const pendingGuests = state.guests.filter(
-      guest => guest.day !== selectedOperationalDate && ['waiting', 'called'].includes(guest.status)
+      guest => guest.day < selectedDashboardStartDate && ['waiting', 'called'].includes(guest.status)
     );
 
     $('pendingWrap').innerHTML = pendingGuests.length

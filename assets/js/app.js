@@ -9,6 +9,8 @@ const fmtElapsed=ms=>{let m=Math.max(0,Math.floor(ms/60000));return m<60?m+' men
 const uid=()=>window.crypto?.randomUUID ? window.crypto.randomUUID() : 'g-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,10);
 let state=loadState(),activeFilter='waiting',sheetGuest=null,toastTimer;
 let selectedOperationalDate = todayKey();
+let selectedDashboardStartDate = todayKey();
+let selectedDashboardEndDate = todayKey();
 let remoteSaveQueue = Promise.resolve();
 let dashboardCountUpPending = true;
 function loadState() {

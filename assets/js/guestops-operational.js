@@ -28,9 +28,12 @@ function openOperationalDetail() {
   initSheetDrag();
 }
 function renderOperationalDetail() {
-  const day = selectedOperationalDate;
-  const guests = state.guests.filter(guest => guest.day === day && guest.status !== 'missed').sort((a, b) => b.created - a.created);
-  const yesterday = state.guests.filter(guest => guest.day === shiftDateKey(day, -1) && guest.status !== 'missed');
+  const start = selectedDashboardStartDate;
+  const end = selectedDashboardEndDate;
+  const rangeDays = Math.round((Date.parse(end + 'T00:00:00Z') - Date.parse(start + 'T00:00:00Z')) / 86400000) + 1;
+  const guests = state.guests.filter(guest => guest.day >= start && guest.day <= end && guest.status !== 'missed').sort((a, b) => b.created - a.created);
+  const previousStart = shiftDateKey(start, -rangeDays);
+  const yesterday = state.guests.filter(guest => guest.day >= previousStart && guest.day < start && guest.status !== 'missed');
   const total = guests.length;
   const difference = total - yesterday.length;
   const trend = yesterday.length ? (difference > 0 ? '+' : '') + Math.round((difference / yesterday.length) * 100) + '%' : (total ? 'Data awal' : '0%');
@@ -38,13 +41,13 @@ function renderOperationalDetail() {
   const packTotal = guests.reduce((sum, guest) => sum + Number(guest.pack || 0), 0);
   const averageWait = operationalAverageWait(guests);
   const seatedTotal = guests.filter(guest => ['seated', 'done'].includes(guest.status)).length;
-  const dateLabel = fmtDate(day);
+  const dateLabel = start === end ? fmtDate(start) : fmtDate(start) + ' – ' + fmtDate(end);
   const html = [
-    '<div class="operational-head"><div><h2>Detail Operasional</h2><p>Hari ini · ' + esc(dateLabel) + '</p></div><button class="close operational-close" type="button" data-app-action="closeSheet" aria-label="Tutup detail">×</button></div>',
+    '<div class="operational-head"><div><h2>Detail Operasional</h2><p>' + esc(dateLabel) + '</p></div><button class="close operational-close" type="button" data-app-action="closeSheet" aria-label="Tutup detail">×</button></div>',
     '<section class="operational-summary"><div class="operational-summary-main"><span>Total tamu</span><strong>' + total + '</strong><small class="' + (difference >= 0 ? 'trend-up' : 'trend-down') + '">' + (difference > 0 ? '↑ ' : difference < 0 ? '↓ ' : '') + esc(trend) + '<span>' + esc(trendCopy) + '</span></small></div>',
     '<div class="operational-summary-meta"><div><span class="summary-icon">♧</span><span>Total pack</span><b>' + packTotal + '</b></div><div><span class="summary-icon">◷</span><span>Rata-rata tunggu</span><b>' + esc(averageWait) + '</b></div><div><span class="summary-icon">✓</span><span>Tamu sudah duduk</span><b>' + seatedTotal + '</b></div></div></section>',
     '<section class="operational-chart-card"><div class="operational-section-head"><h3>Tren kunjungan</h3><div class="chart-toggle" role="group" aria-label="Mode grafik"><button type="button" class="' + (operationalChartMode === 'hour' ? 'active' : '') + '" data-app-action="setOperationalChartMode" data-app-value="hour">Jam</button><button type="button" class="' + (operationalChartMode === 'pack' ? 'active' : '') + '" data-app-action="setOperationalChartMode" data-app-value="pack">Pack</button></div></div><div id="operationalChart" class="operational-chart"></div></section>',
-    '<section class="operational-guests"><div class="operational-section-head operational-list-head"><div><h3>Daftar tamu hari ini</h3><small>' + total + ' tamu terdaftar</small></div><span class="operational-list-total">' + total + '</span></div>',
+    '<section class="operational-guests"><div class="operational-section-head operational-list-head"><div><h3>Daftar tamu</h3><small>' + total + ' tamu terdaftar</small></div><span class="operational-list-total">' + total + '</span></div>',
     '<div class="operational-list-tools"><label class="operational-search"><span>⌕</span><input id="operationalSearch" type="search" placeholder="Cari nama atau nomor antrean..." data-app-input-action="renderOperationalGuestList"></label><div class="operational-filter-wrap"><button type="button" id="operationalFilterTrigger" class="operational-filter-trigger" aria-haspopup="listbox" aria-expanded="false" data-app-action="toggleOperationalFilterMenu"><span id="operationalFilterLabel">Semua</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div id="operationalFilterMenu" class="operational-filter-menu" role="listbox" aria-label="Filter status tamu" hidden><button type="button" role="option" aria-selected="true" data-filter="all" data-app-action="setOperationalStatusFilter" data-app-value="all">Semua</button><button type="button" role="option" aria-selected="false" data-filter="waiting" data-app-action="setOperationalStatusFilter" data-app-value="waiting">Menunggu</button><button type="button" role="option" aria-selected="false" data-filter="called" data-app-action="setOperationalStatusFilter" data-app-value="called">Dipanggil</button><button type="button" role="option" aria-selected="false" data-filter="seated" data-app-action="setOperationalStatusFilter" data-app-value="seated">Duduk</button><button type="button" role="option" aria-selected="false" data-filter="done" data-app-action="setOperationalStatusFilter" data-app-value="done">Selesai</button><button type="button" role="option" aria-selected="false" data-filter="cancelled" data-app-action="setOperationalStatusFilter" data-app-value="cancelled">Batal</button></div></div></div>',
     '<div id="operationalGuestList" class="operational-guest-list"></div></section>',
     '<button class="operational-all-button" type="button" data-app-action="closeSheetThenGoWaiting">Lihat semua tamu (' + total + ') <span>→</span></button>'
@@ -55,7 +58,7 @@ function renderOperationalDetail() {
 }
 function setOperationalChartMode(mode) {
   operationalChartMode = mode;
-  const guests = state.guests.filter(guest => guest.day === todayKey() && guest.status !== 'missed');
+  const guests = state.guests.filter(guest => guest.day >= selectedDashboardStartDate && guest.day <= selectedDashboardEndDate && guest.status !== 'missed');
   document.querySelectorAll('.chart-toggle button').forEach(button => button.classList.toggle('active', button.textContent.trim().toLowerCase() === (mode === 'hour' ? 'jam' : 'pack')));
   renderOperationalChart(guests);
 }
@@ -124,7 +127,7 @@ function renderOperationalGuestList() {
   const element = $('operationalGuestList');
   if (!element) return;
   const query = ($('operationalSearch')?.value || '').trim().toLowerCase();
-  const guests = state.guests.filter(guest => guest.day === todayKey() && guest.status !== 'missed')
+  const guests = state.guests.filter(guest => guest.day >= selectedDashboardStartDate && guest.day <= selectedDashboardEndDate && guest.status !== 'missed')
     .filter(guest => operationalStatusFilter === 'all' || guest.status === operationalStatusFilter)
     .filter(guest => {
       const reservation = reservationIdentity(guest);
