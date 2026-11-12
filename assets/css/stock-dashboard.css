@@ -80,3 +80,29 @@
 @media(prefers-reduced-motion:reduce) { #page-stock-dashboard .sd-card { transition:none; } }
 
 .sd-dialog .sd-item-link { margin:0; padding:6px 0; min-height:44px; border:0; border-radius:0; background:transparent; text-align:left; font-size:14px; color:var(--ui-olive); text-decoration:underline; text-underline-offset:4px; }
+
+.sd-sales-dialog { width:min(940px,calc(100vw - 32px)); box-shadow:0 12px 32px rgba(24,37,31,.12); }
+.sd-sales-dialog .sd-dialog-body { padding-top:20px; }
+.sd-sales-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; padding:16px; margin-bottom:12px; border:1px solid var(--ui-line); border-radius:var(--ui-radius-control); background:var(--ui-surface-soft); }
+.sd-sales-summary > span { display:grid; gap:5px; min-width:0; }
+.sd-sales-summary small { color:var(--ui-muted); font-size:12px; }
+.sd-sales-summary b { font-size:clamp(16px,2vw,21px); font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.sd-sales-dialog .sd-detail-list > .sd-detail-row { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,2fr); gap:4px 16px; padding:16px 0; }
+.sd-sales-dialog .sd-item-name { font-size:15px; color:var(--ui-ink); }
+.sd-sales-dialog .sd-detail-list > .sd-detail-row > .sd-metrics { grid-template-columns:.8fr 1.3fr 1fr; margin:0; gap:8px; }
+.sd-sales-dialog .sd-detail-list > .sd-detail-row > .sd-metrics small { font-size:11px; }
+.sd-sales-dialog .sd-detail-list > .sd-detail-row > .sd-metrics b { font-size:14px; }
+.sd-sales-dialog .sd-detail-list > .sd-detail-row > .sd-note,
+.sd-sales-dialog .sd-detail-list > .sd-detail-row > details { grid-column:1/-1; margin:0; }
+.sd-sales-dialog .sd-detail-row summary { display:list-item; padding:5px 0; color:var(--ui-olive); }
+.sd-sales-dialog .sd-detail-row details > .sd-detail-list { padding:0 12px; background:var(--ui-surface-soft); border-radius:var(--ui-radius-control); }
+.sd-sales-dialog details .sd-detail-row .sd-item-name { font-size:12px; font-weight:600; }
+@media(max-width:600px) {
+  .sd-sales-dialog .sd-dialog-body { padding-top:12px; }
+  .sd-sales-summary { grid-template-columns:.65fr 1.45fr 1fr; gap:6px; padding:10px; }
+  .sd-sales-summary b { font-size:14px; }
+  .sd-sales-dialog .sd-detail-list > .sd-detail-row { grid-template-columns:1fr; gap:10px; }
+  .sd-sales-dialog .sd-detail-list > .sd-detail-row > .sd-metrics { grid-template-columns:.7fr 1.3fr 1fr; }
+  .sd-sales-dialog .sd-detail-list > .sd-detail-row > .sd-note,
+  .sd-sales-dialog .sd-detail-list > .sd-detail-row > details { grid-column:1; }
+}
