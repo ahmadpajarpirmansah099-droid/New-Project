@@ -1547,25 +1547,66 @@ body:not(:has(#page-dashboard.active)) .workspace-scope-switcher {
     height: 46px;
   }
 }
+@keyframes mascot-bob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.02); }
+}
+
+@keyframes mascot-wiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-7deg) scale(1.04); }
+  55% { transform: rotate(6deg) scale(1.04); }
+  80% { transform: rotate(-2deg) scale(1); }
+}
+
+@keyframes mascot-poke {
+  0% { transform: scale(1, 1); }
+  30% { transform: scale(1.15, .84); }
+  55% { transform: scale(.93, 1.12); }
+  75% { transform: scale(1.06, .95); }
+  100% { transform: scale(1, 1); }
+}
+
 @media (min-width: 900px) {
   .sidebar-mascot {
     position: fixed;
-    left: 19px;
+    left: 14px;
     bottom: 122px;
-    width: 40px;
+    width: 48px;
     height: 34px;
     display: block;
     overflow: hidden;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
     background: var(--bg);
+    transform-origin: 50% 100%;
+    transform: translate3d(0, var(--mascot-lift, 0px), 0) rotate(var(--mascot-tilt, 0deg));
+    transition: transform .2s ease;
   }
   .sidebar-mascot img {
     position: absolute;
-    left: -24px;
+    left: -19px;
     top: -25px;
     width: 86px;
     height: 86px;
     max-width: none;
     mix-blend-mode: multiply;
+    transform-origin: 50% 88%;
+    animation: mascot-bob 5s ease-in-out infinite;
+  }
+  .sidebar-mascot:hover img {
+    animation: mascot-wiggle .55s ease-in-out;
+  }
+  .sidebar-mascot.is-poked img {
+    animation: mascot-poke .55s cubic-bezier(.3, .9, .4, 1.2);
+  }
+}
+
+@media (min-width: 900px) and (prefers-reduced-motion: reduce) {
+  .sidebar-mascot,
+  .sidebar-mascot img {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 }
