@@ -104,9 +104,10 @@ test('production with two WIPs and multiple material postings allocates each cos
   data.state.documents=[doc('production','2026-11-05',[{...item,qty:-2},{...wip,qty:1},{...item,qty:-3},{...supply,qty:-1},{...other,qty:2}],{lines:[{key:wip.key,qty:1},{key:other.key,qty:2}]})];
   const r=report(data);assert.equal(r.totals.production,2050);assert.equal(r.production.find(row=>row.key===wip.key).value,20);assert.equal(r.production.find(row=>row.key===other.key).value,2030);
 });
-test('zero-value receipts are hidden and empty state has complete chart dates',()=>{
-  const data=fixture();data.state.documents=[doc('receipt','2026-11-02',[{...item,qty:10,price:0}])];
-  const r=report(data);assert.equal(r.receipts.length,0);assert.equal(r.days.length,30);
+test('zero-value receipts and expenses are hidden and empty state has complete chart dates',()=>{
+  const data=fixture();data.state.documents=[doc('receipt','2026-11-02',[{...item,qty:10,price:0}]),doc('expense','2026-11-03',[{...item,qty:-10,price:0}],{category:'QC'})];
+  const r=report(data);assert.equal(r.receipts.length,0);assert.equal(r.expenses.length,0);assert.equal(r.days.length,30);
+  assert.equal(r.totals.receipt,0);assert.equal(r.totals.expense,0);
   assert.equal(report({state:{periods:[],documents:[]},catalog:[]}).monthly.available,false);
 });
 
@@ -118,3 +119,4 @@ test('a closed prior period without next opening does not invent current month s
   const data=fixture();close(data);const r=report(data,'2026-12-01','2026-12-31');assert.equal(r.monthly.available,false);
   assert.equal(model.validRange('2026-13-01','2026-13-02'),false);
 });
+

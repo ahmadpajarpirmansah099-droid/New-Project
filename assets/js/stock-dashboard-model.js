@@ -165,7 +165,7 @@
     const bounds = monthBounds(start);
     return {start, end, bounds, days, sales: sorted(sales), production: sorted(production),
       receipts: sorted(receipts).filter(row => row.value !== 0),
-      expenses: sorted(expenses).map(row => ({...row, items: sorted(row.items)})), supplies: sorted(supplies),
+      expenses: sorted(expenses).filter(row => row.value !== 0).map(row => ({...row, items: sorted(row.items)})), supplies: sorted(supplies),
       monthly: monthlyStock(data, bounds, documents, periods, current), missingSales, rangeSales,
       totals: {sales: sum([...sales.values()], 'sales'), units: sum([...sales.values()], 'qty'),
         production: sum([...production.values()], 'value'), receipt: sum([...receipts.values()], 'value'),
@@ -173,3 +173,4 @@
   }
   root.StockDashboardModel = {build, validRange, monthBounds};
 })(typeof window === 'undefined' ? globalThis : window);
+

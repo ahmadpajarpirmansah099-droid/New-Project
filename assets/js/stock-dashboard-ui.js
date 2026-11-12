@@ -3,12 +3,12 @@
   const model = root.StockDashboardModel;
   const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[char]));
   const number = value => Number(value).toLocaleString('id-ID', {maximumFractionDigits: 3});
-  const money = (value, signed = false) => value == null ? '—' : (value < 0 ? '−' : signed && value > 0 ? '+' : '') + 'Rp' + Math.abs(value).toLocaleString('id-ID', {maximumFractionDigits: 0});
-  const quantity = (value, unit = '', signed = false) => value == null ? '—' : (signed && value > 0 ? '+' : '') + number(value) + ' ' + escape(unit);
+  const money = (value, signed = false) => value == null ? 'â€”' : (value < 0 ? 'âˆ’' : signed && value > 0 ? '+' : '') + 'Rp' + Math.abs(value).toLocaleString('id-ID', {maximumFractionDigits: 0});
+  const quantity = (value, unit = '', signed = false) => value == null ? 'â€”' : (signed && value > 0 ? '+' : '') + number(value) + ' ' + escape(unit);
   const today = () => new Intl.DateTimeFormat('en-CA', {timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date());
   const dateLabel = value => new Intl.DateTimeFormat('id-ID', {day: 'numeric', month: 'short', year: 'numeric'}).format(new Date(value + 'T12:00:00'));
   const monthLabel = value => new Intl.DateTimeFormat('id-ID', {month: 'long', year: 'numeric'}).format(new Date(value + 'T12:00:00'));
-  const rangeLabel = (start, end) => start === end ? dateLabel(start) : dateLabel(start) + ' – ' + dateLabel(end);
+  const rangeLabel = (start, end) => start === end ? dateLabel(start) : dateLabel(start) + ' â€“ ' + dateLabel(end);
   const calendarIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4m8-4v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>';
   const series = [
     {key:'sales', name:'Total Sales', color:'#56751d', dash:[]},
@@ -31,7 +31,7 @@
   }
   function header() {
     const context = root.AppAuth?.getContext();
-    const scope = [context?.workspaceName, context?.activeDivisionName].filter(Boolean).join(' · ');
+    const scope = [context?.workspaceName, context?.activeDivisionName].filter(Boolean).join(' Â· ');
     return `<header class="sd-head"><div><h1>Dashboard Stock Opname</h1><p>${escape(scope)}</p></div><div class="sd-actions"><button type="button" data-sd="transactions">Transaksi</button><button type="button" data-sd="calendar" class="sd-icon-button" aria-label="Pilih periode dashboard">${calendarIcon}</button></div></header><div class="sd-period"><span>${escape(rangeLabel(range.start, range.end))}</span><button type="button" data-sd="refresh">Muat ulang</button></div>`;
   }
   async function show() {
@@ -39,7 +39,7 @@
     range = range || model.monthBounds(today());
     const token = ++generation;
     observer?.disconnect(); closeDialog(); report = null; snapshot = null;
-    page().innerHTML = header() + '<p class="sd-status" role="status">Memuat dashboard…</p>';
+    page().innerHTML = header() + '<p class="sd-status" role="status">Memuat dashboardâ€¦</p>';
     try {
       const data = await root.StockOpnameService.readDashboard();
       if (token !== generation) return;
@@ -55,7 +55,7 @@
     const totals = report.totals;
     const cards = Object.keys(titles).map(key => {
       const value = key === 'variance' ? (report.monthly.complete ? report.monthly.total : null) : key === 'sales' && report.sales.length && !report.sales.some(row => row.salesKnown) ? null : totals[key];
-      const meta = key === 'sales' ? number(totals.units) + ' menu terjual' : key === 'variance' ? monthLabel(range.start) + (report.monthly.closed ? ' · Akhir bulan' : ' · Sementara') : 'Lihat rincian';
+      const meta = key === 'sales' ? number(totals.units) + ' menu terjual' : key === 'variance' ? monthLabel(range.start) + (report.monthly.closed ? ' Â· Akhir bulan' : ' Â· Sementara') : 'Lihat rincian';
       return `<button type="button" class="sd-card sd-card-${key}" data-sd-card="${key}"><span>${titles[key]}</span><strong>${money(value, key === 'variance' || key === 'supplies')}</strong><small>${escape(meta)}</small></button>`;
     }).join('');
     const notes = [];
@@ -95,13 +95,14 @@
           (item.missingSales || item.missingHpp ? '<p class="sd-note">Harga tersimpan belum lengkap.</p>' : '') +
           `<details><summary>Catatan penjualan</summary>${list(item.details.map(line => row(rangeLabel(line.start, line.end), metric('Terjual', quantity(line.qty)) + metric('Omzet', money(line.sales)) + metric('HPP', money(line.hpp)))))}</details>`)));
     }
-    if (key === 'production') content = list(report.production.map(item => row(item.name, metric('Transaksi', number(item.transactions)) + metric('Batch', number(item.batches)) + metric('Biaya produksi', money(item.value)))));
-    if (key === 'receipt') content = list(report.receipts.map((item, index) => `<li class="sd-detail-row"><button type="button" class="sd-item-link" data-sd-drill="${index}">${escape(item.name)}</button><div class="sd-metrics">${metric('Jumlah', quantity(item.qty, item.unit)) + metric('Nilai', money(item.value))}</div></li>`));
-    if (key === 'expense') content = list(report.expenses.map((item, index) => row(item.name, metric('Total', money(item.value)), `<button type="button" data-sd-drill="${index}">Detail</button>`)));
-    if (key === 'supplies') content = list(report.supplies.map(item => row(item.name, metric('Selisih', quantity(item.qty, item.unit, true)) + metric('Nilai selisih', money(item.value, true)))));
+    if (key === 'production') content = (report.production.length ? `<div class="sd-production-summary">${metric('Total biaya produksi', money(report.totals.production))}</div>` : '') +
+      list(report.production.map(item => row(item.name, metric('Transaksi', number(item.transactions)) + metric('Batch', number(item.batches)) + metric('Biaya produksi', money(item.value)))));
+    if (key === 'receipt') content = (report.receipts.length ? `<div class="sd-ledger-summary">${metric('Total biaya barang masuk', money(report.totals.receipt))}</div>` : '') + list(report.receipts.map((item, index) => `<li class="sd-detail-row"><button type="button" class="sd-item-link" data-sd-drill="${index}">${escape(item.name)}</button><div class="sd-metrics">${metric('Jumlah', quantity(item.qty, item.unit)) + metric('Nilai', money(item.value))}</div></li>`));
+    if (key === 'expense') content = (report.expenses.length ? `<div class="sd-ledger-summary">${metric('Total pengeluaran', money(report.totals.expense))}</div>` : '') + list(report.expenses.map((item, index) => row(item.name, metric('Total', money(item.value)), `<button type="button" class="sd-detail-action" data-sd-drill="${index}" aria-label="Detail ${escape(item.name)}">Detail</button>`)));
+    if (key === 'supplies') content = (report.supplies.length ? `<div class="sd-ledger-summary">${metric('Total nilai selisih', money(report.totals.supplies, true))}</div>` : '') + list(report.supplies.map(item => row(item.name, metric('Selisih', quantity(item.qty, item.unit, true)) + metric('Nilai selisih', money(item.value, true)))));
     if (key === 'variance') {
       const monthly = report.monthly;
-      content = `<p class="sd-note">${escape(monthLabel(range.start))} · ${monthly.closed ? 'Opname akhir bulan' : 'Stok sistem sementara'}</p>`;
+      content = (monthly.complete ? `<div class="sd-ledger-summary">${metric('Total nilai selisih', money(monthly.total, true))}</div>` : '') + `<p class="sd-note">${escape(monthLabel(range.start))} Â· ${monthly.closed ? 'Opname akhir bulan' : 'Stok sistem sementara'}</p>`;
       if (monthly.openingDate > report.bounds.start) content += `<p class="sd-note">Stok awal tersedia mulai ${escape(dateLabel(monthly.openingDate))}.</p>`;
       if (!monthly.available) content += '<p class="sd-status">Stok awal bulan ini belum tersedia.</p>';
       else content += list(monthly.rows.map(item => row(item.name + (item.kind === 'wip' ? ' (WIP)' : ''),
@@ -109,6 +110,8 @@
     }
     const current = openDialog(titles[key], content);
     if (key === 'sales') current.classList.add('sd-sales-dialog');
+    if (key === 'production') current.classList.add('sd-production-dialog');
+    if (['receipt', 'expense', 'supplies', 'variance'].includes(key)) current.classList.add('sd-ledger-dialog', `sd-ledger-${key}`);
     current.addEventListener('click', event => {
       const target = event.target.closest('[data-sd-drill]');
       if (!target) return;
@@ -127,7 +130,7 @@
   function calendar() {
     if (!range) return;
     let month = range.start.slice(0, 7), start = range.start, end = range.end, selectingEnd = false;
-    const current = openDialog('Pilih periode', '<div class="sd-calendar-nav"><button type="button" data-sd-month="-1" aria-label="Bulan sebelumnya">‹</button><strong></strong><button type="button" data-sd-month="1" aria-label="Bulan berikutnya">›</button></div><div class="sd-calendar-grid"></div><p class="sd-calendar-selected" aria-live="polite"></p><div class="sd-calendar-actions"><button type="button" data-sd-full>Seluruh bulan</button><button type="button" class="sd-primary" data-sd-apply>Terapkan</button></div>');
+    const current = openDialog('Pilih periode', '<div class="sd-calendar-nav"><button type="button" data-sd-month="-1" aria-label="Bulan sebelumnya">â€¹</button><strong></strong><button type="button" data-sd-month="1" aria-label="Bulan berikutnya">â€º</button></div><div class="sd-calendar-grid"></div><p class="sd-calendar-selected" aria-live="polite"></p><div class="sd-calendar-actions"><button type="button" data-sd-full>Seluruh bulan</button><button type="button" class="sd-primary" data-sd-apply>Terapkan</button></div>');
     current.classList.add('sd-calendar');
     function draw() {
       const bounds = model.monthBounds(month + '-01');
@@ -222,3 +225,4 @@
   });
   root.StockDashboardUI = {show, reset};
 })(window);
+
