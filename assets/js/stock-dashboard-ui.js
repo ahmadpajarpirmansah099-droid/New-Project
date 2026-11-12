@@ -86,10 +86,15 @@
   function details(key) {
     if (!report) return;
     let content = '';
-    if (key === 'sales') content = list(report.sales.map(item => row(item.name,
-      metric('Terjual', quantity(item.qty)) + metric('Omzet', money(item.salesKnown ? item.sales : null)) + metric('HPP', money(item.hppKnown ? item.hpp : null)),
-      (item.missingSales || item.missingHpp ? '<p class="sd-note">Harga tersimpan belum lengkap.</p>' : '') +
-      `<details><summary>Catatan penjualan</summary>${list(item.details.map(line => row(rangeLabel(line.start, line.end), metric('Terjual', quantity(line.qty)) + metric('Omzet', money(line.sales)) + metric('HPP', money(line.hpp)))))}</details>`)));
+    if (key === 'sales') {
+      const totalHpp = report.sales.length > 0 && report.sales.every(item => !item.missingHpp)
+        ? report.sales.reduce((sum, item) => sum + item.hpp, 0) : null;
+      content = (report.sales.length ? `<div class="sd-sales-summary">${metric('Terjual', quantity(report.totals.units)) + metric('Omzet', money(report.sales.some(item => item.salesKnown) ? report.totals.sales : null)) + metric('HPP', money(totalHpp))}</div>` : '') +
+        list(report.sales.map(item => row(item.name,
+          metric('Terjual', quantity(item.qty)) + metric('Omzet', money(item.salesKnown ? item.sales : null)) + metric('HPP', money(item.hppKnown ? item.hpp : null)),
+          (item.missingSales || item.missingHpp ? '<p class="sd-note">Harga tersimpan belum lengkap.</p>' : '') +
+          `<details><summary>Catatan penjualan</summary>${list(item.details.map(line => row(rangeLabel(line.start, line.end), metric('Terjual', quantity(line.qty)) + metric('Omzet', money(line.sales)) + metric('HPP', money(line.hpp)))))}</details>`)));
+    }
     if (key === 'production') content = list(report.production.map(item => row(item.name, metric('Transaksi', number(item.transactions)) + metric('Batch', number(item.batches)) + metric('Biaya produksi', money(item.value)))));
     if (key === 'receipt') content = list(report.receipts.map((item, index) => `<li class="sd-detail-row"><button type="button" class="sd-item-link" data-sd-drill="${index}">${escape(item.name)}</button><div class="sd-metrics">${metric('Jumlah', quantity(item.qty, item.unit)) + metric('Nilai', money(item.value))}</div></li>`));
     if (key === 'expense') content = list(report.expenses.map((item, index) => row(item.name, metric('Total', money(item.value)), `<button type="button" data-sd-drill="${index}">Detail</button>`)));
@@ -103,6 +108,7 @@
         metric('Stok sistem', quantity(item.system, item.unit)) + (monthly.closed ? metric('Fisik akhir', quantity(item.physical, item.unit)) + metric('Selisih', quantity(item.variance, item.unit, true)) + metric('Nilai selisih', money(item.value, true)) : ''))));
     }
     const current = openDialog(titles[key], content);
+    if (key === 'sales') current.classList.add('sd-sales-dialog');
     current.addEventListener('click', event => {
       const target = event.target.closest('[data-sd-drill]');
       if (!target) return;
