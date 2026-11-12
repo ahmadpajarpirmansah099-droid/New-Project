@@ -17,6 +17,7 @@
     {key:'expense', name:'Total Pengeluaran', color:'#b54860', dash:[8,3,2,3]},
     {key:'production', name:'Total Biaya Produksi', color:'#21867b', dash:[10,4]}
   ];
+  const chartValue = value => Math.abs(value);
   const titles = {sales:'Total Sales', production:'Total Biaya Produksi', receipt:'Barang Masuk', expense:'Pengeluaran', supplies:'Pengeluaran Suplies', variance:'Selisih semua barang'};
   const page = () => document.getElementById('page-stock-dashboard');
   let range = null, report = null, snapshot = null, generation = 0, observer = null, dialog = null;
@@ -157,7 +158,7 @@
   function chartDetail(index) {
     const day = report?.days[index], node = document.getElementById('sdChartDetail');
     if (!day || !node) return;
-    node.innerHTML = `<strong>${escape(dateLabel(day.date))}</strong><div>${series.map(line => metric(line.name, money(day[line.key], line.key === 'expense'))).join('')}</div>`;
+    node.innerHTML = `<strong>${escape(dateLabel(day.date))}</strong><div>${series.map(line => metric(line.name, money(chartValue(day[line.key]), line.key === 'expense'))).join('')}</div>`;
   }
   function drawChart() {
     const canvas = document.getElementById('sdChart'); if (!canvas || !report) return;
@@ -166,8 +167,8 @@
     canvas.width = width * scale; canvas.height = height * scale;
     const context = canvas.getContext('2d'); context.scale(scale, scale);
     const left = 60, right = width - 16, top = 14, bottom = height - 30;
-    const values = report.days.flatMap(day => series.map(line => day[line.key]));
-    const min = Math.min(0, ...values), max = Math.max(1, ...values), span = max - min;
+    const values = report.days.flatMap(day => series.map(line => chartValue(day[line.key])));
+    const min = 0, max = Math.max(1, ...values), span = max;
     const x = index => report.days.length === 1 ? (left + right) / 2 : left + index * (right - left) / (report.days.length - 1);
     const y = value => bottom - (value - min) / span * (bottom - top);
     context.font = '11px sans-serif'; context.textAlign = 'right';
@@ -182,9 +183,9 @@
     }
     for (const line of series) {
       context.strokeStyle = line.color; context.fillStyle = line.color; context.lineWidth = 2; context.setLineDash(line.dash); context.beginPath();
-      report.days.forEach((day, i) => { if (i) context.lineTo(x(i), y(day[line.key])); else context.moveTo(x(i), y(day[line.key])); });
+      report.days.forEach((day, i) => { if (i) context.lineTo(x(i), y(chartValue(day[line.key]))); else context.moveTo(x(i), y(chartValue(day[line.key]))); });
       context.stroke(); context.setLineDash([]);
-      report.days.forEach((day, i) => { context.beginPath(); context.arc(x(i), y(day[line.key]), 2.5, 0, Math.PI * 2); context.fill(); });
+      report.days.forEach((day, i) => { context.beginPath(); context.arc(x(i), y(chartValue(day[line.key])), 2.5, 0, Math.PI * 2); context.fill(); });
     }
     let selected = report.days.length - 1;
     canvas.onpointermove = event => {
