@@ -22,8 +22,10 @@
 .sd-chart-panel { margin-top:24px; padding:24px; background:var(--ui-surface); border:1px solid var(--ui-line); border-radius:var(--ui-radius-card); box-shadow:var(--ui-shadow-card); min-width:0; }
 .sd-chart-panel h2 { margin:0 0 16px; font:800 18px var(--ui-heading-font); }
 .sd-legend { list-style:none; padding:0; margin:0 0 20px; display:flex; flex-wrap:wrap; gap:10px 20px; font-size:12px; }
-.sd-legend li { display:flex; align-items:center; gap:7px; }
-.sd-legend span { display:block; width:18px; height:3px; background:var(--sd-series); }
+.sd-legend li { display:flex; }
+#page-stock-dashboard .sd-series-toggle { display:flex; align-items:center; gap:7px; min-height:36px; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+#page-stock-dashboard .sd-series-toggle[aria-pressed="false"] { color:var(--ui-muted); opacity:.65; background:transparent; }
+.sd-series-toggle span { display:block; width:18px; height:3px; background:var(--sd-series); flex-shrink:0; }
 .sd-chart-wrap { min-width:0; width:100%; height:270px; }
 #sdChart { width:100%; height:270px; display:block; }
 .sd-chart-detail { padding-top:16px; border-top:1px solid var(--ui-line); font-size:12px; }

@@ -17,6 +17,8 @@
     {key:'expense', name:'Total Pengeluaran', color:'#b54860', dash:[8,3,2,3]},
     {key:'production', name:'Total Biaya Produksi', color:'#21867b', dash:[10,4]}
   ];
+  const chartValue = value => Math.abs(value);
+  let activeSeries = new Set(series.map(line => line.key));
   const titles = {sales:'Total Sales', production:'Total Biaya Produksi', receipt:'Barang Masuk', expense:'Pengeluaran', supplies:'Pengeluaran Suplies', variance:'Selisih semua barang'};
   const page = () => document.getElementById('page-stock-dashboard');
   let range = null, report = null, snapshot = null, generation = 0, observer = null, dialog = null;
@@ -24,6 +26,7 @@
   function reset() {
     generation++; observer?.disconnect(); observer = null; closeDialog();
     range = null; report = null; snapshot = null;
+    activeSeries = new Set(series.map(line => line.key));
     if (page()) page().innerHTML = '';
   }
   function header() {
@@ -58,7 +61,7 @@
     const notes = [];
     if (report.rangeSales) notes.push('Sales gabungan ditampilkan pada tanggal akhir catatan. Rentang asal tersedia di rincian Sales.');
     if (report.missingSales) notes.push('Sebagian harga Sales belum tersedia. Total memakai angka yang tersimpan.');
-    page().innerHTML = header() + `<div class="sd-cards">${cards}</div><section class="sd-chart-panel" aria-label="Grafik transaksi dalam rupiah"><h2>Transaksi harian</h2><ul class="sd-legend">${series.map(line => `<li><span style="--sd-series:${line.color}"></span>${line.name}</li>`).join('')}</ul><div class="sd-chart-wrap"><canvas id="sdChart" tabindex="0" role="img" aria-label="Grafik lima garis dalam rupiah. Gunakan panah kiri dan kanan untuk melihat rincian tanggal."></canvas></div><div id="sdChartDetail" class="sd-chart-detail" aria-live="polite"></div>${notes.map(note => `<p class="sd-note">${note}</p>`).join('')}</section>`;
+    page().innerHTML = header() + `<div class="sd-cards">${cards}</div><section class="sd-chart-panel" aria-label="Grafik transaksi dalam rupiah"><h2>Transaksi harian</h2><ul class="sd-legend">${series.map(line => `<li><button type="button" class="sd-series-toggle" data-sd-series="${line.key}" aria-pressed="${activeSeries.has(line.key)}"><span style="--sd-series:${line.color}"></span>${line.name}</button></li>`).join('')}</ul><div class="sd-chart-wrap"><canvas id="sdChart" tabindex="0" role="img" aria-label="Grafik transaksi dalam rupiah. Pilih garis di atas, gunakan panah kiri dan kanan untuk melihat rincian tanggal."></canvas></div><div id="sdChartDetail" class="sd-chart-detail" aria-live="polite"></div>${notes.map(note => `<p class="sd-note">${note}</p>`).join('')}</section>`;
     drawChart();
     observer = new ResizeObserver(drawChart);
     observer.observe(page().querySelector('.sd-chart-wrap'));
@@ -157,7 +160,7 @@
   function chartDetail(index) {
     const day = report?.days[index], node = document.getElementById('sdChartDetail');
     if (!day || !node) return;
-    node.innerHTML = `<strong>${escape(dateLabel(day.date))}</strong><div>${series.map(line => metric(line.name, money(day[line.key], line.key === 'expense'))).join('')}</div>`;
+    node.innerHTML = `<strong>${escape(dateLabel(day.date))}</strong><div>${series.filter(line => activeSeries.has(line.key)).map(line => metric(line.name, money(chartValue(day[line.key]), line.key === 'expense'))).join('')}</div>`;
   }
   function drawChart() {
     const canvas = document.getElementById('sdChart'); if (!canvas || !report) return;
@@ -166,8 +169,9 @@
     canvas.width = width * scale; canvas.height = height * scale;
     const context = canvas.getContext('2d'); context.scale(scale, scale);
     const left = 60, right = width - 16, top = 14, bottom = height - 30;
-    const values = report.days.flatMap(day => series.map(line => day[line.key]));
-    const min = Math.min(0, ...values), max = Math.max(1, ...values), span = max - min;
+    const visible = series.filter(line => activeSeries.has(line.key));
+    const values = report.days.flatMap(day => visible.map(line => chartValue(day[line.key])));
+    const min = 0, max = Math.max(1, ...values), span = max;
     const x = index => report.days.length === 1 ? (left + right) / 2 : left + index * (right - left) / (report.days.length - 1);
     const y = value => bottom - (value - min) / span * (bottom - top);
     context.font = '11px sans-serif'; context.textAlign = 'right';
@@ -180,11 +184,11 @@
     for (let i = 0; i < report.days.length; i++) {
       if (i % Math.max(1, Math.ceil(report.days.length / 6)) === 0 || i === report.days.length - 1) context.fillText(String(Number(report.days[i].date.slice(8))), x(i), height - 9);
     }
-    for (const line of series) {
+    for (const line of visible) {
       context.strokeStyle = line.color; context.fillStyle = line.color; context.lineWidth = 2; context.setLineDash(line.dash); context.beginPath();
-      report.days.forEach((day, i) => { if (i) context.lineTo(x(i), y(day[line.key])); else context.moveTo(x(i), y(day[line.key])); });
+      report.days.forEach((day, i) => { if (i) context.lineTo(x(i), y(chartValue(day[line.key]))); else context.moveTo(x(i), y(chartValue(day[line.key]))); });
       context.stroke(); context.setLineDash([]);
-      report.days.forEach((day, i) => { context.beginPath(); context.arc(x(i), y(day[line.key]), 2.5, 0, Math.PI * 2); context.fill(); });
+      report.days.forEach((day, i) => { context.beginPath(); context.arc(x(i), y(chartValue(day[line.key])), 2.5, 0, Math.PI * 2); context.fill(); });
     }
     let selected = report.days.length - 1;
     canvas.onpointermove = event => {
@@ -194,6 +198,15 @@
     chartDetail(selected);
   }
   document.addEventListener('click', event => {
+    const toggle = event.target.closest('[data-sd-series]');
+    if (toggle && page()?.contains(toggle)) {
+      const key = toggle.dataset.sdSeries;
+      if (!series.some(line => line.key === key) || (activeSeries.has(key) && activeSeries.size === 1)) return;
+      if (activeSeries.has(key)) activeSeries.delete(key); else activeSeries.add(key);
+      toggle.setAttribute('aria-pressed', String(activeSeries.has(key)));
+      drawChart();
+      return;
+    }
     const target = event.target.closest('[data-sd], [data-sd-card]'); if (!target) return;
     if (target.dataset.sdCard) details(target.dataset.sdCard);
     if (target.dataset.sd === 'calendar') calendar();
