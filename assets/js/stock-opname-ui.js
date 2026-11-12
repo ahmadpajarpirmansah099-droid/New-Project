@@ -25,7 +25,7 @@
   const n=document.getElementById('soDraftStatus');if(n)n.textContent=draftStatus();
   return draftSaved;
  }
- function reset(){activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];receiptQuery='';busy=false;draftSaved=false;historyKind='close';historyLimit=10;service.reset();}
+ function reset(){root.StockDashboardUI?.reset();activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];receiptQuery='';busy=false;draftSaved=false;historyKind='close';historyLimit=10;service.reset();}
  async function initialize(client,context){activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];receiptQuery='';draftSaved=false;historyKind='close';historyLimit=10;await service.initialize(client,context);navigation();}
  function navigation(){const n=document.querySelector('[data-page="stock-opname"]');if(n)n.style.display=service.available()?'':'none';}
  function button(label,action,extra='',primary=false){return '<button type="button" data-so-action="'+action+'" '+extra+' class="'+(primary?'so-primary':'')+'" '+(busy?'disabled':'')+'>'+e(label)+'</button>';}
@@ -376,7 +376,7 @@
  function render(){
   if(!page())return;const d=get();
   if(!d){page().innerHTML='<p class="so-notice">Stock Opname belum siap.</p>';return;}
-  if(d.developer){page().innerHTML='<div class="so-head"><h1>Stock Opname</h1></div><section class="so-panel"><h2>Aktivasi divisi</h2><p>Atur akses untuk outlet dan divisi yang sedang dipilih. Transaksi dikerjakan admin divisi.</p><p>Status: '+(d.enabled?'Aktif':'Nonaktif')+'</p>'+button(d.enabled?'Nonaktifkan akses':'Aktifkan akses','configure','',true)+'</section>';return;}
+  if(d.developer){page().innerHTML=(d.enabled?'<button type="button" data-sd="open">Dashboard Stock Opname</button>':'')+'<div class="so-head"><h1>Stock Opname</h1></div><section class="so-panel"><h2>Aktivasi divisi</h2><p>Atur akses untuk outlet dan divisi yang sedang dipilih. Transaksi dikerjakan admin divisi.</p><p>Status: '+(d.enabled?'Aktif':'Nonaktif')+'</p>'+button(d.enabled?'Nonaktifkan akses':'Aktifkan akses','configure','',true)+'</section>';return;}
   if(!d.state){page().innerHTML='<p class="so-notice">Stock Opname belum tersedia untuk akun/divisi ini.</p>';return;}
   if(staleOpeningDraft(form)){service.clearDraft('initial');form=null;draftSaved=false;notice='Draft Stock Awal lama diabaikan setelah reset. Isi ulang manual.';}
   if(staleCorrectionDraft(form)){service.clearDraft('close');form=null;draftSaved=false;notice='Koreksi opname sudah dibatalkan. Form koreksi lama ditutup.';}
@@ -392,7 +392,7 @@
   const status=p?periodStatus[p.status]||p.status:'Isi Stock Awal untuk memulai';
   page().innerHTML=`<header class="so-head">
    <div><h1>Stock Opname</h1>${scope?`<p>${e(scope)}</p>`:''}</div>
-   ${button('Muat Ulang','refresh')}
+   <div class="so-actions"><button type="button" data-sd="open">Dashboard</button>${button('Muat Ulang','refresh')}</div>
   </header>
   <section class="so-overview" aria-label="Periode stok" data-so-period-status="${e(p?.status||'')}">
    <div class="so-period-copy">${p?`<span>Periode mulai ${e(dateLabel(p.start))}</span>`:''}<strong>${e(status)}</strong></div>

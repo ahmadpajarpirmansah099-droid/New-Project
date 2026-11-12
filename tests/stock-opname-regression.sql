@@ -38,6 +38,8 @@ begin
  exception when others then if sqlerrm not like 'Transaksi sudah dibatalkan%' then raise;end if;end;
  if public.stock_opname_read(d) is distinct from before_source or public.stock_opname_read(t) is distinct from before_target or exists(select 1 from public.stock_opname_requests where request_id=req) then raise exception 'Rejected adjustment changed stock or request history';end if;
 
+ -- New transactions follow the activated period's next-day opening.
+ tx_day:=v->'state'->'periods'->-1->>'start';
  -- An invalid destination must reject the entire operation before either stock changes.
  req:=gen_random_uuid();
  begin

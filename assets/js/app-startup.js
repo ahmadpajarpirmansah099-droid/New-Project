@@ -131,7 +131,7 @@ async function initializeWorkspace(event, switchingContext) {
       state=remoteState; syncSeatingSettingInput();
       const requestedPage = workspaceReturnPage;
       workspaceReturnPage = null;
-      const requestedPageExists = requestedPage && $('page-' + requestedPage) && (requestedPage !== 'stock-opname' || window.StockOpnameService?.available());
+      const requestedPageExists = requestedPage && $('page-' + requestedPage) && (requestedPage !== 'stock-opname' || window.StockOpnameService?.available()) && (requestedPage !== 'stock-dashboard' || window.StockOpnameService?.dashboardAvailable());
       const guestPageUnavailable = GUEST_OPERATION_PAGES.includes(requestedPage) && !canAccessGuestOperations();
       const divisionsOverviewUnavailable = requestedPage === 'all-divisions' && authContext.divisionMode !== 'all';
       const targetPage = requestedPageExists && !guestPageUnavailable && !divisionsOverviewUnavailable
@@ -144,7 +144,7 @@ async function initializeWorkspace(event, switchingContext) {
       if(!isCurrent()) return;
       const requestedPage = workspaceReturnPage;
       workspaceReturnPage = null;
-      const requestedPageExists = requestedPage && $('page-' + requestedPage) && (requestedPage !== 'stock-opname' || window.StockOpnameService?.available());
+      const requestedPageExists = requestedPage && $('page-' + requestedPage) && (requestedPage !== 'stock-opname' || window.StockOpnameService?.available()) && (requestedPage !== 'stock-dashboard' || window.StockOpnameService?.dashboardAvailable());
       const guestPageUnavailable = GUEST_OPERATION_PAGES.includes(requestedPage);
       const divisionsOverviewUnavailable = requestedPage === 'all-divisions' && authContext.divisionMode !== 'all';
       const targetPage = requestedPageExists && !guestPageUnavailable && !divisionsOverviewUnavailable
