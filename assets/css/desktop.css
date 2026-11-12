@@ -1493,9 +1493,10 @@ body:not(:has(#page-dashboard.active)) .workspace-scope-switcher {
   }
 }
 
-/* Add Guest opens as a centered desktop dialog instead of a bottom sheet. */
+/* Guest forms and details open as centered desktop dialogs. */
 @media (min-width: 900px) {
-  #sheet:has(#guestName) {
+  #sheet:has(#guestName),
+  #sheet:has(.detail-ticket) {
     top: 50%;
     bottom: auto;
     width: min(640px, calc(100vw - 48px));
@@ -1509,18 +1510,24 @@ body:not(:has(#page-dashboard.active)) .workspace-scope-switcher {
     transition: opacity .2s ease, transform .2s ease, visibility .2s;
   }
 
-  #sheet:has(#guestName).show {
+  #sheet:has(#guestName).show,
+  #sheet:has(.detail-ticket).show {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
   }
 
-  #sheet:has(#guestName) .sheet-handle-row {
+  #sheet:has(#guestName) .sheet-handle-row,
+  #sheet:has(.detail-ticket) .sheet-handle-row {
     display: none !important;
+  }
+
+  body:has(#sheet.show .detail-ticket) #backdrop {
+    background: rgba(36, 42, 50, .46);
   }
 }
 
 @media (min-width: 900px) and (prefers-reduced-motion: reduce) {
-  #sheet:has(#guestName) { transition: none; }
+  #sheet:has(#guestName), #sheet:has(.detail-ticket) { transition: none; }
 }
