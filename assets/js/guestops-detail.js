@@ -79,7 +79,7 @@ function openDetail(id) {
   const timeline = renderGuestAuditTimeline(guest.audit || []);
 
   openSheet(
-    '<div class="sheet-head"><h2>Detail tamu</h2><button class="close" data-app-action="closeSheet">✕</button></div>' +
+    '<div class="sheet-head"><h2>Detail tamu</h2><button class="close" data-app-action="closeSheet" aria-label="Tutup detail tamu">✕</button></div>' +
     ticketPanel +
     '<div class="detail-name">' + esc(guest.name) + '</div>' +
     '<div class="detail-grid">' +
