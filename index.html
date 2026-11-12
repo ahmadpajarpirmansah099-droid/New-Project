@@ -50,30 +50,12 @@
     </div>
   </div>
   <button class="desktop-sidebar-toggle" id="desktopSidebarToggle" type="button" aria-label="Buka sidebar" aria-expanded="false" title="Buka sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-  <div class="workspace-scope-switcher" id="workspaceScopeSwitcher" hidden aria-label="Pemilihan outlet dan divisi">
-    <div class="scope-field">
-      <span>OUTLET</span>
-      <button class="scope-trigger" id="workspaceOutletTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
-        <span id="workspaceOutletValue">Memuat outlet</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      <div class="scope-dropdown-menu" id="workspaceOutletMenu" role="listbox" aria-label="Pilihan outlet" hidden></div>
-    </div>
-    <div class="scope-field">
-      <span>DIVISI</span>
-      <button class="scope-trigger" id="workspaceDivisionTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
-        <span id="workspaceDivisionValue">Memuat divisi</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      <div class="scope-dropdown-menu" id="workspaceDivisionMenu" role="listbox" aria-label="Pilihan divisi" hidden></div>
-    </div>
-  </div>
   <div class="top-actions"><div class="date desktop-queue-date" id="desktopQueueDate" aria-hidden="true">Hari ini</div><button class="profile" id="authProfileButton" type="button" aria-label="Keluar dari akun" title="Keluar dari akun">AP</button><button class="auth-logout-button" id="authLogoutButton" type="button" aria-label="Keluar" title="Keluar dari akun"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg></button><button class="menu-toggle" id="menuToggle" type="button" data-action="toggleMenu" aria-label="Buka menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
 </header>
 <main class="content">
   <section class="page active" id="page-dashboard">
-    <div class="greeting"><div><div class="eyebrow">Admin</div><h1>Selamat datang.</h1></div><div class="greeting-dates"><div class="date" id="dateLabel">Hari ini</div></div></div>
-    <div class="hero hero-detail-trigger" role="button" tabindex="0" aria-label="Buka detail operasional hari ini" data-action="openOperationalDetail" data-keydown-action="openOperationalDetail"><div class="hero-head"><span class="hero-label">Total tamu pada tanggal dipilih</span><span class="hero-action" aria-hidden="true">↗</span></div><div class="hero-total" id="totalCount">0</div><div class="hero-foot"><span><b id="packCount">0</b> total pack</span><span><b id="avgWait">—</b> rata-rata tunggu</span></div></div>
+    <div class="greeting"><div><div class="eyebrow">Admin</div><h1>Selamat datang.</h1></div><div class="greeting-dates"><label class="dashboard-date-field"><span>Dari</span><input type="date" id="dashboardStartDate" data-dashboard-date aria-label="Tanggal awal"></label><span class="dashboard-date-separator" aria-hidden="true">–</span><label class="dashboard-date-field"><span>Sampai</span><input type="date" id="dashboardEndDate" data-dashboard-date aria-label="Tanggal akhir"></label><small>Maks. 1 bulan</small></div></div>
+    <div class="hero hero-detail-trigger" role="button" tabindex="0" aria-label="Buka detail operasional pada rentang tanggal dipilih" data-action="openOperationalDetail" data-keydown-action="openOperationalDetail"><div class="hero-head"><span class="hero-label">Total tamu pada rentang dipilih</span><span class="hero-action" aria-hidden="true">↗</span></div><div class="hero-total" id="totalCount">0</div><div class="hero-foot"><span><b id="packCount">0</b> total pack</span><span><b id="avgWait">—</b> rata-rata tunggu</span></div></div>
     <div class="metrics">
       <div class="metric"><div class="metric-top"><span class="eyebrow">Menunggu</span><span class="metric-icon i-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div><strong id="waitingCount">0</strong><small>Antrean aktif</small></div>
       <div class="metric"><div class="metric-top"><span class="eyebrow">Selesai</span><span class="metric-icon i-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg></span></div><strong id="doneCount">0</strong><small>Kunjungan selesai</small></div>
@@ -81,7 +63,10 @@
     </div>
     
     <div id="pendingWrap"></div>
-    <div class="section-head"><h2>Antrean aktif</h2><button class="text-btn" data-action="go" data-action-args='["waiting"]'>Lihat semua →</button></div>
+    <div class="section-head"><h2>Antrean aktif</h2><div class="queue-head-actions"><div class="workspace-scope-switcher" id="workspaceScopeSwitcher" hidden aria-label="Pemilihan outlet dan divisi">
+      <div class="scope-field"><span>OUTLET</span><button class="scope-trigger" id="workspaceOutletTrigger" type="button" aria-haspopup="listbox" aria-expanded="false"><span id="workspaceOutletValue">Memuat outlet</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="scope-dropdown-menu" id="workspaceOutletMenu" role="listbox" aria-label="Pilihan outlet" hidden></div></div>
+      <div class="scope-field"><span>DIVISI</span><button class="scope-trigger" id="workspaceDivisionTrigger" type="button" aria-haspopup="listbox" aria-expanded="false"><span id="workspaceDivisionValue">Memuat divisi</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="scope-dropdown-menu" id="workspaceDivisionMenu" role="listbox" aria-label="Pilihan divisi" hidden></div></div>
+    </div><button class="text-btn" data-action="go" data-action-args='["waiting"]'>Lihat semua →</button></div></div>
     <div class="queue-list" id="dashboardList"></div>
     <section class="dashboard-reservations" aria-label="Kalender reservasi">
       <div class="dashboard-reservations-head">

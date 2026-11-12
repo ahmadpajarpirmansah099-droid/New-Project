@@ -152,19 +152,53 @@ function setDashboardCounter(id,targetValue,animate=false){
   element.textContent='0';
   requestAnimationFrame(step);
 }
+function dashboardDateLimit(start) {
+  const [year, month, day] = start.split('-').map(Number);
+  const nextMonth = new Date(Date.UTC(year, month, 1));
+  const lastDay = new Date(Date.UTC(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth() + 1, 0)).getUTCDate();
+  const limit = new Date(Date.UTC(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth(), Math.min(day, lastDay)));
+  return [limit.toISOString().slice(0, 10), todayKey()].sort()[0];
+}
+function renderDashboardDateInputs() {
+  const startInput = $('dashboardStartDate');
+  const endInput = $('dashboardEndDate');
+  if (!startInput || !endInput) return;
+  startInput.max = todayKey();
+  startInput.value = selectedDashboardStartDate;
+  endInput.min = selectedDashboardStartDate;
+  endInput.max = dashboardDateLimit(selectedDashboardStartDate);
+  endInput.value = selectedDashboardEndDate;
+}
+document.addEventListener('change', event => {
+  if (!event.target.matches('[data-dashboard-date]')) return;
+  const today = todayKey();
+  if (event.target.id === 'dashboardStartDate') {
+    selectedDashboardStartDate = event.target.value || today;
+    if (selectedDashboardStartDate > today) selectedDashboardStartDate = today;
+    if (selectedDashboardEndDate < selectedDashboardStartDate || selectedDashboardEndDate > dashboardDateLimit(selectedDashboardStartDate)) {
+      selectedDashboardEndDate = dashboardDateLimit(selectedDashboardStartDate);
+    }
+  } else {
+    selectedDashboardEndDate = event.target.value || selectedDashboardStartDate;
+    selectedDashboardEndDate = [selectedDashboardEndDate, dashboardDateLimit(selectedDashboardStartDate)].sort()[0];
+    if (selectedDashboardEndDate < selectedDashboardStartDate) selectedDashboardEndDate = selectedDashboardStartDate;
+  }
+  renderDashboardDateInputs();
+  renderAll();
+});
 function renderAll() {
   const dashboardDateText = historyDateLabel(selectedOperationalDate, {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
   });
-  $('dateLabel').textContent = dashboardDateText;
   const desktopQueueDate = document.getElementById('desktopQueueDate');
   if (desktopQueueDate) desktopQueueDate.textContent = dashboardDateText;
   updateOperationalDateLabels();
 
   if ($('page-dashboard')?.classList.contains('active')) {
-    const todayGuests = state.guests.filter(guest => guest.day === selectedOperationalDate && guest.status !== 'missed');
+    renderDashboardDateInputs();
+    const todayGuests = state.guests.filter(guest => guest.day >= selectedDashboardStartDate && guest.day <= selectedDashboardEndDate && guest.status !== 'missed');
     const waitingGuests = todayGuests.filter(guest => ['waiting', 'called'].includes(guest.status));
     const doneGuests = todayGuests.filter(guest => guest.status === 'done');
     const cancelledGuests = todayGuests.filter(guest => guest.status === 'cancelled');
@@ -190,7 +224,7 @@ function renderAll() {
       : '—';
 
     const pendingGuests = state.guests.filter(
-      guest => guest.day !== selectedOperationalDate && ['waiting', 'called'].includes(guest.status)
+      guest => guest.day < selectedDashboardStartDate && ['waiting', 'called'].includes(guest.status)
     );
 
     $('pendingWrap').innerHTML = pendingGuests.length

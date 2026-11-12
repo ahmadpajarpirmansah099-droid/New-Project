@@ -1415,35 +1415,6 @@
     overflow: visible;
   }
 
-  body:has(.page.active) .workspace-scope-switcher {
-    position: absolute;
-    z-index: 82;
-    top: 32px;
-    left: clamp(300px, 20vw, 370px);
-    display: flex;
-    align-items: stretch;
-    width: clamp(290px, 23vw, 410px);
-    margin: 0;
-    gap: 12px;
-    box-sizing: border-box;
-  }
-
-  body:has(.page.active) .workspace-scope-switcher .scope-field {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-
-  body:has(.page.active) .workspace-scope-switcher .scope-trigger {
-    box-sizing: border-box;
-    width: 100%;
-    min-width: 0;
-    max-width: none;
-  }
-
-  body:has(.page.active) .workspace-scope-switcher[hidden] {
-    display: none !important;
-  }
-
   body.desktop-sidebar-collapsed:has(.page.active) .drawer-head {
     display: none;
   }
@@ -1490,13 +1461,6 @@
   body.desktop-sidebar-collapsed:has(.page.active) .drawer-guide-icon svg {
     width: 20px;
     height: 20px;
-  }
-}
-
-@media (min-width: 1280px) and (max-width: 1449px) {
-  body:has(.page.active) .workspace-scope-switcher {
-    left: clamp(320px, 23vw, 345px);
-    width: clamp(270px, 21vw, 310px);
   }
 }
 

@@ -295,6 +295,83 @@ button, input, select, textarea { font-family: var(--ui-font); }
   .md-item-card, .wip-card, .menu-card { padding: 20px; }
 }
 
+/* Dashboard date range and workspace controls. */
+#page-dashboard > .greeting .greeting-dates {
+  display: flex;
+  align-items: end;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+#page-dashboard .dashboard-date-field {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+#page-dashboard .dashboard-date-field input {
+  width: 145px;
+  min-width: 0;
+  height: 40px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+}
+#page-dashboard .greeting-dates > small {
+  padding-bottom: 11px;
+  color: var(--muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+#page-dashboard .dashboard-date-separator { padding-bottom: 10px; color: var(--muted); }
+#page-dashboard > .section-head .queue-head-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 0;
+  margin-left: auto;
+}
+#page-dashboard .queue-head-actions .workspace-scope-switcher {
+  flex: 0 1 330px;
+  width: 330px;
+  margin: 0;
+  gap: 8px;
+}
+#page-dashboard .queue-head-actions .workspace-scope-switcher .scope-field { flex: 1 1 0; }
+#page-dashboard .queue-head-actions .scope-trigger { width: 100%; min-width: 0; }
+
+@media (min-width: 900px) {
+  #page-dashboard > .greeting .greeting-dates { display: flex; }
+}
+@media (min-width: 900px) and (max-width: 1279px) {
+  #page-dashboard > .greeting { flex-wrap: wrap; gap: 8px; }
+  #page-dashboard > .greeting .greeting-dates { flex: 1 1 100%; justify-content: flex-start; }
+  #page-dashboard > .section-head { flex-wrap: wrap; row-gap: 8px; }
+  #page-dashboard > .section-head .queue-head-actions { flex: 1 1 100%; justify-content: flex-start; margin-left: 0; }
+  #page-dashboard .queue-head-actions .workspace-scope-switcher { flex: 1 1 auto; width: auto; }
+  #page-dashboard .queue-head-actions .workspace-scope-switcher { order: 0; }
+}
+@media (max-width: 899px) {
+  #page-dashboard > .greeting { flex-wrap: wrap; gap: 10px; }
+  #page-dashboard > .greeting .greeting-dates { flex: 1 1 100%; justify-content: flex-start; }
+  #page-dashboard > .section-head { flex-wrap: wrap; row-gap: 10px; }
+  #page-dashboard > .section-head .queue-head-actions { flex: 1 1 100%; justify-content: space-between; margin-left: 0; }
+  #page-dashboard .queue-head-actions .workspace-scope-switcher { flex: 1 1 auto; width: auto; order: 0; }
+}
+@media (max-width: 420px) {
+  #page-dashboard > .greeting .greeting-dates { gap: 6px; }
+  #page-dashboard .dashboard-date-field { flex: 1 1 0; min-width: 0; }
+  #page-dashboard .dashboard-date-field input { width: 100%; padding: 0 5px; font-size: 11px; }
+  #page-dashboard .greeting-dates > small { font-size: 9px; }
+  #page-dashboard .queue-head-actions .workspace-scope-switcher { gap: 6px; }
+  #page-dashboard .queue-head-actions .scope-trigger { padding-right: 8px; padding-left: 8px; font-size: 12px; }
+}
+
 /* Mobile: wrap controls instead of shrinking text to 8px. */
 @media (max-width: 899px) {
   .content { padding-left: 20px; padding-right: 20px; }
