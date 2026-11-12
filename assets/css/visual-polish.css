@@ -439,7 +439,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 @media (max-width: 420px) {
   #page-dashboard > .greeting .greeting-dates { gap: 6px; }
   #page-dashboard .dashboard-date-trigger { width: min(100%, 210px); gap: 12px; font-size: 15px; }
-  #page-dashboard .dashboard-date-trigger svg { width: 14px; height: 14px; }
+  #page-dashboard .dashboard-date-icon { width: 28px; height: 28px; }
   #page-dashboard .greeting-dates > small { font-size: 9px; }
   #page-dashboard .queue-head-actions .workspace-scope-switcher { gap: 6px; }
   #page-dashboard .queue-head-actions .scope-trigger { padding-right: 8px; padding-left: 8px; font-size: 12px; }
