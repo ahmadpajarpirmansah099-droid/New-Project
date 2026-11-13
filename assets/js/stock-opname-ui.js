@@ -308,9 +308,9 @@
    }else lines=materials.map(row).join('');
    return historyDate(date,entries,`
     <div class="so-date-materials">${lines||'<p class="so-sales-unavailable">Tidak ada transaksi aktif pada tanggal ini.</p>'}</div>
-    <details class="so-date-original-transactions"><summary>Transaksi asli (${number(entries.length)})</summary>
+    ${expense?`<details class="so-date-original-transactions"><summary>Transaksi asli (${number(entries.length)})</summary>
      <ul class="so-history so-history-nested">${entries.map(doc=>historyDocument(doc,p,true)).join('')}</ul>
-    </details>
+    </details>`:''}
    `,'transaksi',index===0);
   }).join('');
  }
