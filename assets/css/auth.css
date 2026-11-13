@@ -11,8 +11,17 @@ body.auth-ready .auth-screen{display:none}
 .auth-intro{margin-bottom:27px}
 .auth-eyebrow{color:#898878;font-size:9px;font-weight:800;letter-spacing:.17em}
 .auth-intro h1{margin:10px 0 8px;color:#17172a;font:800 clamp(25px,6vw,31px)/1.15 Manrope,sans-serif;letter-spacing:-.045em}
+.auth-screen .auth-intro{margin-bottom:18px}
+.auth-screen .auth-title{display:flex;align-items:center;gap:.12em;margin:0}
+.auth-mascot{position:relative;display:block;width:1.48em;height:1.1em;flex:0 0 1.48em;overflow:hidden;padding:0;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;transform-origin:50% 100%;transform:translate3d(0,var(--mascot-lift,0px),0) rotate(var(--mascot-tilt,0deg));transition:transform .2s ease}
+.auth-mascot img{position:absolute;left:-.77em;top:-.94em;width:2.77em;height:2.77em;max-width:none;mix-blend-mode:multiply;transform-origin:50% 88%;animation:mascot-bob 5s ease-in-out infinite}
+.auth-mascot:hover img{animation:mascot-wiggle .55s ease-in-out}
+.auth-mascot.is-poked img{animation:mascot-poke .55s cubic-bezier(.3,.9,.4,1.2)}
+.auth-mascot:focus-visible{outline:2px solid var(--ui-olive,#777b61);outline-offset:2px;border-radius:5px}
 .auth-intro p{max-width:310px;margin:0;color:#85848d;font-size:13px;line-height:1.65}
 .auth-form{display:grid;gap:10px}
+.auth-screen .auth-form{gap:9px}
+.auth-screen .auth-password-label{margin-top:4px}
 .auth-form label{color:#343342;font-size:11px;font-weight:700}
 .auth-input-wrap{display:flex;align-items:center;gap:11px;min-height:51px;padding:0 14px;border:1px solid #e9e8e2;border-radius:12px;background:#fff;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
 .auth-input-wrap:focus-within{border-color:#77758d;box-shadow:0 0 0 3px rgba(70,68,95,.08);transform:translateY(-1px)}
@@ -37,7 +46,7 @@ body.auth-ready .auth-screen{display:none}
 .auth-logout-button svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 @keyframes auth-panel-enter{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:480px){.auth-screen{padding:18px 16px 48px}.auth-panel{padding:27px 23px 23px;border-radius:21px}.auth-intro{margin-bottom:23px}}
-@media(prefers-reduced-motion:reduce){.auth-screen,.auth-panel,.auth-input-wrap,.auth-submit{animation:none;transition:none}}
+@media(prefers-reduced-motion:reduce){.auth-screen,.auth-panel,.auth-input-wrap,.auth-submit,.auth-mascot,.auth-mascot img{animation:none!important;transition:none!important;transform:none!important}}
 
 /* LOGIN POLISH — soft depth and restrained motion */
 .auth-panel {
