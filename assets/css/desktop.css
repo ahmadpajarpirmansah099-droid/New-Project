@@ -1464,11 +1464,6 @@
   }
 }
 
-/* Outlet and division selectors are available on the dashboard only. */
-body:not(:has(#page-dashboard.active)) .workspace-scope-switcher {
-  display: none !important;
-}
-
 /* Desktop icon rail: navigation order and a compact card under every icon. */
 @media (min-width: 900px) {
   .drawer-nav > .drawer-item[data-page="dashboard"] { order: 1; }
