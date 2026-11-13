@@ -1603,7 +1603,8 @@
     overflow: hidden;
     pointer-events: auto;
     cursor: pointer;
-    background: var(--bg);
+    background: transparent;
+    mix-blend-mode: multiply;
     transform-origin: 50% 100%;
     transform: translate3d(0, var(--mascot-lift, 0px), 0) rotate(var(--mascot-tilt, 0deg));
     transition: transform .2s ease;
@@ -1622,7 +1623,6 @@
     width: 86px;
     height: 86px;
     max-width: none;
-    mix-blend-mode: multiply;
   }
   .sidebar-mascot__eyes {
     position: absolute;
