@@ -196,8 +196,10 @@
    if(form.category==='Move'&&k==='expense')html+='<label><small>Barang tujuan</small>'+pickerButton(targetRows.find(t=>t.key===form.mapping[r.key])?.name||'Pilih padanan','data-so-map="'+e(r.key)+'" data-so-title="Pilih padanan barang"',[{value:'',label:'Pilih padanan'},...targetRows.filter(t=>!t.error&&t.unit===r.unit).map(t=>({value:t.key,label:t.name}))])+'</label>';
    html+='</td>'+(isCount?'<td class="so-desktop-only so-stock">'+(disabled?'—':number(b[r.key])+' '+e(r.unit))+'</td>':'')+'<td data-so-label="Jumlah"><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="qty" aria-label="'+e(labels[k]+' '+r.name)+'" value="'+e(v.qty??'')+'" '+(disabled?'disabled':'')+'></td>';
    if(withUnit){
-    const options=units.map(u=>'<option value="'+e(u.unit)+'" '+(u.unit===(v.unit||r.unit)?'selected':'')+'>'+e(u.unit)+'</option>').join('');
-    html+='<td data-so-label="Satuan"><select class="so-unit-select" data-so-key="'+e(r.key)+'" data-so-prop="unit" aria-label="Satuan '+e(r.name)+'" '+(disabled?'disabled':'')+'>'+options+'</select><span class="so-unit-picker">'+pickerButton(v.unit||r.unit,'data-so-key="'+e(r.key)+'" data-so-title="Pilih satuan" aria-label="Satuan '+e(r.name)+'" '+(disabled?'disabled':''),units.map(u=>({value:u.unit,label:u.unit})))+'</span></td>';
+    const current=v.unit||r.unit;
+    const options=units.map(u=>'<button type="button" data-so-action="unit-option" data-so-key="'+e(r.key)+'" data-so-value="'+e(u.unit)+'" aria-pressed="'+(u.unit===current)+'">'+e(u.unit)+'</button>').join('');
+    const desktop=disabled?'<button type="button" class="so-unit-disabled" disabled>'+e(current)+'</button>':'<details class="so-unit-dropdown" data-so-unit-key="'+e(r.key)+'"><summary aria-label="Satuan '+e(r.name)+'"><span>'+e(current)+'</span><span class="so-picker-chevron" aria-hidden="true"></span></summary><div class="so-unit-options">'+options+'</div></details>';
+    html+='<td data-so-label="Satuan">'+desktop+'<span class="so-unit-picker">'+pickerButton(current,'data-so-key="'+e(r.key)+'" data-so-title="Pilih satuan" aria-label="Satuan '+e(r.name)+'" '+(disabled?'disabled':''),units.map(u=>({value:u.unit,label:u.unit})))+'</span></td>';
    }
    if(isCount)html+='<td class="so-desktop-only so-conversion" data-so-conversion="'+e(r.key)+'">'+e(countConversion(r))+'</td>';
    if(receipt)html+='<td data-so-label="Total invoice"><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="invoice_total" aria-label="Total invoice '+e(r.name)+'" value="'+e(v.invoice_total??'')+'" placeholder="Opsional"></td>';
@@ -468,6 +470,7 @@
    if(name==='history-more'){historyLimit+=10;return;}
    if(name==='pick-date'){openDatePicker(el.dataset.soField);return;}
    if(name==='pick-choice'){openChoicePicker(el);return;}
+   if(name==='unit-option'&&form){const key=el.dataset.soKey,value=el.dataset.soValue,row=catalog().find(r=>r.key===key&&!r.error);if(row?.units?.some(u=>u.unit===value)){form.counts[key]={...form.counts[key],unit:value};form.touched=true;snapshot();}return;}
    if(name==='receipt-add'&&form?.kind==='receipt'){
     const key=el.dataset.soItemKey,row=catalog().find(r=>r.key===key&&r.key.startsWith('m:')&&!r.error);
     if(row&&!receiptItems().includes(key)){
@@ -511,9 +514,18 @@
     await service.write(name,{},crypto.randomUUID());notice=name==='reopen'?'Opname dibuka kembali. Koreksi transaksi atau stok fisik, lalu selesaikan ulang.':'Stock Awal dikonfirmasi. Draft transaksi dapat dipulihkan dan disimpan.';
    }
   }catch(error){if(token===viewGeneration)notice=error.message;}
-  finally{if(token===viewGeneration){busy=false;render();}}
+  finally{if(token===viewGeneration){busy=false;render();if(name==='unit-option')page()?.querySelectorAll?.('.so-unit-dropdown').forEach(node=>{if(node.dataset.soUnitKey===el.dataset.soKey)node.querySelector('summary')?.focus();});}}
  }
- document.addEventListener('click',ev=>{const el=ev.target.closest('[data-so-action]');if(el){ev.preventDefault();action(el.dataset.soAction,el);}});
+ document.addEventListener('click',ev=>{
+  const inside=ev.target.closest('.so-unit-dropdown');
+  page()?.querySelectorAll?.('.so-unit-dropdown[open]').forEach(node=>{if(node!==inside)node.open=false;});
+  const el=ev.target.closest('[data-so-action]');if(el){ev.preventDefault();action(el.dataset.soAction,el);}
+ });
+ document.addEventListener('keydown',ev=>{
+  if(ev.key!=='Escape')return;
+  const dropdown=ev.target.closest('.so-unit-dropdown[open]');
+  if(dropdown){ev.preventDefault();dropdown.open=false;dropdown.querySelector('summary')?.focus();}
+ });
  document.addEventListener('input',ev=>{
   const el=ev.target;if(!form||!page()?.contains(el))return;
   if(el.dataset.soReceiptSearch!==undefined&&form.kind==='receipt'){
@@ -525,7 +537,6 @@
   if(el.dataset.soKey){const key=el.dataset.soKey;form.counts[key]={...form.counts[key],[el.dataset.soProp]:el.value};if(form.kind==='production'){const row=catalog().find(x=>x.key===key);const output=el.closest('tr')?.querySelector('[data-so-output]');if(row&&output)output.textContent='Hasil: '+number(Number(el.value||0)*Number(row.yield))+' '+row.unit+' · 1 batch = '+number(row.yield)+' '+row.unit;}}
   else if(el.dataset.soMap)form.mapping[el.dataset.soMap]=el.value;
   else if(el.dataset.soField)form[el.dataset.soField]=el.value;
-  if(el.dataset.soProp==='unit'){const label=el.closest('td')?.querySelector('.so-unit-picker .so-picker-trigger span:first-child');if(label)label.textContent=el.value;}
   form.touched=true;
   if(el.dataset.soKey&&['initial','close'].includes(form.kind)){const row=catalog().find(r=>r.key===el.dataset.soKey),output=el.closest('tr')?.querySelector('[data-so-conversion]');if(row&&output)output.textContent=countConversion(row);}
   snapshot();
