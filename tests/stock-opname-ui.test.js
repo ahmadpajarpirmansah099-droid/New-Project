@@ -40,7 +40,7 @@ function runtime() {
         };
       }
     },
-    AppAuth: { getContext: () => ({}), getClient: () => ({}) },
+    AppAuth: { getContext: () => ({ activeDivisionId: 'division' }), getClient: () => ({}) },
     MasterDataStore: { initialize: async () => {} },
     StockOpnameService: {
       current: () => data,
@@ -67,6 +67,8 @@ function runtime() {
     ui: w.StockOpnameUI, data, writes, confirmations, page,
     searchResults,
     draft: kind => { const value = drafts[kind || letHolder.active]; return value && copy(value); },
+    setExcel(value) { w.StockExcel = value; },
+    async importFile(file) { await handlers.change({target:{dataset:{soExcelImport:''},files:[file],value:'file'}}); },
     confirm: value => allowConfirm = value,
     storageFails: value => storageFails = value,
     writeFails: value => writeFails = value,
@@ -488,4 +490,26 @@ test('desktop unit selection preserves quantity and submits selected unit', asyn
   assert.equal(t.draft('receipt').counts['m:a'].unit,'LITER');
   await t.click('submit');
   assert.equal(t.writes.at(-1).input.lines[0].unit,'LITER');
+});
+
+test('Excel import replaces draft only after approval and never writes a transaction', async () => {
+  const t=runtime(); await t.ui.open('sales');
+  t.input({soKey:'s:a',soProp:'qty'},'2');
+  t.setExcel({readFile:async()=>({'s:a':{qty:'9'}})});
+  t.confirm(false); await t.importFile({});
+  assert.equal(t.draft('sales').counts['s:a'].qty,'2');
+  t.confirm(true); await t.importFile({});
+  assert.equal(t.draft('sales').counts['s:a'].qty,'9');
+  assert.equal(t.writes.length,0);
+});
+
+test('Excel import preserves existing draft if validation or storage fails', async () => {
+  const t=runtime(); await t.ui.open('sales');
+  t.input({soKey:'s:a',soProp:'qty'},'2');
+  t.setExcel({readFile:async()=>{throw Error('File tidak cocok');}});
+  await t.importFile({}); assert.equal(t.draft('sales').counts['s:a'].qty,'2');
+  t.setExcel({readFile:async()=>({'s:a':{qty:'9'}})});
+  t.storageFails(true); await t.importFile({});
+  assert.equal(t.draft('sales').counts['s:a'].qty,'2');
+  assert.equal(t.writes.length,0);
 });
