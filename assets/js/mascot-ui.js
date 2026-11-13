@@ -13,8 +13,14 @@
     const img = mascot.querySelector('img');
     if (!img) return;
 
+    const isSidebarMascot = mascot.matches('.sidebar-mascot');
+    const eyes = isSidebarMascot ? mascot.querySelector('.sidebar-mascot__eyes') : null;
+    const animatedFace = mascot.querySelector('.sidebar-mascot__face') || img;
+    let blinkTimer = 0;
+    let blinkEndTimer = 0;
+
     function canAnimate() {
-      return (!mascot.matches('.sidebar-mascot') || desktop.matches) && !stillMotion.matches;
+      return (!isSidebarMascot || desktop.matches) && !stillMotion.matches;
     }
 
     function tiltTo(event) {
@@ -35,6 +41,68 @@
       mascot.style.removeProperty('--mascot-lift');
     }
 
+    function resetGaze() {
+      if (!eyes) return;
+      eyes.style.removeProperty('--gaze-x');
+      eyes.style.removeProperty('--gaze-y');
+    }
+
+    function moveEyesTowardPointer(event) {
+      if (!eyes || !canAnimate() || !finePointer.matches || document.hidden) {
+        resetGaze();
+        return;
+      }
+
+      const rect = mascot.getBoundingClientRect();
+      const deltaX = event.clientX - (rect.left + rect.width / 2);
+      const deltaY = event.clientY - (rect.top + rect.height / 2);
+      const distance = Math.hypot(deltaX, deltaY);
+      const glanceRange = 150;
+
+      if (distance < 1 || distance >= glanceRange) {
+        resetGaze();
+        return;
+      }
+
+      const strength = 1 - distance / glanceRange;
+      eyes.style.setProperty('--gaze-x', ((deltaX / distance) * 1.25 * strength).toFixed(2) + 'px');
+      eyes.style.setProperty('--gaze-y', ((deltaY / distance) * .8 * strength).toFixed(2) + 'px');
+    }
+
+    function stopBlinking() {
+      window.clearTimeout(blinkTimer);
+      window.clearTimeout(blinkEndTimer);
+      mascot.classList.remove('is-blinking');
+    }
+
+    function scheduleBlink() {
+      window.clearTimeout(blinkTimer);
+      if (!isSidebarMascot || !eyes || !canAnimate() || document.hidden) return;
+
+      blinkTimer = window.setTimeout(function () {
+        if (!canAnimate() || document.hidden) {
+          scheduleBlink();
+          return;
+        }
+
+        mascot.classList.add('is-blinking');
+        blinkEndTimer = window.setTimeout(function () {
+          mascot.classList.remove('is-blinking');
+          scheduleBlink();
+        }, 130);
+      }, 2800 + Math.random() * 4200);
+    }
+
+    function handleMotionPreferenceChange() {
+      if (canAnimate()) {
+        scheduleBlink();
+        return;
+      }
+      stopBlinking();
+      resetGaze();
+      resetTilt();
+    }
+
     function poke() {
       if (!canAnimate()) return;
       mascot.classList.remove('is-poked');
@@ -50,8 +118,36 @@
       mascot.classList.remove('is-poked');
     });
 
-    img.addEventListener('animationend', function (event) {
+    animatedFace.addEventListener('animationend', function (event) {
       if (event.animationName === POKE_ANIMATION) mascot.classList.remove('is-poked');
     });
+
+    if (isSidebarMascot && eyes) {
+      window.addEventListener('pointermove', moveEyesTowardPointer, { passive: true });
+      window.addEventListener('blur', resetGaze);
+      window.addEventListener('pointerout', function (event) {
+        if (!event.relatedTarget) resetGaze();
+      });
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) {
+          stopBlinking();
+          resetGaze();
+        } else {
+          scheduleBlink();
+        }
+      });
+
+      function listenForChange(mediaQuery) {
+        if (typeof mediaQuery.addEventListener === 'function') {
+          mediaQuery.addEventListener('change', handleMotionPreferenceChange);
+        } else if (typeof mediaQuery.addListener === 'function') {
+          mediaQuery.addListener(handleMotionPreferenceChange);
+        }
+      }
+
+      listenForChange(desktop);
+      listenForChange(stillMotion);
+      scheduleBlink();
+    }
   });
 })();

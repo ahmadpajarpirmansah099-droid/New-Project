@@ -1548,8 +1548,8 @@ body:not(:has(#page-dashboard.active)) .workspace-scope-switcher {
   }
 }
 @keyframes mascot-bob {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-2px) scale(1.02); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
 }
 
 @keyframes mascot-wiggle {
@@ -1583,7 +1583,14 @@ body:not(:has(#page-dashboard.active)) .workspace-scope-switcher {
     transform: translate3d(0, var(--mascot-lift, 0px), 0) rotate(var(--mascot-tilt, 0deg));
     transition: transform .2s ease;
   }
-  .sidebar-mascot img {
+  .sidebar-mascot__face {
+    position: absolute;
+    inset: 0;
+    display: block;
+    transform-origin: 50% 88%;
+    animation: mascot-bob 6s ease-in-out infinite;
+  }
+  .sidebar-mascot__body {
     position: absolute;
     left: -19px;
     top: -25px;
@@ -1591,20 +1598,49 @@ body:not(:has(#page-dashboard.active)) .workspace-scope-switcher {
     height: 86px;
     max-width: none;
     mix-blend-mode: multiply;
-    transform-origin: 50% 88%;
-    animation: mascot-bob 5s ease-in-out infinite;
   }
-  .sidebar-mascot:hover img {
+  .sidebar-mascot__eyes {
+    position: absolute;
+    left: 27.5px;
+    top: 11.3px;
+    width: 8.5px;
+    height: 9.6px;
+    transform: translate3d(var(--gaze-x, 0px), var(--gaze-y, 0px), 0) scaleY(var(--blink-scale, 1));
+    transform-origin: 50% 50%;
+    transition: transform .12s ease-out;
+  }
+  .sidebar-mascot__eye {
+    position: absolute;
+    top: 0;
+    width: 3.2px;
+    height: 9.6px;
+    border-radius: 999px;
+    background: #060643;
+  }
+  .sidebar-mascot__eye--left {
+    left: 0;
+    transform: rotate(9deg);
+  }
+  .sidebar-mascot__eye--right {
+    left: 5.3px;
+    transform: rotate(-9deg);
+  }
+  .sidebar-mascot.is-blinking .sidebar-mascot__eyes {
+    --blink-scale: .08;
+  }
+  .sidebar-mascot:hover .sidebar-mascot__face {
     animation: mascot-wiggle .55s ease-in-out;
   }
-  .sidebar-mascot.is-poked img {
+  .sidebar-mascot.is-poked .sidebar-mascot__face {
     animation: mascot-poke .55s cubic-bezier(.3, .9, .4, 1.2);
   }
 }
 
 @media (min-width: 900px) and (prefers-reduced-motion: reduce) {
   .sidebar-mascot,
-  .sidebar-mascot img {
+  .sidebar-mascot__face,
+  .sidebar-mascot__body,
+  .sidebar-mascot__eyes {
     animation: none !important;
     transition: none !important;
     transform: none !important;
