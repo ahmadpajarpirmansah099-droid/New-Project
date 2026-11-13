@@ -400,7 +400,7 @@
 .so-date-material-row small { display: block; color: var(--so-muted); font-size: 11px; }
 .so-date-material-row strong { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
 .so-date-material-category + .so-date-material-category { margin-top: 14px; }
-.so-date-material-category h4 { margin: 0; padding: 8px 10px; color: var(--ui-ink); background: var(--ui-lime-soft, #edf3d8); border-radius: 8px; font-size: 13px; font-weight: 800; }
+.so-date-material-category h4 { margin: 0; padding: 10px 12px; color: var(--ui-ink); background: var(--ui-lime, #d9ef91); border-left: 4px solid var(--ui-olive, #617b2c); border-radius: 8px; font-size: 14px; font-weight: 800; letter-spacing: .025em; text-transform: uppercase; }
 .so-date-original-transactions { margin: 0 8px; border-top: 1px solid var(--so-line); }
 .so-date-original-transactions > summary { color: var(--so-muted); font-size: 12px; }
 .so-date-original-transactions .so-history-nested { margin: 0; }
