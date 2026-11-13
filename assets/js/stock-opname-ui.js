@@ -323,17 +323,23 @@
     for(const row of doc.postings||[]){
      if(!String(row.key||'').startsWith('w:')||!(Number(row.qty)>0)||seen.has(row.key))continue;
      seen.add(row.key);
-     if(!items.has(row.key))items.set(row.key,{name:row.name||row.key,count:0});
-     items.get(row.key).count++;
+     if(!items.has(row.key))items.set(row.key,{name:row.name||row.key,transactions:[]});
+     const line=(doc.lines||[]).find(line=>line.key===row.key);
+     const batch=line&&Number(line.qty)>0?Number(line.qty):null;
+     items.get(row.key).transactions.push({doc,batch,qty:Number(row.qty),unit:String(row.unit||'')});
     }
    }
-   const rows=[...items.values()].sort((a,b)=>a.name.localeCompare(b.name,'id'))
-    .map(item=>`<div class="so-date-material-row"><span>${e(item.name)}</span><strong>${number(item.count)}x</strong></div>`).join('');
+   const rows=[...items.values()].sort((a,b)=>a.name.localeCompare(b.name,'id')).map(item=>{
+    const details=item.transactions.map((entry,i)=>{
+     const perBatch=entry.batch===null?'Hasil per batch tidak tersedia':'1 batch = '+number(entry.qty/entry.batch)+' '+entry.unit;
+     return `<div class="so-date-material-row"><span>Produksi ${number(i+1)}<small>${e(perBatch)}</small></span><strong>${number(entry.qty)} ${e(entry.unit)}</strong></div>${historyDocumentActions(entry.doc,p)}`;
+    }).join('');
+    const units=new Set(item.transactions.map(entry=>entry.unit));
+    const total=units.size===1?number(item.transactions.reduce((sum,entry)=>sum+entry.qty,0))+' '+e(item.transactions[0].unit):'';
+    return `<details class="so-sales-menu"><summary><span>${e(item.name)}${total?'<small> · Total hasil '+total+'</small>':''}</span><strong>${number(item.transactions.length)}x</strong></summary><div class="so-date-materials">${details}</div></details>`;
+   }).join('');
    return historyDate(date,entries,`
-    <div class="so-date-materials">${rows||'<p class="so-sales-unavailable">Tidak ada hasil produksi aktif yang tersedia pada tanggal ini.</p>'}</div>
-    <details class="so-date-original-transactions"><summary>Transaksi asli (${number(entries.length)})</summary>
-     <ul class="so-history so-history-nested">${entries.map(doc=>historyDocument(doc,p,true)).join('')}</ul>
-    </details>
+    <div class="so-date-materials so-sales-menu-list">${rows||'<p class="so-sales-unavailable">Tidak ada hasil produksi aktif yang tersedia pada tanggal ini.</p>'}</div>
    `,'transaksi',index===0);
   }).join('');
  }
