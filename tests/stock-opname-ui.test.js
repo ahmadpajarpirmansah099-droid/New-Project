@@ -261,7 +261,7 @@ test('history follows the selected feature without touching an unfinished local 
   assert.match(t.page.innerHTML, /100 ML/);
 });
 
-test('daily receipt history paginates complete dates and retains active-period edits', async () => {
+test('daily receipt history paginates complete dates without original transaction controls', async () => {
   const t = runtime();
   const receipt = (id, day, qty) => ({
     id, period_id: 'period', type: 'receipt', start: day, end: day,
@@ -276,13 +276,12 @@ test('daily receipt history paginates complete dates and retains active-period e
   assert.equal((html.match(/class="so-history-date"/g) || []).length, 10);
   assert.match(html, /class="so-history-date"><details open>/);
   assert.match(html, /Susu<\/span><strong>78 ML/);
-  assert.match(html, /Transaksi asli \(12\)/);
-  assert.match(html, /data-so-id="recent-0"/);
-  assert.doesNotMatch(html, /data-so-id="older-0"/);
+  assert.doesNotMatch(html, /Transaksi asli|data-so-action="(?:edit|void)"/);
+  assert.doesNotMatch(html, /1 November 2026<\/span>/);
   assert.match(html, /data-so-action="history-more"/);
   await t.click('history-more');
   assert.equal((t.page.innerHTML.match(/class="so-history-date"/g) || []).length, 11);
-  assert.match(t.page.innerHTML, /data-so-id="older-0"/);
+  assert.match(t.page.innerHTML, /1 November 2026<\/span>/);
   assert.doesNotMatch(t.page.innerHTML, /data-so-action="history-more"/);
 });
 
@@ -435,7 +434,7 @@ test('daily expense history sums materials and preserves original transaction co
  assert.match(html,/Dibatalkan/);
 });
 
-test('daily receipt history totals repeated materials by name and keeps original records',async()=>{
+test('daily receipt history totals repeated materials without original records',async()=>{
  const t=runtime();
  t.data.state.documents=[
   {id:'r1',period_id:'period',type:'receipt',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:100,unit:'ML'}]},
@@ -447,8 +446,7 @@ test('daily receipt history totals repeated materials by name and keeps original
  assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
  assert.match(html,/Susu<\/span><strong>150 ML/);
  assert.match(html,/Gula<\/span><strong>20 GR/);
- assert.equal((html.match(/Transaksi asli/g)||[]).length,1);
- assert.equal((html.match(/data-so-action="edit"/g)||[]).length,2);
+ assert.doesNotMatch(html,/Transaksi asli|data-so-action="(?:edit|void)"/);
 });
 
 test('daily expense history distinguishes inward adjustments from outward expenses',async()=>{
