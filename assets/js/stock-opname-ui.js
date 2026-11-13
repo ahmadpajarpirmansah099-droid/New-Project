@@ -314,6 +314,29 @@
    `,'transaksi',index===0);
   }).join('');
  }
+ function productionHistoryByDate(dates,p){
+  return dates.map(([date,entries],index)=>{
+   const items=new Map();
+   for(const doc of entries){
+    if(doc.void)continue;
+    const seen=new Set();
+    for(const row of doc.postings||[]){
+     if(!String(row.key||'').startsWith('w:')||!(Number(row.qty)>0)||seen.has(row.key))continue;
+     seen.add(row.key);
+     if(!items.has(row.key))items.set(row.key,{name:row.name||row.key,count:0});
+     items.get(row.key).count++;
+    }
+   }
+   const rows=[...items.values()].sort((a,b)=>a.name.localeCompare(b.name,'id'))
+    .map(item=>`<div class="so-date-material-row"><span>${e(item.name)}</span><strong>${number(item.count)}x</strong></div>`).join('');
+   return historyDate(date,entries,`
+    <div class="so-date-materials">${rows||'<p class="so-sales-unavailable">Tidak ada hasil produksi aktif yang tersedia pada tanggal ini.</p>'}</div>
+    <details class="so-date-original-transactions"><summary>Transaksi asli (${number(entries.length)})</summary>
+     <ul class="so-history so-history-nested">${entries.map(doc=>historyDocument(doc,p,true)).join('')}</ul>
+    </details>
+   `,'transaksi',index===0);
+  }).join('');
+ }
  function openingHistoryEntry(entry,periods){
   const rows=Object.entries(entry.opening).map(([key,qty])=>{
    const item=(entry.opening_catalog||[]).find(r=>r.key===key)||periods.flatMap(period=>period.result||[]).find(r=>r.key===key)||get().catalog.find(r=>r.key===key);
@@ -364,6 +387,10 @@
    const dates=historyDates(recent,doc=>doc.start);
    total=dates.length;
    list=materialHistoryByDate(dates.slice(0,historyLimit),p,historyKind==='expense');
+  }else if(historyKind==='production'){
+   const dates=historyDates(recent,doc=>doc.start);
+   total=dates.length;
+   list=productionHistoryByDate(dates.slice(0,historyLimit),p);
   }else list=groupedHistory(recent.slice(0,historyLimit),doc=>doc.start,doc=>historyDocument(doc,p));
 
   const tabs=kinds.map(kind=>`<button type="button" data-so-action="history-tab" data-so-kind="${kind}" aria-pressed="${kind===historyKind}" class="${kind===historyKind?'is-active':''}"><span>${e(labels[kind])}</span><small>${number(entries[kind].length)}</small></button>`).join('');
