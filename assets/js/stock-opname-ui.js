@@ -314,32 +314,28 @@
    `,'transaksi',index===0);
   }).join('');
  }
- function productionHistoryByDate(dates,p){
+ function productionHistoryByDate(dates){
   return dates.map(([date,entries],index)=>{
    const items=new Map();
    for(const doc of entries){
     if(doc.void)continue;
     const seen=new Set();
     for(const row of doc.postings||[]){
-     if(!String(row.key||'').startsWith('w:')||!(Number(row.qty)>0)||seen.has(row.key))continue;
+     const qty=Number(row.qty);
+     if(!String(row.key||'').startsWith('w:')||!Number.isFinite(qty)||qty<=0||seen.has(row.key))continue;
      seen.add(row.key);
-     if(!items.has(row.key))items.set(row.key,{name:row.name||row.key,transactions:[]});
-     const line=(doc.lines||[]).find(line=>line.key===row.key);
-     const batch=line&&Number(line.qty)>0?Number(line.qty):null;
-     items.get(row.key).transactions.push({doc,batch,qty:Number(row.qty),unit:String(row.unit||'')});
+     if(!items.has(row.key))items.set(row.key,{name:row.name||row.key,count:0,totals:new Map()});
+     const item=items.get(row.key),unit=String(row.unit||'');
+     item.count++;
+     item.totals.set(unit,(item.totals.get(unit)||0)+qty);
     }
    }
    const rows=[...items.values()].sort((a,b)=>a.name.localeCompare(b.name,'id')).map(item=>{
-    const details=item.transactions.map((entry,i)=>{
-     const perBatch=entry.batch===null?'Hasil per batch tidak tersedia':'1 batch = '+number(entry.qty/entry.batch)+' '+entry.unit;
-     return `<div class="so-date-material-row"><span>Produksi ${number(i+1)}<small>${e(perBatch)}</small></span><strong>${number(entry.qty)} ${e(entry.unit)}</strong></div>${historyDocumentActions(entry.doc,p)}`;
-    }).join('');
-    const units=new Set(item.transactions.map(entry=>entry.unit));
-    const total=units.size===1?number(item.transactions.reduce((sum,entry)=>sum+entry.qty,0))+' '+e(item.transactions[0].unit):'';
-    return `<details class="so-sales-menu"><summary><span>${e(item.name)}${total?'<small> · Total hasil '+total+'</small>':''}</span><strong>${number(item.transactions.length)}x</strong></summary><div class="so-date-materials">${details}</div></details>`;
+    const total=[...item.totals].map(([unit,qty])=>number(qty)+' '+e(unit)).join(' / ');
+    return `<div class="so-date-material-row"><span>${e(item.name)} · ${total}</span><strong>${number(item.count)}x</strong></div>`;
    }).join('');
    return historyDate(date,entries,`
-    <div class="so-date-materials so-sales-menu-list">${rows||'<p class="so-sales-unavailable">Tidak ada hasil produksi aktif yang tersedia pada tanggal ini.</p>'}</div>
+    <div class="so-date-materials">${rows||'<p class="so-sales-unavailable">Tidak ada hasil produksi aktif yang tersedia pada tanggal ini.</p>'}</div>
    `,'transaksi',index===0);
   }).join('');
  }
@@ -396,7 +392,7 @@
   }else if(historyKind==='production'){
    const dates=historyDates(recent,doc=>doc.start);
    total=dates.length;
-   list=productionHistoryByDate(dates.slice(0,historyLimit),p);
+   list=productionHistoryByDate(dates.slice(0,historyLimit));
   }else list=groupedHistory(recent.slice(0,historyLimit),doc=>doc.start,doc=>historyDocument(doc,p));
 
   const tabs=kinds.map(kind=>`<button type="button" data-so-action="history-tab" data-so-kind="${kind}" aria-pressed="${kind===historyKind}" class="${kind===historyKind?'is-active':''}"><span>${e(labels[kind])}</span><small>${number(entries[kind].length)}</small></button>`).join('');
