@@ -1530,9 +1530,38 @@
 
 .sidebar-mascot { display: none; }
 @media (min-width: 900px) and (max-width: 1279px) {
+  body:has(.page.active) .app {
+    position: relative;
+  }
   body:has(.page.active) .top {
+    position: static;
+    display: block;
+    width: 0;
+    height: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+  }
+  body:has(.page.active) .top > .brand,
+  body:has(.page.active) .top > .desktop-sidebar-toggle,
+  body:has(.page.active) .top-actions > .desktop-queue-date,
+  body:has(.page.active) .top-actions > .profile,
+  body:has(.page.active) .top-actions > .menu-toggle {
+    display: none !important;
+  }
+  body:has(.page.active) .top-actions {
+    display: block;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
   }
   body:has(.page.active) #authLogoutButton {
     position: fixed;
