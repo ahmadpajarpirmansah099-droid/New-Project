@@ -525,3 +525,15 @@ test('opname template leaves physical counts blank even when the draft is filled
   assert.equal(t.draft('close').counts['m:a'].qty,'42');
   assert.equal(t.writes.length,0);
 });
+
+test('sales template leaves quantities blank even when the draft is filled', async () => {
+  const t=runtime(); await t.ui.open('sales');
+  t.input({soKey:'s:a',soProp:'qty'},'42');
+  let exported; t.setExcel({exportFile:async value=>{exported=value;}});
+  await t.click('excel-form');
+  assert.equal(exported.kind,'sales');
+  assert.equal(exported.rows.find(row=>row.key==='s:a').qty,'');
+  assert.equal(exported.rows.find(row=>row.key==='s:a').name,'Menu');
+  assert.equal(t.draft('sales').counts['s:a'].qty,'42');
+  assert.equal(t.writes.length,0);
+});

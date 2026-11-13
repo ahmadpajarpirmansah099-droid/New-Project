@@ -2,7 +2,7 @@
 
 ## Perilaku yang disengaja
 
-- Admin divisi dapat mengunduh template opname dengan kolom jumlah fisik kosong untuk tanggal terpilih, meskipun form sudah terisi. Nama barang dan satuan tetap tercantum. Form Sales dapat mengekspor template/isian untuk rentang yang dipilih. Riwayat menyediakan ekspor hasil satu opname atau satu catatan Sales pada tanggal/rentang yang tercatat; tidak menggabungkan beberapa transaksi Sales otomatis.
+- Admin divisi dapat mengunduh template opname dengan kolom jumlah fisik kosong untuk tanggal terpilih, meskipun form sudah terisi. Nama barang dan satuan tetap tercantum. Form Sales menyediakan template kosong untuk rentang yang dipilih; daftar menu tetap tercantum dan jumlah terjual kosong meskipun draft terisi. Riwayat menyediakan ekspor hasil satu opname atau satu catatan Sales pada tanggal/rentang yang tercatat; tidak menggabungkan beberapa transaksi Sales otomatis.
 - Impor menerima template aplikasi dalam format `.xlsx` untuk jenis, divisi, tanggal dan (untuk opname) periode yang sesuai. Data dimasukkan sebagai draft perangkat; draft yang sudah berisi memerlukan persetujuan sebelum diganti. Penyelesaian tetap menggunakan konfirmasi dan validasi server yang sudah ada.
 - Hasil opname berisi stok sistem, fisik, selisih dan harga. Saat impor, hanya jumlah fisik dan satuan dipakai; data hasil perhitungan tidak mengubah stok secara langsung.
 
