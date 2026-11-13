@@ -1470,7 +1470,8 @@
   .drawer-nav > .drawer-item[data-page="user-monitoring"] { order: 2; }
   .drawer-nav > .drawer-item[data-page="stock-opname"] { order: 3; }
   .drawer-nav > .drawer-item[data-page="master-items"] { order: 4; }
-  .drawer-nav > .drawer-item[data-page="settings"] { order: 5; }
+  .drawer-nav > .drawer-item.drawer-scope-item { order: 5; }
+  .drawer-nav > .drawer-item[data-page="settings"] { order: 6; }
 
   .drawer-nav > .drawer-item:not(.active),
   body.desktop-sidebar-collapsed:has(.page.active) .drawer-guide-icon,
