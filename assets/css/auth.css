@@ -14,7 +14,8 @@ body.auth-ready .auth-screen{display:none}
 .auth-screen .auth-intro{margin-bottom:18px}
 .auth-screen .auth-title{display:flex;align-items:center;gap:.28em;margin:0}
 .auth-mascot{position:relative;display:block;width:1.48em;height:1.1em;flex:0 0 1.48em;overflow:visible;padding:0;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;transform-origin:50% 100%;transform:translate3d(0,var(--mascot-lift,0px),0) rotate(var(--mascot-tilt,0deg));transition:transform .2s ease}
-.auth-mascot img{position:absolute;left:-.67em;top:-.83em;width:2.77em;height:2.77em;max-width:none;clip-path:inset(32% 25% 32% 25% round 20%);mix-blend-mode:multiply;transform-origin:50% 88%;animation:mascot-bob 5s ease-in-out infinite}
+/* Crop values are tuned to the mascot PNG built-in whitespace. */
+.auth-mascot img{position:absolute;left:-.67em;top:-.83em;width:2.77em;height:2.77em;max-width:none;clip-path:inset(30% 25% 30% 25%);mix-blend-mode:multiply;transform-origin:50% 88%;animation:mascot-bob 5s ease-in-out infinite}
 .auth-mascot:hover img{animation:mascot-wiggle .55s ease-in-out}
 .auth-mascot.is-poked img{animation:mascot-poke .55s cubic-bezier(.3,.9,.4,1.2)}
 .auth-mascot:focus-visible{outline:2px solid var(--ui-olive,#777b61);outline-offset:2px;border-radius:5px}
