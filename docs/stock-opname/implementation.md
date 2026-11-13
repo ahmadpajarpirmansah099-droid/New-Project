@@ -110,3 +110,7 @@ Dense operational ledger, inherited New-Project typography and lime/navy identit
 4. Known limitations: saran pencarian menampilkan hingga delapan barang cocok sekaligus; katalog bergantung pada data yang dimuat untuk divisi aktif. Data lama tidak didistribusikan ulang.
 5. Risk checks: sebelum perubahan, 105 barang tepat sama dengan hasil fisik opname dan belum ada transaksi periode baru. Migrasi mengunci state dan memeriksa revision, status, outlet/divisi, hubungan periode, kesamaan jumlah stok dan ketiadaan transaksi sebelum memperbaiki tanggal. Reactivation menolak transaksi yang lebih awal daripada tanggal Stock Awal baru.
 6. Verification: setelah migrasi tanggal 2026-11-09, 105 barang tidak berubah, total 215 dokumen historis tetap tersimpan, tanpa transaksi pada periode kedua, serta privilege fungsi tetap authenticated:EXECUTE dan postgres:EXECUTE. Pengujian UI ada di tests/stock-opname-ui.test.js. Pemeriksaan manual mobile/desktop masih diperlukan; PR/merge/deploy frontend dicatat di GitHub.
+
+## Riwayat dan form aktif (14 November 2026)
+
+Perpindahan kategori riwayat dan tombol tampilkan lebih banyak hanya memperbarui panel riwayat, sehingga form dan draft yang sedang terbuka tidak digambar ulang. Berlaku untuk seluruh kategori riwayat. Tidak ada perubahan alur data, akses, database, RLS, RPC, autentikasi, atau penyimpanan. Tes otomatis memeriksa pergantian kategori dan penambahan riwayat tanpa render ulang form atau transaksi baru; pemeriksaan visual di browser tetap diperlukan.

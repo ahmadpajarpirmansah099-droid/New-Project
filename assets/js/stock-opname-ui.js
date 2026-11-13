@@ -499,13 +499,13 @@
  }
  async function action(name,el){
   if(busy)return;
-  const token=viewGeneration;busy=true;
+  const token=viewGeneration;let historyOnly=false;busy=true;
   try{
    if(name==='excel-form'){await excelForm();return;}
    if(name==='excel-close'){await excelHistory('close',el.dataset.soId);return;}
    if(name==='excel-sales'){await excelHistory('sales',el.dataset.soId);return;}
-   if(name==='history-tab'){historyKind=el.dataset.soKind;historyLimit=10;return;}
-   if(name==='history-more'){historyLimit+=10;return;}
+   if(name==='history-tab'){historyKind=el.dataset.soKind;historyLimit=10;historyOnly=true;return;}
+   if(name==='history-more'){historyLimit+=10;historyOnly=true;return;}
    if(name==='pick-date'){openDatePicker(el.dataset.soField);return;}
    if(name==='pick-choice'){openChoicePicker(el);return;}
    if(name==='unit-option'&&form){const key=el.dataset.soKey,value=el.dataset.soValue,row=catalog().find(r=>r.key===key&&!r.error);if(row?.units?.some(u=>u.unit===value)){form.counts[key]={...form.counts[key],unit:value};form.touched=true;snapshot();}return;}
@@ -551,8 +551,8 @@
    if(['activate','reactivate','reopen'].includes(name)&&await confirmStock(name==='reopen'?'Buka kembali opname terakhir? Periode berikutnya ditahan sampai koreksi dikonfirmasi.':'Konfirmasi stok fisik sebagai Stock Awal periode berikutnya?',name==='reopen'?'Buka kembali opname?':'Aktifkan Stock Awal?',name==='reopen'?'Buka kembali':'Aktifkan')){
     await service.write(name,{},crypto.randomUUID());notice=name==='reopen'?'Opname dibuka kembali. Koreksi transaksi atau stok fisik, lalu selesaikan ulang.':'Stock Awal dikonfirmasi. Draft transaksi dapat dipulihkan dan disimpan.';
    }
-  }catch(error){if(token===viewGeneration)notice=error.message;}
-  finally{if(token===viewGeneration){busy=false;render();if(name==='unit-option')page()?.querySelectorAll?.('.so-unit-dropdown').forEach(node=>{if(node.dataset.soUnitKey===el.dataset.soKey)node.querySelector('summary')?.focus();});}}
+  }catch(error){historyOnly=false;if(token===viewGeneration)notice=error.message;}
+  finally{if(token===viewGeneration){busy=false;const history=page()?.querySelector('#soHistory');if(historyOnly&&history)history.outerHTML=historyHTML();else render();if(name==='unit-option')page()?.querySelectorAll?.('.so-unit-dropdown').forEach(node=>{if(node.dataset.soUnitKey===el.dataset.soKey)node.querySelector('summary')?.focus();});}}
  }
  document.addEventListener('click',ev=>{
   const inside=ev.target.closest('.so-unit-dropdown');

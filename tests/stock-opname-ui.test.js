@@ -6,7 +6,9 @@ const fs = require('node:fs');
 
 function runtime() {
   const handlers = {}, writes = [], confirmations = [];
-  const page = { innerHTML: '', contains: () => true };
+  let pageHtml = '', pageRenders = 0;
+  const history = { set outerHTML(value) { const start=pageHtml.indexOf('<section class="so-panel so-history-panel"'); if(start>=0)pageHtml=pageHtml.slice(0,start)+value; } };
+  const page = { get innerHTML(){return pageHtml;}, set innerHTML(value){pageHtml=value;pageRenders++;}, contains: () => true, querySelector: selector => selector==='#soHistory' && pageHtml.includes('id="soHistory"') ? history : null };
   const searchResults = { innerHTML: '' };
   const drafts = {}, letHolder = { active: null };
   let allowConfirm = true, storageFails = false, writeFails = false;
@@ -65,6 +67,7 @@ function runtime() {
   vm.runInContext(fs.readFileSync('assets/js/stock-opname-ui.js', 'utf8'), w);
   return {
     ui: w.StockOpnameUI, data, writes, confirmations, page,
+    pageRenders: () => pageRenders,
     searchResults,
     draft: kind => { const value = drafts[kind || letHolder.active]; return value && copy(value); },
     setExcel(value) { w.StockExcel = value; },
@@ -535,5 +538,21 @@ test('sales template leaves quantities blank even when the draft is filled', asy
   assert.equal(exported.rows.find(row=>row.key==='s:a').qty,'');
   assert.equal(exported.rows.find(row=>row.key==='s:a').name,'Menu');
   assert.equal(t.draft('sales').counts['s:a'].qty,'42');
+  assert.equal(t.writes.length,0);
+});
+
+test('switching history tabs and showing more does not rerender an open sales form', async () => {
+  const t=runtime(); await t.ui.open('sales');
+  t.input({soKey:'s:a',soProp:'qty'},'12');
+  const before=t.pageRenders();
+  await t.click('history-tab',{soKind:'expense'});
+  assert.equal(t.pageRenders(),before);
+  assert.match(t.page.innerHTML,/Riwayat Pengeluaran/);
+  assert.equal(t.draft('sales').counts['s:a'].qty,'12');
+  await t.click('history-tab',{soKind:'sales'});
+  await t.click('history-more');
+  assert.equal(t.pageRenders(),before);
+  assert.match(t.page.innerHTML,/Riwayat Sales/);
+  assert.equal(t.draft('sales').counts['s:a'].qty,'12');
   assert.equal(t.writes.length,0);
 });
