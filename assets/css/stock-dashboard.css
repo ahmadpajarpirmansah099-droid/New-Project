@@ -141,3 +141,22 @@
   .sd-sales-dialog .sd-detail-list > .sd-detail-row > details { grid-column:1; }
 }
 
+
+/* Compact stock dashboard layout for phones. */
+@media (max-width:600px) {
+  .sd-head { align-items:flex-start; margin:2px 0 14px; gap:12px; }
+  .sd-head h1 { font-size:clamp(19px,5.2vw,22px); line-height:1.18; }
+  .sd-head p { margin-top:5px; }
+  .sd-actions { align-items:center; }
+  #page-stock-dashboard .sd-actions button { min-height:44px; }
+  .sd-period { margin-bottom:16px; gap:10px; font-size:12px; }
+  #page-stock-dashboard .sd-period button { padding:8px 12px; white-space:nowrap; }
+  .sd-cards { gap:10px; }
+  #page-stock-dashboard .sd-card { min-width:0; padding:15px; gap:8px; border-radius:18px; }
+  #page-stock-dashboard .sd-card-sales { padding:18px 16px; }
+  .sd-card > span { font-size:12px; line-height:1.3; }
+  .sd-card strong { max-width:100%; font-size:clamp(17px,5vw,22px); line-height:1.2; }
+  .sd-card-sales strong { font-size:clamp(27px,8vw,34px); }
+  .sd-card small { font-size:11px; line-height:1.4; text-align:left; }
+  .sd-chart-panel { margin-top:18px; }
+}
