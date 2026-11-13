@@ -972,15 +972,6 @@ body.workspace-switching .app::after{content:'Memuat divisi...';position:fixed;z
 }
 
 
-/* Hide workspace controls only while the mobile navigation drawer is open. */
-@media (max-width: 520px) {
-  body.menu-open .workspace-scope-switcher {
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-}
-
 /* Desktop navigation overlay: blur the complete workspace, including its header. */
 @media (min-width: 900px) {
   .menu-backdrop {
@@ -1343,3 +1334,36 @@ button:active,
 }
 
 
+
+
+/* Developer outlet/division switcher: drawer entry + modal dialog. */
+.drawer-scope-item { display: none; }
+body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: flex; }
+
+.scope-dialog {
+  width: min(440px, calc(100vw - 32px));
+  padding: 22px;
+  overflow: visible;
+  border: 1px solid rgba(31, 42, 61, .09);
+  border-radius: 20px;
+  background: #fffefa;
+  color: #24334d;
+  box-shadow: 0 22px 60px rgba(17, 18, 37, .24);
+}
+.scope-dialog::backdrop { background: rgba(17, 18, 37, .34); }
+.scope-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.scope-dialog-kicker { color: #8993a4; font-size: 9px; font-weight: 800; letter-spacing: .13em; }
+.scope-dialog h2 { margin: 4px 0 0; color: #111225; font: 800 18px Manrope, sans-serif; letter-spacing: -.02em; }
+.scope-dialog-close { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; padding: 0; border: 0; border-radius: 11px; background: #f4f3f7; color: #55536d; cursor: pointer; }
+.scope-dialog-close svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.scope-dialog-note { margin: 10px 0 14px; color: #77758d; font-size: 11px; line-height: 1.5; }
+.scope-dialog .workspace-scope-switcher { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; padding: 0; }
+.scope-dialog .workspace-scope-switcher .scope-field { flex: none; min-width: 0; }
+.scope-dialog .scope-trigger { max-width: none; height: 42px; }
+.scope-dialog .scope-field:last-child .scope-dropdown-menu { right: 0; left: auto; }
+.scope-dialog .scope-dropdown-menu.opens-up { top: auto; bottom: calc(100% + 8px); transform-origin: bottom left; }
+.scope-dialog .scope-field:last-child .scope-dropdown-menu.opens-up { transform-origin: bottom right; }
+@media (max-width: 520px) {
+  .scope-dialog { padding: 18px; }
+  .scope-dialog .workspace-scope-switcher { grid-template-columns: 1fr; }
+}

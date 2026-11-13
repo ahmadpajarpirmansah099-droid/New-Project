@@ -7,12 +7,12 @@
 <title>Guest Operations — Admin</title>
 <link rel="stylesheet" href="assets/css/style.css?v=20261109-hero-popup-desktop-p1">
 <link rel="stylesheet" href="assets/css/auth.css?v=20261113-login-fields-autofill-p1">
-<link rel="stylesheet" href="assets/css/app-overrides.css?v=20261107-guest-save-loading-p1">
+<link rel="stylesheet" href="assets/css/app-overrides.css?v=20261113-drawer-scope-switcher-p1">
 <link rel="stylesheet" href="assets/css/masterdata.css?v=20261107-export-excel-p1">
 <link rel="stylesheet" href="assets/css/wip.css?v=20261107-export-excel-p1">
 <link rel="stylesheet" href="assets/css/menu.css?v=20261107-export-excel-p1">
 <link rel="stylesheet" href="assets/css/masterdata-export.css?v=20261107-actions-right-p4">
-<link rel="stylesheet" href="assets/css/desktop.css?v=20261113-sidebar-mascot-interactive-p2">
+<link rel="stylesheet" href="assets/css/desktop.css?v=20261113-dev-drawer-scope-switcher-p1">
 <link rel="stylesheet" href="assets/css/user-monitoring.css?v=20261106-user-monitoring-p1">
 
 <link rel="stylesheet" href="assets/css/visual-tokens.css?v=20261110-polish-1">
@@ -64,10 +64,7 @@
     </div>
     
     <div id="pendingWrap"></div>
-    <div class="section-head"><h2>Antrean aktif</h2><div class="queue-head-actions"><div class="workspace-scope-switcher" id="workspaceScopeSwitcher" hidden aria-label="Pemilihan outlet dan divisi">
-      <div class="scope-field"><span>OUTLET</span><button class="scope-trigger" id="workspaceOutletTrigger" type="button" aria-haspopup="listbox" aria-expanded="false"><span id="workspaceOutletValue">Memuat outlet</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="scope-dropdown-menu" id="workspaceOutletMenu" role="listbox" aria-label="Pilihan outlet" hidden></div></div>
-      <div class="scope-field"><span>DIVISI</span><button class="scope-trigger" id="workspaceDivisionTrigger" type="button" aria-haspopup="listbox" aria-expanded="false"><span id="workspaceDivisionValue">Memuat divisi</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="scope-dropdown-menu" id="workspaceDivisionMenu" role="listbox" aria-label="Pilihan divisi" hidden></div></div>
-    </div><button class="text-btn" data-action="go" data-action-args='["waiting"]'>Lihat semua →</button></div></div>
+    <div class="section-head"><h2>Antrean aktif</h2><div class="queue-head-actions"><button class="text-btn" data-action="go" data-action-args='["waiting"]'>Lihat semua →</button></div></div>
     <div class="queue-list" id="dashboardList"></div>
     <section class="dashboard-reservations" aria-label="Kalender reservasi">
       <div class="dashboard-reservations-head">
@@ -377,6 +374,18 @@
   </div>
 </section>
 
+<dialog class="scope-dialog" id="workspaceScopeDialog" aria-labelledby="scopeDialogTitle">
+  <header class="scope-dialog-head">
+    <div><span class="scope-dialog-kicker">OUTLET &amp; DIVISI</span><h2 id="scopeDialogTitle">Ganti outlet/divisi</h2></div>
+    <button type="button" class="scope-dialog-close" id="scopeDialogClose" aria-label="Tutup dialog ganti outlet/divisi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </header>
+  <p class="scope-dialog-note">Daftar divisi mengikuti akses akun ini.</p>
+  <div class="workspace-scope-switcher" id="workspaceScopeSwitcher" hidden aria-label="Pemilihan outlet dan divisi">
+    <div class="scope-field"><span>OUTLET</span><button class="scope-trigger" id="workspaceOutletTrigger" type="button" aria-haspopup="listbox" aria-expanded="false"><span id="workspaceOutletValue">Memuat outlet</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="scope-dropdown-menu" id="workspaceOutletMenu" role="listbox" aria-label="Pilihan outlet" hidden></div></div>
+    <div class="scope-field"><span>DIVISI</span><button class="scope-trigger" id="workspaceDivisionTrigger" type="button" aria-haspopup="listbox" aria-expanded="false"><span id="workspaceDivisionValue">Memuat divisi</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="scope-dropdown-menu" id="workspaceDivisionMenu" role="listbox" aria-label="Pilihan divisi" hidden></div></div>
+  </div>
+</dialog>
+
 <!-- Navigation icons: Lucide Icons (https://lucide.dev). Use Lucide for every new icon. -->
 <div class="menu-backdrop" id="menuBackdrop" data-action="closeMenu"></div>
 <aside class="menu-drawer" id="menuDrawer" aria-label="Navigasi utama" aria-hidden="true">
@@ -384,6 +393,7 @@
 <nav class="drawer-nav">
 <button class="drawer-item" type="button" title="Stock Opname" data-page="stock-opname" data-action="navigateFromMenu" data-action-args='["stock-opname"]' style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="18" x="5" y="4" rx="2"/><path d="M9 4V2h6v2M9 12l2 2 4-4M9 18h6"/></svg><span>Stock Opname</span></button>
   <button class="drawer-item active" title="Guest Operational" data-page="dashboard" data-action="navigateFromMenu" data-action-args='["dashboard"]' aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Guest Operational</span></button>
+  <button class="drawer-item drawer-scope-item" type="button" id="drawerScopeButton" title="Ganti outlet/divisi" aria-haspopup="dialog" aria-controls="workspaceScopeDialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 1.6-5h14.8L21 9"/><path d="M4.5 9v10a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V9"/><path d="M3 9h18"/><path d="M9.5 20v-5.5h5V20"/></svg><span>Ganti outlet/divisi</span></button>
   <button class="drawer-item" title="Pengaturan" data-page="settings" data-action="navigateFromMenu" data-action-args='["settings"]'><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg><span>Pengaturan</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
 
   <button class="drawer-item" title="User Monitoring" data-page="user-monitoring" data-action="navigateFromMenu" data-action-args='["user-monitoring"]' style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>User Monitoring</span><svg class="drawer-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
@@ -392,7 +402,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18V5a2 2 0 0 1 2-2h3a4 4 0 0 1 4 4 4 4 0 0 1 4-4h3a2 2 0 0 1 2 2v13"/><path d="M3 18a2 2 0 0 0 2 2h3a4 4 0 0 1 4 1 4 4 0 0 1 4-1h3a2 2 0 0 0 2-2"/></svg>
   </button></div></aside><div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="assets/js/auth.js?v=20261107-custom-logout-dialog-p1" defer></script>
+<script src="assets/js/auth.js?v=20261113-drawer-scope-switcher-p1" defer></script>
 <script src="assets/js/masterdata-store.js?v=20261104-workspace-guard-v1" defer></script>
 <script src="assets/js/masterdata-service.js?v=20261103-p4" defer></script>
 <script src="assets/js/masterdata-ui.js?v=20261103-remove-guest-back-p1" defer></script>
