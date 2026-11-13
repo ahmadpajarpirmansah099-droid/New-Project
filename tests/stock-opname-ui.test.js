@@ -410,7 +410,7 @@ test('Barang Masuk removes an item from its local draft and avoids sending it',a
  assert.equal(t.writes.length,0);
 });
 
-test('daily expense history sums materials and preserves original transaction controls',async()=>{
+test('daily expense history groups materials by category without original transaction controls',async()=>{
  const t=runtime();
  t.data.state.documents=[
   {id:'e1',period_id:'period',type:'expense',category:'Kalibrasi',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-2,unit:'ML'}]},
@@ -427,11 +427,8 @@ test('daily expense history sums materials and preserves original transaction co
  assert.match(html,/<h4>Kalibrasi<\/h4>/);
  assert.match(html,/<h4>Lainnya<\/h4>/);
  assert.match(html,/Gula<\/span><strong>100 GR/);
- assert.match(html,/Transaksi asli \(3\)/);
- assert.match(html,/Pengeluaran · Kalibrasi/);
- assert.match(html,/Pengeluaran · Lainnya/);
- assert.equal((html.match(/data-so-action="edit"/g)||[]).length,2);
- assert.match(html,/Dibatalkan/);
+ assert.doesNotMatch(html,/Transaksi asli|data-so-action="(?:edit|void|adjust)"/);
+ assert.doesNotMatch(html,/<h4>QC<\/h4>/);
 });
 
 test('daily receipt history totals repeated materials without original records',async()=>{
