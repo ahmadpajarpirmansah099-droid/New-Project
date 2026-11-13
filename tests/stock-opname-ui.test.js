@@ -513,3 +513,15 @@ test('Excel import preserves existing draft if validation or storage fails', asy
   assert.equal(t.draft('sales').counts['s:a'].qty,'2');
   assert.equal(t.writes.length,0);
 });
+
+test('opname template leaves physical counts blank even when the draft is filled', async () => {
+  const t=runtime(); await t.ui.open('close');
+  t.input({soKey:'m:a',soProp:'qty'},'42');
+  let exported; t.setExcel({exportFile:async value=>{exported=value;}});
+  await t.click('excel-form');
+  assert.equal(exported.kind,'close');
+  assert.equal(exported.rows.find(row=>row.key==='m:a').qty,'');
+  assert.equal(exported.rows.find(row=>row.key==='m:a').unit,'ML');
+  assert.equal(t.draft('close').counts['m:a'].qty,'42');
+  assert.equal(t.writes.length,0);
+});

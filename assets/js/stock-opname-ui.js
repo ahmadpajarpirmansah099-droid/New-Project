@@ -186,7 +186,7 @@
   if(k==='expense')extra='<label>Kategori'+pickerButton(form.category,'data-so-field="category" data-so-title="Pilih kategori"',['Kalibrasi','RnD','QC','Suplies','Move','Waste','Lainnya'].map(x=>({value:x,label:x})))+'</label>';
   if(form.category==='Move'&&k==='expense')extra+='<label>Tujuan'+pickerButton((get().targets||[]).find(x=>x.id===form.target)?.name||'Pilih tujuan aktif','data-so-field="target" data-so-title="Pilih tujuan outlet/divisi"',[{value:'',label:'Pilih tujuan aktif'},...(get().targets||[]).map(x=>({value:x.id,label:x.name}))])+'</label>';
   const noTarget=k==='expense'&&form.category==='Move'&&!(get().targets||[]).length;
-  const excelActions=['sales','close'].includes(k)?'<div class="so-actions">'+button('Ekspor Excel / Template','excel-form')+'<label class="so-excel-import">Impor Excel<input type="file" accept=".xlsx" data-so-excel-import hidden></label></div>':'';
+  const excelActions=['sales','close'].includes(k)?'<div class="so-actions">'+button(k==='close'?'Unduh Template Kosong':'Ekspor Excel / Template','excel-form')+'<label class="so-excel-import">Impor Excel<input type="file" accept=".xlsx" data-so-excel-import hidden></label></div>':'';
   const receiptSearch=receipt?'<div class="so-receipt-search"><label for="soReceiptSearch">Cari barang masuk</label><input id="soReceiptSearch" type="search" data-so-receipt-search placeholder="Ketik nama barang..." aria-label="Cari nama barang" autocomplete="off" value="'+e(receiptQuery)+'"><div class="so-receipt-search-results" data-so-receipt-results role="group" aria-label="Hasil pencarian barang">'+receiptSuggestions(receiptQuery)+'</div></div>':'';
   const head='<tr><th>'+(isCount?'Barang':k==='sales'?'Menu':k==='production'?'WIP / hasil otomatis':'Barang / stok sistem')+'</th>'+(isCount?'<th class="so-desktop-only so-stock">Stok sistem</th>':'')+'<th class="so-quantity">'+(k==='production'?'Batch':k==='sales'?'Terjual':isCount?'Fisik':'Jumlah')+'</th>'+(withUnit?'<th class="so-unit">Satuan</th>':'')+(isCount?'<th class="so-desktop-only so-conversion">Konversi fisik</th>':'')+(receipt?'<th class="so-invoice">Total invoice</th>':'')+'</tr>';
   const body=rows.map(r=>{
@@ -469,7 +469,7 @@
   return {kind,start:kind==='close'?end:start,end,scope:ctx.activeDivisionId,period:periodId||'',rows};
  }
  async function excelForm(){
-  const k=form.kind,rows=rowsForForm().map(r=>({key:r.key,name:r.name,unit:k==='close'?(form.counts[r.key]?.unit||r.unit):'',qty:form.counts[r.key]?.qty==null||form.counts[r.key].qty===''?'':Number(form.counts[r.key].qty)}));
+  const k=form.kind,rows=rowsForForm().map(r=>({key:r.key,name:r.name,unit:k==='close'?(form.counts[r.key]?.unit||r.unit):'',qty:k==='close'||form.counts[r.key]?.qty==null||form.counts[r.key].qty===''?'':Number(form.counts[r.key].qty)}));
   await root.StockExcel.exportFile(excelContext(k,form.start,form.end,rows,period()?.id));
  }
  async function excelHistory(kind,id){
