@@ -277,11 +277,11 @@ test('daily receipt history paginates complete dates without original transactio
   assert.match(html, /class="so-history-date"><details open>/);
   assert.match(html, /Susu<\/span><strong>78 ML/);
   assert.doesNotMatch(html, /Transaksi asli|data-so-action="(?:edit|void)"/);
-  assert.doesNotMatch(html, /1 November 2026<\/span>/);
+  assert.doesNotMatch(html, /<span>1 November 2026<\/span>/);
   assert.match(html, /data-so-action="history-more"/);
   await t.click('history-more');
   assert.equal((t.page.innerHTML.match(/class="so-history-date"/g) || []).length, 11);
-  assert.match(t.page.innerHTML, /1 November 2026<\/span>/);
+  assert.match(t.page.innerHTML, /<span>1 November 2026<\/span>/);
   assert.doesNotMatch(t.page.innerHTML, /data-so-action="history-more"/);
 });
 
