@@ -291,7 +291,7 @@
   }
   return [...totals.values()].sort((a,b)=>a.name.localeCompare(b.name,'id'));
  }
- function materialHistoryByDate(dates,p,expense){
+ function materialHistoryByDate(dates,expense){
   return dates.map(([date,entries],index)=>{
    const materials=materialTotals(entries,expense);
    const row=m=>`<div class="so-date-material-row"><span>${e(m.name)}${expense&&m.inbound?'<small>Masuk / penyesuaian</small>':''}</span><strong>${number(m.qty)} ${e(m.unit)}</strong></div>`;
@@ -308,9 +308,7 @@
    }else lines=materials.map(row).join('');
    return historyDate(date,entries,`
     <div class="so-date-materials">${lines||'<p class="so-sales-unavailable">Tidak ada transaksi aktif pada tanggal ini.</p>'}</div>
-    ${expense?`<details class="so-date-original-transactions"><summary>Transaksi asli (${number(entries.length)})</summary>
-     <ul class="so-history so-history-nested">${entries.map(doc=>historyDocument(doc,p,true)).join('')}</ul>
-    </details>`:''}
+
    `,'transaksi',index===0);
   }).join('');
  }
@@ -388,7 +386,7 @@
   else if(historyKind==='expense'||historyKind==='receipt'){
    const dates=historyDates(recent,doc=>doc.start);
    total=dates.length;
-   list=materialHistoryByDate(dates.slice(0,historyLimit),p,historyKind==='expense');
+   list=materialHistoryByDate(dates.slice(0,historyLimit),historyKind==='expense');
   }else if(historyKind==='production'){
    const dates=historyDates(recent,doc=>doc.start);
    total=dates.length;
