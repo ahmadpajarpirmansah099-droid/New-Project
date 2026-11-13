@@ -206,10 +206,11 @@ test('stock opname dates and selections render as in-app web controls', async ()
   const t = runtime(); await t.ui.open('close');
   assert.match(t.page.innerHTML, /data-so-action="pick-date"/);
   assert.match(t.page.innerHTML, /data-so-action="pick-choice"/);
-  assert.doesNotMatch(t.page.innerHTML, /type="date"|<select\b/);
+  assert.doesNotMatch(t.page.innerHTML, /type="date"/);
+  assert.match(t.page.innerHTML, /<select class="so-unit-select"/);
   await t.ui.open('expense');
   assert.match(t.page.innerHTML, /Pilih kategori/);
-  assert.doesNotMatch(t.page.innerHTML, /<select\b/);
+  assert.match(t.page.innerHTML, /data-so-action="pick-choice"/);
 });
 
 test('opname results show two compact rows and keep full movements expandable', () => {
@@ -472,4 +473,19 @@ test('expense material totals remain separated by category, including repeated m
  assert.match(html,/Susu<\/span><strong>6 ML/);
  assert.match(html,/Susu<\/span><strong>5 ML/);
  assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
+});
+
+
+test('desktop unit selection preserves quantity and submits selected unit', async () => {
+  const t = runtime();
+  t.data.catalog[0].units = [{unit:'ML',factor:1},{unit:'LITER',factor:1000}];
+  await t.ui.open('receipt');
+  await t.click('receipt-add',{soItemKey:'m:a'});
+  assert.match(t.page.innerHTML, /<option value="LITER"/);
+  t.input({soKey:'m:a',soProp:'qty'},'2');
+  t.input({soKey:'m:a',soProp:'unit'},'LITER');
+  assert.equal(t.draft('receipt').counts['m:a'].qty,'2');
+  assert.equal(t.draft('receipt').counts['m:a'].unit,'LITER');
+  await t.click('submit');
+  assert.equal(t.writes.at(-1).input.lines[0].unit,'LITER');
 });
