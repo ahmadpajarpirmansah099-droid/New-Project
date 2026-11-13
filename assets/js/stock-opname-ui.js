@@ -186,6 +186,7 @@
   if(k==='expense')extra='<label>Kategori'+pickerButton(form.category,'data-so-field="category" data-so-title="Pilih kategori"',['Kalibrasi','RnD','QC','Suplies','Move','Waste','Lainnya'].map(x=>({value:x,label:x})))+'</label>';
   if(form.category==='Move'&&k==='expense')extra+='<label>Tujuan'+pickerButton((get().targets||[]).find(x=>x.id===form.target)?.name||'Pilih tujuan aktif','data-so-field="target" data-so-title="Pilih tujuan outlet/divisi"',[{value:'',label:'Pilih tujuan aktif'},...(get().targets||[]).map(x=>({value:x.id,label:x.name}))])+'</label>';
   const noTarget=k==='expense'&&form.category==='Move'&&!(get().targets||[]).length;
+  const excelActions=['sales','close'].includes(k)?'<div class="so-actions">'+button('Unduh Template Kosong','excel-form')+'<label class="so-excel-import">Impor Excel<input type="file" accept=".xlsx" data-so-excel-import hidden></label></div>':'';
   const receiptSearch=receipt?'<div class="so-receipt-search"><label for="soReceiptSearch">Cari barang masuk</label><input id="soReceiptSearch" type="search" data-so-receipt-search placeholder="Ketik nama barang..." aria-label="Cari nama barang" autocomplete="off" value="'+e(receiptQuery)+'"><div class="so-receipt-search-results" data-so-receipt-results role="group" aria-label="Hasil pencarian barang">'+receiptSuggestions(receiptQuery)+'</div></div>':'';
   const head='<tr><th>'+(isCount?'Barang':k==='sales'?'Menu':k==='production'?'WIP / hasil otomatis':'Barang / stok sistem')+'</th>'+(isCount?'<th class="so-desktop-only so-stock">Stok sistem</th>':'')+'<th class="so-quantity">'+(k==='production'?'Batch':k==='sales'?'Terjual':isCount?'Fisik':'Jumlah')+'</th>'+(withUnit?'<th class="so-unit">Satuan</th>':'')+(isCount?'<th class="so-desktop-only so-conversion">Konversi fisik</th>':'')+(receipt?'<th class="so-invoice">Total invoice</th>':'')+'</tr>';
   const body=rows.map(r=>{
@@ -205,7 +206,7 @@
    if(receipt)html+='<td data-so-label="Total invoice"><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="invoice_total" aria-label="Total invoice '+e(r.name)+'" value="'+e(v.invoice_total??'')+'" placeholder="Opsional"></td>';
    return html+'</tr>';
   }).join('');
-  return '<section class="so-panel so-form"><header class="so-form-head"><h2>'+e(labels[k])+'</h2><p>'+e(formHelp[k])+'</p></header><div class="so-toolbar">'+dates+extra+'</div>'+(noTarget?'<p class="so-notice">Belum ada outlet/divisi tujuan yang aktif.</p>':'')+receiptSearch+(rows.some(r=>r.error)?masterLinks():'')+(isPending()&&k!=='close'?'<p class="so-notice">Stock Awal berikutnya belum dikonfirmasi. Isian ini disimpan sebagai draft.</p>':'')+(rows.length?'<table class="so-ledger'+(isCount?' so-count-ledger':receipt?' so-receipt-ledger':'')+'" aria-label="'+e(labels[k])+'"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>':'<p class="so-notice">'+(receipt?'Belum ada barang dipilih. Cari dan pilih barang di atas.':'Data belum tersedia.')+'</p>')+(!rows.length&&(!receipt||!catalog().some(r=>r.key.startsWith('m:')))?masterLinks():'')+'<footer class="so-form-footer"><p id="soDraftStatus" class="so-status" role="status">'+e(draftStatus())+'</p><div class="so-actions">'+button('Simpan Draft','draft')+button('Tutup Form','cancel')+button(isCount?'Konfirmasi':'Simpan Transaksi','submit','',true)+'</div></footer></section>';
+  return '<section class="so-panel so-form"><header class="so-form-head"><h2>'+e(labels[k])+'</h2><p>'+e(formHelp[k])+'</p></header><div class="so-toolbar">'+dates+extra+'</div>'+(noTarget?'<p class="so-notice">Belum ada outlet/divisi tujuan yang aktif.</p>':'')+receiptSearch+excelActions+(rows.some(r=>r.error)?masterLinks():'')+(isPending()&&k!=='close'?'<p class="so-notice">Stock Awal berikutnya belum dikonfirmasi. Isian ini disimpan sebagai draft.</p>':'')+(rows.length?'<table class="so-ledger'+(isCount?' so-count-ledger':receipt?' so-receipt-ledger':'')+'" aria-label="'+e(labels[k])+'"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>':'<p class="so-notice">'+(receipt?'Belum ada barang dipilih. Cari dan pilih barang di atas.':'Data belum tersedia.')+'</p>')+(!rows.length&&(!receipt||!catalog().some(r=>r.key.startsWith('m:')))?masterLinks():'')+'<footer class="so-form-footer"><p id="soDraftStatus" class="so-status" role="status">'+e(draftStatus())+'</p><div class="so-actions">'+button('Simpan Draft','draft')+button('Tutup Form','cancel')+button(isCount?'Konfirmasi':'Simpan Transaksi','submit','',true)+'</div></footer></section>';
  }
  function historyDates(items,dateOf){
   const groups=new Map();
@@ -269,7 +270,7 @@
   const name=e(labels[doc.type]||doc.type)+(doc.category&&['expense','adjustment'].includes(doc.type)?' · '+e(doc.category):'');
   const voidTag=doc.void?'<span class="so-history-tag is-void">Dibatalkan</span>':'';
   const detail=doc.type==='sales'?salesHistoryRows(doc):quantityLines(doc.postings||[]);
-  const actions=historyDocumentActions(doc,p);
+  const actions=historyDocumentActions(doc,p)+(doc.type==='sales'&&!doc.void?'<div class="so-history-actions">'+button('Ekspor Excel','excel-sales','data-so-id="'+e(doc.id)+'"')+'</div>':'');
   if(original)return `<li class="so-history-compact">
    <div class="so-history-entry"><div><strong>${name}</strong></div>${voidTag}</div>
    <details><summary>Rincian transaksi</summary>${detail}</details>${actions}
@@ -367,7 +368,7 @@
  function closeHistoryEntry(entry){
   const total=entry.result.reduce((sum,row)=>sum+Number(row.variance_value||0),0);
   return `<li><div class="so-history-entry"><div><strong>Opname ${e(dateLabel(entry.end))}</strong><small>${number(entry.result.length)} barang dihitung</small></div><span class="so-history-tag">${entry.status==='reopened'?'Sedang dikoreksi':'Selesai'}</span></div>
-   <details><summary>Lihat hasil dan selisih</summary><div class="so-result">
+   <div class="so-history-actions">${button('Ekspor Excel','excel-close','data-so-id="'+e(entry.id)+'"')}</div><details><summary>Lihat hasil dan selisih</summary><div class="so-result">
     ${entry.result.map(resultItem).join('')}<div class="so-result-total"><span>Total selisih rupiah</span><strong>${money(total)}</strong></div>
    </div></details>
   </li>`;
@@ -462,10 +463,47 @@
   // Reload shared catalog after invoice updates so other master pages see the new price.
   if(k==='receipt'){const ctx=root.AppAuth.getContext();await root.MasterDataStore.initialize(root.AppAuth.getClient(),ctx.workspaceId,ctx.activeDivisionId);}
  }
+ function excelContext(kind,start,end,rows,periodId){
+  const ctx=root.AppAuth?.getContext();
+  if(!ctx?.activeDivisionId)throw Error('Divisi aktif belum tersedia.');
+  return {kind,start:kind==='close'?end:start,end,scope:ctx.activeDivisionId,period:periodId||'',rows};
+ }
+ async function excelForm(){
+  const k=form.kind,rows=rowsForForm().map(r=>({key:r.key,name:r.name,unit:k==='close'?(form.counts[r.key]?.unit||r.unit):'',qty:''}));
+  await root.StockExcel.exportFile(excelContext(k,form.start,form.end,rows,period()?.id));
+ }
+ async function excelHistory(kind,id){
+  const state=get().state;
+  if(kind==='close'){
+   const p=state.periods.find(x=>x.id===id&&Array.isArray(x.result));if(!p)throw Error('Hasil opname tidak ditemukan.');
+   const rows=p.result.map(r=>({key:r.key,name:r.name,qty:Number(r.physical),unit:r.unit,system:r.system,variance:r.variance,price:r.price,variance_value:r.variance_value}));
+   await root.StockExcel.exportFile(excelContext(kind,p.end,p.end,rows,p.id));
+  }else{
+   const doc=state.documents.find(x=>x.id===id&&x.type==='sales'&&!x.void);if(!doc)throw Error('Sales tidak ditemukan.');
+   const menus=doc.catalog_snapshot?.menus||[];
+   const rows=(doc.lines||[]).map(l=>({key:l.key,name:menus.find(m=>m.id===l.key.slice(2))?.nama_menu||l.key,qty:Number(l.qty),unit:''}));
+   if(!rows.length)throw Error('Daftar menu transaksi ini tidak tersedia untuk diekspor.');
+   await root.StockExcel.exportFile(excelContext(kind,doc.start,doc.end,rows,doc.period_id));
+  }
+ }
+ async function importExcel(file){
+  if(!form||!['sales','close'].includes(form.kind))return;
+  const current=form,token=viewGeneration,k=form.kind,periodId=period()?.id;
+  const context=excelContext(k,form.start,form.end,rowsForForm(),periodId);
+  const counts=await root.StockExcel.readFile(file,context);
+  if(token!==viewGeneration||form!==current||period()?.id!==periodId||form.start!==context.start&&k==='sales'||form.end!==context.end||root.AppAuth?.getContext()?.activeDivisionId!==context.scope)throw Error('Form, tanggal, atau divisi berubah. Impor dibatalkan.');
+  if(hasDraftContent(form)&&!await confirmStock('Isi draft saat ini akan diganti dengan isi file.','Ganti isi draft?','Ganti draft'))return;
+  if(token!==viewGeneration||form!==current||period()?.id!==periodId||form.start!==context.start&&k==='sales'||form.end!==context.end||root.AppAuth?.getContext()?.activeDivisionId!==context.scope)throw Error('Form, tanggal, atau divisi berubah. Impor dibatalkan.');
+  const next={...form,counts,touched:true};
+  service.saveDraft(next);form=next;draftSaved=true;notice='File masuk ke draft perangkat. Periksa tanggal, barang, dan jumlah sebelum konfirmasi.';
+ }
  async function action(name,el){
   if(busy)return;
   const token=viewGeneration;busy=true;
   try{
+   if(name==='excel-form'){await excelForm();return;}
+   if(name==='excel-close'){await excelHistory('close',el.dataset.soId);return;}
+   if(name==='excel-sales'){await excelHistory('sales',el.dataset.soId);return;}
    if(name==='history-tab'){historyKind=el.dataset.soKind;historyLimit=10;return;}
    if(name==='history-more'){historyLimit+=10;return;}
    if(name==='pick-date'){openDatePicker(el.dataset.soField);return;}
@@ -528,6 +566,7 @@
  });
  document.addEventListener('input',ev=>{
   const el=ev.target;if(!form||!page()?.contains(el))return;
+  if(el.dataset.soExcelImport!==undefined)return;
   if(el.dataset.soReceiptSearch!==undefined&&form.kind==='receipt'){
    receiptQuery=el.value;
    const results=el.parentElement?.querySelector('[data-so-receipt-results]');
@@ -542,6 +581,7 @@
   snapshot();
  });
  document.addEventListener('change',async ev=>{const el=ev.target;if(!form||!page()?.contains(el))return;
+  if(el.dataset.soExcelImport!==undefined){const file=el.files?.[0];el.value='';if(!file)return;try{await importExcel(file);}catch(error){notice=error.message||'File gagal diimpor.';}render();return;}
   if(el.dataset.soField==='category'){render();}
   if(el.dataset.soField==='target'){const token=viewGeneration;try{targetRows=el.value?await service.targetCatalog(el.value):[];if(token===viewGeneration)render();}catch(error){notice=error.message;render();}}
  });

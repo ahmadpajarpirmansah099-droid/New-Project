@@ -426,3 +426,11 @@
   #page-stock-opname .so-unit-options button[aria-pressed="true"] { background: var(--ui-lime); }
   #page-stock-opname .so-unit-options button:hover { background: var(--ui-lime-soft); }
 }
+#page-stock-opname .so-excel-import {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 10px 14px; box-sizing: border-box; cursor: pointer;
+  font: 700 13px/1.35 var(--ui-font); color: var(--so-ink); background: var(--ui-surface);
+  border: 1px solid var(--so-line); border-radius: var(--ui-radius-control); box-shadow: var(--ui-shadow-control);
+}
+#page-stock-opname .so-excel-import input { position: absolute; width: 1px; height: 1px; min-height: 0; padding: 0; opacity: 0; }
+#page-stock-opname .so-excel-import:focus-within { outline: 2px solid var(--ui-lime-strong); outline-offset: 2px; }
