@@ -80,6 +80,22 @@
       if(trigger)trigger.setAttribute('aria-expanded','false');
     });
   }
+  function placeScopeMenu(menu, trigger) {
+    menu.classList.remove('opens-up');
+    menu.style.removeProperty('max-height');
+    const gap=8, margin=12;
+    const field=trigger.parentElement||trigger;
+    const fieldRect=field.getBoundingClientRect();
+    const spaceBelow=window.innerHeight-fieldRect.bottom-gap-margin;
+    const spaceAbove=fieldRect.top-gap-margin;
+    if(menu.scrollHeight<=spaceBelow)return;
+    if(spaceAbove>spaceBelow){
+      menu.classList.add('opens-up');
+      menu.style.maxHeight=Math.max(120,spaceAbove)+'px';
+    }else{
+      menu.style.maxHeight=Math.max(96,spaceBelow)+'px';
+    }
+  }
   function renderScopeMenu(type, items, selectedId) {
     const menu=$(type==='outlet'?'workspaceOutletMenu':'workspaceDivisionMenu');
     if(!menu)return;
@@ -128,6 +144,7 @@
     if(shouldOpen){
       menu.hidden=false;
       trigger.setAttribute('aria-expanded','true');
+      placeScopeMenu(menu,trigger);
     }
   }
   async function switchWorkspaceContext(workspaceId, divisionSelection) {
@@ -434,6 +451,31 @@
     document.addEventListener('keydown',(event)=>{
       if(event.key==='Escape')closeScopeDropdowns();
     });
+    const scopeDialog = $('workspaceScopeDialog');
+    const drawerScopeButton = $('drawerScopeButton');
+    if (scopeDialog && drawerScopeButton) {
+      drawerScopeButton.addEventListener('click', () => {
+        if (!authContext?.isGlobalDeveloper || scopeDialog.open) return;
+        scopeDialog.showModal();
+      });
+      $('scopeDialogClose')?.addEventListener('click', () => scopeDialog.close());
+      scopeDialog.addEventListener('click', (event) => {
+        if (event.target === scopeDialog) scopeDialog.close();
+      });
+      scopeDialog.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        if (!scopeDialog.querySelector('.scope-dropdown-menu:not([hidden])')) return;
+        event.preventDefault();
+        closeScopeDropdowns();
+      });
+      scopeDialog.addEventListener('close', () => {
+        closeScopeDropdowns();
+        drawerScopeButton.focus();
+      });
+      window.addEventListener('app:workspace-context-changed', () => {
+        if (scopeDialog.open) scopeDialog.close();
+      });
+    }
     $('authProfileButton').addEventListener('click', handleLogout);
 
     supabaseClient.auth.onAuthStateChange(function (event, session) {
