@@ -1542,7 +1542,7 @@
     color: var(--ui-ink, #111225);
     box-shadow: 0 4px 14px rgba(0, 0, 0, .16);
     font: 700 12px/1.3 'DM Sans', sans-serif;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
     pointer-events: none;
     transform: translateY(-50%);
   }
