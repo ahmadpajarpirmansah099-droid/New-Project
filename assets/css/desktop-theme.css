@@ -1,0 +1,45 @@
+.desktop-theme-setting { display: none; }
+@media (min-width: 900px) {
+  .desktop-theme-setting { display: block; }
+  #page-settings .desktop-theme-toggle { display: inline-grid; place-items: center; width: 44px; height: 44px; min-width: 44px; padding: 10px; border: 1px solid var(--ui-line); border-radius: 12px; background: var(--ui-surface-soft); color: var(--ui-ink); }
+  .desktop-theme-toggle svg { width: 22px; height: 22px; }
+  .desktop-theme-sun { display: none; }
+  html[data-desktop-theme="dark"] .desktop-theme-moon { display: none; }
+  html[data-desktop-theme="dark"] .desktop-theme-sun { display: block; }
+
+  html[data-desktop-theme="dark"] {
+    color-scheme: dark;
+    --ui-bg: #141815; --ui-surface: #202622; --ui-surface-soft: #2b332d;
+    --ui-ink: #f1f4eb; --ui-muted: #b8c2b5; --ui-line: #465147;
+    --ui-lime: #455b2d; --ui-lime-soft: #35462d; --ui-lime-strong: #a5c85e; --ui-olive: #c4df82;
+    --ui-shadow-control: 0 2px 8px #0005; --ui-shadow-card: 0 6px 18px #0005;
+    --ui-shadow-raised: 0 10px 26px #0008; --ui-shadow-overlay: 0 18px 48px #000a;
+  }
+  html[data-desktop-theme="dark"] body { background: var(--ui-bg); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.top, .menu-drawer, .drawer-nav, .drawer-foot) { background-color: var(--ui-bg); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.drawer-item, .drawer-guide-icon, .auth-logout-button, .scope-trigger) { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.hero, .metric, .guest, .settings-card, .empty, .reservation-card, .reservation-toolbar, .dashboard-reservation-card, .dashboard-trend-card, .monitor-stat, .monitor-account, .monitor-activity-item, .division-overview-card, .md-item-card, .wip-card, .menu-card, .md-count-grid > div, .wip-count-grid > div, .menu-count-grid > div, .so-panel, .so-overview, .sd-card, .sd-chart-panel, .sheet, .calendar-dialog, .logout-confirm-dialog, .so-picker-dialog, .so-confirm-dialog, .sd-dialog, .scope-dropdown, .app-select-menu) {
+    background-color: var(--ui-surface); color: var(--ui-ink); border-color: var(--ui-line);
+  }
+  html[data-desktop-theme="dark"] :is(.md-search, .wip-search, .menu-search, .search, .md-item-prices > div, .wip-card-metrics > div, .menu-card-prices > div, .so-toolbar, .so-receipt-search, .so-ledger th, .so-category-options, .so-unit-options, .sd-production-summary, .sd-ledger-summary, .md-recipe-section, .wip-recipe-section, .menu-recipe-section, .wip-recipe-row, .menu-recipe-row, .md-conversion-row) {
+    background-color: var(--ui-surface-soft); color: var(--ui-ink); border-color: var(--ui-line);
+  }
+  html[data-desktop-theme="dark"] :is(input, textarea, select) { background-color: var(--ui-surface-soft); color: var(--ui-ink); border-color: var(--ui-line); }
+  html[data-desktop-theme="dark"] :is(.md-search input, .wip-search input, .menu-search input, .search input) { background: transparent; color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.page-title, .greeting h1, .setting-copy b, .md-item-copy h3, .wip-card-copy h3, .menu-card-copy h3, .md-list-heading h2, .wip-list-heading h2, .menu-list-heading h2, .sheet-head h2, .wip-sheet-heading h2, .menu-sheet-heading h2, .md-sheet-heading h2) { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.md-filter-row button, .wip-filter-row button, .menu-filter-row button, .md-item-actions button, .wip-card-actions button, .menu-card-actions button, .md-export-button, .so-picker-trigger, .so-unit-dropdown > summary, .so-category-dropdown > summary, .so-unit-options button, .so-category-options button, .so-excel-import, .so-receipt-search-results button, .seating-step-button) {
+    background-color: var(--ui-surface-soft); color: var(--ui-ink); border-color: var(--ui-line);
+  }
+  html[data-desktop-theme="dark"] :is(.md-filter-row button.is-selected, .wip-filter-row button.is-selected, .menu-filter-row button.is-selected, .so-unit-options button[aria-pressed="true"], .so-category-options button[aria-pressed="true"], .drawer-item.active, .sd-card-sales, .so-primary) {
+    background-color: var(--ui-lime); color: var(--ui-ink); border-color: var(--ui-lime-strong);
+  }
+}
+@media (min-width: 900px) {
+  html[data-desktop-theme="dark"] :is(.primary, .md-primary, .wip-primary, .menu-primary, .md-save, .wip-save, .menu-save) { background-color: var(--ui-lime); color: var(--ui-ink); border-color: var(--ui-lime-strong); }
+  html[data-desktop-theme="dark"] :is(.md-field, .wip-field, .menu-field, .setting-copy, .md-sheet-simple .md-field, .md-advanced-content .md-field) { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.md-item-actions .md-status-action, .wip-card-actions .wip-status-action, .menu-card-actions .menu-status-action) { background: #363245; color: #dfd4ff; }
+}
+@media (min-width: 900px) {
+  html[data-desktop-theme="dark"] #page-dashboard > .hero { background: linear-gradient(135deg, #344e29, #26382b); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.hero-label, .hero-foot span, .hero-foot b, .hero-total) { color: var(--ui-ink); }
+}
