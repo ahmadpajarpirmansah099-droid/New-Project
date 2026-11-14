@@ -704,11 +704,7 @@
   padding: 10px 12px;
   box-shadow: 0 2px 5px rgba(17,18,37,.035);
 }
-.md-sheet-simple .md-supply-toggle b { font-size: 12px; }
-.md-sheet-simple .md-supply-toggle small { font-size: 11px; }
 .md-advanced summary { min-height: 56px; }
-.md-advanced summary b { font-size: 13px; }
-.md-advanced summary small { font-size: 11px; }
 .md-advanced-content { gap: 10px; }
 
 .md-advanced-content .md-section-heading small { font-size: 10px; }
@@ -723,10 +719,6 @@
   padding: 10px 12px;
   box-shadow: 0 2px 6px rgba(17,18,37,.035);
 }
-.md-sheet-simple .md-price-result span { font-size: 11px; }
-.md-sheet-simple .md-price-result strong { font-size: 15px; }
-.md-sheet-simple .md-price-result small { font-size: 11px; }
-.md-sheet-simple .md-form-note { font-size: 11px; }
 .md-sheet-simple .md-save {
   box-shadow: 0 3px 8px rgba(17,18,37,.10), 0 1px 2px rgba(17,18,37,.045);
 }
@@ -743,10 +735,7 @@
 
 
 /* Refined typography for Master Barang form */
-.md-sheet-simple .md-sheet-heading h2 {
-  font-size: 18px;
-  letter-spacing: -.025em;
-}
+.md-sheet-simple .md-sheet-heading h2 { letter-spacing: -.025em; }
 .md-sheet-simple .md-eyebrow {
   font-size: 8px;
   letter-spacing: .12em;
@@ -769,18 +758,8 @@
   min-height: 42px;
   font-size: 14px;
 }
-.md-sheet-simple .md-supply-toggle b {
-  font-size: 11px;
-}
 .md-sheet-simple .md-supply-toggle small {
-  font-size: 10px;
   line-height: 1.35;
-}
-.md-advanced summary b {
-  font-size: 12px;
-}
-.md-advanced summary small {
-  font-size: 10px;
 }
 .md-advanced-mark {
   width: 30px;
@@ -803,37 +782,19 @@
 .md-advanced-content .md-field input {
   font-size: 16px;
 }
-.md-sheet-simple .md-price-result span {
-  font-size: 10px;
-}
-.md-sheet-simple .md-price-result strong {
-  font-size: 14px;
-}
 .md-sheet-simple .md-price-result strong.is-muted {
   font-size: 11px;
 }
 .md-sheet-simple .md-price-result small {
-  font-size: 10px;
   line-height: 1.35;
 }
 .md-sheet-simple .md-form-note {
-  font-size: 10px;
   line-height: 1.4;
-}
-.md-sheet-simple .md-save {
-  font-size: 15px;
 }
 @media (max-width: 390px) {
   .md-sheet-simple .md-sheet-heading h2 { font-size: 17px; }
   .md-sheet-simple .md-field { font-size: 11px; }
   .md-sheet-simple .app-select-trigger { font-size: 14px; }
-  .md-sheet-simple .md-supply-toggle b { font-size: 10px; }
-  .md-sheet-simple .md-supply-toggle small { font-size: 9px; }
-  .md-advanced summary b { font-size: 11px; }
-  .md-advanced summary small { font-size: 9px; }
-  .md-sheet-simple .md-price-result span { font-size: 9px; }
-  .md-sheet-simple .md-price-result strong { font-size: 13px; }
-  .md-sheet-simple .md-form-note { font-size: 9px; }
 }
 
 
