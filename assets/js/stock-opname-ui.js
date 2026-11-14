@@ -6,9 +6,10 @@
  const money=v=>'Rp'+Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:0});
  const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  const labels={initial:'Stock Awal',receipt:'Barang Masuk',expense:'Pengeluaran',production:'Produksi WIP',sales:'Sales',close:'Stock Opname',move_in:'Move Masuk',adjustment:'Penyesuaian Move',adjustment_in:'Penyesuaian Move Masuk'};
+ const expenseCategories=['Kalibrasi','RnD','QC','Suplies','Move','Waste','Lainnya'];
  const periodStatus={active:'Berjalan',reopened:'Koreksi opname',opening_pending:'Stock Awal perlu diisi ulang',closed:'Menunggu konfirmasi Stock Awal',held:'Ditahan'};
  const formHelp={initial:'Isi stok pertama untuk seluruh bahan, suplies, dan WIP, termasuk angka 0.',receipt:'Catat bahan dan suplies yang diterima. Simpan Transaksi langsung menambah stok; Simpan Draft untuk isian yang belum selesai.',expense:'Catat barang yang digunakan atau dipindahkan. Simpan Transaksi langsung mengurangi stok; Simpan Draft belum mengubah stok.',production:'Isi jumlah batch. Simpan Transaksi langsung memproses bahan dan hasil WIP; Simpan Draft belum mengubah stok.',sales:'Pilih rentang tanggal, lalu isi total terjual setiap menu dalam satu form.',close:'Cocokkan stok sistem dengan fisik. Isi seluruh barang, termasuk angka 0.'};
- let form=null,busy=false,notice='',targetRows=[],receiptQuery='',viewGeneration=0,draftSaved=false,activeConfirm=null,historyKind='close',historyLimit=10;
+ let form=null,busy=false,notice='',targetRows=[],receiptQuery='',expenseQuery='',viewGeneration=0,draftSaved=false,activeConfirm=null,historyKind='close',historyLimit=10;
  const page=()=>document.getElementById('page-stock-opname');
  const get=()=>service.current();
  function period(){const ps=get()?.state?.periods||[];const p=ps.at(-1);return p?.status==='held'?ps.at(-2):p;}
@@ -25,8 +26,8 @@
   const n=document.getElementById('soDraftStatus');if(n)n.textContent=draftStatus();
   return draftSaved;
  }
- function reset(){root.StockDashboardUI?.reset();activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];receiptQuery='';busy=false;draftSaved=false;historyKind='close';historyLimit=10;service.reset();}
- async function initialize(client,context){activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];receiptQuery='';draftSaved=false;historyKind='close';historyLimit=10;await service.initialize(client,context);navigation();}
+ function reset(){root.StockDashboardUI?.reset();activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];receiptQuery='';expenseQuery='';busy=false;draftSaved=false;historyKind='close';historyLimit=10;service.reset();}
+ async function initialize(client,context){activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];receiptQuery='';expenseQuery='';draftSaved=false;historyKind='close';historyLimit=10;await service.initialize(client,context);navigation();}
  function navigation(){const n=document.querySelector('[data-page="stock-opname"]');if(n)n.style.display=service.available()?'':'none';}
  function button(label,action,extra='',primary=false){return '<button type="button" data-so-action="'+action+'" '+extra+' class="'+(primary?'so-primary':'')+'" '+(busy?'disabled':'')+'>'+e(label)+'</button>';}
  function hasDraftContent(draft){
@@ -116,7 +117,7 @@
   });
  }
  async function open(kind,existing){
-  receiptQuery='';
+  receiptQuery='';expenseQuery='';
   if(kind==='initial'&&period()&&period().status!=='opening_pending'){notice='Stock Awal pertama sudah diisi. Berikutnya gunakan konfirmasi hasil opname.';render();return;}
   if(staleOpeningDraft(form)){service.clearDraft('initial');form=null;}
   if(staleCorrectionDraft(form)){service.clearDraft('close');form=null;}
@@ -163,12 +164,27 @@
   if(!matches.length)return '<p>Tidak ada barang yang cocok atau barang sudah dipilih.</p>';
   return matches.map(r=>'<button type="button" data-so-action="receipt-add" data-so-item-key="'+e(r.key)+'" '+(r.error?'disabled':'')+'><span>'+e(r.name)+'</span><small>'+e(r.error||r.unit||'')+'</small></button>').join('');
  }
+ function expenseItems(){
+  if(form?.kind!=='expense')return [];
+  if(!Array.isArray(form.expenseItems))form.expenseItems=Object.keys(form.counts||{}).filter(key=>/^[mw]:/.test(key)&&form.counts[key]?.qty!=null&&String(form.counts[key].qty).trim()!=='');
+  return form.expenseItems;
+ }
+ function expenseSuggestions(query){
+  const term=query.trim().toLocaleLowerCase('id-ID');
+  if(!term)return '<p>Ketik nama barang atau WIP untuk mencari.</p>';
+  const selected=expenseItems();
+  const matches=catalog().filter(r=>/^[mw]:/.test(r.key)&&!selected.includes(r.key)&&String(r.name||'').toLocaleLowerCase('id-ID').includes(term)).sort((a,b)=>a.name.localeCompare(b.name,'id')).slice(0,8);
+  if(!matches.length)return '<p>Tidak ada barang atau WIP yang cocok, atau sudah dipilih.</p>';
+  return matches.map(r=>'<button type="button" data-so-action="expense-add" data-so-item-key="'+e(r.key)+'" '+(r.error?'disabled':'')+'><span>'+e(r.name)+'</span><small>'+e(r.error||r.unit||'')+'</small></button>').join('');
+ }
  function rowsForForm(){let rows=catalog();const k=form.kind;
   if(k==='sales')rows=rows.filter(x=>x.key.startsWith('s:'));
   else if(k==='production')rows=rows.filter(x=>x.key.startsWith('w:'));
   else if(k==='receipt')rows=rows.filter(x=>receiptItems().includes(x.key));
+  else if(k==='expense')rows=rows.filter(x=>expenseItems().includes(x.key));
   else rows=rows.filter(x=>!x.key.startsWith('s:'));
-  return k==='receipt'?rows.sort((a,b)=>receiptItems().indexOf(a.key)-receiptItems().indexOf(b.key)):rows.sort((a,b)=>a.name.localeCompare(b.name,'id'));
+  const selected=k==='receipt'?receiptItems():k==='expense'?expenseItems():null;
+  return selected?rows.sort((a,b)=>selected.indexOf(a.key)-selected.indexOf(b.key)):rows.sort((a,b)=>a.name.localeCompare(b.name,'id'));
  }
  function countConversion(row){
   const value=form.counts[row.key]||{},factor=(row.units||[]).find(u=>u.unit===(value.unit||row.unit))?.factor;
@@ -179,20 +195,22 @@
  function pickerButton(label,attrs,options){return '<button type="button" class="so-picker-trigger" aria-haspopup="dialog" data-so-action="pick-choice" '+attrs+' data-so-options="'+e(JSON.stringify(options))+'"><span>'+e(label)+'</span><span class="so-picker-chevron" aria-hidden="true"></span></button>';}
  function formHTML(){
   if(!form)return '';
-  const k=form.kind,rows=rowsForForm(),b=balances(),isCount=['initial','close'].includes(k),withUnit=!['sales','production'].includes(k),receipt=k==='receipt';
+  const k=form.kind,rows=rowsForForm(),b=balances(),isCount=['initial','close'].includes(k),withUnit=!['sales','production'].includes(k),receipt=k==='receipt',expense=k==='expense';
   const dateButton=(field,title)=>'<button type="button" class="so-picker-trigger" aria-haspopup="dialog" data-so-action="pick-date" data-so-field="'+field+'" data-so-title="'+title+'" '+(k==='initial'&&period()?.status==='opening_pending'?'disabled':'')+'><span>'+e(dateLabel(form[field]))+'</span><span class="so-picker-chevron" aria-hidden="true"></span></button>';
   const dates=(k==='sales'?'<label>Dari tanggal'+dateButton('start','Pilih tanggal awal')+'</label>':'')+'<label>'+(k==='sales'?'Sampai tanggal':'Tanggal')+dateButton('end','Pilih tanggal')+'</label>';
   let extra='';
-  if(k==='expense')extra='<label>Kategori'+pickerButton(form.category,'data-so-field="category" data-so-title="Pilih kategori"',['Kalibrasi','RnD','QC','Suplies','Move','Waste','Lainnya'].map(x=>({value:x,label:x})))+'</label>';
+  if(k==='expense')extra='<div class="so-category-field"><span>Kategori</span><details class="so-category-dropdown"><summary aria-label="Kategori pengeluaran"><span>'+e(form.category)+'</span><span class="so-picker-chevron" aria-hidden="true"></span></summary><div class="so-category-options">'+expenseCategories.map(x=>'<button type="button" data-so-action="expense-category" data-so-value="'+e(x)+'" aria-pressed="'+(x===form.category)+'">'+e(x)+'</button>').join('')+'</div></details></div>';
   if(form.category==='Move'&&k==='expense')extra+='<label>Tujuan'+pickerButton((get().targets||[]).find(x=>x.id===form.target)?.name||'Pilih tujuan aktif','data-so-field="target" data-so-title="Pilih tujuan outlet/divisi"',[{value:'',label:'Pilih tujuan aktif'},...(get().targets||[]).map(x=>({value:x.id,label:x.name}))])+'</label>';
   const noTarget=k==='expense'&&form.category==='Move'&&!(get().targets||[]).length;
   const excelActions=['sales','close'].includes(k)?'<div class="so-actions">'+button('Unduh Template Kosong','excel-form')+'<label class="so-excel-import">Impor Excel<input type="file" accept=".xlsx" data-so-excel-import hidden></label></div>':'';
   const receiptSearch=receipt?'<div class="so-receipt-search"><label for="soReceiptSearch">Cari barang masuk</label><input id="soReceiptSearch" type="search" data-so-receipt-search placeholder="Ketik nama barang..." aria-label="Cari nama barang" autocomplete="off" value="'+e(receiptQuery)+'"><div class="so-receipt-search-results" data-so-receipt-results role="group" aria-label="Hasil pencarian barang">'+receiptSuggestions(receiptQuery)+'</div></div>':'';
+  const expenseSearch=expense?'<div class="so-receipt-search"><label for="soExpenseSearch">Cari barang atau WIP</label><input id="soExpenseSearch" type="search" data-so-expense-search placeholder="Ketik nama barang atau WIP..." aria-label="Cari nama barang atau WIP" autocomplete="off" value="'+e(expenseQuery)+'"><div class="so-receipt-search-results" data-so-expense-results role="group" aria-label="Hasil pencarian barang atau WIP">'+expenseSuggestions(expenseQuery)+'</div></div>':'';
   const head='<tr><th>'+(isCount?'Barang':k==='sales'?'Menu':k==='production'?'WIP / hasil otomatis':'Barang / stok sistem')+'</th>'+(isCount?'<th class="so-desktop-only so-stock">Stok sistem</th>':'')+'<th class="so-quantity">'+(k==='production'?'Batch':k==='sales'?'Terjual':isCount?'Fisik':'Jumlah')+'</th>'+(withUnit?'<th class="so-unit">Satuan</th>':'')+(isCount?'<th class="so-desktop-only so-conversion">Konversi fisik</th>':'')+(receipt?'<th class="so-invoice">Total invoice</th>':'')+'</tr>';
   const body=rows.map(r=>{
    const v=form.counts[r.key]||{},units=r.units||[],disabled=!!r.error;
    let meta=disabled?r.error:k==='sales'?'Total selama rentang pilihan':k==='production'?'Hasil: '+number(Number(v.qty||0)*Number(r.yield))+' '+r.unit+' · 1 batch = '+number(r.yield)+' '+r.unit:'Sistem: '+number(b[r.key])+' '+(r.unit||'');
    let html='<tr><td><strong>'+e(r.name)+'</strong><small data-so-output="'+e(r.key)+'" class="'+(disabled?'so-error':isCount?'so-system-mobile':'')+'">'+e(meta)+'</small>';
+   if(expense)html+='<button type="button" class="so-receipt-remove" data-so-action="expense-remove" data-so-item-key="'+e(r.key)+'" aria-label="Hapus '+e(r.name)+' dari transaksi">Hapus</button>';
    if(receipt)html+='<button type="button" class="so-receipt-remove" data-so-action="receipt-remove" data-so-item-key="'+e(r.key)+'" aria-label="Hapus '+e(r.name)+' dari transaksi">Hapus</button>';
    if(form.category==='Move'&&k==='expense')html+='<label><small>Barang tujuan</small>'+pickerButton(targetRows.find(t=>t.key===form.mapping[r.key])?.name||'Pilih padanan','data-so-map="'+e(r.key)+'" data-so-title="Pilih padanan barang"',[{value:'',label:'Pilih padanan'},...targetRows.filter(t=>!t.error&&t.unit===r.unit).map(t=>({value:t.key,label:t.name}))])+'</label>';
    html+='</td>'+(isCount?'<td class="so-desktop-only so-stock">'+(disabled?'—':number(b[r.key])+' '+e(r.unit))+'</td>':'')+'<td data-so-label="Jumlah"><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="qty" aria-label="'+e(labels[k]+' '+r.name)+'" value="'+e(v.qty??'')+'" '+(disabled?'disabled':'')+'></td>';
@@ -206,7 +224,7 @@
    if(receipt)html+='<td data-so-label="Total invoice"><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="invoice_total" aria-label="Total invoice '+e(r.name)+'" value="'+e(v.invoice_total??'')+'" placeholder="Opsional"></td>';
    return html+'</tr>';
   }).join('');
-  return '<section class="so-panel so-form"><header class="so-form-head"><h2>'+e(labels[k])+'</h2><p>'+e(formHelp[k])+'</p></header><div class="so-toolbar">'+dates+extra+'</div>'+(noTarget?'<p class="so-notice">Belum ada outlet/divisi tujuan yang aktif.</p>':'')+receiptSearch+excelActions+(rows.some(r=>r.error)?masterLinks():'')+(isPending()&&k!=='close'?'<p class="so-notice">Stock Awal berikutnya belum dikonfirmasi. Isian ini disimpan sebagai draft.</p>':'')+(rows.length?'<table class="so-ledger'+(isCount?' so-count-ledger':receipt?' so-receipt-ledger':'')+'" aria-label="'+e(labels[k])+'"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>':'<p class="so-notice">'+(receipt?'Belum ada barang dipilih. Cari dan pilih barang di atas.':'Data belum tersedia.')+'</p>')+(!rows.length&&(!receipt||!catalog().some(r=>r.key.startsWith('m:')))?masterLinks():'')+'<footer class="so-form-footer"><p id="soDraftStatus" class="so-status" role="status">'+e(draftStatus())+'</p><div class="so-actions">'+button('Simpan Draft','draft')+button('Tutup Form','cancel')+button(isCount?'Konfirmasi':'Simpan Transaksi','submit','',true)+'</div></footer></section>';
+  return '<section class="so-panel so-form"><header class="so-form-head"><h2>'+e(labels[k])+'</h2><p>'+e(formHelp[k])+'</p></header><div class="so-toolbar">'+dates+extra+'</div>'+(noTarget?'<p class="so-notice">Belum ada outlet/divisi tujuan yang aktif.</p>':'')+receiptSearch+expenseSearch+excelActions+(rows.some(r=>r.error)?masterLinks():'')+(isPending()&&k!=='close'?'<p class="so-notice">Stock Awal berikutnya belum dikonfirmasi. Isian ini disimpan sebagai draft.</p>':'')+(rows.length?'<table class="so-ledger'+(isCount?' so-count-ledger':receipt?' so-receipt-ledger':'')+'" aria-label="'+e(labels[k])+'"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>':'<p class="so-notice">'+(receipt||expense?'Belum ada barang dipilih. Cari dan pilih barang di atas.':'Data belum tersedia.')+'</p>')+(!rows.length&&(!(receipt||expense)||!catalog().some(r=>receipt?r.key.startsWith('m:'):/^[mw]:/.test(r.key)))?masterLinks():'')+'<footer class="so-form-footer"><p id="soDraftStatus" class="so-status" role="status">'+e(draftStatus())+'</p><div class="so-actions">'+button('Simpan Draft','draft')+button('Tutup Form','cancel')+button(isCount?'Konfirmasi':'Simpan Transaksi','submit','',true)+'</div></footer></section>';
  }
  function historyDates(items,dateOf){
   const groups=new Map();
@@ -508,7 +526,19 @@
    if(name==='history-more'){historyLimit+=10;historyOnly=true;return;}
    if(name==='pick-date'){openDatePicker(el.dataset.soField);return;}
    if(name==='pick-choice'){openChoicePicker(el);return;}
+   if(name==='expense-category'&&form?.kind==='expense'){const value=el.dataset.soValue;if(expenseCategories.includes(value)){form.category=value;form.touched=true;snapshot();}return;}
    if(name==='unit-option'&&form){const key=el.dataset.soKey,value=el.dataset.soValue,row=catalog().find(r=>r.key===key&&!r.error);if(row?.units?.some(u=>u.unit===value)){form.counts[key]={...form.counts[key],unit:value};form.touched=true;snapshot();}return;}
+   if(name==='expense-add'&&form?.kind==='expense'){
+    const key=el.dataset.soItemKey,row=catalog().find(r=>r.key===key&&/^[mw]:/.test(r.key)&&!r.error);
+    if(row&&!expenseItems().includes(key)){
+     expenseItems().push(key);form.counts[key]={...form.counts[key],unit:form.counts[key]?.unit||row.unit};
+     form.touched=true;snapshot();expenseQuery='';
+    }return;
+   }
+   if(name==='expense-remove'&&form?.kind==='expense'){
+    const key=el.dataset.soItemKey;form.expenseItems=expenseItems().filter(item=>item!==key);
+    delete form.counts[key];delete form.mapping[key];form.touched=true;snapshot();return;
+   }
    if(name==='receipt-add'&&form?.kind==='receipt'){
     const key=el.dataset.soItemKey,row=catalog().find(r=>r.key===key&&r.key.startsWith('m:')&&!r.error);
     if(row&&!receiptItems().includes(key)){
@@ -552,21 +582,27 @@
     await service.write(name,{},crypto.randomUUID());notice=name==='reopen'?'Opname dibuka kembali. Koreksi transaksi atau stok fisik, lalu selesaikan ulang.':'Stock Awal dikonfirmasi. Draft transaksi dapat dipulihkan dan disimpan.';
    }
   }catch(error){historyOnly=false;if(token===viewGeneration)notice=error.message;}
-  finally{if(token===viewGeneration){busy=false;const history=page()?.querySelector('#soHistory');if(historyOnly&&history)history.outerHTML=historyHTML();else render();if(name==='unit-option')page()?.querySelectorAll?.('.so-unit-dropdown').forEach(node=>{if(node.dataset.soUnitKey===el.dataset.soKey)node.querySelector('summary')?.focus();});}}
+  finally{if(token===viewGeneration){busy=false;const history=page()?.querySelector('#soHistory');if(historyOnly&&history)history.outerHTML=historyHTML();else render();if(name==='expense-category')page()?.querySelector?.('.so-category-dropdown summary')?.focus();if(name==='unit-option')page()?.querySelectorAll?.('.so-unit-dropdown').forEach(node=>{if(node.dataset.soUnitKey===el.dataset.soKey)node.querySelector('summary')?.focus();});}}
  }
  document.addEventListener('click',ev=>{
+  const category=ev.target.closest('.so-category-dropdown');
+  page()?.querySelectorAll?.('.so-category-dropdown[open]').forEach(node=>{if(node!==category)node.open=false;});
   const inside=ev.target.closest('.so-unit-dropdown');
   page()?.querySelectorAll?.('.so-unit-dropdown[open]').forEach(node=>{if(node!==inside)node.open=false;});
   const el=ev.target.closest('[data-so-action]');if(el){ev.preventDefault();action(el.dataset.soAction,el);}
  });
  document.addEventListener('keydown',ev=>{
   if(ev.key!=='Escape')return;
-  const dropdown=ev.target.closest('.so-unit-dropdown[open]');
+  const dropdown=ev.target.closest('.so-unit-dropdown[open], .so-category-dropdown[open]');
   if(dropdown){ev.preventDefault();dropdown.open=false;dropdown.querySelector('summary')?.focus();}
  });
  document.addEventListener('input',ev=>{
   const el=ev.target;if(!form||!page()?.contains(el))return;
   if(el.dataset.soExcelImport!==undefined)return;
+  if(el.dataset.soExpenseSearch!==undefined&&form.kind==='expense'){
+   expenseQuery=el.value;const results=el.parentElement?.querySelector('[data-so-expense-results]');
+   if(results)results.innerHTML=expenseSuggestions(expenseQuery);return;
+  }
   if(el.dataset.soReceiptSearch!==undefined&&form.kind==='receipt'){
    receiptQuery=el.value;
    const results=el.parentElement?.querySelector('[data-so-receipt-results]');

@@ -114,3 +114,9 @@ Dense operational ledger, inherited New-Project typography and lime/navy identit
 ## Riwayat dan form aktif (14 November 2026)
 
 Perpindahan kategori riwayat dan tombol tampilkan lebih banyak hanya memperbarui panel riwayat, sehingga form dan draft yang sedang terbuka tidak digambar ulang. Berlaku untuk seluruh kategori riwayat. Tidak ada perubahan alur data, akses, database, RLS, RPC, autentikasi, atau penyimpanan. Tes otomatis memeriksa pergantian kategori dan penambahan riwayat tanpa render ulang form atau transaksi baru; pemeriksaan visual di browser tetap diperlukan.
+
+## Pencarian barang Pengeluaran (14 November 2026)
+
+Form Pengeluaran memakai pencarian untuk memilih bahan atau WIP satu per satu; barang terpilih dapat dilepas dari draft. Draft lama dipulihkan dari item yang sudah memiliki jumlah, termasuk nol. Penghapusan item dari draft juga membersihkan padanan Move untuk item itu; transaksi tersimpan tidak dihapus. Kategori, pilihan satuan, tujuan Move, alur konfirmasi dan hak akses tetap mengikuti mekanisme semula. Tidak ada perubahan database, RLS, RPC, autentikasi atau nama kunci penyimpanan. Uji otomatis mencakup pencarian, pemilihan WIP, pemulihan draft lama, penghapusan pilihan dan pengiriman Move; pemeriksaan visual browser serta data asli belum dilakukan.
+
+Pilihan kategori Pengeluaran menggunakan dropdown web di dekat kolom pada HP dan desktop. Pergantian kategori tetap disimpan di draft dan kategori Move tetap menggunakan pemeriksaan tujuan/padanan yang sama. Tes otomatis memeriksa pilihan kategori, draft dan blokir Move tanpa tujuan; interaksi browser dan tampilan visual belum terverifikasi.

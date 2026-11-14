@@ -47,6 +47,7 @@ function runtime() {
     StockOpnameService: {
       current: () => data,
       async read() { return data; },
+      async targetCatalog() { return [{key:'m:destination',name:'Susu tujuan',unit:'ML'}]; },
       saveDraft(value) { if (storageFails) throw Error('Quota exceeded'); drafts[value.kind] = copy(value); letHolder.active = value.kind; },
       loadDraft: kind => { const value = drafts[kind || letHolder.active]; return value && copy(value); },
       clearDraft(kind) { if (kind) delete drafts[kind]; else for (const key of Object.keys(drafts)) delete drafts[key]; if (!kind || letHolder.active === kind) letHolder.active = Object.keys(drafts).at(-1) || null; },
@@ -70,6 +71,7 @@ function runtime() {
     pageRenders: () => pageRenders,
     searchResults,
     draft: kind => { const value = drafts[kind || letHolder.active]; return value && copy(value); },
+    seedDraft(value) { drafts[value.kind]=copy(value); letHolder.active=value.kind; },
     setExcel(value) { w.StockExcel = value; },
     async importFile(file) { await handlers.change({target:{dataset:{soExcelImport:''},files:[file],value:'file'}}); },
     confirm: value => allowConfirm = value,
@@ -96,6 +98,7 @@ for (const [kind, key] of [['receipt', 'm:a'], ['production', 'w:a'], ['sales', 
 
 test('switching forms retains each local draft and restores the selected form', async () => {
   const t = runtime(); await t.ui.open('expense');
+  await t.click('expense-add',{soItemKey:'m:a'});
   t.input({ soKey: 'm:a', soProp: 'qty' }, '9');
   await t.ui.open('receipt');
   assert.equal(t.draft('expense').counts['m:a'].qty, '9');
@@ -214,8 +217,8 @@ test('stock opname dates and selections render as in-app web controls', async ()
   assert.doesNotMatch(t.page.innerHTML, /type="date"/);
   assert.match(t.page.innerHTML, /<details class="so-unit-dropdown"/);
   await t.ui.open('expense');
-  assert.match(t.page.innerHTML, /Pilih kategori/);
-  assert.match(t.page.innerHTML, /data-so-action="pick-choice"/);
+  assert.match(t.page.innerHTML, /aria-label="Kategori pengeluaran"/);
+  assert.match(t.page.innerHTML, /data-so-action="expense-category"/);
 });
 
 test('opname results show two compact rows and keep full movements expandable', () => {
@@ -344,6 +347,7 @@ test('Move with no active destination never submits a one-sided expense', async 
 
 test('failed transaction keeps its draft and reuses the same request on retry', async () => {
   const t = runtime(); await t.ui.open('expense');
+  await t.click('expense-add',{soItemKey:'m:a'});
   t.input({ soKey: 'm:a', soProp: 'qty' }, '9'); t.writeFails(true);
   await t.click('submit');
   assert.equal(t.draft().counts['m:a'].qty, '9');
@@ -555,4 +559,70 @@ test('switching history tabs and showing more does not rerender an open sales fo
   assert.match(t.page.innerHTML,/Riwayat Sales/);
   assert.equal(t.draft('sales').counts['s:a'].qty,'12');
   assert.equal(t.writes.length,0);
+});
+
+test('Pengeluaran searches and selects materials and WIP one by one', async () => {
+ const t=runtime(); await t.ui.open('expense');
+ assert.match(t.page.innerHTML,/Cari barang atau WIP/);
+ assert.doesNotMatch(t.page.innerHTML,/aria-label="Pengeluaran (?:Susu|WIP)"/);
+ t.input({soExpenseSearch:''},'su'); assert.match(t.searchResults.innerHTML,/data-so-item-key="m:a"/);
+ await t.click('expense-add',{soItemKey:'m:a'}); t.input({soKey:'m:a',soProp:'qty'},'5');
+ t.input({soExpenseSearch:''},'wip'); assert.match(t.searchResults.innerHTML,/data-so-item-key="w:a"/);
+ await t.click('expense-add',{soItemKey:'w:a'}); t.input({soKey:'w:a',soProp:'qty'},'3');
+ await t.click('expense-add',{soItemKey:'w:a'});
+ assert.deepEqual(t.draft('expense').expenseItems,['m:a','w:a']);
+ await t.click('submit');
+ assert.equal(t.writes[0].input.lines.length,2);
+ assert.equal(t.writes[0].input.lines[0].qty,'5'); assert.equal(t.writes[0].input.lines[1].qty,'3');
+});
+
+test('legacy expense drafts restore pre-existing materials and WIP', async () => {
+ const t=runtime(); t.seedDraft({kind:'expense',request:'legacy',counts:{'m:a':{qty:'7',unit:'ML'},'w:a':{qty:'0',unit:'ML'}},mapping:{},category:'Waste',start:'2026-11-01',end:'2026-11-01'});
+ await t.ui.open('expense');
+ assert.match(t.page.innerHTML,/aria-label="Pengeluaran Susu" value="7"/);
+ assert.match(t.page.innerHTML,/aria-label="Pengeluaran WIP" value="0"/);
+ await t.click('submit'); assert.equal(t.writes[0].input.lines[0].qty,'7');
+});
+
+test('removing an expense item clears only its draft values and Move mapping', async () => {
+ const t=runtime(); await t.ui.open('expense');
+ await t.click('expense-add',{soItemKey:'m:a'}); await t.click('expense-add',{soItemKey:'w:a'});
+ t.input({soKey:'m:a',soProp:'qty'},'5'); t.input({soKey:'w:a',soProp:'qty'},'3');
+ t.input({soMap:'m:a'},'m:destination'); await t.click('expense-remove',{soItemKey:'m:a'});
+ assert.equal(t.draft('expense').counts['m:a'],undefined);
+ assert.equal(t.draft('expense').mapping['m:a'],undefined);
+ assert.equal(t.draft('expense').counts['w:a'].qty,'3');
+ await t.click('submit'); assert.equal(t.writes[0].input.lines.length,1);
+ assert.equal(t.writes[0].input.lines[0].key,'w:a');
+});
+
+test('Move keeps selected item, destination and mapping when submitting', async () => {
+ const t=runtime(); t.data.targets=[{id:'destination',name:'Outlet'}];
+ t.seedDraft({kind:'expense',request:'move',counts:{'m:a':{qty:'5',unit:'ML'}},mapping:{'m:a':'m:destination'},category:'Move',target:'destination',start:'2026-11-01',end:'2026-11-01'});
+ await t.ui.open('expense'); await t.click('submit');
+ assert.equal(t.writes[0].input.target,'destination');
+ assert.equal(t.writes[0].input.mapping[0].target,'m:destination');
+ assert.equal(t.writes[0].input.lines[0].qty,'5');
+});
+
+test('expense category uses in-page options and selection preserves selected items', async () => {
+ const t=runtime(); await t.ui.open('expense');
+ assert.match(t.page.innerHTML, /class="so-category-dropdown"/);
+ assert.match(t.page.innerHTML, /data-so-action="expense-category" data-so-value="Waste" aria-pressed="true"/);
+ assert.doesNotMatch(t.page.innerHTML, /data-so-field="category" data-so-title="Pilih kategori"/);
+ await t.click('expense-add',{soItemKey:'m:a'}); t.input({soKey:'m:a',soProp:'qty'},'5');
+ await t.click('expense-category',{soValue:'Kalibrasi'});
+ assert.equal(t.draft('expense').category,'Kalibrasi');
+ assert.equal(t.draft('expense').counts['m:a'].qty,'5');
+ assert.match(t.page.innerHTML, /data-so-value="Kalibrasi" aria-pressed="true"/);
+ await t.click('submit'); assert.equal(t.writes[0].input.category,'Kalibrasi');
+});
+
+test('selecting Move via in-page category retains safeguards', async () => {
+ const t=runtime(); await t.ui.open('expense');
+ await t.click('expense-add',{soItemKey:'m:a'}); t.input({soKey:'m:a',soProp:'qty'},'5');
+ await t.click('expense-category',{soValue:'Move'});
+ assert.match(t.page.innerHTML,/Belum ada outlet\/divisi tujuan yang aktif/);
+ await t.click('submit'); assert.equal(t.writes.length,0);
+ assert.equal(t.draft('expense').counts['m:a'].qty,'5');
 });
