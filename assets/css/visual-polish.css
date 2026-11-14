@@ -721,3 +721,30 @@ button, input, select, textarea { font-family: var(--ui-font); }
   #page-dashboard > .dashboard-trend-card { grid-area: trend; }
 }
 
+
+/* Gentle hover feedback on master-data cards and controls for mouse users. */
+@media (hover: hover) and (pointer: fine) {
+  :is(#page-master-items, #page-wips, #page-menus) :is(.md-item-card, .wip-card, .menu-card, .md-count-grid > div, .wip-count-grid > div, .menu-count-grid > div) {
+    transition: transform .2s var(--ui-ease), box-shadow .2s var(--ui-ease), border-color .2s var(--ui-ease);
+  }
+  :is(#page-master-items, #page-wips, #page-menus) :is(.md-item-card, .wip-card, .menu-card, .md-count-grid > div, .wip-count-grid > div, .menu-count-grid > div):hover {
+    transform: translateY(-2px);
+    border-color: #c6d5a7;
+    box-shadow: var(--ui-shadow-raised);
+  }
+  :is(#page-master-items, #page-wips, #page-menus) :is(.md-filter-row, .wip-filter-row, .menu-filter-row, .md-item-actions, .wip-card-actions, .menu-card-actions) button,
+  :is(#page-master-items, #page-wips, #page-menus) .md-export-toolbar-actions > button {
+    transition: box-shadow .2s var(--ui-ease), border-color .2s var(--ui-ease);
+  }
+  :is(#page-master-items, #page-wips, #page-menus) :is(.md-filter-row, .wip-filter-row, .menu-filter-row, .md-item-actions, .wip-card-actions, .menu-card-actions) button:hover:not(:disabled),
+  :is(#page-master-items, #page-wips, #page-menus) .md-export-toolbar-actions > button:hover:not(:disabled) {
+    border-color: #b7cf86;
+    box-shadow: 0 3px 10px rgba(49, 66, 24, .14);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(#page-master-items, #page-wips, #page-menus) :is(.md-item-card, .wip-card, .menu-card, .md-count-grid > div, .wip-count-grid > div, .menu-count-grid > div):hover { transform: none; }
+  :is(#page-master-items, #page-wips, #page-menus) :is(.md-item-card, .wip-card, .menu-card, .md-count-grid > div, .wip-count-grid > div, .menu-count-grid > div),
+  :is(#page-master-items, #page-wips, #page-menus) :is(.md-filter-row, .wip-filter-row, .menu-filter-row, .md-item-actions, .wip-card-actions, .menu-card-actions) button,
+  :is(#page-master-items, #page-wips, #page-menus) .md-export-toolbar-actions > button { transition: none; }
+}
