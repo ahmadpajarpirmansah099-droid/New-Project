@@ -43,3 +43,61 @@
   html[data-desktop-theme="dark"] #page-dashboard > .hero { background: linear-gradient(135deg, #344e29, #26382b); color: var(--ui-ink); }
   html[data-desktop-theme="dark"] :is(.hero-label, .hero-foot span, .hero-foot b, .hero-total) { color: var(--ui-ink); }
 }
+
+/* Desktop dashboard and rail have more specific light-theme styles. */
+@media (min-width: 900px) {
+  html[data-desktop-theme="dark"] #page-dashboard > .dashboard-trend-card,
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-reservation-calendar-panel,
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-reservation-details,
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-reservation-list .reservation-empty {
+    background: var(--ui-surface);
+    border-color: var(--ui-line);
+    color: var(--ui-ink);
+  }
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-reservation-calendar { background: transparent; }
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-reservation-calendar .reservation-day:not(.selected) {
+    background: var(--ui-surface-soft);
+    color: var(--ui-ink);
+  }
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-reservation-calendar .reservation-day.selected {
+    background: #c5df74;
+    color: #172012;
+  }
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-reservation-list > .dashboard-reservation-item {
+    background: var(--ui-surface-soft);
+    border-color: var(--ui-line);
+    color: var(--ui-ink);
+  }
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-trend-toggle { background: var(--ui-surface-soft); }
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-trend-toggle button { color: var(--ui-muted); }
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-trend-toggle button.active { color: #172012; }
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-trend-day { color: var(--ui-muted); }
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-trend-track { border-color: var(--ui-line); }
+  html[data-desktop-theme="dark"] .drawer-nav > .drawer-item:not(.active),
+  html[data-desktop-theme="dark"] body.desktop-sidebar-collapsed:has(.page.active) .drawer-guide-icon,
+  html[data-desktop-theme="dark"] body:has(.page.active) #authLogoutButton {
+    background: var(--ui-surface-soft);
+    color: var(--ui-ink);
+    border-color: var(--ui-line);
+  }
+  html[data-desktop-theme="dark"] .drawer-nav > .drawer-item.active,
+  html[data-desktop-theme="dark"] body.desktop-sidebar-collapsed:has(.page.active) .drawer-guide-icon.active {
+    background: var(--ui-lime);
+    color: var(--ui-ink);
+  }
+  html[data-desktop-theme="dark"] .drawer-nav > .drawer-item:not(.active):hover { background: #3a4838; color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .drawer-nav > .drawer-item:not(.active):hover > svg:first-child { color: var(--ui-ink); }
+}
+@media (min-width: 900px) {
+  html[data-desktop-theme="dark"] #page-dashboard > .metrics .metric {
+    background: var(--ui-surface);
+    border-color: var(--ui-line);
+    color: var(--ui-ink);
+  }
+  html[data-desktop-theme="dark"] #page-dashboard > .metrics .metric-icon {
+    background: var(--ui-surface-soft);
+    color: var(--ui-ink);
+  }
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-reservation-list .reservation-empty strong { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-reservation-calendar .reservation-day:not(.selected):hover { background: #3a4838; color: var(--ui-ink); }
+}
