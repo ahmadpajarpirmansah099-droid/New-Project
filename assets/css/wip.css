@@ -261,7 +261,7 @@
 
 /* Compact four-column recipe editor with 25 prepared rows */
 .wip-recipe-section { gap:8px; }
-.wip-recipe-labels,.wip-recipe-row { display:grid; grid-template-columns:minmax(58px,.85fr) minmax(78px,1.2fr) minmax(42px,.65fr) minmax(42px,.65fr) 44px; gap:4px; align-items:center; }
+.wip-recipe-labels,.wip-recipe-row { display:grid; align-items:center; }
 .wip-recipe-labels { padding:0 0 4px; color:#85838f; font-size:9px; font-weight:800; letter-spacing:.025em; }
 .wip-recipe-labels span { min-width:0; }
 .wip-recipe-row { padding:4px 0; border-bottom:1px solid #eeedf0; }
@@ -273,11 +273,9 @@
 .wip-recipe-row .wip-remove-row { width:44px; height:44px; min-height:44px; padding:0; border:1px solid #f1dfe2; border-radius:8px; background:#fff5f5; color:#a95d67; font-size:17px; }
 .wip-add-row { width:100%; min-height:44px; margin-top:6px; border:1px solid #dedbed; border-radius:9px; background:#f2f0f8; color:#625b92; font-size:12px; font-weight:700; }
 
-/* Keep the backing select hidden; the search field is the only item picker */
-.wip-recipe-row [data-wip-component][hidden] { display:none !important; }
-.wip-recipe-row { grid-template-columns:minmax(68px,.82fr) minmax(0,1.65fr) minmax(52px,.72fr) minmax(58px,.78fr); gap:5px; }
-.wip-recipe-labels { grid-template-columns:minmax(68px,.82fr) minmax(0,1.65fr) minmax(52px,.72fr) minmax(58px,.78fr); gap:5px; font-size:8px; letter-spacing:0; }
-.wip-recipe-row .wip-field select,.wip-recipe-row .wip-field input,.wip-component-search input { font-size:11px; padding:0 5px; }
+.wip-recipe-row { gap:5px; }
+.wip-recipe-labels { gap:5px; font-size:8px; letter-spacing:0; }
+.wip-recipe-row .wip-field select,.wip-recipe-row .wip-field input,.wip-component-search input { padding:0 5px; }
 .wip-recipe-row .wip-field select { text-overflow:ellipsis; }
 
 /* Three compact actions share one bottom row */
@@ -292,8 +290,6 @@
 .wip-recipe-row .wip-field select,
 .wip-recipe-row .wip-field input,
 .wip-component-search input { font-size:13px !important; font-weight:500; }
-.wip-recipe-row .wip-field input::placeholder,
-.wip-component-search input::placeholder { font-size:13px; }
 
 /* Final recipe typography: consistent and compact on mobile */
 .wip-recipe-heading b { font-size:13px; }
@@ -304,8 +300,7 @@
 .wip-component-search input::placeholder { font-size:13px !important; }
 .wip-recipe-row .app-select-trigger { font-size:13px !important; }
 
-.wip-recipe-row { grid-template-columns:minmax(54px,.72fr) minmax(0,1.65fr) minmax(52px,.72fr) minmax(58px,.78fr); }
-.wip-recipe-labels { grid-template-columns:minmax(54px,.72fr) minmax(0,1.65fr) minmax(52px,.72fr) minmax(58px,.78fr); }
+.wip-recipe-row, .wip-recipe-labels { grid-template-columns:minmax(54px,.72fr) minmax(0,1.65fr) minmax(52px,.72fr) minmax(58px,.78fr); }
 .wip-recipe-type { min-width:0; min-height:44px; display:flex; align-items:center; padding:0 6px; color:#55546a; font-size:13px; font-weight:600; }
 .wip-component-option small { flex:none; color:#77758a; font-size:11px; }
 
