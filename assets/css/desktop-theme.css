@@ -1,4 +1,18 @@
 .desktop-theme-setting { display: none; }
+/* Keep the original mascot artwork visible without its white background. */
+@media (min-width: 900px) {
+  html[data-desktop-theme="dark"] .sidebar-mascot { mix-blend-mode: normal; }
+  html[data-desktop-theme="dark"] :is(.sidebar-mascot__body, .auth-mascot img) {
+    mix-blend-mode: normal;
+    filter: url(#mascot-remove-white);
+  }
+  html[data-desktop-theme="dark"] .logout-confirm-dialog h2 { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .logout-confirm-dialog p { color: var(--ui-muted); }
+  html[data-desktop-theme="dark"] .logout-confirm-mark { background: var(--ui-lime-soft); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .logout-confirm-actions .logout-confirm-cancel { background: var(--ui-surface-soft); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .logout-confirm-actions .logout-confirm-accept { background: var(--ui-lime); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .logout-confirm-actions button:focus-visible { outline-color: var(--ui-lime-strong); }
+}
 @media (min-width: 900px) {
   .desktop-theme-setting { display: block; }
   #page-settings .desktop-theme-toggle { display: inline-grid; place-items: center; width: 44px; height: 44px; min-width: 44px; padding: 10px; border: 1px solid var(--ui-line); border-radius: 12px; background: var(--ui-surface-soft); color: var(--ui-ink); }
