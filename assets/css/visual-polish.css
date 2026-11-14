@@ -748,3 +748,12 @@ button, input, select, textarea { font-family: var(--ui-font); }
   :is(#page-master-items, #page-wips, #page-menus) :is(.md-filter-row, .wip-filter-row, .menu-filter-row, .md-item-actions, .wip-card-actions, .menu-card-actions) button,
   :is(#page-master-items, #page-wips, #page-menus) .md-export-toolbar-actions > button { transition: none; }
 }
+
+/* Match the wide-screen Master Barang card grid for WIP and Menu. */
+@media (min-width: 1100px) {
+  .wip-list, .menu-list { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
+  .wip-list > .wip-empty, .menu-list > .menu-empty { grid-column: 1 / -1; }
+  .wip-card, .menu-card { display: flex; flex-direction: column; }
+  .wip-card-heading, .menu-card-heading { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .wip-card-footer, .menu-card-footer { align-items: flex-end; margin-top: auto; padding-top: 12px; }
+}

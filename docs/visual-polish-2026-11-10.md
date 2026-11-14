@@ -39,3 +39,7 @@ Browser lokal sebelumnya gagal diluncurkan; browser cloud menolak file lokal. Vi
 ## Interaksi kursor Master Data (14 November 2026)
 
 Kartu dan tombol di Master Barang, Resep WIP dan Menu mendapat respons hover halus pada perangkat dengan kursor. Kartu informasi tidak menjadi tombol. Preferensi pengurangan gerak menghilangkan gerakan dan transisi. Perubahan hanya CSS; tidak mengubah akses, data, penyimpanan atau fungsi. Pemeriksaan visual di browser dengan data asli masih diperlukan.
+
+## Grid Resep WIP dan Menu (14 November 2026)
+
+Daftar kartu WIP dan Menu menjadi tiga kolom pada lebar 1.100 px ke atas, mengikuti Master Barang. Pada lebar lebih kecil aturan sebelumnya dipertahankan; status kosong memakai lebar penuh. Perubahan hanya CSS dan tidak mengubah fungsi, akses, data atau penyimpanan. Tes otomatis terkait WIP/Menu dan pemeriksaan visual browser perlu dicatat pada PR.
