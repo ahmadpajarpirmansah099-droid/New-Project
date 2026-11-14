@@ -6,6 +6,7 @@
  const money=v=>'Rp'+Number(v||0).toLocaleString('id-ID',{maximumFractionDigits:0});
  const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  const labels={initial:'Stock Awal',receipt:'Barang Masuk',expense:'Pengeluaran',production:'Produksi WIP',sales:'Sales',close:'Stock Opname',move_in:'Move Masuk',adjustment:'Penyesuaian Move',adjustment_in:'Penyesuaian Move Masuk'};
+ const expenseCategories=['Kalibrasi','RnD','QC','Suplies','Move','Waste','Lainnya'];
  const periodStatus={active:'Berjalan',reopened:'Koreksi opname',opening_pending:'Stock Awal perlu diisi ulang',closed:'Menunggu konfirmasi Stock Awal',held:'Ditahan'};
  const formHelp={initial:'Isi stok pertama untuk seluruh bahan, suplies, dan WIP, termasuk angka 0.',receipt:'Catat bahan dan suplies yang diterima. Simpan Transaksi langsung menambah stok; Simpan Draft untuk isian yang belum selesai.',expense:'Catat barang yang digunakan atau dipindahkan. Simpan Transaksi langsung mengurangi stok; Simpan Draft belum mengubah stok.',production:'Isi jumlah batch. Simpan Transaksi langsung memproses bahan dan hasil WIP; Simpan Draft belum mengubah stok.',sales:'Pilih rentang tanggal, lalu isi total terjual setiap menu dalam satu form.',close:'Cocokkan stok sistem dengan fisik. Isi seluruh barang, termasuk angka 0.'};
  let form=null,busy=false,notice='',targetRows=[],receiptQuery='',expenseQuery='',viewGeneration=0,draftSaved=false,activeConfirm=null,historyKind='close',historyLimit=10;
@@ -198,7 +199,7 @@
   const dateButton=(field,title)=>'<button type="button" class="so-picker-trigger" aria-haspopup="dialog" data-so-action="pick-date" data-so-field="'+field+'" data-so-title="'+title+'" '+(k==='initial'&&period()?.status==='opening_pending'?'disabled':'')+'><span>'+e(dateLabel(form[field]))+'</span><span class="so-picker-chevron" aria-hidden="true"></span></button>';
   const dates=(k==='sales'?'<label>Dari tanggal'+dateButton('start','Pilih tanggal awal')+'</label>':'')+'<label>'+(k==='sales'?'Sampai tanggal':'Tanggal')+dateButton('end','Pilih tanggal')+'</label>';
   let extra='';
-  if(k==='expense')extra='<label>Kategori'+pickerButton(form.category,'data-so-field="category" data-so-title="Pilih kategori"',['Kalibrasi','RnD','QC','Suplies','Move','Waste','Lainnya'].map(x=>({value:x,label:x})))+'</label>';
+  if(k==='expense')extra='<div class="so-category-field"><span>Kategori</span><details class="so-category-dropdown"><summary aria-label="Kategori pengeluaran"><span>'+e(form.category)+'</span><span class="so-picker-chevron" aria-hidden="true"></span></summary><div class="so-category-options">'+expenseCategories.map(x=>'<button type="button" data-so-action="expense-category" data-so-value="'+e(x)+'" aria-pressed="'+(x===form.category)+'">'+e(x)+'</button>').join('')+'</div></details></div>';
   if(form.category==='Move'&&k==='expense')extra+='<label>Tujuan'+pickerButton((get().targets||[]).find(x=>x.id===form.target)?.name||'Pilih tujuan aktif','data-so-field="target" data-so-title="Pilih tujuan outlet/divisi"',[{value:'',label:'Pilih tujuan aktif'},...(get().targets||[]).map(x=>({value:x.id,label:x.name}))])+'</label>';
   const noTarget=k==='expense'&&form.category==='Move'&&!(get().targets||[]).length;
   const excelActions=['sales','close'].includes(k)?'<div class="so-actions">'+button('Unduh Template Kosong','excel-form')+'<label class="so-excel-import">Impor Excel<input type="file" accept=".xlsx" data-so-excel-import hidden></label></div>':'';
@@ -525,6 +526,7 @@
    if(name==='history-more'){historyLimit+=10;historyOnly=true;return;}
    if(name==='pick-date'){openDatePicker(el.dataset.soField);return;}
    if(name==='pick-choice'){openChoicePicker(el);return;}
+   if(name==='expense-category'&&form?.kind==='expense'){const value=el.dataset.soValue;if(expenseCategories.includes(value)){form.category=value;form.touched=true;snapshot();}return;}
    if(name==='unit-option'&&form){const key=el.dataset.soKey,value=el.dataset.soValue,row=catalog().find(r=>r.key===key&&!r.error);if(row?.units?.some(u=>u.unit===value)){form.counts[key]={...form.counts[key],unit:value};form.touched=true;snapshot();}return;}
    if(name==='expense-add'&&form?.kind==='expense'){
     const key=el.dataset.soItemKey,row=catalog().find(r=>r.key===key&&/^[mw]:/.test(r.key)&&!r.error);
@@ -580,16 +582,18 @@
     await service.write(name,{},crypto.randomUUID());notice=name==='reopen'?'Opname dibuka kembali. Koreksi transaksi atau stok fisik, lalu selesaikan ulang.':'Stock Awal dikonfirmasi. Draft transaksi dapat dipulihkan dan disimpan.';
    }
   }catch(error){historyOnly=false;if(token===viewGeneration)notice=error.message;}
-  finally{if(token===viewGeneration){busy=false;const history=page()?.querySelector('#soHistory');if(historyOnly&&history)history.outerHTML=historyHTML();else render();if(name==='unit-option')page()?.querySelectorAll?.('.so-unit-dropdown').forEach(node=>{if(node.dataset.soUnitKey===el.dataset.soKey)node.querySelector('summary')?.focus();});}}
+  finally{if(token===viewGeneration){busy=false;const history=page()?.querySelector('#soHistory');if(historyOnly&&history)history.outerHTML=historyHTML();else render();if(name==='expense-category')page()?.querySelector?.('.so-category-dropdown summary')?.focus();if(name==='unit-option')page()?.querySelectorAll?.('.so-unit-dropdown').forEach(node=>{if(node.dataset.soUnitKey===el.dataset.soKey)node.querySelector('summary')?.focus();});}}
  }
  document.addEventListener('click',ev=>{
+  const category=ev.target.closest('.so-category-dropdown');
+  page()?.querySelectorAll?.('.so-category-dropdown[open]').forEach(node=>{if(node!==category)node.open=false;});
   const inside=ev.target.closest('.so-unit-dropdown');
   page()?.querySelectorAll?.('.so-unit-dropdown[open]').forEach(node=>{if(node!==inside)node.open=false;});
   const el=ev.target.closest('[data-so-action]');if(el){ev.preventDefault();action(el.dataset.soAction,el);}
  });
  document.addEventListener('keydown',ev=>{
   if(ev.key!=='Escape')return;
-  const dropdown=ev.target.closest('.so-unit-dropdown[open]');
+  const dropdown=ev.target.closest('.so-unit-dropdown[open], .so-category-dropdown[open]');
   if(dropdown){ev.preventDefault();dropdown.open=false;dropdown.querySelector('summary')?.focus();}
  });
  document.addEventListener('input',ev=>{

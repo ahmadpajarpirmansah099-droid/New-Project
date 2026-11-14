@@ -217,8 +217,8 @@ test('stock opname dates and selections render as in-app web controls', async ()
   assert.doesNotMatch(t.page.innerHTML, /type="date"/);
   assert.match(t.page.innerHTML, /<details class="so-unit-dropdown"/);
   await t.ui.open('expense');
-  assert.match(t.page.innerHTML, /Pilih kategori/);
-  assert.match(t.page.innerHTML, /data-so-action="pick-choice"/);
+  assert.match(t.page.innerHTML, /aria-label="Kategori pengeluaran"/);
+  assert.match(t.page.innerHTML, /data-so-action="expense-category"/);
 });
 
 test('opname results show two compact rows and keep full movements expandable', () => {
@@ -603,4 +603,26 @@ test('Move keeps selected item, destination and mapping when submitting', async 
  assert.equal(t.writes[0].input.target,'destination');
  assert.equal(t.writes[0].input.mapping[0].target,'m:destination');
  assert.equal(t.writes[0].input.lines[0].qty,'5');
+});
+
+test('expense category uses in-page options and selection preserves selected items', async () => {
+ const t=runtime(); await t.ui.open('expense');
+ assert.match(t.page.innerHTML, /class="so-category-dropdown"/);
+ assert.match(t.page.innerHTML, /data-so-action="expense-category" data-so-value="Waste" aria-pressed="true"/);
+ assert.doesNotMatch(t.page.innerHTML, /data-so-field="category" data-so-title="Pilih kategori"/);
+ await t.click('expense-add',{soItemKey:'m:a'}); t.input({soKey:'m:a',soProp:'qty'},'5');
+ await t.click('expense-category',{soValue:'Kalibrasi'});
+ assert.equal(t.draft('expense').category,'Kalibrasi');
+ assert.equal(t.draft('expense').counts['m:a'].qty,'5');
+ assert.match(t.page.innerHTML, /data-so-value="Kalibrasi" aria-pressed="true"/);
+ await t.click('submit'); assert.equal(t.writes[0].input.category,'Kalibrasi');
+});
+
+test('selecting Move via in-page category retains safeguards', async () => {
+ const t=runtime(); await t.ui.open('expense');
+ await t.click('expense-add',{soItemKey:'m:a'}); t.input({soKey:'m:a',soProp:'qty'},'5');
+ await t.click('expense-category',{soValue:'Move'});
+ assert.match(t.page.innerHTML,/Belum ada outlet\/divisi tujuan yang aktif/);
+ await t.click('submit'); assert.equal(t.writes.length,0);
+ assert.equal(t.draft('expense').counts['m:a'].qty,'5');
 });

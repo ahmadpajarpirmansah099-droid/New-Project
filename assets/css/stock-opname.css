@@ -434,3 +434,15 @@
 }
 #page-stock-opname .so-excel-import input { position: absolute; width: 1px; height: 1px; min-height: 0; padding: 0; opacity: 0; }
 #page-stock-opname .so-excel-import:focus-within { outline: 2px solid var(--ui-lime-strong); outline-offset: 2px; }
+
+/* Category menu is positioned beside its trigger on all screen sizes. */
+.so-category-field { display: grid; gap: 6px; min-width: 0; color: var(--so-muted); font-size: 12px; font-weight: 700; }
+.so-category-dropdown { position: relative; min-width: 0; }
+.so-category-dropdown[open] { z-index: 25; }
+.so-category-dropdown > summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; box-sizing: border-box; padding: 9px 10px; border: 1px solid var(--so-line); border-radius: var(--ui-radius-control); background: var(--ui-surface); color: var(--so-ink); box-shadow: var(--ui-shadow-control); font: 700 13px/1.35 var(--ui-font); cursor: pointer; list-style: none; }
+.so-category-dropdown > summary::-webkit-details-marker { display: none; }
+.so-category-dropdown > summary:focus-visible { outline: 2px solid var(--ui-lime-strong); outline-offset: 2px; }
+.so-category-options { position: absolute; top: calc(100% + 4px); left: 0; z-index: 26; width: 100%; max-height: 220px; overflow-y: auto; box-sizing: border-box; padding: 5px; border: 1px solid var(--so-line); border-radius: 12px; background: var(--ui-surface); box-shadow: var(--ui-shadow-card); }
+#page-stock-opname .so-category-options button { display: flex; justify-content: flex-start; width: 100%; min-height: 40px; padding: 8px 10px; border: 0; border-radius: 8px; box-shadow: none; text-align: left; }
+#page-stock-opname .so-category-options button[aria-pressed="true"] { background: var(--ui-lime); }
+#page-stock-opname .so-category-options button:hover { background: var(--ui-lime-soft); }
