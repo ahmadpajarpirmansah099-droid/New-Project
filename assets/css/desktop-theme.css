@@ -1,4 +1,28 @@
 .desktop-theme-setting { display: none; }
+/* Master data forms and menu cards in desktop dark mode. */
+@media (min-width: 900px) {
+  html[data-desktop-theme="dark"] .md-sheet-simple .md-supply-toggle,
+  html[data-desktop-theme="dark"] :is(.md-base-unit-row, .md-conversion-preview-row) {
+    background: var(--ui-surface-soft); color: var(--ui-ink); border-color: var(--ui-line);
+  }
+  html[data-desktop-theme="dark"] .md-sheet-simple .md-supply-toggle :is(b, small) { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .md-advanced-mark,
+  html[data-desktop-theme="dark"] :is(.md-close, .wip-close, .menu-close, .md-add-unit) {
+    background: var(--ui-surface-soft); color: var(--ui-ink); border-color: var(--ui-line);
+  }
+  html[data-desktop-theme="dark"] .md-sheet-simple .md-price-result,
+  html[data-desktop-theme="dark"] .menu-margin { background: var(--ui-lime-soft); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .md-sheet-simple .md-price-result :is(span, strong, small),
+  html[data-desktop-theme="dark"] .menu-margin :is(span, b),
+  html[data-desktop-theme="dark"] :is(.md-base-unit-row, .md-conversion-preview-row) :is(b, strong) { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.wip-recipe-type, .menu-recipe-type, .wip-unit-display, .menu-unit-display, .wip-recipe-labels, .menu-recipe-labels) { color: var(--ui-muted); }
+  html[data-desktop-theme="dark"] :is(.wip-recipe-actions, .menu-recipe-actions) :is(.wip-add-row, .menu-add-row, .wip-cancel, .menu-cancel) {
+    background: var(--ui-surface-soft); color: var(--ui-ink); border-color: var(--ui-line);
+  }
+  html[data-desktop-theme="dark"] :is(.wip-component-options, .menu-component-options) { background: var(--ui-surface); color: var(--ui-ink); border-color: var(--ui-line); }
+  html[data-desktop-theme="dark"] :is(.wip-component-option, .menu-component-option) { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.wip-component-option, .menu-component-option):is(:hover, :focus-visible) { background: var(--ui-surface-soft); color: var(--ui-ink); }
+}
 /* Keep the original mascot artwork visible without its white background. */
 @media (min-width: 900px) {
   html[data-desktop-theme="dark"] .sidebar-mascot { mix-blend-mode: normal; }
