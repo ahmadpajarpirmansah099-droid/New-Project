@@ -1,0 +1,18 @@
+/* The guide keeps its lime illustrations but follows the desktop workspace surface. */
+:root[data-guide-dark="true"] {
+  --ui-bg: #141815; --ui-ink: #f1f4eb; --ui-muted: #b8c2b5; --ui-line: #465147;
+  --navy: #17182b;
+  --ui-shadow-card: 0 6px 18px #0005;
+  --ui-shadow-raised: 0 10px 26px #0008;
+}
+:root[data-guide-dark="true"] .guide-nav { background: var(--ui-bg); border-color: var(--ui-line); }
+:root[data-guide-dark="true"] .guide-menu :is(summary, nav),
+:root[data-guide-dark="true"] .index a { background: #202622; color: var(--ui-ink); border-color: var(--ui-line); }
+:root[data-guide-dark="true"] .guide-menu nav a:is(:hover, :focus-visible),
+:root[data-guide-dark="true"] .index a:hover { background: #35462d; border-color: #a5c85e; color: var(--ui-ink); }
+:root[data-guide-dark="true"] .index span,
+:root[data-guide-dark="true"] .num { color: #c4df82; }
+:root[data-guide-dark="true"] :is(.copy > p, .note, .legend li) { color: var(--ui-muted); }
+:root[data-guide-dark="true"] .legend li.on { color: var(--ui-ink); }
+:root[data-guide-dark="true"] .hero { color: #17182b; }
+:root[data-guide-dark="true"] :is(.hero-device-label, .hchip) { color: #17182b; }

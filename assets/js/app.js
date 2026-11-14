@@ -218,7 +218,7 @@ function loadUserGuideFeature() {
 
   const loadScript = new Promise((resolve, reject) => {
     const script = document.createElement('script');
-    script.src = 'assets/js/user-guide.js?v=20261110-guest-operational-replace-v1';
+    script.src = 'assets/js/user-guide.js?v=20261114-desktop-dark-v1';
     script.onload = resolve;
     script.onerror = () => reject(new Error('Gagal memuat Panduan Pengguna.'));
     document.body.appendChild(script);

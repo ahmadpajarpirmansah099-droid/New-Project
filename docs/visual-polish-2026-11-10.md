@@ -51,3 +51,7 @@ Tombol di Pengaturan mengubah mode terang/gelap pada layar 900 px ke atas. Mode 
 ## Kontras mode gelap dashboard (14 November 2026)
 
 Menanggapi laporan kartu dashboard putih dengan teks terang: aturan mode gelap diperkuat untuk kartu tren, panel kalender dan reservasi serta ikon rail, termasuk hover dan pilihan tanggal. Tidak ada perubahan data, autentikasi, hak akses atau perilaku transaksi. Uji visual browser dan pemeriksaan kontras pada kondisi nyata tetap diperlukan.
+
+## Mode gelap lintas fitur (14 November 2026)
+
+Perbaikan menyesuaikan kontras pada dashboard, menu cepat, form dan dialog tamu/reservasi, halaman reservasi, Master Barang/WIP/Menu, User Monitoring, pengaturan, Stock Opname, grafik Stock Opname, login dan panduan. Grafik Stock Opname menggambar ulang warna saat tema berubah; panduan di iframe mengikuti mode desktop induknya dan kembali terang di HP. Ilustrasi panduan tetap mempertahankan warna aslinya. Tidak ada perubahan database, RLS, RPC, autentikasi, hak akses, data atau penyimpanan. Pengujian otomatis mencakup peralihan tema, warna grafik dan sinkronisasi panduan; pemeriksaan visual, kontras komponen nyata, interaksi browser dan data asli masih perlu dilakukan.

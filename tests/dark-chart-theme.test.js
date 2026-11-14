@@ -1,0 +1,20 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const vm=require('node:vm');
+const fs=require('node:fs');
+test('chart redraws with theme colors on appearance change',async()=>{
+ const events={},strokes=[],fills=[];
+ const ctx={scale(){},beginPath(){},moveTo(){},lineTo(){},stroke(){strokes.push(this.strokeStyle);},fill(){fills.push(this.fillStyle);},fillText(){fills.push(this.fillStyle);},setLineDash(){},arc(){}};
+ const canvas={parentElement:{clientWidth:600},getContext:()=>ctx};
+ const page={innerHTML:'',querySelector:()=>({}),contains:()=>true};
+ const document={getElementById:id=>id==='page-stock-dashboard'?page:id==='sdChart'?canvas:null,addEventListener(){}};
+ const report={totals:{units:0},monthly:{complete:false,closed:false},sales:[],days:[{date:'2026-11-01',sales:1,hpp:0,receipt:0,expense:0,production:0}]};
+ let dark=false;
+ const root={StockDashboardModel:{monthBounds:()=>({start:'2026-11-01',end:'2026-11-30'}),build:()=>report},StockOpnameService:{dashboardAvailable:()=>true,readDashboard:async()=>({})},addEventListener(name,fn){events[name]=fn;},getComputedStyle:()=>({getPropertyValue:name=>dark?({'--sd-chart-grid':'#526052','--sd-chart-text':'#c6d3c4','--sd-chart-sales':'#b8dc78'}[name]||''):''})};
+ const context={window:root,document,ResizeObserver:class{observe(){} disconnect(){}},Intl,Date,Number,Set,Math};
+ vm.runInNewContext(fs.readFileSync('assets/js/stock-dashboard-ui.js','utf8'),context);
+ await root.StockDashboardUI.show();assert.ok(strokes.includes('#e4e8de'));assert.ok(fills.includes('#586557'));
+ strokes.length=0;fills.length=0;dark=true;events['app:desktop-theme-change']();
+ assert.ok(strokes.includes('#526052'));assert.ok(strokes.includes('#b8dc78'));assert.ok(fills.includes('#c6d3c4'));
+});

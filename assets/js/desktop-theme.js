@@ -3,8 +3,10 @@
   const system = typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-color-scheme: dark)') : null;
   let manual = false;
   function apply(dark) {
+    const changed = (document.documentElement.dataset.desktopTheme === 'dark') !== dark;
     if (dark) document.documentElement.dataset.desktopTheme = 'dark';
     else delete document.documentElement.dataset.desktopTheme;
+    if (changed && typeof window.dispatchEvent === 'function' && typeof window.Event === 'function') window.dispatchEvent(new window.Event('app:desktop-theme-change'));
     const button = document.getElementById('desktopThemeToggle');
     const description = document.getElementById('desktopThemeDescription');
     if (!button || !description) return;
