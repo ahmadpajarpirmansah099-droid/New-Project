@@ -46,4 +46,4 @@ Daftar kartu WIP dan Menu menjadi tiga kolom pada lebar 1.100 px ke atas, mengik
 
 ## Mode tampilan desktop (14 November 2026)
 
-Tombol di Pengaturan mengubah mode terang/gelap pada layar 900 px ke atas. Preferensi hanya berlaku selama halaman terbuka dan kembali terang setelah dimuat ulang; tidak menambah atau mengubah kunci penyimpanan. Tidak ada perubahan backend, akses, autentikasi, atau data. Uji otomatis mencakup pergantian status dan label aksesibilitas. Pengujian visual seluruh halaman, dialog, grafik dan kontras dengan data asli belum dilakukan dan harus dilakukan sebelum digabung.
+Tombol di Pengaturan mengubah mode terang/gelap pada layar 900 px ke atas. Mode awal mengikuti sistem dan ikut berubah ketika sistem berubah. Pilihan manual berlaku sampai halaman dimuat ulang; setelah itu kembali mengikuti sistem. Tidak menambah atau mengubah kunci penyimpanan. Tidak ada perubahan backend, akses, autentikasi, atau data. Uji otomatis mencakup pergantian status dan label aksesibilitas. Pengujian visual seluruh halaman, dialog, grafik dan kontras dengan data asli belum dilakukan dan harus dilakukan sebelum digabung.
