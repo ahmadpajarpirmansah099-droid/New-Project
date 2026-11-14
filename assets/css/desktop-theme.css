@@ -101,3 +101,119 @@
   html[data-desktop-theme="dark"] #page-dashboard .dashboard-reservation-list .reservation-empty strong { color: var(--ui-ink); }
   html[data-desktop-theme="dark"] #page-dashboard .dashboard-reservation-calendar .reservation-day:not(.selected):hover { background: #3a4838; color: var(--ui-ink); }
 }
+
+/* Desktop dark mode: shared surfaces and readable controls across features. */
+@media (min-width: 900px) {
+  html[data-desktop-theme="dark"] #page-dashboard > .section-head { background: transparent; }
+  html[data-desktop-theme="dark"] #page-dashboard > .section-head h2,
+  html[data-desktop-theme="dark"] #page-dashboard > .metrics .metric strong,
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-date-trigger,
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-date-trigger:hover { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] #page-dashboard > #dashboardList { background: var(--ui-surface-soft); border-color: var(--ui-line); }
+  html[data-desktop-theme="dark"] #page-dashboard > #dashboardList > .guest { background: var(--ui-surface); border-color: var(--ui-line); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-reservation-add-button { background: var(--ui-lime); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.page-back, .secondary) { background: var(--ui-surface-soft); border-color: var(--ui-line); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.text-btn, .page-back svg, .history-date-chevron) { color: var(--ui-olive); }
+
+  /* Empty and error cards on Master Barang, WIP, Menu and monitoring. */
+  html[data-desktop-theme="dark"] :is(.md-empty, .md-error, .wip-empty, .menu-empty, .monitor-empty) { background: var(--ui-surface); border-color: var(--ui-line); color: var(--ui-muted); }
+  html[data-desktop-theme="dark"] :is(.md-empty b, .md-error b, .wip-empty b, .menu-empty b) { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.md-empty-mark, .monitor-tabs, .monitor-select-menu, .monitor-modal-device-group, .monitor-detail-button, .monitor-modal-close) { background: var(--ui-surface-soft); border-color: var(--ui-line); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.monitor-tab, .monitor-modal-subtitle, .monitor-activity-detail) { color: var(--ui-muted); }
+  html[data-desktop-theme="dark"] .monitor-tab.is-active { background: var(--ui-lime); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .monitor-account-modal { background: var(--ui-surface); color: var(--ui-ink); border-color: var(--ui-line); }
+
+  /* Guest history and reservation pages. */
+  html[data-desktop-theme="dark"] :is(.history-date, button.history-date, .reservation-toolbar, .reservation-calendar, .reservation-empty, .reservation-card) { background: var(--ui-surface); color: var(--ui-ink); border-color: var(--ui-line); }
+  html[data-desktop-theme="dark"] :is(.history-date-copy strong, .reservation-toolbar strong, .reservation-day-head h2, .reservation-empty strong, .reservation-name) { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.history-date-copy small, .reservation-day-head p, .reservation-meta, .reservation-empty p) { color: var(--ui-muted); }
+  html[data-desktop-theme="dark"] :is(.reservation-today-button, .reservation-month-nav button) { background: var(--ui-surface-soft); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .reservation-calendar .reservation-day:not(.selected):not(.outside) { background: var(--ui-surface-soft); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .reservation-calendar .reservation-day:not(.selected):not(.outside):hover { background: #3a4838; color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .reservation-calendar .reservation-day.selected { background: #c5df74; color: #172012; }
+  html[data-desktop-theme="dark"] #page-dashboard .dashboard-reservation-calendar { background: transparent; }
+
+  /* Floating actions retain their existing order, icons and motion. */
+  html[data-desktop-theme="dark"] .quick-menu-item > svg:first-child { background: var(--ui-surface-soft); color: var(--ui-ink); border-color: var(--ui-line); }
+  html[data-desktop-theme="dark"] .quick-menu-item > span { background: var(--ui-surface-soft); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .quick-menu-item:hover > svg:first-child { background: var(--ui-lime); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .fab { background: var(--ui-lime); color: var(--ui-ink); }
+
+  /* Sheets, form fields and the initial-status control. */
+  html[data-desktop-theme="dark"] #sheet .field label { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] #sheet .field :is(input, textarea, select),
+  html[data-desktop-theme="dark"] #sheet .pack-control { background: var(--ui-surface-soft); border-color: var(--ui-line); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] #sheet .pack-control strong { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] #sheet .pack-control button { background: #455249; color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] #sheet .seg button { color: var(--ui-ink) !important; }
+  html[data-desktop-theme="dark"] #sheet .seg button.selected { color: #172012 !important; }
+  html[data-desktop-theme="dark"] #sheet .close { background: var(--ui-surface-soft); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] #sheet .field :is(.reservation-picker-trigger, .reservation-select-trigger, .reservation-select-options, .reservation-select-option) { background: var(--ui-surface-soft); color: var(--ui-ink); border-color: var(--ui-line); }
+  html[data-desktop-theme="dark"] #sheet .field .reservation-select-option.selected { background: var(--ui-lime); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.reservation-time-display, .reservation-time-unit input, .reservation-time-unit button) { background: var(--ui-surface-soft); color: var(--ui-ink); border-color: var(--ui-line); }
+  html[data-desktop-theme="dark"] :is(.reservation-time-display small, .reservation-time-display strong, .reservation-time-display span, .reservation-time-unit label) { color: var(--ui-ink); }
+
+  /* Inventory warning colors remain distinct against dark surfaces. */
+  html[data-desktop-theme="dark"] #page-stock-opname { --so-shortage: #ff9e9e; }
+  html[data-desktop-theme="dark"] .so-warning { background: #4d3e1f; border-color: #927d43; color: #ffdf98; }
+  html[data-desktop-theme="dark"] :is(.md-field input, .md-field select, .wip-field input, .wip-field select, .menu-field input, .menu-field select, .wip-component-search input, .menu-component-search input) { background: var(--ui-surface-soft); border-color: var(--ui-line); color: var(--ui-ink); }
+}
+@media (min-width: 900px) {
+  html[data-desktop-theme="dark"] #page-stock-dashboard {
+    --sd-chart-grid: #526052;
+    --sd-chart-text: #c6d3c4;
+    --sd-chart-sales: #b8dc78;
+    --sd-chart-hpp: #f2bc73;
+    --sd-chart-receipt: #86c9f5;
+    --sd-chart-expense: #ffa1b2;
+    --sd-chart-production: #7bdacc;
+  }
+  html[data-desktop-theme="dark"] [data-sd-series="sales"] span { background: var(--sd-chart-sales); }
+  html[data-desktop-theme="dark"] [data-sd-series="hpp"] span { background: var(--sd-chart-hpp); }
+  html[data-desktop-theme="dark"] [data-sd-series="receipt"] span { background: var(--sd-chart-receipt); }
+  html[data-desktop-theme="dark"] [data-sd-series="expense"] span { background: var(--sd-chart-expense); }
+  html[data-desktop-theme="dark"] [data-sd-series="production"] span { background: var(--sd-chart-production); }
+}
+@media (min-width: 900px) {
+  html[data-desktop-theme="dark"] :is(.guest-confirm-dialog, .scope-dialog, .dashboard-date-dialog, .dashboard-calendar-panel, .monitor-select-menu, .app-select-menu) { background: var(--ui-surface); color: var(--ui-ink); border-color: var(--ui-line); }
+  html[data-desktop-theme="dark"] :is(.guest-confirm-dialog h2, .scope-dialog h2, .dashboard-date-dialog h2, .monitor-modal-title, .monitor-modal-section-title) { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.guest-confirm-dialog p, .scope-dialog-note, .monitor-modal-subtitle) { color: var(--ui-muted); }
+  html[data-desktop-theme="dark"] :is(.guest-confirm-cancel, .scope-dialog-close, .dashboard-date-close, .dashboard-calendar-nav button, .monitor-modal-close, .monitor-detail-button) { background: var(--ui-surface-soft); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.guest-confirm-accept, .dashboard-date-dialog footer button:last-child) { background: var(--ui-lime); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .dashboard-calendar-grid .dashboard-calendar-day:not(.is-range-start):not(.is-range-end) { background: var(--ui-surface-soft); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .dashboard-calendar-grid .dashboard-calendar-day.is-in-range { background: var(--ui-lime-soft); }
+  html[data-desktop-theme="dark"] .dashboard-calendar-grid .dashboard-calendar-day:is(.is-range-start, .is-range-end) { background: #c5df74; color: #172012; }
+  html[data-desktop-theme="dark"] :is(.app-select-option, .monitor-select-option, .scope-dropdown-option) { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.app-select-option, .monitor-select-option, .scope-dropdown-option):is(:hover, :focus-visible) { background: var(--ui-surface-soft); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .monitor-select-option[aria-selected="true"] { background: var(--ui-lime); color: var(--ui-ink); }
+}
+@media (min-width: 900px) {
+  html[data-desktop-theme="dark"] :is(.scope-dropdown-menu, .scope-picker-sheet, .operational-filter-menu, .app-select-menu) { background: var(--ui-surface); color: var(--ui-ink); border-color: var(--ui-line); }
+  html[data-desktop-theme="dark"] :is(.scope-trigger, .scope-trigger[aria-expanded="true"], .scope-native-select, .scope-picker-close, .scope-picker-option, .scope-dropdown-option, .app-select-trigger, .operational-filter-trigger, .operational-filter-menu button) { background-color: var(--ui-surface-soft); color: var(--ui-ink); border-color: var(--ui-line); }
+  html[data-desktop-theme="dark"] :is(.scope-trigger svg, .scope-picker-header h2, .operational-head h2, .operational-section-head h3, .operational-search input) { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.scope-picker-option.is-selected, .scope-dropdown-option.is-selected, .app-select-option.is-selected, .operational-filter-menu button[aria-selected="true"], .operational-filter-trigger[aria-expanded="true"]) { background: var(--ui-lime); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] :is(.operational-chart-card, .operational-guest-row, .operational-empty, .operational-search, .chart-toggle) { background: var(--ui-surface-soft); color: var(--ui-ink); border-color: var(--ui-line); }
+  html[data-desktop-theme="dark"] .operational-search input { background: transparent; }
+  html[data-desktop-theme="dark"] .chart-toggle button { color: var(--ui-muted); }
+  html[data-desktop-theme="dark"] .chart-toggle button.active { background: var(--ui-lime); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] #sheet .detail-ticket { background: var(--ui-lime); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] #sheet .detail-ticket :is(small, strong) { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] #sheet .detail-cell { background: var(--ui-surface-soft); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] #sheet .detail-cell:active { background: #3a4838; }
+}
+@media (min-width: 900px) {
+  html[data-desktop-theme="dark"] .reservation-calendar .reservation-day.outside { background: transparent; }
+  html[data-desktop-theme="dark"] .auth-screen { background: var(--ui-bg); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .auth-panel { background: var(--ui-surface); border-color: var(--ui-line); color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .auth-form label { color: var(--ui-ink); }
+  html[data-desktop-theme="dark"] .auth-input-wrap { background: var(--ui-surface-soft); border-color: var(--ui-line); }
+  html[data-desktop-theme="dark"] .auth-input-wrap input { color: var(--ui-ink); background: transparent; }
+  html[data-desktop-theme="dark"] .auth-input-wrap input:-webkit-autofill,
+  html[data-desktop-theme="dark"] .auth-input-wrap input:-webkit-autofill:hover,
+  html[data-desktop-theme="dark"] .auth-input-wrap input:-webkit-autofill:focus,
+  html[data-desktop-theme="dark"] .auth-input-wrap input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--ui-ink); caret-color: var(--ui-ink);
+    -webkit-box-shadow: inset 0 0 0 100px #2b332d !important;
+    box-shadow: inset 0 0 0 100px #2b332d !important;
+  }
+}

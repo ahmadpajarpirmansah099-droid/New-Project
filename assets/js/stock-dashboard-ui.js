@@ -177,6 +177,8 @@
     if (!width) return;
     canvas.width = width * scale; canvas.height = height * scale;
     const context = canvas.getContext('2d'); context.scale(scale, scale);
+    const style = root.getComputedStyle?.(canvas);
+    const chartColor = (name, fallback) => style?.getPropertyValue(name)?.trim() || fallback;
     const left = 60, right = width - 16, top = 14, bottom = height - 30;
     const visible = series.filter(line => activeSeries.has(line.key));
     const values = report.days.flatMap(day => visible.map(line => chartValue(day[line.key])));
@@ -186,15 +188,15 @@
     context.font = '11px sans-serif'; context.textAlign = 'right';
     for (let i = 0; i <= 4; i++) {
       const value = min + span * i / 4, position = y(value);
-      context.strokeStyle = '#e4e8de'; context.beginPath(); context.moveTo(left, position); context.lineTo(right, position); context.stroke();
-      context.fillStyle = '#586557'; context.fillText(new Intl.NumberFormat('id-ID', {notation:'compact', maximumFractionDigits:1}).format(value), left - 8, position + 4);
+      context.strokeStyle = chartColor('--sd-chart-grid', '#e4e8de'); context.beginPath(); context.moveTo(left, position); context.lineTo(right, position); context.stroke();
+      context.fillStyle = chartColor('--sd-chart-text', '#586557'); context.fillText(new Intl.NumberFormat('id-ID', {notation:'compact', maximumFractionDigits:1}).format(value), left - 8, position + 4);
     }
     context.textAlign = 'center';
     for (let i = 0; i < report.days.length; i++) {
       if (i % Math.max(1, Math.ceil(report.days.length / 6)) === 0 || i === report.days.length - 1) context.fillText(String(Number(report.days[i].date.slice(8))), x(i), height - 9);
     }
     for (const line of visible) {
-      context.strokeStyle = line.color; context.fillStyle = line.color; context.lineWidth = 2; context.setLineDash(line.dash); context.beginPath();
+      context.strokeStyle = chartColor('--sd-chart-'+line.key, line.color); context.fillStyle = context.strokeStyle; context.lineWidth = 2; context.setLineDash(line.dash); context.beginPath();
       report.days.forEach((day, i) => { if (i) context.lineTo(x(i), y(chartValue(day[line.key]))); else context.moveTo(x(i), y(chartValue(day[line.key]))); });
       context.stroke(); context.setLineDash([]);
       report.days.forEach((day, i) => { context.beginPath(); context.arc(x(i), y(chartValue(day[line.key])), 2.5, 0, Math.PI * 2); context.fill(); });
@@ -223,5 +225,6 @@
     if (target.dataset.sd === 'transactions') root.go('stock-opname');
     if (target.dataset.sd === 'open') root.go('stock-dashboard');
   });
+  root.addEventListener('app:desktop-theme-change', drawChart);
   root.StockDashboardUI = {show, reset};
 })(window);

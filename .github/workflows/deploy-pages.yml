@@ -24,6 +24,8 @@ jobs:
           node --check assets/js/stock-opname-ui.js
           node --check assets/js/stock-dashboard-model.js
           node --check assets/js/stock-dashboard-ui.js
+          node --check assets/js/desktop-theme.js
+          node --check assets/js/user-guide.js
           node --check assets/js/app.js
           node --check assets/js/guestops-queue.js
           node --check assets/js/guestops-operational.js
@@ -45,6 +47,9 @@ jobs:
           node --test tests/stock-opname-service.test.js
           node --test tests/stock-opname-ui.test.js
           node --test tests/stock-dashboard.test.js
+          node --test tests/desktop-theme.test.js
+          node --test tests/dark-chart-theme.test.js
+          node --test tests/user-guide-theme.test.js
           node --test tests/masterdata-invoice-conflict.test.js
           node --test tests/masterdata-phase1.test.js
           node --test tests/workspace-session.test.js
