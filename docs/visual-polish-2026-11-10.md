@@ -35,3 +35,7 @@ Browser lokal sebelumnya gagal diluncurkan; browser cloud menolak file lokal. Vi
 - Review desain berbasis kode: AI Slop 3/10 (palet 0, layout 0, komponen 1, tipografi 1, dekorasi 1), Distinctiveness 8/10 (produk 2, sistem 2, layout 2, tipografi 1, ciri khas 1). Risiko tersisa: shadow berlapis dan radius harus ditinjau dalam render sesungguhnya. Tiket antrean, jam reservasi, lime aktif, dan susunan operasional dipertahankan sebagai ciri produk.
 - Uji browser/screenshot desktop-mobile dan interaksi end-to-end belum dilakukan karena keterbatasan lingkungan yang disebutkan di atas. Hasil uji unit tidak membuktikan layout/scroll/motion aktual sudah benar.
 - Perubahan disiapkan sebagai draft PR; belum merge atau deploy, tanpa migration. Nomor PR dan SHA commit tersedia pada metadata PR.
+
+## Interaksi kursor Master Data (14 November 2026)
+
+Kartu dan tombol di Master Barang, Resep WIP dan Menu mendapat respons hover halus pada perangkat dengan kursor. Kartu informasi tidak menjadi tombol. Preferensi pengurangan gerak menghilangkan gerakan dan transisi. Perubahan hanya CSS; tidak mengubah akses, data, penyimpanan atau fungsi. Pemeriksaan visual di browser dengan data asli masih diperlukan.
