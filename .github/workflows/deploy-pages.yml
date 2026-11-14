@@ -42,22 +42,7 @@ jobs:
           node --check assets/js/menu-service.js
           node --check assets/js/menu-ui.js
       - name: Test frontend logic
-        run: |
-          node --test tests/guestops-service.test.js
-          node --test tests/stock-opname-service.test.js
-          node --test tests/stock-opname-ui.test.js
-          node --test tests/stock-dashboard.test.js
-          node --test tests/desktop-theme.test.js
-          node --test tests/dark-chart-theme.test.js
-          node --test tests/user-guide-theme.test.js
-          node --test tests/masterdata-invoice-conflict.test.js
-          node --test tests/masterdata-phase1.test.js
-          node --test tests/workspace-session.test.js
-          node --test tests/guestops-access.test.js
-          node --test tests/wip-phase2.test.js
-          node --test tests/menu-phase3.test.js
-          node --test tests/csv-export.test.js
-          node --test tests/daily-stock-architecture.test.js
+        run: node --test tests/*.test.js
 
   deploy:
     needs: validate
