@@ -8,7 +8,10 @@ function runtime() {
   const handlers = {}, writes = [], confirmations = [];
   let pageHtml = '', pageRenders = 0;
   const history = { set outerHTML(value) { const start=pageHtml.indexOf('<section class="so-panel so-history-panel"'); if(start>=0)pageHtml=pageHtml.slice(0,start)+value; } };
-  const page = { get innerHTML(){return pageHtml;}, set innerHTML(value){pageHtml=value;pageRenders++;}, contains: () => true, querySelector: selector => selector==='#soHistory' && pageHtml.includes('id="soHistory"') ? history : null };
+  let partsEnabled=false;
+  const parts={toolbar:{innerHTML:''},rows:{innerHTML:''},input:{value:''},results:{innerHTML:''}};
+  const liveForm={querySelector(selector){return ({'[data-so-expense-toolbar]':parts.toolbar,'[data-so-expense-rows]':parts.rows,'[data-so-expense-search]':parts.input,'[data-so-expense-results]':parts.results})[selector]||null;}};
+  const page = { get innerHTML(){return pageHtml;}, set innerHTML(value){pageHtml=value;pageRenders++;}, contains: () => true, querySelector: selector => selector==='.so-form'&&partsEnabled?liveForm:selector==='#soHistory' && pageHtml.includes('id="soHistory"') ? history : null };
   const searchResults = { innerHTML: '' };
   const drafts = {}, letHolder = { active: null };
   let allowConfirm = true, storageFails = false, writeFails = false;
@@ -30,6 +33,7 @@ function runtime() {
       addEventListener: (name, fn) => handlers[name] = fn,
       body: { appendChild() {} },
       createElement(name) {
+        if(name==='template'){const template={innerHTML:'',content:{querySelector:()=>({get innerHTML(){return template.innerHTML;}})}};return template;}
         assert.equal(name, 'dialog');
         const buttons = Object.fromEntries(['[data-so-accept]', '[data-so-decline]'].map(key => [key, {
           addEventListener(type, fn) { this[type] = fn; },
@@ -69,6 +73,7 @@ function runtime() {
   return {
     ui: w.StockOpnameUI, data, writes, confirmations, page,
     pageRenders: () => pageRenders,
+    enableExpenseParts() { partsEnabled=true; }, parts,
     searchResults,
     draft: kind => { const value = drafts[kind || letHolder.active]; return value && copy(value); },
     seedDraft(value) { drafts[value.kind]=copy(value); letHolder.active=value.kind; },
@@ -625,4 +630,20 @@ test('selecting Move via in-page category retains safeguards', async () => {
  assert.match(t.page.innerHTML,/Belum ada outlet\/divisi tujuan yang aktif/);
  await t.click('submit'); assert.equal(t.writes.length,0);
  assert.equal(t.draft('expense').counts['m:a'].qty,'5');
+});
+
+test('expense selection updates form sections without replacing page or form', async () => {
+ const t=runtime(); t.data.catalog[0].units.push({unit:'Botol',factor:1000});
+ await t.ui.open('expense'); t.enableExpenseParts(); const before=t.pageRenders();
+ await t.click('expense-add',{soItemKey:'m:a'});
+ assert.equal(t.pageRenders(),before); assert.match(t.parts.rows.innerHTML,/Pengeluaran Susu/);
+ t.input({soKey:'m:a',soProp:'qty'},'4');
+ await t.click('expense-category',{soValue:'Move'});
+ assert.equal(t.pageRenders(),before); assert.match(t.parts.toolbar.innerHTML,/Belum ada outlet/);
+ await t.click('unit-option',{soKey:'m:a',soValue:'Botol'});
+ assert.equal(t.pageRenders(),before);
+ assert.equal(t.draft('expense').counts['m:a'].qty,'4');
+ assert.equal(t.draft('expense').counts['m:a'].unit,'Botol');
+ assert.equal(t.draft('expense').category,'Move');
+ assert.equal(t.writes.length,0);
 });

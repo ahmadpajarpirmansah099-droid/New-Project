@@ -113,7 +113,7 @@
   const d=pickerDialog(el.dataset.soTitle||'Pilih '+(el.getAttribute('aria-label')||''),content);
   d.querySelector('.so-choice-list').addEventListener('click',async ev=>{const btn=ev.target.closest('[data-choice-value]');if(!btn)return;const value=btn.dataset.choiceValue;
    if(map)form.mapping[key]=value;else if(key)form.counts[key]={...form.counts[key],unit:value};else form[field]=value;
-   form.touched=true;snapshot();d.close();if(field==='target')try{targetRows=value?await service.targetCatalog(value):[];}catch(error){notice=error.message;}render();
+   form.touched=true;snapshot();d.close();let failed=false;if(field==='target')try{targetRows=value?await service.targetCatalog(value):[];}catch(error){notice=error.message;failed=true;}if(form?.kind==='expense'&&!failed)updateExpenseParts(field==='target'?'expense-category':'unit-option');else render();
   });
  }
  async function open(kind,existing){
@@ -224,7 +224,20 @@
    if(receipt)html+='<td data-so-label="Total invoice"><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="invoice_total" aria-label="Total invoice '+e(r.name)+'" value="'+e(v.invoice_total??'')+'" placeholder="Opsional"></td>';
    return html+'</tr>';
   }).join('');
-  return '<section class="so-panel so-form"><header class="so-form-head"><h2>'+e(labels[k])+'</h2><p>'+e(formHelp[k])+'</p></header><div class="so-toolbar">'+dates+extra+'</div>'+(noTarget?'<p class="so-notice">Belum ada outlet/divisi tujuan yang aktif.</p>':'')+receiptSearch+expenseSearch+excelActions+(rows.some(r=>r.error)?masterLinks():'')+(isPending()&&k!=='close'?'<p class="so-notice">Stock Awal berikutnya belum dikonfirmasi. Isian ini disimpan sebagai draft.</p>':'')+(rows.length?'<table class="so-ledger'+(isCount?' so-count-ledger':receipt?' so-receipt-ledger':'')+'" aria-label="'+e(labels[k])+'"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>':'<p class="so-notice">'+(receipt||expense?'Belum ada barang dipilih. Cari dan pilih barang di atas.':'Data belum tersedia.')+'</p>')+(!rows.length&&(!(receipt||expense)||!catalog().some(r=>receipt?r.key.startsWith('m:'):/^[mw]:/.test(r.key)))?masterLinks():'')+'<footer class="so-form-footer"><p id="soDraftStatus" class="so-status" role="status">'+e(draftStatus())+'</p><div class="so-actions">'+button('Simpan Draft','draft')+button('Tutup Form','cancel')+button(isCount?'Konfirmasi':'Simpan Transaksi','submit','',true)+'</div></footer></section>';
+  const toolbar='<div class="so-toolbar">'+dates+extra+'</div>'+(noTarget?'<p class="so-notice">Belum ada outlet/divisi tujuan yang aktif.</p>':'');
+  const ledger=(rows.some(r=>r.error)?masterLinks():'')+(rows.length?'<table class="so-ledger'+(isCount?' so-count-ledger':receipt?' so-receipt-ledger':'')+'" aria-label="'+e(labels[k])+'"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>':'<p class="so-notice">'+(receipt||expense?'Belum ada barang dipilih. Cari dan pilih barang di atas.':'Data belum tersedia.')+'</p>')+(!rows.length&&(!(receipt||expense)||!catalog().some(r=>receipt?r.key.startsWith('m:'):/^[mw]:/.test(r.key)))?masterLinks():'');
+  return '<section class="so-panel so-form"><header class="so-form-head"><h2>'+e(labels[k])+'</h2><p>'+e(formHelp[k])+'</p></header>'+(expense?'<div data-so-expense-toolbar>'+toolbar+'</div>':toolbar)+receiptSearch+expenseSearch+excelActions+(isPending()&&k!=='close'?'<p class="so-notice">Stock Awal berikutnya belum dikonfirmasi. Isian ini disimpan sebagai draft.</p>':'')+(expense?'<div data-so-expense-rows>'+ledger+'</div>':ledger)+'<footer class="so-form-footer"><p id="soDraftStatus" class="so-status" role="status">'+e(draftStatus())+'</p><div class="so-actions">'+button('Simpan Draft','draft')+button('Tutup Form','cancel')+button(isCount?'Konfirmasi':'Simpan Transaksi','submit','',true)+'</div></footer></section>';
+ }
+ function updateExpenseParts(part){
+  const current=page()?.querySelector?.('.so-form');
+  if(!current||!draftSaved){render();return;}
+  const template=document.createElement('template');template.innerHTML=formHTML();
+  const next=template.content,selectors=part==='expense-category'?['[data-so-expense-toolbar]','[data-so-expense-rows]']:['[data-so-expense-rows]'];
+  for(const selector of selectors){const old=current.querySelector(selector),replacement=next.querySelector(selector);if(!old||!replacement){render();return;}old.innerHTML=replacement.innerHTML;}
+  if(part==='expense-add'||part==='expense-remove'){
+   const input=current.querySelector('[data-so-expense-search]'),results=current.querySelector('[data-so-expense-results]');
+   if(input)input.value=expenseQuery;if(results)results.innerHTML=expenseSuggestions(expenseQuery);
+  }
  }
  function historyDates(items,dateOf){
   const groups=new Map();
@@ -517,7 +530,7 @@
  }
  async function action(name,el){
   if(busy)return;
-  const token=viewGeneration;let historyOnly=false;busy=true;
+  const token=viewGeneration;let historyOnly=false,expensePart='',skipRender=false;busy=true;
   try{
    if(name==='excel-form'){await excelForm();return;}
    if(name==='excel-close'){await excelHistory('close',el.dataset.soId);return;}
@@ -525,19 +538,19 @@
    if(name==='history-tab'){historyKind=el.dataset.soKind;historyLimit=10;historyOnly=true;return;}
    if(name==='history-more'){historyLimit+=10;historyOnly=true;return;}
    if(name==='pick-date'){openDatePicker(el.dataset.soField);return;}
-   if(name==='pick-choice'){openChoicePicker(el);return;}
-   if(name==='expense-category'&&form?.kind==='expense'){const value=el.dataset.soValue;if(expenseCategories.includes(value)){form.category=value;form.touched=true;snapshot();}return;}
-   if(name==='unit-option'&&form){const key=el.dataset.soKey,value=el.dataset.soValue,row=catalog().find(r=>r.key===key&&!r.error);if(row?.units?.some(u=>u.unit===value)){form.counts[key]={...form.counts[key],unit:value};form.touched=true;snapshot();}return;}
+   if(name==='pick-choice'){openChoicePicker(el);skipRender=form?.kind==='expense';return;}
+   if(name==='expense-category'&&form?.kind==='expense'){const value=el.dataset.soValue;if(expenseCategories.includes(value)){form.category=value;form.touched=true;snapshot();expensePart='expense-category';}return;}
+   if(name==='unit-option'&&form){const key=el.dataset.soKey,value=el.dataset.soValue,row=catalog().find(r=>r.key===key&&!r.error);if(row?.units?.some(u=>u.unit===value)){form.counts[key]={...form.counts[key],unit:value};form.touched=true;snapshot();if(form.kind==='expense')expensePart='unit-option';}return;}
    if(name==='expense-add'&&form?.kind==='expense'){
     const key=el.dataset.soItemKey,row=catalog().find(r=>r.key===key&&/^[mw]:/.test(r.key)&&!r.error);
     if(row&&!expenseItems().includes(key)){
      expenseItems().push(key);form.counts[key]={...form.counts[key],unit:form.counts[key]?.unit||row.unit};
-     form.touched=true;snapshot();expenseQuery='';
+     form.touched=true;snapshot();expenseQuery='';expensePart='expense-add';
     }return;
    }
    if(name==='expense-remove'&&form?.kind==='expense'){
     const key=el.dataset.soItemKey;form.expenseItems=expenseItems().filter(item=>item!==key);
-    delete form.counts[key];delete form.mapping[key];form.touched=true;snapshot();return;
+    delete form.counts[key];delete form.mapping[key];form.touched=true;snapshot();expensePart='expense-remove';return;
    }
    if(name==='receipt-add'&&form?.kind==='receipt'){
     const key=el.dataset.soItemKey,row=catalog().find(r=>r.key===key&&r.key.startsWith('m:')&&!r.error);
@@ -581,8 +594,8 @@
    if(['activate','reactivate','reopen'].includes(name)&&await confirmStock(name==='reopen'?'Buka kembali opname terakhir? Periode berikutnya ditahan sampai koreksi dikonfirmasi.':'Konfirmasi stok fisik sebagai Stock Awal periode berikutnya?',name==='reopen'?'Buka kembali opname?':'Aktifkan Stock Awal?',name==='reopen'?'Buka kembali':'Aktifkan')){
     await service.write(name,{},crypto.randomUUID());notice=name==='reopen'?'Opname dibuka kembali. Koreksi transaksi atau stok fisik, lalu selesaikan ulang.':'Stock Awal dikonfirmasi. Draft transaksi dapat dipulihkan dan disimpan.';
    }
-  }catch(error){historyOnly=false;if(token===viewGeneration)notice=error.message;}
-  finally{if(token===viewGeneration){busy=false;const history=page()?.querySelector('#soHistory');if(historyOnly&&history)history.outerHTML=historyHTML();else render();if(name==='expense-category')page()?.querySelector?.('.so-category-dropdown summary')?.focus();if(name==='unit-option')page()?.querySelectorAll?.('.so-unit-dropdown').forEach(node=>{if(node.dataset.soUnitKey===el.dataset.soKey)node.querySelector('summary')?.focus();});}}
+  }catch(error){historyOnly=false;expensePart='';skipRender=false;if(token===viewGeneration)notice=error.message;}
+  finally{if(token===viewGeneration){busy=false;const history=page()?.querySelector('#soHistory');if(historyOnly&&history)history.outerHTML=historyHTML();else if(expensePart)updateExpenseParts(expensePart);else if(!skipRender)render();if(name==='expense-category')page()?.querySelector?.('.so-category-dropdown summary')?.focus();if(name==='unit-option')page()?.querySelectorAll?.('.so-unit-dropdown').forEach(node=>{if(node.dataset.soUnitKey===el.dataset.soKey)node.querySelector('summary')?.focus();});}}
  }
  document.addEventListener('click',ev=>{
   const category=ev.target.closest('.so-category-dropdown');
