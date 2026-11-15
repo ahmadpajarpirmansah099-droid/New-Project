@@ -343,9 +343,14 @@
      `<section class="so-date-material-category"><h4>${e(category)}</h4>${items.map(row).join('')}</section>`
     ).join('');
    }else lines=materials.map(row).join('');
+   const documents=entries.map(doc=>{
+    const title=e(labels[doc.type]||doc.type)+(doc.category&&['expense','adjustment'].includes(doc.type)?' · '+e(doc.category):'');
+    const actions=historyDocumentActions(doc,period());
+    return `<div class="so-history-original"><div><strong>${title}</strong>${doc.void?'<span class="so-history-tag is-void">Dibatalkan</span>':''}</div>${quantityLines(doc.postings||[])}${actions}</div>`;
+   }).join('');
    return historyDate(date,entries,`
     <div class="so-date-materials">${lines||'<p class="so-sales-unavailable">Tidak ada transaksi aktif pada tanggal ini.</p>'}</div>
-
+    <details class="so-history-originals"><summary>Transaksi per bukti</summary>${documents}</details>
    `,'transaksi',index===0);
   }).join('');
  }
