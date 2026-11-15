@@ -281,7 +281,7 @@ test('Guest Operations writes only changed rows with their last-seen versions', 
 });
 
 test('Guest Operations batch rejects a stale guest without partially saving the reservation', async () => {
-  const { runtime, client, rows } = createRuntime();
+  const { runtime, client, calls, rows } = createRuntime();
   const guestVersion = '2026-11-03T09:00:00.123456+00:00';
   const reservationVersion = '2026-11-03T08:00:00.000Z';
   rows.guests.push({
