@@ -29,6 +29,7 @@
       phone: row.phone || '',
       status: row.status,
       created: toMs(row.created_at),
+      createdAt: row.created_at || null,
       updatedAt: row.updated_at || null,
       resolved: toMs(row.resolved_at),
       seatedAt: toMs(row.seated_at),
@@ -53,6 +54,7 @@
       table: row.table_label || '',
       status: row.status,
       created: toMs(row.created_at),
+      createdAt: row.created_at || null,
       updatedAt: row.updated_at || null,
       guestId: null,
       seatedAt: toMs(row.seated_at)
@@ -70,7 +72,7 @@
       pack: item.pack,
       phone: item.phone || null,
       status: item.status,
-      created_at: toIso(item.created),
+      created_at: item.createdAt || toIso(item.created),
       seated_at: item.seatedAt ? toIso(item.seatedAt) : null,
       resolved_at: item.resolved ? toIso(item.resolved) : null
     };
@@ -89,7 +91,8 @@
       smoking: item.smoking || null,
       note: item.note || null,
       table_label: item.table || null,
-      status: item.status
+      status: item.status,
+      created_at: item.createdAt || toIso(item.created)
     };
   }
 
@@ -289,13 +292,19 @@
         changedGuests.forEach(({ expected_updated_at, ...record }) => {
           const updatedAt = savedGuests.get(record.id);
           const guest = (state.guests || []).find(item => item.id === record.id);
-          if (guest) guest.updatedAt = updatedAt;
+          if (guest) {
+            guest.createdAt = record.created_at;
+            guest.updatedAt = updatedAt;
+          }
           persistedGuestRows.set(record.id, { fingerprint: recordFingerprint(record), updatedAt });
         });
         changedReservations.forEach(({ expected_updated_at, ...record }) => {
           const updatedAt = savedReservations.get(record.id);
           const reservation = (state.reservations || []).find(item => item.id === record.id);
-          if (reservation) reservation.updatedAt = updatedAt;
+          if (reservation) {
+            reservation.createdAt = record.created_at;
+            reservation.updatedAt = updatedAt;
+          }
           persistedReservationRows.set(record.id, { fingerprint: recordFingerprint(record), updatedAt });
         });
       }
