@@ -1576,3 +1576,21 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
     line-height:1;
   }
 }
+
+
+/* Force identical rendered height for the mobile seated controls. */
+@media (max-width:520px) {
+  .guest-is-seated .guest-seated-inline-actions .mini,
+  .guest-is-seated .guest-seated-inline-status {
+    box-sizing:border-box !important;
+    height:27px !important;
+    min-height:27px !important;
+    max-height:27px !important;
+    padding:0 7px !important;
+    line-height:27px !important;
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    vertical-align:middle;
+  }
+}
