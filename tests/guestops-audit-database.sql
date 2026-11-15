@@ -125,6 +125,23 @@ BEGIN
     RAISE EXCEPTION 'Guest Operations settings were not saved with the batch';
   END IF;
 
+  -- Missing settings fields must be rejected instead of silently bypassing validation.
+  BEGIN
+    PERFORM public.save_guest_operations(
+      test_workspace, '[]'::jsonb, '[]'::jsonb, '{}'::jsonb
+    );
+    RAISE EXCEPTION 'Invalid Guest Operations settings were accepted';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM <> 'Pengaturan Guest Operations tidak valid.' THEN RAISE; END IF;
+  END;
+
+  SELECT setting_value INTO v_saved_settings
+  FROM public.workspace_settings
+  WHERE workspace_id = test_workspace AND setting_key = 'guest_operations';
+  IF v_saved_settings IS DISTINCT FROM v_requested_settings THEN
+    RAISE EXCEPTION 'Invalid settings changed the saved Guest Operations settings';
+  END IF;
+
   SELECT count(*) INTO history_count
   FROM public.guest_status_history
   WHERE guest_id = v_batch_guest_id AND label = 'Terdaftar';
