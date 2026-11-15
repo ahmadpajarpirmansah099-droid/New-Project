@@ -233,9 +233,14 @@
     }
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     if (event.target.id !== 'mdItemForm') return;
     event.preventDefault();
+    const form = event.target;
+    const submitButton = form.querySelector('[type="submit"]');
+    if (form.dataset.saving === 'true') return;
+    form.dataset.saving = 'true';
+    if (submitButton) submitButton.disabled = true;
 
     try {
       const input = getFormInput();
@@ -250,15 +255,24 @@
       });
 
       if (!saved) return;
+      const persisted = await root.MasterDataStore.flush();
+      if (persisted === false) {
+        if (typeof root.closeSheet === 'function') root.closeSheet();
+        renderPage('master-items');
+        return;
+      }
       if (typeof root.closeSheet === 'function') root.closeSheet();
       notify('Master Barang berhasil disimpan.');
       renderPage('master-items');
     } catch (error) {
       notify(error.message || 'Barang belum berhasil disimpan.');
+    } finally {
+      delete form.dataset.saving;
+      if (submitButton) submitButton.disabled = false;
     }
   }
 
-  function handleClick(event) {
+  async function handleClick(event) {
     const button = event.target.closest('[data-md-action]');
     if (!button) return;
 
@@ -292,12 +306,20 @@
       if (!item) return notify('Barang tidak ditemukan.');
       const next = item.status === service().ACTIVE ? service().INACTIVE : service().ACTIVE;
       if (!root.confirm((next === 'inactive' ? 'Nonaktifkan ' : 'Aktifkan kembali ') + item.nama_barang + '?')) return;
+      button.disabled = true;
       try {
         service().setItemStatus(id, next);
+        const persisted = await root.MasterDataStore.flush();
+        if (persisted === false) {
+          renderPage('master-items');
+          return;
+        }
         renderPage('master-items');
         notify(next === 'inactive' ? 'Barang dinonaktifkan.' : 'Barang diaktifkan.');
       } catch (error) {
         notify(error.message);
+      } finally {
+        button.disabled = false;
       }
     }
     if (action === 'retry') renderPage('master-items');

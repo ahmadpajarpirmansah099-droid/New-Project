@@ -101,6 +101,10 @@
     }
 
     const now = new Date().toISOString();
+    const basePrice = referencePrice / priceFactor;
+    const previousBasePrice = Number(existing && existing.harga_per_satuan_dasar);
+    const priceUnchanged = Number.isFinite(previousBasePrice) &&
+      Math.abs(previousBasePrice - basePrice) <= Math.max(1, Math.abs(previousBasePrice), Math.abs(basePrice)) * Number.EPSILON * 8;
     return {
       id: existing ? existing.id : (input.id || store.createId()),
       scope_id: scopeId,
@@ -109,9 +113,9 @@
       konversi_satuan: conversions,
       harga_referensi: referencePrice,
       satuan_harga: priceUnit,
-      harga_per_satuan_dasar: referencePrice / priceFactor,
+      harga_per_satuan_dasar: basePrice,
       harga_beli_terakhir_per_satuan_dasar: existing
-        ? existing.harga_beli_terakhir_per_satuan_dasar
+        ? (priceUnchanged ? existing.harga_beli_terakhir_per_satuan_dasar : null)
         : null,
       status: input.status === INACTIVE || (existing && existing.status === INACTIVE && input.status == null)
         ? INACTIVE

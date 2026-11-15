@@ -179,25 +179,38 @@ function findComponent(type, id) {
     }
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     if (event.target.id !== 'menuForm') return;
     event.preventDefault();
     const form = event.target;
+    const submitButton = form.querySelector('[type="submit"]');
+    if (form.dataset.saving === 'true') return;
+    form.dataset.saving = 'true';
+    if (submitButton) submitButton.disabled = true;
     try {
       root.MenuService.saveMenu({
         id: form.elements.menuId.value || null,
         nama_menu: form.elements.menuName.value,
         harga_jual: form.elements.menuSellingPrice.value
       }, getRecipeRows());
+      const persisted = await root.MasterDataStore.flush();
+      if (persisted === false) {
+        if (typeof root.closeSheet === 'function') root.closeSheet();
+        renderPage('menus');
+        return;
+      }
       if (typeof root.closeSheet === 'function') root.closeSheet();
       notify('Menu berhasil disimpan.');
       renderPage('menus');
     } catch (error) {
       notify(error.message || 'Menu belum berhasil disimpan.');
+    } finally {
+      delete form.dataset.saving;
+      if (submitButton) submitButton.disabled = false;
     }
   }
 
-  function handleClick(event) {
+  async function handleClick(event) {
     const option = event.target.closest('[data-menu-component-option]');
     if (option) {
       const row = option.closest('[data-menu-recipe-row]');
@@ -243,11 +256,18 @@ function findComponent(type, id) {
       if (!menu) return notify('Menu tidak ditemukan.');
       const next = menu.status === 'active' ? 'inactive' : 'active';
       if (!root.confirm((next === 'inactive' ? 'Nonaktifkan ' : 'Aktifkan kembali ') + menu.nama_menu + '?')) return;
+      button.disabled = true;
       try {
         root.MenuService.setMenuStatus(id, next);
+        const persisted = await root.MasterDataStore.flush();
+        if (persisted === false) {
+          renderPage('menus');
+          return;
+        }
         renderPage('menus');
         notify(next === 'inactive' ? 'Menu dinonaktifkan.' : 'Menu diaktifkan.');
       } catch (error) { notify(error.message); }
+      finally { button.disabled = false; }
     }
     if (action === 'retry') renderPage('menus');
     if (action === 'nav') {
