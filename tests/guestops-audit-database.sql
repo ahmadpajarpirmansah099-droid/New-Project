@@ -116,6 +116,19 @@ BEGIN
     RAISE EXCEPTION 'Identical Guest Operations retry did not return the original versions';
   END IF;
 
+  SELECT count(*) INTO history_count
+  FROM public.guest_status_history
+  WHERE guest_id = v_batch_guest_id AND label = 'Terdaftar';
+  IF history_count <> 1 THEN
+    RAISE EXCEPTION 'Guest insert retry duplicated its audit history';
+  END IF;
+  SELECT count(*) INTO history_count
+  FROM public.reservation_status_history
+  WHERE reservation_id = v_reservation_id AND label = 'Duduk';
+  IF history_count <> 1 THEN
+    RAISE EXCEPTION 'Reservation retry duplicated its status history';
+  END IF;
+
   IF NOT EXISTS (
     SELECT 1 FROM public.guests
     WHERE id = v_batch_guest_id AND reservation_id = v_reservation_id AND status = 'seated'
