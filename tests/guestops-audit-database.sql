@@ -13,7 +13,11 @@ DECLARE
   v_reservation_id uuid := gen_random_uuid();
   v_batch_guest_id uuid := gen_random_uuid();
   v_reservation_updated_at timestamptz;
+  v_initial_reservation_updated_at timestamptz;
   v_batch_guest_updated_at timestamptz;
+  batch_guests jsonb;
+  batch_reservations jsonb;
+  retry_result jsonb;
   v_table_label text;
   v_guest_phone text;
   batch_result jsonb;
@@ -41,6 +45,7 @@ BEGIN
     'Tamu Reservasi', 2, 'pending', service_id
   )
   RETURNING updated_at INTO v_reservation_updated_at;
+  v_initial_reservation_updated_at := v_reservation_updated_at;
 
   PERFORM set_config('request.jwt.claim.sub', service_id::text, true);
   EXECUTE 'SET LOCAL ROLE authenticated';
@@ -68,42 +73,47 @@ BEGIN
   END IF;
 
   -- Seating a reservation must update its row and insert the guest atomically.
-  batch_result := public.save_guest_operations(
-    test_workspace,
-    jsonb_build_array(jsonb_build_object(
-      'id', v_batch_guest_id,
-      'workspace_id', test_workspace,
-      'reservation_id', v_reservation_id,
-      'ticket', 'WL-TEST-002',
-      'service_date', (now() AT TIME ZONE 'Asia/Jakarta')::date,
-      'guest_name', 'Tamu Duduk',
-      'pack', 2,
-      'phone', '081234567890',
-      'status', 'seated',
-      'created_at', now(),
-      'seated_at', now(),
-      'resolved_at', now(),
-      'expected_updated_at', NULL
-    )),
-    jsonb_build_array(jsonb_build_object(
-      'id', v_reservation_id,
-      'workspace_id', test_workspace,
-      'code', 'RSV-TEST-001',
-      'reservation_date', (now() AT TIME ZONE 'Asia/Jakarta')::date,
-      'reservation_time', '19:00:00',
-      'guest_name', 'Tamu Reservasi',
-      'pack', 2,
-      'phone', NULL,
-      'smoking', NULL,
-      'note', NULL,
-      'table_label', 'Meja 1',
-      'status', 'seated',
-      'created_at', now(),
-      'expected_updated_at', v_reservation_updated_at
-    ))
-  );
+  batch_guests := jsonb_build_array(jsonb_build_object(
+    'id', v_batch_guest_id,
+    'workspace_id', test_workspace,
+    'reservation_id', v_reservation_id,
+    'ticket', 'WL-TEST-002',
+    'service_date', (now() AT TIME ZONE 'Asia/Jakarta')::date,
+    'guest_name', 'Tamu Duduk',
+    'pack', 2,
+    'phone', '081234567890',
+    'status', 'seated',
+    'created_at', now(),
+    'seated_at', now(),
+    'resolved_at', now(),
+    'expected_updated_at', NULL
+  ));
+  batch_reservations := jsonb_build_array(jsonb_build_object(
+    'id', v_reservation_id,
+    'workspace_id', test_workspace,
+    'code', 'RSV-TEST-001',
+    'reservation_date', (now() AT TIME ZONE 'Asia/Jakarta')::date,
+    'reservation_time', '19:00:00',
+    'guest_name', 'Tamu Reservasi',
+    'pack', 2,
+    'phone', NULL,
+    'smoking', NULL,
+    'note', NULL,
+    'table_label', 'Meja 1',
+    'status', 'seated',
+    'created_at', now(),
+    'expected_updated_at', v_initial_reservation_updated_at
+  ));
+
+  batch_result := public.save_guest_operations(test_workspace, batch_guests, batch_reservations);
   v_batch_guest_updated_at := (batch_result->'guests'->0->>'updated_at')::timestamptz;
   v_reservation_updated_at := (batch_result->'reservations'->0->>'updated_at')::timestamptz;
+
+  -- Replaying the exact request after a lost response must not duplicate rows or audit events.
+  retry_result := public.save_guest_operations(test_workspace, batch_guests, batch_reservations);
+  IF retry_result IS DISTINCT FROM batch_result THEN
+    RAISE EXCEPTION 'Identical Guest Operations retry did not return the original versions';
+  END IF;
 
   IF NOT EXISTS (
     SELECT 1 FROM public.guests
