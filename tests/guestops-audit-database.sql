@@ -5,7 +5,7 @@ DO $test$
 DECLARE
   service_id uuid;
   test_workspace uuid := gen_random_uuid();
-  guest_id uuid := gen_random_uuid();
+  v_guest_id uuid := gen_random_uuid();
   original_updated_at timestamptz;
   result jsonb;
   history_count integer;
@@ -19,7 +19,7 @@ BEGIN
 
   INSERT INTO public.guests(id, workspace_id, ticket, service_date, guest_name, pack, phone, status, created_by)
   VALUES (
-    guest_id, test_workspace, 'WL-TEST-001',
+    v_guest_id, test_workspace, 'WL-TEST-001',
     (now() AT TIME ZONE 'Asia/Jakarta')::date,
     'Tamu Awal', 2, '081111111111', 'waiting', service_id
   )
@@ -29,7 +29,7 @@ BEGIN
   EXECUTE 'SET LOCAL ROLE authenticated';
 
   result := public.correct_guest_record(
-    guest_id, 'Tamu Koreksi', 3, '082222222222', 'Salah input',
+    v_guest_id, 'Tamu Koreksi', 3, '082222222222', 'Salah input',
     original_updated_at
   );
 
@@ -41,15 +41,15 @@ BEGIN
   END IF;
 
   SELECT count(*) INTO history_count
-  FROM public.guest_status_history
-  WHERE guest_id = guest_id AND label = 'Dikoreksi' AND changed_by = service_id;
+  FROM public.guest_status_history AS h
+  WHERE h.guest_id = v_guest_id AND h.label = 'Dikoreksi' AND h.changed_by = service_id;
   IF history_count <> 1 THEN
     RAISE EXCEPTION 'Correction audit was not committed exactly once';
   END IF;
 
   BEGIN
     PERFORM public.correct_guest_record(
-      guest_id, 'Stale Edit', 4, '083333333333', 'Stale request',
+      v_guest_id, 'Stale Edit', 4, '083333333333', 'Stale request',
       original_updated_at
     );
     RAISE EXCEPTION 'Stale correction unexpectedly succeeded';
@@ -59,7 +59,7 @@ BEGIN
 
   BEGIN
     INSERT INTO public.guest_status_history(workspace_id, guest_id, status, label, changed_by)
-    VALUES (test_workspace, guest_id, 'waiting', 'Palsu', service_id);
+    VALUES (test_workspace, v_guest_id, 'waiting', 'Palsu', service_id);
     RAISE EXCEPTION 'Authenticated direct history insert unexpectedly succeeded';
   EXCEPTION WHEN insufficient_privilege THEN
     NULL;
