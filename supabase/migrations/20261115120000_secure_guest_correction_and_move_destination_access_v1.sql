@@ -355,7 +355,8 @@ end $$;
 CREATE OR REPLACE FUNCTION public.save_guest_operations(
   p_workspace_id uuid,
   p_guests jsonb,
-  p_reservations jsonb
+  p_reservations jsonb,
+  p_settings jsonb DEFAULT NULL
 ) RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY INVOKER
@@ -378,6 +379,33 @@ BEGIN
      OR pg_catalog.jsonb_array_length(coalesce(p_guests, '[]'::jsonb)) > 100
      OR pg_catalog.jsonb_array_length(coalesce(p_reservations, '[]'::jsonb)) > 100 THEN
     RAISE EXCEPTION 'Data Guest Operations tidak valid.';
+  END IF;
+
+  -- Settings share this transaction so callers never roll back UI state after
+  -- guest/reservation rows have already committed.
+  IF p_settings IS NOT NULL THEN
+    IF jsonb_typeof(p_settings) <> 'object' THEN
+      RAISE EXCEPTION 'Pengaturan Guest Operations tidak valid.';
+    END IF;
+    IF jsonb_typeof(p_settings->'seatingDurationMinutes') <> 'number'
+       OR p_settings - 'seatingDurationMinutes' <> '{}'::jsonb THEN
+      RAISE EXCEPTION 'Pengaturan Guest Operations tidak valid.';
+    END IF;
+    IF (p_settings->>'seatingDurationMinutes')::numeric NOT BETWEEN 1 AND 1440
+       OR pg_catalog.trunc((p_settings->>'seatingDurationMinutes')::numeric)
+          <> (p_settings->>'seatingDurationMinutes')::numeric THEN
+      RAISE EXCEPTION 'Durasi duduk harus bilangan bulat antara 1 dan 1440 menit.';
+    END IF;
+
+    INSERT INTO public.workspace_settings (
+      workspace_id, setting_key, setting_value, updated_at
+    ) VALUES (
+      p_workspace_id, 'guest_operations', p_settings, pg_catalog.clock_timestamp()
+    )
+    ON CONFLICT (workspace_id, setting_key) DO UPDATE
+    SET setting_value = EXCLUDED.setting_value,
+        updated_at = EXCLUDED.updated_at
+    WHERE public.workspace_settings.setting_value IS DISTINCT FROM EXCLUDED.setting_value;
   END IF;
 
   -- Save reservations first so a newly inserted guest can reference its reservation.
@@ -588,5 +616,5 @@ BEGIN
 END;
 $function$;
 
-REVOKE ALL ON FUNCTION public.save_guest_operations(uuid, jsonb, jsonb) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.save_guest_operations(uuid, jsonb, jsonb) TO authenticated;
+REVOKE ALL ON FUNCTION public.save_guest_operations(uuid, jsonb, jsonb, jsonb) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.save_guest_operations(uuid, jsonb, jsonb, jsonb) TO authenticated;
