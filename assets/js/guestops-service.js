@@ -29,6 +29,8 @@
       phone: row.phone || '',
       status: row.status,
       created: toMs(row.created_at),
+      createdAt: row.created_at || null,
+      updatedAt: row.updated_at || null,
       resolved: toMs(row.resolved_at),
       seatedAt: toMs(row.seated_at),
       reservationId: row.reservation_id || null,
@@ -52,6 +54,8 @@
       table: row.table_label || '',
       status: row.status,
       created: toMs(row.created_at),
+      createdAt: row.created_at || null,
+      updatedAt: row.updated_at || null,
       guestId: null,
       seatedAt: toMs(row.seated_at)
     };
@@ -68,7 +72,7 @@
       pack: item.pack,
       phone: item.phone || null,
       status: item.status,
-      created_at: toIso(item.created),
+      created_at: item.createdAt || toIso(item.created),
       seated_at: item.seatedAt ? toIso(item.seatedAt) : null,
       resolved_at: item.resolved ? toIso(item.resolved) : null
     };
@@ -87,7 +91,8 @@
       smoking: item.smoking || null,
       note: item.note || null,
       table_label: item.table || null,
-      status: item.status
+      status: item.status,
+      created_at: item.createdAt || toIso(item.created)
     };
   }
 
@@ -131,11 +136,11 @@
     const guard = await assertWorkspaceSession();
     const [guestResult, reservationResult, settingResult] = await Promise.all([
       client.from('guests')
-        .select('id,ticket,service_date,guest_name,pack,phone,status,created_at,resolved_at,seated_at,reservation_id')
+        .select('id,ticket,service_date,guest_name,pack,phone,status,created_at,updated_at,resolved_at,seated_at,reservation_id')
         .eq('workspace_id', workspaceId)
         .order('created_at', { ascending: true }),
       client.from('reservations')
-        .select('id,code,reservation_date,reservation_time,guest_name,pack,phone,smoking,note,table_label,status,created_at')
+        .select('id,code,reservation_date,reservation_time,guest_name,pack,phone,smoking,note,table_label,status,created_at,updated_at')
         .eq('workspace_id', workspaceId)
         .order('reservation_date', { ascending: true })
         .order('reservation_time', { ascending: true }),
@@ -166,11 +171,11 @@
 
     persistedGuestRows = new Map(guests.map(guest => {
       const record = guestRecord(guest);
-      return [guest.id, recordFingerprint(record)];
+      return [guest.id, { fingerprint: recordFingerprint(record), updatedAt: guest.updatedAt }];
     }));
     persistedReservationRows = new Map(reservations.map(reservation => {
       const record = reservationRecord(reservation);
-      return [reservation.id, recordFingerprint(record)];
+      return [reservation.id, { fingerprint: recordFingerprint(record), updatedAt: reservation.updatedAt }];
     }));
     const loadedSettings = settingResult.data?.setting_value;
     persistedSettingsFingerprint = settingResult.data
@@ -249,42 +254,67 @@
       const guard = await assertWorkspaceSession(requestedGeneration);
       const reservations = (state.reservations || []).map(reservationRecord);
       const guests = (state.guests || []).map(guestRecord);
-      const changedReservations = reservations.filter(record =>
-        persistedReservationRows.get(record.id) !== recordFingerprint(record)
-      );
-      const changedGuests = guests.filter(record =>
-        persistedGuestRows.get(record.id) !== recordFingerprint(record)
-      );
+      const changedReservations = reservations
+        .filter(record => {
+          const saved = persistedReservationRows.get(record.id);
+          return !saved || saved.fingerprint !== recordFingerprint(record);
+        })
+        .map(record => ({
+          ...record,
+          expected_updated_at: persistedReservationRows.get(record.id)?.updatedAt || null
+        }));
+      const changedGuests = guests
+        .filter(record => {
+          const saved = persistedGuestRows.get(record.id);
+          return !saved || saved.fingerprint !== recordFingerprint(record);
+        })
+        .map(record => ({
+          ...record,
+          expected_updated_at: persistedGuestRows.get(record.id)?.updatedAt || null
+        }));
+      const settingValue = {
+        seatingDurationMinutes: Number(state.settings?.seatingDurationMinutes) || 90
+      };
+      const settingFingerprint = JSON.stringify(settingValue);
+      const changedSettings = root.AppAuth?.getContext()?.role !== 'service'
+        && settingFingerprint !== persistedSettingsFingerprint;
 
       await assertWorkspaceSession(guard.generation);
-      if (changedReservations.length) {
-        const result = await client.from('reservations').upsert(changedReservations, { onConflict: 'id' });
-        if (result.error) throw result.error;
-        changedReservations.forEach(record => persistedReservationRows.set(record.id, recordFingerprint(record)));
-      }
-      await assertWorkspaceSession(guard.generation);
-      if (changedGuests.length) {
-        const rows = changedGuests.map(record => ({ ...record, updated_at: new Date().toISOString() }));
-        const result = await client.from('guests').upsert(rows, { onConflict: 'id' });
-        if (result.error) throw result.error;
-        changedGuests.forEach(record => persistedGuestRows.set(record.id, recordFingerprint(record)));
-      }
-      await assertWorkspaceSession(guard.generation);
-      if (root.AppAuth?.getContext()?.role !== 'service') {
-        const settingValue = {
-          seatingDurationMinutes: Number(state.settings?.seatingDurationMinutes) || 90
-        };
-        const settingFingerprint = JSON.stringify(settingValue);
-        if (settingFingerprint !== persistedSettingsFingerprint) {
-          const setting = await client.from('workspace_settings').upsert({
-            workspace_id: workspaceId,
-            setting_key: 'guest_operations',
-            setting_value: settingValue,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'workspace_id,setting_key' });
-          if (setting.error) throw setting.error;
-          persistedSettingsFingerprint = settingFingerprint;
+      if (changedReservations.length || changedGuests.length || changedSettings) {
+        const { data, error } = await client.rpc('save_guest_operations', {
+          p_workspace_id: workspaceId,
+          p_guests: changedGuests,
+          p_reservations: changedReservations,
+          p_settings: changedSettings ? settingValue : null
+        });
+        if (error) throw error;
+        await assertWorkspaceSession(guard.generation);
+
+        const savedGuests = new Map((data?.guests || []).map(row => [row.id, row.updated_at]));
+        const savedReservations = new Map((data?.reservations || []).map(row => [row.id, row.updated_at]));
+        if (savedGuests.size !== changedGuests.length || savedReservations.size !== changedReservations.length) {
+          throw new Error('Respons penyimpanan Guest Operations tidak lengkap. Muat ulang data sebelum melanjutkan.');
         }
+
+        changedGuests.forEach(({ expected_updated_at, ...record }) => {
+          const updatedAt = savedGuests.get(record.id);
+          const guest = (state.guests || []).find(item => item.id === record.id);
+          if (guest) {
+            guest.createdAt = record.created_at;
+            guest.updatedAt = updatedAt;
+          }
+          persistedGuestRows.set(record.id, { fingerprint: recordFingerprint(record), updatedAt });
+        });
+        changedReservations.forEach(({ expected_updated_at, ...record }) => {
+          const updatedAt = savedReservations.get(record.id);
+          const reservation = (state.reservations || []).find(item => item.id === record.id);
+          if (reservation) {
+            reservation.createdAt = record.created_at;
+            reservation.updatedAt = updatedAt;
+          }
+          persistedReservationRows.set(record.id, { fingerprint: recordFingerprint(record), updatedAt });
+        });
+        if (changedSettings) persistedSettingsFingerprint = settingFingerprint;
       }
     };
 
@@ -293,23 +323,45 @@
     return operation;
   }
 
-  async function appendGuestAudit(guestId, entry) {
+  function correctGuestRecord(guestId, changes) {
     requireReady();
-    const guard = await assertWorkspaceSession();
-    const guest = await client.from('guests').select('workspace_id').eq('id', guestId).single();
-    if (guest.error) throw guest.error;
-    if (guest.data?.workspace_id !== guard.workspaceId) throw new Error('Tamu berasal dari workspace lain. Perubahan diblokir.');
-    await assertWorkspaceSession(guard.generation);
-    const { error } = await client.from('guest_status_history').insert({
-      workspace_id: workspaceId,
-      guest_id: guestId,
-      status: entry.status || 'waiting',
-      label: entry.label || 'Dikoreksi',
-      detail: entry.detail || null,
-      reason: entry.reason || null,
-      changed_at: toIso(entry.at)
-    });
-    if (error) throw error;
+    const requestedGeneration = serviceGeneration;
+    const run = async () => {
+      const guard = await assertWorkspaceSession(requestedGeneration);
+      if (!changes || !Number.isFinite(Date.parse(changes.expectedUpdatedAt))) {
+        throw new Error('Versi data tamu tidak tersedia. Muat ulang sebelum mengoreksi.');
+      }
+      const { data, error } = await client.rpc('correct_guest_record', {
+        p_guest_id: guestId,
+        p_guest_name: String(changes.name || ''),
+        p_pack: Number(changes.pack),
+        p_phone: String(changes.phone || '') || null,
+        p_reason: String(changes.reason || ''),
+        p_expected_updated_at: String(changes.expectedUpdatedAt)
+      });
+      if (error) throw error;
+      await assertWorkspaceSession(guard.generation);
+      if (!data?.guest || data.guest.id !== guestId || data.guest.workspace_id !== guard.workspaceId) {
+        throw new Error('Respons koreksi tamu tidak cocok dengan workspace aktif.');
+      }
+      const mapped = mapGuest(data.guest);
+      persistedGuestRows.set(guestId, {
+        fingerprint: recordFingerprint(guestRecord(mapped)),
+        updatedAt: mapped.updatedAt
+      });
+      return {
+        guest: mapped,
+        audit: {
+          at: toMs(data.audit?.changed_at),
+          label: data.audit?.label || 'Dikoreksi',
+          detail: data.audit?.detail || '',
+          reason: data.audit?.reason || ''
+        }
+      };
+    };
+    const operation = writeQueue.catch(() => undefined).then(run);
+    writeQueue = operation;
+    return operation;
   }
 
   function reset() {
@@ -331,7 +383,7 @@
     persist,
     nextTicket,
     nextReservationCode,
-    appendGuestAudit,
+    correctGuestRecord,
     isReady: () => ready,
     workspaceId: () => workspaceId
   };

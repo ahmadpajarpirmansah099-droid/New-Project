@@ -46,7 +46,7 @@ Production schema installation is complete. The database scenarios run after ins
 - Only division_admin membership plus protected admin profile and explicit division assignment can operate enabled scopes.
 - Private SECURITY DEFINER entry helpers check identity and scope; exposed RPC wrappers are SECURITY INVOKER. Tables have RLS and no authenticated write grants.
 - Version checks prevent lost inventory updates. Request UUID + payload hash prevents duplicate or mismatched retries.
-- Transfers and linked reversals update both scopes in one transaction under a serialization lock.
+- Transfers and linked reversals update both scopes in one transaction under a serialization lock. The actor must have an active admin assignment and enabled Stock Opname scope at both the source and destination; unauthorized destinations are omitted from choices and rejected server-side.
 - Reopening the latest closed period holds the following period. Existing later transactions remain retained and are recomputed against the reconfirmed physical opening.
 - Mapping inventory between divisions is explicit and requires the same base unit; independently maintained catalogs need not share IDs.
 - Drafts are local to account/workspace/division. A pending-period draft is restored and explicitly saved after opening confirmation; it never silently posts while the opening is pending.
@@ -54,7 +54,7 @@ Production schema installation is complete. The database scenarios run after ins
 ## Validation
 
 - Node suite including the follow-up UI regression tests: 77 passing, 0 failures; syntax checks passed for 21 JavaScript files.
-- Rollback database scenarios: initial/production/conversion/Sales without double consumption, overlap guard, invoice price update, WIP waste, atomic Move, optimistic conflict, required counts, variance, pending confirmation, rollover, reopen/hold/reconfirm, linked Move reversal, negative stock, authenticated read/direct-write denial, anonymous rejection.
+- Rollback database scenarios: initial/production/conversion/Sales without double consumption, overlap guard, invoice price update, WIP waste, atomic Move, optimistic conflict, required counts, variance, pending confirmation, rollover, reopen/hold/reconfirm, linked Move reversal, negative stock, authenticated read/direct-write denial, anonymous rejection. The updated regression also removes target membership and asserts that Move choices, target catalog reads, and stock mutations are denied without changing either division.
 - PR #226 reported browser fixture checks: direct quantity/unit entry, draft save/restoration after reload, compact form at a 320px iframe viewport (305px content area with scrollbar), equal scrollWidth/clientWidth. These checks use controlled fixtures, not a production account; follow-up visual changes have not been revalidated in an authenticated browser.
 - Follow-up database regression scripts both passed on Supabase after migration, with ROLLBACK and no remaining test workspaces. See the follow-up record for cases and access checks.
 

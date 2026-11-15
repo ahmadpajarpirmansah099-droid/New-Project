@@ -128,7 +128,7 @@ begin
  if not private.so_allowed(d) then raise exception 'Akses Stock Opname ditolak.'; end if;
  select * into st from public.stock_opname_state where division_id=d;
  c:=private.so_catalog(d);p:=st.payload->'periods'->-1;
- select coalesce(jsonb_agg(jsonb_build_object('id',s.division_id,'name',w.name||' · '||dv.name)),'[]') into targets from public.stock_opname_scopes s join public.divisions dv on dv.id=s.division_id join public.workspaces w on w.id=s.workspace_id where s.enabled and dv.is_active and s.division_id<>d;
+ select coalesce(jsonb_agg(jsonb_build_object('id',s.division_id,'name',w.name||' · '||dv.name)),'[]') into targets from public.stock_opname_scopes s join public.divisions dv on dv.id=s.division_id join public.workspaces w on w.id=s.workspace_id where s.enabled and dv.is_active and s.division_id<>d and private.so_allowed(s.division_id);
  return jsonb_build_object('state',coalesce(st.payload,'{"periods":[],"documents":[]}'),'revision',coalesce(st.revision,0),'catalog',private.so_catalog_rows(c),'balance',private.so_balances(coalesce(st.payload,'{}'),coalesce(p,'{}')),'targets',targets);
 end $$;
 create function public.stock_opname_read(division uuid) returns jsonb language sql security invoker set search_path='' as $$ select private.so_view(division); $$;
@@ -282,7 +282,7 @@ begin
    end if;
    if doc->>'category'='Move' and target is null then raise exception 'Pilih tujuan Move yang sudah aktif.';end if;
    if target is not null then
-    if target=d or not exists(select 1 from public.stock_opname_scopes sc join public.divisions dv on dv.id=sc.division_id where sc.division_id=target and sc.enabled and dv.is_active) then raise exception 'Tujuan Move belum aktif.';end if;
+    if target=d or not private.so_allowed(target) then raise exception 'Tujuan Move tidak tersedia atau akses ditolak.';end if;
     if old_doc ? 'target' and old_doc->>'target'<>target::text then raise exception 'Tujuan Move tidak dapat diganti. Batalkan lalu buat baru.';end if;
     select * into target_st from public.stock_opname_state where division_id=target for update;
     target_s:=target_st.payload;target_p:=target_s->'periods'->-1;
@@ -364,7 +364,7 @@ select d.id,w.id,true from public.divisions d join public.workspaces w on w.id=d
 create function private.so_target_catalog(origin uuid,destination uuid) returns jsonb
 language plpgsql stable security definer set search_path='' as $$
 begin
- if not private.so_allowed(origin) or not exists(select 1 from public.stock_opname_scopes where division_id=destination and enabled) then raise exception 'Tujuan tidak tersedia.';end if;
+ if not private.so_allowed(origin) or not private.so_allowed(destination) then raise exception 'Tujuan tidak tersedia.';end if;
  return (select coalesce(jsonb_agg(value-'price'-'parts'),'[]') from jsonb_array_elements(private.so_catalog_rows(private.so_catalog(destination))) where left(value->>'key',2)<>'s:');
 end $$;
 revoke all on function private.so_target_catalog(uuid,uuid) from public,anon;
