@@ -1401,3 +1401,73 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
   opacity:.45;
   box-shadow:none;
 }
+
+
+/* Highlight seating details only on guest cards with the seated status. */
+.guest-seated-info {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:8px;
+  margin:11px 0 0 55px;
+}
+.guest-seated-metric {
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-width:0;
+  min-height:58px;
+  padding:9px 11px;
+  border:1px solid #e3edc7;
+  border-radius:12px;
+  background:linear-gradient(135deg,#f5f9e9 0%,#edf5d8 100%);
+}
+.guest-seated-metric small {
+  color:#68794a;
+  font-size:8px;
+  font-weight:850;
+  letter-spacing:.09em;
+}
+.guest-seated-metric strong {
+  display:block;
+  margin-top:3px;
+  overflow-wrap:anywhere;
+  color:#26351f;
+  font-size:17px;
+  font-weight:900;
+  line-height:1.15;
+}
+.guest-seated-table {
+  border-color:#d9e9a9;
+  background:linear-gradient(135deg,#eaf5c9 0%,#dff0a6 100%);
+}
+.guest-seated-table strong {
+  font-size:20px;
+  letter-spacing:-.02em;
+}
+.guest-seated-table.is-missing {
+  border-color:#eee4c9;
+  background:#fbf7ed;
+}
+.guest-seated-table.is-missing small,
+.guest-seated-table.is-missing strong {
+  color:#8b7444;
+}
+.guest-is-seated .guest-bottom {
+  margin-top:9px;
+}
+@media (max-width:520px) {
+  .guest-seated-info {
+    margin-left:0;
+    gap:7px;
+  }
+  .guest-seated-metric {
+    min-height:56px;
+    padding:8px 10px;
+  }
+  .guest-seated-metric strong {
+    font-size:16px;
+  }
+  .guest-seated-table strong {
+    font-size:19px;
+  }
+}
