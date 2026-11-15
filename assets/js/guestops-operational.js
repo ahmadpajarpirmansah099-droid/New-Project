@@ -92,10 +92,10 @@ function operationalGuestRow(guest) {
     : '<span class="operational-ticket">' + esc(guest.ticket) + '</span>';
   const tableLabel = guest.tableLabel || (reservation ? reservation.table : '');
   const tableLine = guest.status === 'seated'
-    ? '<small>Meja ' + esc(tableLabel || 'belum dicatat') + '</small>'
+    ? '<small class="operational-guest-highlight">Meja ' + esc(tableLabel || 'belum dicatat') + '</small>'
     : '';
   const timeLine = guest.status === 'seated'
-    ? '<small>Seating · <span data-seating-countdown="' + esc(guest.id) + '">' + seatingCountdownText(guest) + '</span></small>'
+    ? '<small class="operational-guest-highlight">Seating · <span data-seating-countdown="' + esc(guest.id) + '">' + seatingCountdownText(guest) + '</span></small>'
     : '<small>' + esc(time) + '</small>';
 
   return '<button type="button" class="operational-guest-row" data-app-action="closeSheetThenOpenDetail" data-app-id="' + esc(guest.id) + '">' +
