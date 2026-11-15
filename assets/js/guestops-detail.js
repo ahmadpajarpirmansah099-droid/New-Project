@@ -1,15 +1,17 @@
 /* =========================================================
     7. GUEST DETAIL, EDITING, AND EXPORT
     ========================================================= */
-async function setGuestStatus(id,status){
+async function setGuestStatus(id,status,tableLabel=''){
   const guest=state.guests.find(item=>item.id===id);
   if(!guest||['done','cancelled'].includes(guest.status))return;
+  const normalizedTable=String(tableLabel||'').trim();
+  if(status==='seated'&&!normalizedTable){toast('Nomor meja wajib diisi sebelum mendudukkan tamu');return;}
   const now=Date.now();
-  const previous={status:guest.status,resolved:guest.resolved,seatedAt:guest.seatedAt,audit:guest.audit.slice()};
+  const previous={status:guest.status,resolved:guest.resolved,seatedAt:guest.seatedAt,tableLabel:guest.tableLabel,audit:guest.audit.slice()};
   guest.status=status;
-  if(status==='seated'){guest.resolved=guest.resolved||now;guest.seatedAt=now}else if(status==='cancelled')guest.resolved=guest.resolved||now;
+  if(status==='seated'){guest.resolved=guest.resolved||now;guest.seatedAt=now;guest.tableLabel=normalizedTable}else if(status==='cancelled')guest.resolved=guest.resolved||now;
   const labels={called:'Dipanggil',seated:'Duduk',done:'Selesai',cancelled:'Dibatalkan'};
-  guest.audit.push({at:now,label:labels[status]||status});
+  guest.audit.push({at:now,label:labels[status]||status,detail:status==='seated'?'Meja '+normalizedTable:''});
   if (await save() === false) {
     Object.assign(guest, previous);
     renderAll();
@@ -59,8 +61,9 @@ function openDetail(id) {
     : '<div class="detail-ticket"><small>NOMOR ANTREAN</small><strong>' +
       esc(guest.ticket) + '</strong><small>' + fmtDate(guest.day) + '</small></div>';
 
-  const tableCell = isReservation && reservation.table
-    ? '<div class="detail-cell"><small>Meja</small><b>' + esc(reservation.table) + '</b></div>'
+  const tableLabel = guest.tableLabel || (isReservation ? reservation.table : '');
+  const tableCell = tableLabel
+    ? '<div class="detail-cell"><small>Meja</small><b>' + esc(tableLabel) + '</b></div>'
     : '';
 
   const whatsappButton = guest.phone
@@ -221,7 +224,7 @@ function confirmGuestStatus(id, status) {
   const isSeated = status === 'seated';
   const title = isSeated ? 'Dudukkan tamu?' : 'Selesaikan kunjungan?';
   const message = isSeated
-    ? 'Yakin ingin mengubah status ' + guest.name + ' menjadi Duduk?'
+    ? 'Isi nomor meja secara manual untuk melanjutkan.'
     : 'Yakin ingin menyelesaikan kunjungan ' + guest.name + '?';
   const confirmLabel = isSeated ? 'Ya, dudukkan' : 'Ya, selesaikan';
 
@@ -235,6 +238,7 @@ function confirmGuestStatus(id, status) {
     '<section class="guest-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="guestConfirmTitle" aria-describedby="guestConfirmMessage">' +
       '<h2 id="guestConfirmTitle"></h2>' +
       '<p id="guestConfirmMessage"></p>' +
+      (isSeated ? '<div class="guest-confirm-field"><label for="guestTableLabel">Nomor meja *</label><input id="guestTableLabel" type="text" maxlength="30" autocomplete="off" placeholder="Masukkan nomor meja" required></div>' : '') +
       '<div class="guest-confirm-actions">' +
         '<button type="button" class="guest-confirm-cancel">Kembali</button>' +
         '<button type="button" class="guest-confirm-accept"></button>' +
@@ -244,7 +248,10 @@ function confirmGuestStatus(id, status) {
   document.body.appendChild(backdrop);
   backdrop.querySelector('#guestConfirmTitle').textContent = title;
   backdrop.querySelector('#guestConfirmMessage').textContent = message;
-  backdrop.querySelector('.guest-confirm-accept').textContent = confirmLabel;
+  const acceptButton = backdrop.querySelector('.guest-confirm-accept');
+  acceptButton.textContent = confirmLabel;
+  const tableInput = backdrop.querySelector('#guestTableLabel');
+  if (tableInput) acceptButton.disabled = true;
 
   const close = () => {
     document.removeEventListener('keydown', onKeydown);
@@ -255,14 +262,19 @@ function confirmGuestStatus(id, status) {
   };
 
   backdrop.querySelector('.guest-confirm-cancel').addEventListener('click', close);
-  backdrop.querySelector('.guest-confirm-accept').addEventListener('click', async () => {
+  if (tableInput) tableInput.addEventListener('input', () => {
+    acceptButton.disabled = !tableInput.value.trim();
+  });
+  acceptButton.addEventListener('click', async () => {
+    const tableLabel = tableInput ? tableInput.value.trim() : '';
+    if (isSeated && !tableLabel) { tableInput?.focus(); return; }
     close();
-    await setGuestStatus(id, status);
+    await setGuestStatus(id, status, tableLabel);
   });
   backdrop.addEventListener('click', event => {
     if (event.target === backdrop) close();
   });
   document.addEventListener('keydown', onKeydown);
   if (window.lucide?.createIcons) window.lucide.createIcons();
-  backdrop.querySelector('.guest-confirm-cancel').focus();
+  (tableInput || backdrop.querySelector('.guest-confirm-cancel')).focus();
 }
