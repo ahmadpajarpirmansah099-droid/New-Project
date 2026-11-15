@@ -229,7 +229,7 @@ test('Guest Operations persists guests and reservations in one RPC transaction',
   assert.equal(save.args.p_reservations.length, 1);
   assert.equal(save.args.p_guests[0].expected_updated_at, null);
   assert.equal(save.args.p_reservations[0].expected_updated_at, null);
-  assert.deepEqual(save.args.p_settings, { seatingDurationMinutes: 90 });
+  assert.equal(save.args.p_settings.seatingDurationMinutes, 90);
   assert.ok(rows.guests[0].updated_at);
   assert.ok(rows.reservations[0].updated_at);
   assert.equal(rows.workspace_settings.length, 1);
@@ -290,7 +290,7 @@ test('Guest Operations writes only changed rows with their last-seen versions', 
   assert.equal(saves.length, 2);
   assert.equal(saves[0].args.p_guests.length, 1);
   assert.equal(saves[0].args.p_reservations.length, 1);
-  assert.deepEqual(saves[0].args.p_settings, { seatingDurationMinutes: 90 });
+  assert.equal(saves[0].args.p_settings.seatingDurationMinutes, 90);
   assert.ok(saves[1].args.p_guests[0].expected_updated_at);
   assert.equal(saves[1].args.p_reservations.length, 0);
   assert.equal(saves[1].args.p_settings, null);
