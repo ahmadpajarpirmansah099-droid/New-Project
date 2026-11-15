@@ -1,9 +1,10 @@
 -- Run after migration 20261115120000_secure_guest_correction_and_move_destination_access_v1
--- inside BEGIN, then ROLLBACK. Uses a disposable workspace and a real service profile.
+-- inside BEGIN, then ROLLBACK. Uses a disposable workspace and a developer profile
+-- with service workspace membership, so both RLS permissions are covered.
 
 DO $test$
 DECLARE
-  service_id uuid;
+  actor_id uuid;
   test_workspace uuid := gen_random_uuid();
   v_guest_id uuid := gen_random_uuid();
   original_updated_at timestamptz;
@@ -25,18 +26,18 @@ DECLARE
   v_saved_settings jsonb;
   v_requested_settings jsonb := jsonb_build_object('seatingDurationMinutes', 120);
 BEGIN
-  SELECT id INTO STRICT service_id FROM public.profiles WHERE role = 'service' LIMIT 1;
+  SELECT id INTO STRICT actor_id FROM public.profiles WHERE role = 'developer' LIMIT 1;
 
   INSERT INTO public.workspaces(id, name, created_by)
-  VALUES (test_workspace, 'Guest correction rollback fixture', service_id);
+  VALUES (test_workspace, 'Guest correction rollback fixture', actor_id);
   INSERT INTO public.workspace_memberships(workspace_id, user_id, role)
-  VALUES (test_workspace, service_id, 'service');
+  VALUES (test_workspace, actor_id, 'service');
 
   INSERT INTO public.guests(id, workspace_id, ticket, service_date, guest_name, pack, phone, status, created_by)
   VALUES (
     v_guest_id, test_workspace, 'WL-TEST-001',
     (now() AT TIME ZONE 'Asia/Jakarta')::date,
-    'Tamu Awal', 2, '081111111111', 'waiting', service_id
+    'Tamu Awal', 2, '081111111111', 'waiting', actor_id
   )
   RETURNING updated_at INTO original_updated_at;
 
@@ -45,12 +46,12 @@ BEGIN
   ) VALUES (
     v_reservation_id, test_workspace, 'RSV-TEST-001',
     (now() AT TIME ZONE 'Asia/Jakarta')::date, '19:00',
-    'Tamu Reservasi', 2, 'pending', service_id
+    'Tamu Reservasi', 2, 'pending', actor_id
   )
   RETURNING created_at, updated_at INTO v_reservation_created_at, v_reservation_updated_at;
   v_initial_reservation_updated_at := v_reservation_updated_at;
 
-  PERFORM set_config('request.jwt.claim.sub', service_id::text, true);
+  PERFORM set_config('request.jwt.claim.sub', actor_id::text, true);
   EXECUTE 'SET LOCAL ROLE authenticated';
 
   result := public.correct_guest_record(
@@ -67,7 +68,7 @@ BEGIN
 
   SELECT count(*), max(h.changed_at) INTO history_count, history_changed_at
   FROM public.guest_status_history AS h
-  WHERE h.guest_id = v_guest_id AND h.label = 'Dikoreksi' AND h.changed_by = service_id;
+  WHERE h.guest_id = v_guest_id AND h.label = 'Dikoreksi' AND h.changed_by = actor_id;
   IF history_count <> 1 THEN
     RAISE EXCEPTION 'Correction audit was not committed exactly once';
   END IF;
@@ -218,7 +219,7 @@ BEGIN
 
   BEGIN
     INSERT INTO public.guest_status_history(workspace_id, guest_id, status, label, changed_by)
-    VALUES (test_workspace, v_guest_id, 'waiting', 'Palsu', service_id);
+    VALUES (test_workspace, v_guest_id, 'waiting', 'Palsu', actor_id);
     RAISE EXCEPTION 'Authenticated direct history insert unexpectedly succeeded';
   EXCEPTION WHEN insufficient_privilege THEN
     NULL;
