@@ -348,3 +348,158 @@ begin
  insert into public.stock_opname_requests(request_id,actor_id,division_id,action,payload_hash) values(request,auth.uid(),d,action,md5(input::text));
  return private.so_view(d);
 end $$;
+
+
+-- Persist Guest Operations changes as one RLS-respecting compare-and-swap batch.
+-- A conflict in either table aborts the whole function call, including its other writes.
+CREATE OR REPLACE FUNCTION public.save_guest_operations(
+  p_workspace_id uuid,
+  p_guests jsonb,
+  p_reservations jsonb
+) RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path TO ''
+AS $function$
+DECLARE
+  v_entry jsonb;
+  v_id uuid;
+  v_expected_updated_at timestamptz;
+  v_updated_at timestamptz;
+  v_guest_versions jsonb := '[]'::jsonb;
+  v_reservation_versions jsonb := '[]'::jsonb;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Sesi akun tidak valid.';
+  END IF;
+  IF p_workspace_id IS NULL
+     OR jsonb_typeof(coalesce(p_guests, '[]'::jsonb)) <> 'array'
+     OR jsonb_typeof(coalesce(p_reservations, '[]'::jsonb)) <> 'array'
+     OR pg_catalog.jsonb_array_length(coalesce(p_guests, '[]'::jsonb)) > 100
+     OR pg_catalog.jsonb_array_length(coalesce(p_reservations, '[]'::jsonb)) > 100 THEN
+    RAISE EXCEPTION 'Data Guest Operations tidak valid.';
+  END IF;
+
+  -- Save reservations first so a newly inserted guest can reference its reservation.
+  FOR v_entry IN
+    SELECT value FROM pg_catalog.jsonb_array_elements(coalesce(p_reservations, '[]'::jsonb))
+  LOOP
+    IF jsonb_typeof(v_entry) <> 'object'
+       OR v_entry->>'workspace_id' IS DISTINCT FROM p_workspace_id::text THEN
+      RAISE EXCEPTION 'Data reservasi tidak valid.';
+    END IF;
+
+    v_id := nullif(v_entry->>'id', '')::uuid;
+    IF v_id IS NULL THEN RAISE EXCEPTION 'ID reservasi tidak valid.'; END IF;
+    v_expected_updated_at := nullif(v_entry->>'expected_updated_at', '')::timestamptz;
+
+    IF v_expected_updated_at IS NULL THEN
+      INSERT INTO public.reservations (
+        id, workspace_id, code, reservation_date, reservation_time,
+        guest_name, pack, phone, smoking, note, table_label, status, created_at
+      ) VALUES (
+        v_id, p_workspace_id, v_entry->>'code',
+        (v_entry->>'reservation_date')::date,
+        (v_entry->>'reservation_time')::time,
+        v_entry->>'guest_name',
+        (v_entry->>'pack')::integer,
+        nullif(v_entry->>'phone', ''),
+        nullif(v_entry->>'smoking', ''),
+        nullif(v_entry->>'note', ''),
+        nullif(v_entry->>'table_label', ''),
+        v_entry->>'status',
+        (v_entry->>'created_at')::timestamptz
+      )
+      RETURNING updated_at INTO v_updated_at;
+    ELSE
+      UPDATE public.reservations
+      SET reservation_date = (v_entry->>'reservation_date')::date,
+          reservation_time = (v_entry->>'reservation_time')::time,
+          guest_name = v_entry->>'guest_name',
+          pack = (v_entry->>'pack')::integer,
+          phone = nullif(v_entry->>'phone', ''),
+          smoking = nullif(v_entry->>'smoking', ''),
+          note = nullif(v_entry->>'note', ''),
+          table_label = nullif(v_entry->>'table_label', ''),
+          status = v_entry->>'status',
+          updated_at = pg_catalog.clock_timestamp()
+      WHERE id = v_id
+        AND workspace_id = p_workspace_id
+        AND updated_at = v_expected_updated_at
+      RETURNING updated_at INTO v_updated_at;
+
+      IF NOT FOUND THEN
+        RAISE EXCEPTION USING
+          ERRCODE = 'P0001',
+          MESSAGE = 'Data reservasi sudah berubah di perangkat lain atau aksesnya tidak tersedia. Muat ulang sebelum menyimpan.';
+      END IF;
+    END IF;
+
+    v_reservation_versions := v_reservation_versions || pg_catalog.jsonb_build_array(
+      pg_catalog.jsonb_build_object('id', v_id, 'updated_at', v_updated_at)
+    );
+  END LOOP;
+
+  FOR v_entry IN
+    SELECT value FROM pg_catalog.jsonb_array_elements(coalesce(p_guests, '[]'::jsonb))
+  LOOP
+    IF jsonb_typeof(v_entry) <> 'object'
+       OR v_entry->>'workspace_id' IS DISTINCT FROM p_workspace_id::text THEN
+      RAISE EXCEPTION 'Data tamu tidak valid.';
+    END IF;
+
+    v_id := nullif(v_entry->>'id', '')::uuid;
+    IF v_id IS NULL THEN RAISE EXCEPTION 'ID tamu tidak valid.'; END IF;
+    v_expected_updated_at := nullif(v_entry->>'expected_updated_at', '')::timestamptz;
+
+    IF v_expected_updated_at IS NULL THEN
+      INSERT INTO public.guests (
+        id, workspace_id, reservation_id, ticket, service_date,
+        guest_name, pack, phone, status, created_at, seated_at, resolved_at
+      ) VALUES (
+        v_id, p_workspace_id, nullif(v_entry->>'reservation_id', '')::uuid,
+        v_entry->>'ticket', (v_entry->>'service_date')::date,
+        v_entry->>'guest_name', (v_entry->>'pack')::integer,
+        nullif(v_entry->>'phone', ''), v_entry->>'status',
+        (v_entry->>'created_at')::timestamptz,
+        nullif(v_entry->>'seated_at', '')::timestamptz,
+        nullif(v_entry->>'resolved_at', '')::timestamptz
+      )
+      RETURNING updated_at INTO v_updated_at;
+    ELSE
+      UPDATE public.guests
+      SET reservation_id = nullif(v_entry->>'reservation_id', '')::uuid,
+          service_date = (v_entry->>'service_date')::date,
+          guest_name = v_entry->>'guest_name',
+          pack = (v_entry->>'pack')::integer,
+          phone = nullif(v_entry->>'phone', ''),
+          status = v_entry->>'status',
+          seated_at = nullif(v_entry->>'seated_at', '')::timestamptz,
+          resolved_at = nullif(v_entry->>'resolved_at', '')::timestamptz,
+          updated_at = pg_catalog.clock_timestamp()
+      WHERE id = v_id
+        AND workspace_id = p_workspace_id
+        AND updated_at = v_expected_updated_at
+      RETURNING updated_at INTO v_updated_at;
+
+      IF NOT FOUND THEN
+        RAISE EXCEPTION USING
+          ERRCODE = 'P0001',
+          MESSAGE = 'Data tamu sudah berubah di perangkat lain atau aksesnya tidak tersedia. Muat ulang sebelum menyimpan.';
+      END IF;
+    END IF;
+
+    v_guest_versions := v_guest_versions || pg_catalog.jsonb_build_array(
+      pg_catalog.jsonb_build_object('id', v_id, 'updated_at', v_updated_at)
+    );
+  END LOOP;
+
+  RETURN pg_catalog.jsonb_build_object(
+    'guests', v_guest_versions,
+    'reservations', v_reservation_versions
+  );
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION public.save_guest_operations(uuid, jsonb, jsonb) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.save_guest_operations(uuid, jsonb, jsonb) TO authenticated;
