@@ -384,8 +384,10 @@ BEGIN
   -- Settings share this transaction so callers never roll back UI state after
   -- guest/reservation rows have already committed.
   IF p_settings IS NOT NULL THEN
-    IF jsonb_typeof(p_settings) IS DISTINCT FROM 'object'
-       OR jsonb_typeof(p_settings->'seatingDurationMinutes') IS DISTINCT FROM 'number'
+    IF jsonb_typeof(p_settings) IS DISTINCT FROM 'object' THEN
+      RAISE EXCEPTION 'Pengaturan Guest Operations tidak valid.';
+    END IF;
+    IF jsonb_typeof(p_settings->'seatingDurationMinutes') IS DISTINCT FROM 'number'
        OR p_settings - 'seatingDurationMinutes' <> '{}'::jsonb THEN
       RAISE EXCEPTION 'Pengaturan Guest Operations tidak valid.';
     END IF;
