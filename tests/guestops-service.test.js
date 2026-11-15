@@ -25,12 +25,6 @@ function createRuntime() {
     single() {
       return Promise.resolve({ data: { workspace_id: 'workspace-1' }, error: null });
     }
-    insert(values) {
-      this.operation = 'insert';
-      this.values = values;
-      calls.push({ table: this.table, operation: this.operation, values });
-      return Promise.resolve({ error: null });
-    }
     upsert(values, options) {
       calls.push({ table: this.table, operation: 'upsert', values, options });
       if (failNextUpsert) {
@@ -51,7 +45,46 @@ function createRuntime() {
     from(table) { return new Query(table); },
     async rpc(name, args) {
       calls.push({ rpc: name, args });
+      if (name === 'save_guest_operations') {
+        const working = {
+          guests: rows.guests.map(row => ({ ...row })),
+          reservations: rows.reservations.map(row => ({ ...row }))
+        };
+        const versions = { guests: [], reservations: [] };
+        try {
+          const apply = (table, entries) => {
+            for (const entry of entries) {
+              const { expected_updated_at: expected, ...record } = entry;
+              const index = working[table].findIndex(row => row.id === record.id);
+              if (expected == null) {
+                if (index >= 0) throw new Error(`Data ${table === 'guests' ? 'tamu' : 'reservasi'} sudah ada.`);
+                const updatedAt = '2026-11-15T07:00:00.000Z';
+                working[table].push({ ...record, updated_at: updatedAt });
+                versions[table].push({ id: record.id, updated_at: updatedAt });
+                continue;
+              }
+              if (index < 0 || working[table][index].updated_at !== expected) {
+                throw new Error(`Data ${table === 'guests' ? 'tamu' : 'reservasi'} sudah berubah di perangkat lain.`);
+              }
+              const updatedAt = new Date(Date.parse(expected) + 1).toISOString();
+              working[table][index] = { ...working[table][index], ...record, updated_at: updatedAt };
+              versions[table].push({ id: record.id, updated_at: updatedAt });
+            }
+          };
+
+          // Mirror the database transaction: reservation writes happen before guest writes,
+          // but neither table is committed unless the entire batch succeeds.
+          apply('reservations', args.p_reservations || []);
+          apply('guests', args.p_guests || []);
+          rows.guests.splice(0, rows.guests.length, ...working.guests);
+          rows.reservations.splice(0, rows.reservations.length, ...working.reservations);
+          return { data: versions, error: null };
+        } catch (error) {
+          return { data: null, error };
+        }
+      }
       if (name === 'correct_guest_record') {
+        const updatedAt = '2026-11-03T10:00:00.000Z';
         return {
           data: {
             guest: {
@@ -64,12 +97,12 @@ function createRuntime() {
               phone: args.p_phone,
               status: 'waiting',
               created_at: '2026-11-03T09:00:00.000Z',
-              updated_at: '2026-11-03T10:00:00.000Z',
+              updated_at: updatedAt,
               resolved_at: null,
               seated_at: null
             },
             audit: {
-              changed_at: '2026-11-03T10:00:00.000Z',
+              changed_at: updatedAt,
               label: 'Dikoreksi',
               detail: 'Nama dan pack diperbarui',
               reason: args.p_reason
@@ -167,7 +200,7 @@ test('Ticket and reservation numbers are requested from database RPCs', async ()
   ]);
 });
 
-test('Guest Operations persists guest, reservation, and workspace settings', async () => {
+test('Guest Operations persists guests and reservations in one RPC transaction', async () => {
   const { runtime, client, calls, rows } = createRuntime();
   await runtime.GuestOpsService.initialize(client, 'workspace-1');
 
@@ -179,6 +212,13 @@ test('Guest Operations persists guest, reservation, and workspace settings', asy
 
   assert.equal(rows.guests.length, 1);
   assert.equal(rows.reservations.length, 1);
+  const save = calls.find(call => call.rpc === 'save_guest_operations');
+  assert.equal(save.args.p_guests.length, 1);
+  assert.equal(save.args.p_reservations.length, 1);
+  assert.equal(save.args.p_guests[0].expected_updated_at, null);
+  assert.equal(save.args.p_reservations[0].expected_updated_at, null);
+  assert.ok(rows.guests[0].updated_at);
+  assert.ok(rows.reservations[0].updated_at);
   assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 1);
 });
 
@@ -197,7 +237,7 @@ test('Guest Operations write queue recovers after a failed database write', asyn
   assert.equal(rows.reservations.length, 1);
 });
 
-test('Guest Operations writes only records that changed after the first save', async () => {
+test('Guest Operations writes only changed rows with their last-seen versions', async () => {
   const { runtime, client, calls } = createRuntime();
   await runtime.GuestOpsService.initialize(client, 'workspace-1');
 
@@ -229,9 +269,46 @@ test('Guest Operations writes only records that changed after the first save', a
   await runtime.GuestOpsService.persist(state);
   await runtime.GuestOpsService.persist(state);
 
-  assert.equal(calls.filter(call => call.table === 'guests' && call.operation === 'upsert').length, 2);
-  assert.equal(calls.filter(call => call.table === 'reservations' && call.operation === 'upsert').length, 1);
+  const saves = calls.filter(call => call.rpc === 'save_guest_operations');
+  assert.equal(saves.length, 2);
+  assert.equal(saves[0].args.p_guests.length, 1);
+  assert.equal(saves[0].args.p_reservations.length, 1);
+  assert.ok(saves[1].args.p_guests[0].expected_updated_at);
+  assert.equal(saves[1].args.p_reservations.length, 0);
+  assert.equal(calls.filter(call => call.table === 'guests' && call.operation === 'upsert').length, 0);
+  assert.equal(calls.filter(call => call.table === 'reservations' && call.operation === 'upsert').length, 0);
   assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 1);
+});
+
+test('Guest Operations batch rejects a stale guest without partially saving the reservation', async () => {
+  const { runtime, client, rows } = createRuntime();
+  const guestVersion = '2026-11-03T09:00:00.123456+00:00';
+  const reservationVersion = '2026-11-03T08:00:00.000Z';
+  rows.guests.push({
+    id: 'guest-1', workspace_id: 'workspace-1', ticket: 'WL-001',
+    service_date: '2026-11-03', guest_name: 'Tamu', pack: 2, phone: '081111111111',
+    status: 'waiting', created_at: '2026-11-03T07:00:00.000Z',
+    updated_at: guestVersion, resolved_at: null, seated_at: null, reservation_id: null
+  });
+  rows.reservations.push({
+    id: 'reservation-1', workspace_id: 'workspace-1', code: 'RSV-001',
+    reservation_date: '2026-11-03', reservation_time: '19:00:00', guest_name: 'Tamu',
+    pack: 2, phone: null, smoking: null, note: null, table_label: null, status: 'pending',
+    created_at: '2026-11-03T07:00:00.000Z', updated_at: reservationVersion
+  });
+
+  const state = await runtime.GuestOpsService.initialize(client, 'workspace-1');
+  // Simulate another device saving the guest after this device loaded both rows.
+  rows.guests[0].phone = '089999999999';
+  rows.guests[0].updated_at = '2026-11-03T10:00:00.000Z';
+  state.guests[0].status = 'called';
+  state.reservations[0].table = 'VIP 1';
+
+  await assert.rejects(runtime.GuestOpsService.persist(state), /Data tamu sudah berubah/);
+  assert.equal(rows.guests[0].phone, '089999999999');
+  assert.equal(rows.guests[0].status, 'waiting');
+  assert.equal(rows.reservations[0].table_label, null);
+  assert.equal(rows.reservations[0].updated_at, reservationVersion);
 });
 
 test('Guest correction uses one atomic RPC and keeps server-generated audit data', async () => {
