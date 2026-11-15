@@ -132,7 +132,7 @@
     const guard = await assertWorkspaceSession();
     const [guestResult, reservationResult, settingResult] = await Promise.all([
       client.from('guests')
-        .select('id,ticket,service_date,guest_name,pack,phone,status,created_at,resolved_at,seated_at,reservation_id')
+        .select('id,ticket,service_date,guest_name,pack,phone,status,created_at,updated_at,resolved_at,seated_at,reservation_id')
         .eq('workspace_id', workspaceId)
         .order('created_at', { ascending: true }),
       client.from('reservations')
