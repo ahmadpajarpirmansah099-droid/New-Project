@@ -236,6 +236,32 @@ test('Guest Operations persists guests and reservations in one RPC transaction',
   assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 0);
 });
 
+test('Guest Operations saves settings-only changes through the atomic RPC', async () => {
+  const { runtime, client, calls, rows } = createRuntime();
+  await runtime.GuestOpsService.initialize(client, 'workspace-1');
+
+  const state = {
+    guests: [],
+    reservations: [],
+    settings: { seatingDurationMinutes: 90 }
+  };
+  await runtime.GuestOpsService.persist(state);
+  state.settings.seatingDurationMinutes = 120;
+  await runtime.GuestOpsService.persist(state);
+
+  const saves = calls.filter(call => call.rpc === 'save_guest_operations');
+  assert.equal(saves.length, 2);
+  for (const save of saves) {
+    assert.equal(save.args.p_guests.length, 0);
+    assert.equal(save.args.p_reservations.length, 0);
+  }
+  assert.equal(saves[0].args.p_settings.seatingDurationMinutes, 90);
+  assert.equal(saves[1].args.p_settings.seatingDurationMinutes, 120);
+  assert.equal(rows.workspace_settings.length, 1);
+  assert.equal(rows.workspace_settings[0].setting_value.seatingDurationMinutes, 120);
+  assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 0);
+});
+
 test('Guest Operations write queue recovers after a failed database write', async () => {
   const { runtime, client, failOnce, rows } = createRuntime();
   await runtime.GuestOpsService.initialize(client, 'workspace-1');
