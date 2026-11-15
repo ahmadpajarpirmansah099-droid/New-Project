@@ -210,7 +210,7 @@ test('Guest correction uses one atomic RPC and keeps server-generated audit data
     pack: 3,
     phone: '08123456789',
     reason: 'Salah input',
-    expectedUpdatedAt: 1793700000000
+    expectedUpdatedAt: '2026-11-03T09:00:00.000Z'
   });
 
   const call = calls.find(item => item.rpc === 'correct_guest_record');
@@ -219,7 +219,7 @@ test('Guest correction uses one atomic RPC and keeps server-generated audit data
   assert.equal(call.args.p_pack, 3);
   assert.equal(call.args.p_phone, '08123456789');
   assert.equal(call.args.p_reason, 'Salah input');
-  assert.equal(call.args.p_expected_updated_at, new Date(1793700000000).toISOString());
+  assert.equal(call.args.p_expected_updated_at, '2026-11-03T09:00:00.000Z');
   assert.equal(result.guest.name, 'Tamu Baru');
   assert.equal(result.audit.label, 'Dikoreksi');
   assert.equal(result.audit.reason, 'Salah input');
