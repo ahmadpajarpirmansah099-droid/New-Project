@@ -290,7 +290,8 @@ test('daily receipt history paginates complete dates without original transactio
   assert.equal((html.match(/class="so-history-date"/g) || []).length, 10);
   assert.match(html, /class="so-history-date"><details open>/);
   assert.match(html, /Susu<\/span><strong>78 ML/);
-  assert.doesNotMatch(html, /Transaksi asli|data-so-action="(?:edit|void)"/);
+  assert.match(html, /so-history-originals/);
+  assert.match(html, /data-so-action="void"/);
   assert.doesNotMatch(html, /<span>1 November 2026<\/span>/);
   assert.match(html, /data-so-action="history-more"/);
   await t.click('history-more');
@@ -442,7 +443,7 @@ test('daily expense history groups materials by category without original transa
  assert.match(html,/<h4>Kalibrasi<\/h4>/);
  assert.match(html,/<h4>Lainnya<\/h4>/);
  assert.match(html,/Gula<\/span><strong>100 GR/);
- assert.doesNotMatch(html,/Transaksi asli|data-so-action="(?:edit|void|adjust)"/);
+ assert.match(html,/data-so-action="void"/);
  assert.doesNotMatch(html,/<h4>QC<\/h4>/);
 });
 
@@ -458,7 +459,17 @@ test('daily receipt history totals repeated materials without original records',
  assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
  assert.match(html,/Susu<\/span><strong>150 ML/);
  assert.match(html,/Gula<\/span><strong>20 GR/);
- assert.doesNotMatch(html,/Transaksi asli|data-so-action="(?:edit|void)"/);
+ assert.match(html,/data-so-action="void"/);
+});
+
+test('grouped Barang Masuk history exposes per-transaction cancellation and updates stock',async()=>{
+ const t=runtime();
+ t.data.state.documents=[{id:'receipt-1',period_id:'period',type:'receipt',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:10,unit:'ML'}]}];
+ await t.click('history-tab',{soKind:'receipt'});
+ assert.match(t.page.innerHTML,/data-so-action="void" data-so-id="receipt-1"/);
+ await t.click('void',{soId:'receipt-1'});
+ assert.equal(t.writes.at(-1).action,'void');
+ assert.equal(t.writes.at(-1).input.id,'receipt-1');
 });
 
 test('daily expense history distinguishes inward adjustments from outward expenses',async()=>{
