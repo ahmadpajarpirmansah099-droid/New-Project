@@ -1507,3 +1507,37 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
     margin-top:8px;
   }
 }
+
+
+/* Mobile seated guest actions belong in the blank space on the guest name row. */
+.guest-seated-inline-actions {
+  display:none;
+}
+@media (max-width:520px) {
+  .guest-is-seated .guest-status-desktop,
+  .guest-is-seated .guest-bottom {
+    display:none;
+  }
+  .guest-seated-inline-actions {
+    display:flex;
+    flex:0 0 auto;
+    align-items:center;
+    gap:4px;
+  }
+  .guest-seated-inline-actions .mini {
+    min-height:27px;
+    padding:5px 7px;
+    font-size:9px;
+    line-height:1;
+    white-space:nowrap;
+  }
+  .guest-is-seated .guest-main {
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .guest-is-seated .guest-name {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
