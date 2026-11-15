@@ -382,7 +382,7 @@ BEGIN
 
   -- Save reservations first so a newly inserted guest can reference its reservation.
   FOR v_entry IN
-    SELECT value FROM pg_catalog.jsonb_array_elements(coalesce(p_reservations, '[]'::jsonb))
+    SELECT value FROM pg_catalog.jsonb_array_elements(coalesce(p_reservations, '[]'::jsonb)) ORDER BY value->>'id'
   LOOP
     IF jsonb_typeof(v_entry) <> 'object'
        OR v_entry->>'workspace_id' IS DISTINCT FROM p_workspace_id::text THEN
@@ -486,7 +486,7 @@ BEGIN
   END LOOP;
 
   FOR v_entry IN
-    SELECT value FROM pg_catalog.jsonb_array_elements(coalesce(p_guests, '[]'::jsonb))
+    SELECT value FROM pg_catalog.jsonb_array_elements(coalesce(p_guests, '[]'::jsonb)) ORDER BY value->>'id'
   LOOP
     IF jsonb_typeof(v_entry) <> 'object'
        OR v_entry->>'workspace_id' IS DISTINCT FROM p_workspace_id::text THEN
