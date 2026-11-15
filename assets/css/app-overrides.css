@@ -1617,3 +1617,39 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
     align-items:start;
   }
 }
+
+
+/* Desktop seated cards: keep actions and status together on the guest row. */
+@media (min-width:900px) {
+  #queueList.queue-list {
+    align-items:stretch;
+  }
+  #queueList .guest-is-seated .guest-seated-inline-actions {
+    display:flex;
+    flex:0 0 auto;
+    align-items:center;
+    justify-content:flex-end;
+    gap:7px;
+    min-width:0;
+  }
+  #queueList .guest-is-seated .guest-status-desktop,
+  #queueList .guest-is-seated .guest-bottom {
+    display:none;
+  }
+  #queueList .guest-is-seated .guest-seated-inline-actions .mini,
+  #queueList .guest-is-seated .guest-seated-inline-status {
+    box-sizing:border-box;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    height:27px;
+    min-height:27px;
+    padding:0 8px;
+    font-family:inherit;
+    font-size:9px;
+    font-weight:800;
+    line-height:1;
+    letter-spacing:normal;
+    white-space:nowrap;
+  }
+}
