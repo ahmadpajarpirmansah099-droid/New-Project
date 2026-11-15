@@ -29,7 +29,7 @@
       phone: row.phone || '',
       status: row.status,
       created: toMs(row.created_at),
-      updatedAt: toMs(row.updated_at),
+      updatedAt: row.updated_at || null,
       resolved: toMs(row.resolved_at),
       seatedAt: toMs(row.seated_at),
       reservationId: row.reservation_id || null,
@@ -270,7 +270,7 @@
         if (result.error) throw result.error;
         const updatedAtById = new Map(rows.map(record => [record.id, toMs(record.updated_at)]));
         (state.guests || []).forEach(guest => {
-          if (updatedAtById.has(guest.id)) guest.updatedAt = updatedAtById.get(guest.id);
+          if (updatedAtById.has(guest.id)) guest.updatedAt = rows.find(record => record.id === guest.id)?.updated_at || null;
         });
         changedGuests.forEach(record => persistedGuestRows.set(record.id, recordFingerprint(record)));
       }
@@ -310,7 +310,7 @@
       p_pack: Number(changes.pack),
       p_phone: String(changes.phone || '') || null,
       p_reason: String(changes.reason || ''),
-      p_expected_updated_at: new Date(Number(changes.expectedUpdatedAt)).toISOString()
+      p_expected_updated_at: String(changes.expectedUpdatedAt)
     });
     if (error) throw error;
     await assertWorkspaceSession(guard.generation);
