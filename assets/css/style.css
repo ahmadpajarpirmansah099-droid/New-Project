@@ -4246,3 +4246,11 @@ textarea::-webkit-input-placeholder {
   .hero-detail-trigger .hero-action { display: none; }
   .hero-detail-trigger:focus-visible { outline: none; }
 }
+
+
+/* Keep seated details readable but secondary in the operational guest list. */
+.operational-guest-copy > small + small {
+  margin-top:-2px;
+  color:#858494;
+  font-size:8px;
+}
