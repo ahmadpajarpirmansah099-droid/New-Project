@@ -1653,3 +1653,14 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
     white-space:nowrap;
   }
 }
+
+
+/* Desktop seated detail panels fill the full content area after the ticket. */
+@media (min-width:900px) {
+  #queueList .guest-is-seated .guest-seated-info {
+    width:100%;
+    margin-left:0;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    box-sizing:border-box;
+  }
+}
