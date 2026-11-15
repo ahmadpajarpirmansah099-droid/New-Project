@@ -384,14 +384,13 @@ BEGIN
   -- Settings share this transaction so callers never roll back UI state after
   -- guest/reservation rows have already committed.
   IF p_settings IS NOT NULL THEN
-    IF jsonb_typeof(p_settings) <> 'object' THEN
-      RAISE EXCEPTION 'Pengaturan Guest Operations tidak valid.';
-    END IF;
-    IF jsonb_typeof(p_settings->'seatingDurationMinutes') <> 'number'
+    IF jsonb_typeof(p_settings) IS DISTINCT FROM 'object'
+       OR jsonb_typeof(p_settings->'seatingDurationMinutes') IS DISTINCT FROM 'number'
        OR p_settings - 'seatingDurationMinutes' <> '{}'::jsonb THEN
       RAISE EXCEPTION 'Pengaturan Guest Operations tidak valid.';
     END IF;
-    IF (p_settings->>'seatingDurationMinutes')::numeric NOT BETWEEN 1 AND 1440
+    IF (p_settings->>'seatingDurationMinutes') IS NULL
+       OR (p_settings->>'seatingDurationMinutes')::numeric NOT BETWEEN 1 AND 1440
        OR pg_catalog.trunc((p_settings->>'seatingDurationMinutes')::numeric)
           <> (p_settings->>'seatingDurationMinutes')::numeric THEN
       RAISE EXCEPTION 'Durasi duduk harus bilangan bulat antara 1 dan 1440 menit.';
