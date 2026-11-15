@@ -1541,3 +1541,22 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
     white-space:nowrap;
   }
 }
+
+
+/* Keep the seated status visible beside the actions on mobile. */
+@media (max-width:520px) {
+  .guest-seated-inline-actions {
+    justify-content:flex-end;
+    min-width:0;
+  }
+  .guest-seated-inline-actions .actions {
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  .guest-seated-inline-status {
+    display:inline-flex;
+    flex:0 0 auto;
+    white-space:nowrap;
+  }
+}
