@@ -92,7 +92,7 @@ function openDetail(id) {
       '<div class="detail-cell"><small>' + (guest.status === 'seated' ? 'Seating time' : 'Waiting time') + '</small><b>' +
       (guest.status === 'seated' ? '<span data-seating-countdown="' + esc(guest.id) + '">' + seatingCountdownText(guest) + '</span>' : duration(guest)) +
       '</b></div>' + tableCell +
-      '<div class="detail-cell detail-cell-full"><small>WhatsApp</small><b>' +
+      '<div class="detail-cell"><small>WhatsApp</small><b>' +
       esc(guest.phone || 'Tidak diisi') + '</b></div></div>' +
     '<div class="sheet-actions"><button class="secondary" data-app-action="editGuest" data-app-id="' + esc(guest.id) + '">Koreksi data</button>' +
       whatsappButton + '</div>' + cancelActions + finishAction +
