@@ -410,7 +410,31 @@ BEGIN
         v_entry->>'status',
         (v_entry->>'created_at')::timestamptz
       )
+      ON CONFLICT (id) DO NOTHING
       RETURNING updated_at INTO v_updated_at;
+
+      IF NOT FOUND THEN
+        SELECT r.updated_at INTO v_updated_at
+        FROM public.reservations AS r
+        WHERE r.id = v_id
+          AND r.workspace_id = p_workspace_id
+          AND r.code IS NOT DISTINCT FROM v_entry->>'code'
+          AND r.reservation_date IS NOT DISTINCT FROM (v_entry->>'reservation_date')::date
+          AND r.reservation_time IS NOT DISTINCT FROM (v_entry->>'reservation_time')::time
+          AND r.guest_name IS NOT DISTINCT FROM v_entry->>'guest_name'
+          AND r.pack IS NOT DISTINCT FROM (v_entry->>'pack')::integer
+          AND r.phone IS NOT DISTINCT FROM nullif(v_entry->>'phone', '')
+          AND r.smoking IS NOT DISTINCT FROM nullif(v_entry->>'smoking', '')
+          AND r.note IS NOT DISTINCT FROM nullif(v_entry->>'note', '')
+          AND r.table_label IS NOT DISTINCT FROM nullif(v_entry->>'table_label', '')
+          AND r.status IS NOT DISTINCT FROM v_entry->>'status'
+          AND r.created_at IS NOT DISTINCT FROM (v_entry->>'created_at')::timestamptz
+        FOR UPDATE;
+
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'ID reservasi sudah digunakan atau aksesnya tidak tersedia.';
+        END IF;
+      END IF;
     ELSE
       UPDATE public.reservations
       SET reservation_date = (v_entry->>'reservation_date')::date,
@@ -429,9 +453,30 @@ BEGIN
       RETURNING updated_at INTO v_updated_at;
 
       IF NOT FOUND THEN
-        RAISE EXCEPTION USING
-          ERRCODE = 'P0001',
-          MESSAGE = 'Data reservasi sudah berubah di perangkat lain atau aksesnya tidak tersedia. Muat ulang sebelum menyimpan.';
+        -- A retried RPC after a lost response is successful only if the row
+        -- already contains this exact requested state.
+        SELECT r.updated_at INTO v_updated_at
+        FROM public.reservations AS r
+        WHERE r.id = v_id
+          AND r.workspace_id = p_workspace_id
+          AND r.code IS NOT DISTINCT FROM v_entry->>'code'
+          AND r.reservation_date IS NOT DISTINCT FROM (v_entry->>'reservation_date')::date
+          AND r.reservation_time IS NOT DISTINCT FROM (v_entry->>'reservation_time')::time
+          AND r.guest_name IS NOT DISTINCT FROM v_entry->>'guest_name'
+          AND r.pack IS NOT DISTINCT FROM (v_entry->>'pack')::integer
+          AND r.phone IS NOT DISTINCT FROM nullif(v_entry->>'phone', '')
+          AND r.smoking IS NOT DISTINCT FROM nullif(v_entry->>'smoking', '')
+          AND r.note IS NOT DISTINCT FROM nullif(v_entry->>'note', '')
+          AND r.table_label IS NOT DISTINCT FROM nullif(v_entry->>'table_label', '')
+          AND r.status IS NOT DISTINCT FROM v_entry->>'status'
+          AND r.created_at IS NOT DISTINCT FROM (v_entry->>'created_at')::timestamptz
+        FOR UPDATE;
+
+        IF NOT FOUND THEN
+          RAISE EXCEPTION USING
+            ERRCODE = 'P0001',
+            MESSAGE = 'Data reservasi sudah berubah di perangkat lain atau aksesnya tidak tersedia. Muat ulang sebelum menyimpan.';
+        END IF;
       END IF;
     END IF;
 
@@ -465,7 +510,30 @@ BEGIN
         nullif(v_entry->>'seated_at', '')::timestamptz,
         nullif(v_entry->>'resolved_at', '')::timestamptz
       )
+      ON CONFLICT (id) DO NOTHING
       RETURNING updated_at INTO v_updated_at;
+
+      IF NOT FOUND THEN
+        SELECT g.updated_at INTO v_updated_at
+        FROM public.guests AS g
+        WHERE g.id = v_id
+          AND g.workspace_id = p_workspace_id
+          AND g.reservation_id IS NOT DISTINCT FROM nullif(v_entry->>'reservation_id', '')::uuid
+          AND g.ticket IS NOT DISTINCT FROM v_entry->>'ticket'
+          AND g.service_date IS NOT DISTINCT FROM (v_entry->>'service_date')::date
+          AND g.guest_name IS NOT DISTINCT FROM v_entry->>'guest_name'
+          AND g.pack IS NOT DISTINCT FROM (v_entry->>'pack')::integer
+          AND g.phone IS NOT DISTINCT FROM nullif(v_entry->>'phone', '')
+          AND g.status IS NOT DISTINCT FROM v_entry->>'status'
+          AND g.created_at IS NOT DISTINCT FROM (v_entry->>'created_at')::timestamptz
+          AND g.seated_at IS NOT DISTINCT FROM nullif(v_entry->>'seated_at', '')::timestamptz
+          AND g.resolved_at IS NOT DISTINCT FROM nullif(v_entry->>'resolved_at', '')::timestamptz
+        FOR UPDATE;
+
+        IF NOT FOUND THEN
+          RAISE EXCEPTION 'ID tamu sudah digunakan atau aksesnya tidak tersedia.';
+        END IF;
+      END IF;
     ELSE
       UPDATE public.guests
       SET reservation_id = nullif(v_entry->>'reservation_id', '')::uuid,
@@ -483,9 +551,28 @@ BEGIN
       RETURNING updated_at INTO v_updated_at;
 
       IF NOT FOUND THEN
-        RAISE EXCEPTION USING
-          ERRCODE = 'P0001',
-          MESSAGE = 'Data tamu sudah berubah di perangkat lain atau aksesnya tidak tersedia. Muat ulang sebelum menyimpan.';
+        -- Treat a replay as success only when every mutable value is identical.
+        SELECT g.updated_at INTO v_updated_at
+        FROM public.guests AS g
+        WHERE g.id = v_id
+          AND g.workspace_id = p_workspace_id
+          AND g.reservation_id IS NOT DISTINCT FROM nullif(v_entry->>'reservation_id', '')::uuid
+          AND g.ticket IS NOT DISTINCT FROM v_entry->>'ticket'
+          AND g.service_date IS NOT DISTINCT FROM (v_entry->>'service_date')::date
+          AND g.guest_name IS NOT DISTINCT FROM v_entry->>'guest_name'
+          AND g.pack IS NOT DISTINCT FROM (v_entry->>'pack')::integer
+          AND g.phone IS NOT DISTINCT FROM nullif(v_entry->>'phone', '')
+          AND g.status IS NOT DISTINCT FROM v_entry->>'status'
+          AND g.created_at IS NOT DISTINCT FROM (v_entry->>'created_at')::timestamptz
+          AND g.seated_at IS NOT DISTINCT FROM nullif(v_entry->>'seated_at', '')::timestamptz
+          AND g.resolved_at IS NOT DISTINCT FROM nullif(v_entry->>'resolved_at', '')::timestamptz
+        FOR UPDATE;
+
+        IF NOT FOUND THEN
+          RAISE EXCEPTION USING
+            ERRCODE = 'P0001',
+            MESSAGE = 'Data tamu sudah berubah di perangkat lain atau aksesnya tidak tersedia. Muat ulang sebelum menyimpan.';
+        END IF;
       END IF;
     END IF;
 
