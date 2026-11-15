@@ -268,9 +268,9 @@
         const rows = changedGuests.map(record => ({ ...record, updated_at: new Date().toISOString() }));
         const result = await client.from('guests').upsert(rows, { onConflict: 'id' });
         if (result.error) throw result.error;
-        const updatedAtById = new Map(rows.map(record => [record.id, toMs(record.updated_at)]));
+        const updatedAtById = new Map(rows.map(record => [record.id, record.updated_at]));
         (state.guests || []).forEach(guest => {
-          if (updatedAtById.has(guest.id)) guest.updatedAt = rows.find(record => record.id === guest.id)?.updated_at || null;
+          if (updatedAtById.has(guest.id)) guest.updatedAt = updatedAtById.get(guest.id);
         });
         changedGuests.forEach(record => persistedGuestRows.set(record.id, recordFingerprint(record)));
       }
@@ -301,7 +301,7 @@
   async function correctGuestRecord(guestId, changes) {
     requireReady();
     const guard = await assertWorkspaceSession();
-    if (!changes || !Number.isFinite(Number(changes.expectedUpdatedAt))) {
+    if (!changes || !Number.isFinite(Date.parse(changes.expectedUpdatedAt))) {
       throw new Error('Versi data tamu tidak tersedia. Muat ulang sebelum mengoreksi.');
     }
     const { data, error } = await client.rpc('correct_guest_record', {
