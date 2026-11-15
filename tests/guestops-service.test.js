@@ -111,6 +111,39 @@ test('Guest Operations initializes from an empty Supabase workspace', async () =
   assert.equal(reservationSelect.columns.includes('seated_at'), false);
 });
 
+test('Guest Operations loads the exact updated_at value for optimistic corrections', async () => {
+  const { runtime, client, calls, rows } = createRuntime();
+  const updatedAt = '2026-11-03T09:00:00.123456+00:00';
+  rows.guests.push({
+    id: 'guest-1',
+    ticket: 'WL-001',
+    service_date: '2026-11-03',
+    guest_name: 'Tamu Awal',
+    pack: 2,
+    phone: '081111111111',
+    status: 'waiting',
+    created_at: '2026-11-03T08:00:00.000Z',
+    updated_at: updatedAt,
+    resolved_at: null,
+    seated_at: null,
+    reservation_id: null
+  });
+
+  const state = await runtime.GuestOpsService.initialize(client, 'workspace-1');
+  assert.equal(state.guests[0].updatedAt, updatedAt);
+
+  await runtime.GuestOpsService.correctGuestRecord('guest-1', {
+    name: 'Tamu Koreksi',
+    pack: 3,
+    phone: '082222222222',
+    reason: 'Salah input',
+    expectedUpdatedAt: state.guests[0].updatedAt
+  });
+
+  const correction = calls.find(call => call.rpc === 'correct_guest_record');
+  assert.equal(correction.args.p_expected_updated_at, updatedAt);
+});
+
 test('Guest audit history is fetched only when a guest detail is requested', async () => {
   const { runtime, client, calls } = createRuntime();
   await runtime.GuestOpsService.initialize(client, 'workspace-1');
