@@ -53,6 +53,7 @@
       table: row.table_label || '',
       status: row.status,
       created: toMs(row.created_at),
+      updatedAt: row.updated_at || null,
       guestId: null,
       seatedAt: toMs(row.seated_at)
     };
@@ -136,7 +137,7 @@
         .eq('workspace_id', workspaceId)
         .order('created_at', { ascending: true }),
       client.from('reservations')
-        .select('id,code,reservation_date,reservation_time,guest_name,pack,phone,smoking,note,table_label,status,created_at')
+        .select('id,code,reservation_date,reservation_time,guest_name,pack,phone,smoking,note,table_label,status,created_at,updated_at')
         .eq('workspace_id', workspaceId)
         .order('reservation_date', { ascending: true })
         .order('reservation_time', { ascending: true }),
@@ -167,11 +168,11 @@
 
     persistedGuestRows = new Map(guests.map(guest => {
       const record = guestRecord(guest);
-      return [guest.id, recordFingerprint(record)];
+      return [guest.id, { fingerprint: recordFingerprint(record), updatedAt: guest.updatedAt }];
     }));
     persistedReservationRows = new Map(reservations.map(reservation => {
       const record = reservationRecord(reservation);
-      return [reservation.id, recordFingerprint(record)];
+      return [reservation.id, { fingerprint: recordFingerprint(record), updatedAt: reservation.updatedAt }];
     }));
     const loadedSettings = settingResult.data?.setting_value;
     persistedSettingsFingerprint = settingResult.data
@@ -250,31 +251,54 @@
       const guard = await assertWorkspaceSession(requestedGeneration);
       const reservations = (state.reservations || []).map(reservationRecord);
       const guests = (state.guests || []).map(guestRecord);
-      const changedReservations = reservations.filter(record =>
-        persistedReservationRows.get(record.id) !== recordFingerprint(record)
-      );
-      const changedGuests = guests.filter(record =>
-        persistedGuestRows.get(record.id) !== recordFingerprint(record)
-      );
+      const changedReservations = reservations
+        .filter(record => {
+          const saved = persistedReservationRows.get(record.id);
+          return !saved || saved.fingerprint !== recordFingerprint(record);
+        })
+        .map(record => ({
+          ...record,
+          expected_updated_at: persistedReservationRows.get(record.id)?.updatedAt || null
+        }));
+      const changedGuests = guests
+        .filter(record => {
+          const saved = persistedGuestRows.get(record.id);
+          return !saved || saved.fingerprint !== recordFingerprint(record);
+        })
+        .map(record => ({
+          ...record,
+          expected_updated_at: persistedGuestRows.get(record.id)?.updatedAt || null
+        }));
 
       await assertWorkspaceSession(guard.generation);
-      if (changedReservations.length) {
-        const result = await client.from('reservations').upsert(changedReservations, { onConflict: 'id' });
-        if (result.error) throw result.error;
-        changedReservations.forEach(record => persistedReservationRows.set(record.id, recordFingerprint(record)));
-      }
-      await assertWorkspaceSession(guard.generation);
-      if (changedGuests.length) {
-        const rows = changedGuests.map(record => ({ ...record, updated_at: new Date().toISOString() }));
-        const result = await client.from('guests').upsert(rows, { onConflict: 'id' });
-        if (result.error) throw result.error;
-        const updatedAtById = new Map(rows.map(record => [record.id, record.updated_at]));
-        (state.guests || []).forEach(guest => {
-          if (updatedAtById.has(guest.id)) guest.updatedAt = updatedAtById.get(guest.id);
+      if (changedReservations.length || changedGuests.length) {
+        const { data, error } = await client.rpc('save_guest_operations', {
+          p_workspace_id: workspaceId,
+          p_guests: changedGuests,
+          p_reservations: changedReservations
         });
-        changedGuests.forEach(record => persistedGuestRows.set(record.id, recordFingerprint(record)));
+        if (error) throw error;
+        await assertWorkspaceSession(guard.generation);
+
+        const savedGuests = new Map((data?.guests || []).map(row => [row.id, row.updated_at]));
+        const savedReservations = new Map((data?.reservations || []).map(row => [row.id, row.updated_at]));
+        if (savedGuests.size !== changedGuests.length || savedReservations.size !== changedReservations.length) {
+          throw new Error('Respons penyimpanan Guest Operations tidak lengkap. Muat ulang data sebelum melanjutkan.');
+        }
+
+        changedGuests.forEach(({ expected_updated_at, ...record }) => {
+          const updatedAt = savedGuests.get(record.id);
+          const guest = (state.guests || []).find(item => item.id === record.id);
+          if (guest) guest.updatedAt = updatedAt;
+          persistedGuestRows.set(record.id, { fingerprint: recordFingerprint(record), updatedAt });
+        });
+        changedReservations.forEach(({ expected_updated_at, ...record }) => {
+          const updatedAt = savedReservations.get(record.id);
+          const reservation = (state.reservations || []).find(item => item.id === record.id);
+          if (reservation) reservation.updatedAt = updatedAt;
+          persistedReservationRows.set(record.id, { fingerprint: recordFingerprint(record), updatedAt });
+        });
       }
-      await assertWorkspaceSession(guard.generation);
       if (root.AppAuth?.getContext()?.role !== 'service') {
         const settingValue = {
           seatingDurationMinutes: Number(state.settings?.seatingDurationMinutes) || 90
@@ -320,7 +344,10 @@
         throw new Error('Respons koreksi tamu tidak cocok dengan workspace aktif.');
       }
       const mapped = mapGuest(data.guest);
-      persistedGuestRows.set(guestId, recordFingerprint(guestRecord(mapped)));
+      persistedGuestRows.set(guestId, {
+        fingerprint: recordFingerprint(guestRecord(mapped)),
+        updatedAt: mapped.updatedAt
+      });
       return {
         guest: mapped,
         audit: {
