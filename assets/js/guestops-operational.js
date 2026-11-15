@@ -90,12 +90,19 @@ function operationalGuestRow(guest) {
   const ticket = reservation
     ? '<span class="operational-ticket reservation-operational-ticket"><strong>' + esc(reservation.code) + '</strong><small>' + esc(guest.ticket) + '</small></span>'
     : '<span class="operational-ticket">' + esc(guest.ticket) + '</span>';
+  const tableLabel = guest.tableLabel || (reservation ? reservation.table : '');
+  const tableLine = guest.status === 'seated'
+    ? '<small>Meja ' + esc(tableLabel || 'belum dicatat') + '</small>'
+    : '';
+  const timeLine = guest.status === 'seated'
+    ? '<small>Seating · <span data-seating-countdown="' + esc(guest.id) + '">' + seatingCountdownText(guest) + '</span></small>'
+    : '<small>' + esc(time) + '</small>';
 
   return '<button type="button" class="operational-guest-row" data-app-action="closeSheetThenOpenDetail" data-app-id="' + esc(guest.id) + '">' +
     ticket + '<span class="operational-guest-copy"><b>' + esc(guest.name) + '</b><small>' +
-    guest.pack + ' orang · ' + fmtTime(guest.created) + '</small></span>' +
+    guest.pack + ' orang · ' + fmtTime(guest.created) + '</small>' + tableLine + '</span>' +
     '<span class="operational-guest-state"><i class="status ' + statusClass(guest.status) + '">' +
-    esc(status) + '</i><small>' + esc(time) + '</small></span><span class="operational-chevron">›</span></button>';
+    esc(status) + '</i>' + timeLine + '</span><span class="operational-chevron">›</span></button>';
 }
 function toggleOperationalFilterMenu() {
   const menu = $('operationalFilterMenu');
