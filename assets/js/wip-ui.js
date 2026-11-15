@@ -197,10 +197,14 @@
     }
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     if (event.target.id !== 'wipForm') return;
     event.preventDefault();
     const form = event.target;
+    const submitButton = form.querySelector('[type="submit"]');
+    if (form.dataset.saving === 'true') return;
+    form.dataset.saving = 'true';
+    if (submitButton) submitButton.disabled = true;
 
     try {
       const saved = root.WipService.saveWip({
@@ -210,15 +214,24 @@
         satuan_hasil: form.elements.wipYieldUnit.value
       }, getRecipeRows());
 
+      const persisted = await root.MasterDataStore.flush();
+      if (persisted === false) {
+        if (typeof root.closeSheet === 'function') root.closeSheet();
+        renderPage('wips');
+        return;
+      }
       if (typeof root.closeSheet === 'function') root.closeSheet();
       notify('Resep WIP berhasil disimpan.');
       renderPage('wips');
     } catch (error) {
       notify(error.message || 'Resep WIP belum berhasil disimpan.');
+    } finally {
+      delete form.dataset.saving;
+      if (submitButton) submitButton.disabled = false;
     }
   }
 
-  function handleClick(event) {
+  async function handleClick(event) {
     const option = event.target.closest('[data-wip-component-option]');
     if (option) {
       const row = option.closest('[data-wip-recipe-row]');
@@ -265,12 +278,20 @@
       if (!wip) return notify('WIP tidak ditemukan.');
       const next = wip.status === 'active' ? 'inactive' : 'active';
       if (!root.confirm((next === 'inactive' ? 'Nonaktifkan ' : 'Aktifkan kembali ') + wip.nama_wip + '?')) return;
+      button.disabled = true;
       try {
         root.WipService.setWipStatus(id, next);
+        const persisted = await root.MasterDataStore.flush();
+        if (persisted === false) {
+          renderPage('wips');
+          return;
+        }
         renderPage('wips');
         notify(next === 'inactive' ? 'WIP dinonaktifkan.' : 'WIP diaktifkan.');
       } catch (error) {
         notify(error.message);
+      } finally {
+        button.disabled = false;
       }
     }
     if (action === 'retry') renderPage('wips');

@@ -5,8 +5,8 @@
   const SCHEMA_VERSION = 1;
   const ARRAY_FIELDS = ['masterItems', 'wips', 'wipRecipeLines', 'menus', 'menuRecipeLines'];
   let client = null, workspaceId = null, divisionId = null, moduleKey = null;
-  let cache = createEmpty(), ready = false, writeQueue = Promise.resolve();
-  let sessionGeneration = 0, sessionAbortController = null, persistedAt = null;
+  let cache = createEmpty(), persistedCache = createEmpty(), ready = false, writeQueue = Promise.resolve();
+  let sessionGeneration = 0, sessionAbortController = null, persistedAt = null, queuedWriteId = 0;
 
   function createEmpty() {
     return {
@@ -29,6 +29,10 @@
     });
     normalized.updated_at = value.updated_at || normalized.updated_at;
     return normalized;
+  }
+
+  function cloneData(value) {
+    return JSON.parse(JSON.stringify(normalizeData(value)));
   }
 
   function assertCurrent(expectedGeneration, expectedClient, expectedWorkspaceId, expectedDivisionId) {
@@ -118,6 +122,8 @@
     assertCurrent(generation, client, workspaceId, divisionId);
     persistedAt = result.data?.updated_at || null;
     cache = result.data ? normalizeData(result.data.payload) : createEmpty();
+    persistedCache = cloneData(cache);
+    queuedWriteId = 0;
     ready = true;
     return cache;
   }
@@ -127,10 +133,14 @@
   }
 
   function save(value) {
-    const normalized = normalizeData(value);
+    const normalized = cloneData(value);
     normalized.updated_at = new Date().toISOString();
     // Non-browser runtime is used only by isolated unit tests; keep its state in memory.
-    if (!ready && !root.document) return cache = normalized;
+    if (!ready && !root.document) {
+      cache = normalized;
+      persistedCache = cloneData(normalized);
+      return cache;
+    }
     if (!ready || !client || !workspaceId || !divisionId || !moduleKey) {
       throw new Error('Master Data belum tersambung ke database. Muat ulang halaman.');
     }
@@ -144,7 +154,9 @@
     }
 
     cache = normalized;
+    const writeId = ++queuedWriteId;
     writeQueue = writeQueue.catch(function () { return undefined; }).then(async function () {
+      if (writeId !== queuedWriteId) return false;
       await assertSession(generation);
       assertCurrent(generation, capturedClient, capturedWorkspaceId, capturedDivisionId);
       const row = {
@@ -164,10 +176,33 @@
       if (!result.data?.updated_at) throw new Error('Master Data berubah, mungkin karena invoice terbaru. Muat ulang sebelum menyimpan kembali.');
       persistedAt = result.data.updated_at;
       await assertSession(generation);
+      persistedCache = cloneData(normalized);
       return normalized;
-    }).catch(function (error) {
+    }).catch(async function (error) {
       if (generation === sessionGeneration) {
+        // Drop writes already queued from the optimistic cache, then restore the
+        // authoritative row so a failed save cannot remain visible as "saved".
+        queuedWriteId += 1;
         console.error('Master Data database save failed:', error);
+        try {
+          await assertSession(generation);
+          const latest = await withSessionSignal(
+            capturedClient.from('workspace_module_state').select('payload,updated_at')
+              .eq('workspace_id', capturedWorkspaceId).eq('module_key', capturedModuleKey)
+              .eq('division_id', capturedDivisionId),
+            generation
+          ).maybeSingle();
+          assertCurrent(generation, capturedClient, capturedWorkspaceId, capturedDivisionId);
+          if (latest.error) throw latest.error;
+          persistedAt = latest.data?.updated_at || null;
+          cache = latest.data ? normalizeData(latest.data.payload) : createEmpty();
+          persistedCache = cloneData(cache);
+        } catch (refreshError) {
+          if (generation === sessionGeneration) {
+            console.error('Master Data refresh after failed save failed:', refreshError);
+            cache = cloneData(persistedCache);
+          }
+        }
         if (typeof root.toast === 'function') root.toast(error.message || 'Master Data belum tersimpan ke database.');
       }
       return false;
@@ -186,7 +221,7 @@
     if (sessionAbortController) sessionAbortController.abort();
     sessionAbortController = null;
     client = null; workspaceId = null; divisionId = null; moduleKey = null;
-    cache = createEmpty(); ready = false; persistedAt = null; writeQueue = Promise.resolve();
+    cache = createEmpty(); persistedCache = createEmpty(); ready = false; persistedAt = null; queuedWriteId = 0; writeQueue = Promise.resolve();
   }
 
   root.MasterDataStore = {

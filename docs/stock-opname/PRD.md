@@ -19,7 +19,7 @@ Mengelola bahan, suplies, dan hasil WIP; membandingkan stok sistem dengan stok f
 
 Stok sistem = Stock Awal periode + Barang Masuk + Move Masuk + Hasil WIP − Pengeluaran (termasuk Move keluar) − Pemakaian Produksi WIP − Pemakaian Sales.
 
-Selisih unit = fisik − sistem. Selisih rupiah = selisih unit × harga satuan dasar. Harga default Master Barang/HPP WIP, diperbarui dengan invoice terbaru. Harga dan resep historis disimpan sebagai snapshot; perubahan berlaku untuk transaksi baru.
+Selisih unit = fisik − sistem. Selisih rupiah = selisih unit × harga satuan dasar. Harga default Master Barang/HPP WIP, diperbarui dengan invoice terbaru. Harga dan resep transaksi historis disimpan sebagai snapshot. Hasil opname yang sudah ditutup tetap; bila opname terakhir dibuka kembali, harga bahan mengikuti Master terbaru saat ditutup ulang, sementara struktur katalog dan snapshot resep tetap.
 
 Satuan dipilih dari Master Barang dan dikonversi otomatis; WIP mengikuti satuan resep. Stok minus boleh disimpan dengan peringatan. Simpan identitas lingkup/admin, tanggal, periode, dokumen, jumlah, konversi, harga invoice, snapshot resep/harga, transfer terkait, hasil opname, status draft/selesai/konfirmasi.
 

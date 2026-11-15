@@ -139,7 +139,7 @@ create function private.so_mutate(d uuid,expected_revision bigint,request uuid,a
 language plpgsql security definer set search_path='' as $$
 #variable_conflict use_variable
 declare
- st public.stock_opname_state%rowtype; s jsonb; p jsonb; ps jsonb; docs jsonb; c jsonb; rows jsonb;
+ st public.stock_opname_state%rowtype; s jsonb; p jsonb; ps jsonb; docs jsonb; c jsonb; rows jsonb; fresh_rows jsonb;
  item jsonb; r jsonb; l jsonb; doc jsonb; old_doc jsonb; postings jsonb:='[]'; counts jsonb:='{}'; result jsonb:='[]';
  b jsonb; movements jsonb; k text; qty numeric; factor numeric; price numeric; total numeric; idx int; pi int; j int;
  start_date date; end_date date; pid text; docid text; typ text; target uuid; target_st public.stock_opname_state%rowtype;
@@ -199,6 +199,19 @@ begin
    if exists(select 1 from jsonb_array_elements(docs) v where v->>'period_id'=pid and coalesce(v->>'void','false')<>'true' and v->>'type'='sales' and (v->>'start')::date<=end_date and (v->>'end')::date>end_date) then raise exception 'Rentang Sales melewati batas opname. Perbaiki rentang terlebih dahulu.'; end if;
    if exists(select 1 from jsonb_array_elements(docs) v where v->>'period_id'=pid and coalesce(v->>'void','false')<>'true' and (v->>'end')::date>end_date) then raise exception 'Ada transaksi setelah tanggal opname. Koreksi tanggal atau transaksi dahulu.'; end if;
    b:=private.so_balances(s,p,end_date);rows:=coalesce(p->'catalog',private.so_catalog_rows(c));
+   -- Reclosing an explicitly reopened period refreshes material valuation from
+   -- the latest Master Barang price while preserving its historical catalog
+   -- structure, conversions, and WIP/menu recipe snapshots.
+   if p->>'status'='reopened' and jsonb_array_length(rows)>0 then
+    fresh_rows:=private.so_catalog_rows(c);
+    for j in 0..jsonb_array_length(rows)-1 loop
+     item:=rows->j;
+     if left(item->>'key',2)='m:' then
+      select value into r from jsonb_array_elements(fresh_rows) where value->>'key'=item->>'key' and not (value ? 'error');
+      if r is not null then rows:=jsonb_set(rows,array[j::text],item||jsonb_build_object('price',r->'price'));end if;
+     end if;
+    end loop;
+   end if;
    -- Keep opening items and snapshot-only items even when a catalog item is disabled.
    for item in select value from jsonb_array_elements(coalesce(p->'opening_catalog','[]')) loop
     if not exists(select 1 from jsonb_array_elements(rows) v where v->>'key'=item->>'key') then rows:=rows||jsonb_build_array(item);end if;

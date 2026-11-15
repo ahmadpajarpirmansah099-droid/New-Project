@@ -1,7 +1,7 @@
 -- Run after schema.sql inside BEGIN, then ROLLBACK. No fixture survives.
 do $$
 declare
- u uuid;w uuid:=gen_random_uuid();d uuid:=gen_random_uuid();t uuid:=gen_random_uuid();c jsonb;
+ u uuid;w uuid:=gen_random_uuid();d uuid:=gen_random_uuid();t uuid:=gen_random_uuid();c jsonb;price numeric;
  v jsonb;req uuid;docid text;moveid text;rev bigint;start_day text:=((now() at time zone 'Asia/Jakarta')::date-10)::text;
  day text:=((now() at time zone 'Asia/Jakarta')::date-2)::text; active_day text:=((now() at time zone 'Asia/Jakarta')::date-1)::text; n int:=0;
 begin
@@ -45,7 +45,10 @@ begin
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'reopen','{}');
  if v->'state'->'periods'->1->>'status'<>'held' or v->'state'->'periods'->0->>'status'<>'reopened' then raise exception 'Reopen chain failed';end if;n:=n+1;
  begin perform public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'adjust_move',jsonb_build_object('id',moveid));raise exception 'Expected active-period adjustment guard';exception when others then if sqlerrm not like 'Penyesuaian Move hanya boleh%' then raise;end if;end;n:=n+1;
+ update public.workspace_module_state set payload=jsonb_set(payload,'{masterItems,0,harga_beli_terakhir_per_satuan_dasar}','7'::jsonb),updated_at=now() where division_id=d and module_key='master_data:'||d;
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'close',jsonb_build_object('date',day,'counts','{"m:a":{"qty":"1160","unit":"ML"},"m:b":{"qty":"960","unit":"GR"},"w:x":{"qty":"240","unit":"ML"}}'::jsonb));
+ select (value->>'price')::numeric into price from jsonb_array_elements(v->'state'->'periods'->0->'result') where value->>'key'='m:a';
+ if price<>7 or (v->'state'->'periods'->0->'result'->0->>'variance_value')::numeric<>-70 then raise exception 'Reclosed opname did not use the current Master price';end if;
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'reactivate','{}');
  if v->'state'->'periods'->1->>'start'<>active_day then raise exception 'Reconfirmed Stock Awal date mismatch';end if;n:=n+1;
  if (v->'balance'->>'m:a')::numeric<>1160 then raise exception 'Reconfirmed opening mismatch';end if;n:=n+1;
