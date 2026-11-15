@@ -102,6 +102,44 @@ test('Master Barang converts Liter to ML', () => {
   assert.equal(item.harga_per_satuan_dasar, 32);
 });
 
+test('Editing the reference price clears an outdated last-purchase price', () => {
+  const { runtime } = createRuntime();
+  const item = runtime.MasterDataService.saveItem(validItem({
+    nama_barang: 'Sirup Madu Rasa',
+    satuan_dasar: 'GR',
+    konversi_satuan: [{ unit: 'BOTOL', factor: 910 }],
+    harga_referensi: '113390',
+    satuan_harga: 'GR'
+  }));
+  runtime.MasterDataService.findItem(item.id).harga_beli_terakhir_per_satuan_dasar = 113390;
+
+  const updated = runtime.MasterDataService.saveItem(validItem({
+    id: item.id,
+    nama_barang: item.nama_barang,
+    satuan_dasar: 'GR',
+    konversi_satuan: [{ unit: 'BOTOL', factor: 910 }],
+    harga_referensi: '113390',
+    satuan_harga: 'BOTOL'
+  }));
+
+  assert.equal(updated.harga_per_satuan_dasar, 113390 / 910);
+  assert.equal(updated.harga_beli_terakhir_per_satuan_dasar, null);
+  assert.equal(runtime.MasterDataService.getPriceSource(updated).source, 'reference');
+});
+
+test('Non-price Master edits preserve the latest purchase price', () => {
+  const { runtime } = createRuntime();
+  const item = runtime.MasterDataService.saveItem(validItem());
+  runtime.MasterDataService.findItem(item.id).harga_beli_terakhir_per_satuan_dasar = 30;
+
+  const updated = runtime.MasterDataService.saveItem(validItem({
+    id: item.id,
+    nama_barang: 'Freshmilk renamed'
+  }));
+
+  assert.equal(updated.harga_beli_terakhir_per_satuan_dasar, 30);
+});
+
 test('Duplicate names are rejected without case sensitivity in the same scope', () => {
   const { runtime } = createRuntime();
   runtime.MasterDataService.saveItem(validItem({ nama_barang: 'Simple Sirup' }));
