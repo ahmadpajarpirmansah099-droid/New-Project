@@ -145,7 +145,7 @@ async function saveEdit(event, id) {
     toast('Periksa nama, jumlah pack, WhatsApp, dan alasan koreksi.');
     return;
   }
-  if (!Number.isFinite(Number(guest.updatedAt))) {
+  if (!guest.updatedAt || !Number.isFinite(Date.parse(guest.updatedAt))) {
     toast('Versi data tamu tidak tersedia. Muat ulang sebelum mengoreksi.');
     return;
   }
