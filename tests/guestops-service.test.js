@@ -49,8 +49,35 @@ function createRuntime() {
   const client = {
     auth: { async getUser() { return { data: { user: { id: 'user-1' } }, error: null }; } },
     from(table) { return new Query(table); },
-    async rpc(name) {
-      calls.push({ rpc: name });
+    async rpc(name, args) {
+      calls.push({ rpc: name, args });
+      if (name === 'correct_guest_record') {
+        return {
+          data: {
+            guest: {
+              id: args.p_guest_id,
+              workspace_id: 'workspace-1',
+              ticket: 'WL-001',
+              service_date: '2026-11-03',
+              guest_name: args.p_guest_name,
+              pack: args.p_pack,
+              phone: args.p_phone,
+              status: 'waiting',
+              created_at: '2026-11-03T09:00:00.000Z',
+              updated_at: '2026-11-03T10:00:00.000Z',
+              resolved_at: null,
+              seated_at: null
+            },
+            audit: {
+              changed_at: '2026-11-03T10:00:00.000Z',
+              label: 'Dikoreksi',
+              detail: 'Nama dan pack diperbarui',
+              reason: args.p_reason
+            }
+          },
+          error: null
+        };
+      }
       return { data: name === 'next_guest_ticket' ? 'WL-001' : 'RSV-001', error: null };
     }
   };
@@ -174,19 +201,29 @@ test('Guest Operations writes only records that changed after the first save', a
   assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 1);
 });
 
-test('Guest status correction audit is appended to the history table', async () => {
+test('Guest correction uses one atomic RPC and keeps server-generated audit data', async () => {
   const { runtime, client, calls } = createRuntime();
   await runtime.GuestOpsService.initialize(client, 'workspace-1');
 
-  await runtime.GuestOpsService.appendGuestAudit('guest-1', {
-    at: 1793700000000,
-    label: 'Dikoreksi',
-    detail: 'Nama diperbarui',
+  const result = await runtime.GuestOpsService.correctGuestRecord('guest-1', {
+    name: 'Tamu Baru',
+    pack: 3,
+    phone: '08123456789',
     reason: 'Salah input',
-    status: 'waiting'
+    expectedUpdatedAt: 1793700000000
   });
 
-  assert.equal(calls.some(call => call.table === 'guest_status_history' && call.operation === 'insert'), true);
+  const call = calls.find(item => item.rpc === 'correct_guest_record');
+  assert.ok(call);
+  assert.equal(call.args.p_guest_name, 'Tamu Baru');
+  assert.equal(call.args.p_pack, 3);
+  assert.equal(call.args.p_phone, '08123456789');
+  assert.equal(call.args.p_reason, 'Salah input');
+  assert.equal(call.args.p_expected_updated_at, new Date(1793700000000).toISOString());
+  assert.equal(result.guest.name, 'Tamu Baru');
+  assert.equal(result.audit.label, 'Dikoreksi');
+  assert.equal(result.audit.reason, 'Salah input');
+  assert.equal(calls.some(item => item.table === 'guest_status_history' && item.operation === 'insert'), false);
 });
 
 test('Guest Operations blocks initialization when auth context points to another workspace', async () => {
