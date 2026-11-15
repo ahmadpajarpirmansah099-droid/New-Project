@@ -11,7 +11,7 @@ const servicePath = path.join(__dirname, '..', 'assets/js/guestops-service.js');
 function createRuntime() {
   const calls = [];
   const rows = { guests: [], reservations: [], workspace_settings: [] };
-  let failNextUpsert = false;
+  let failNextBatch = false;
 
   class Query {
     constructor(table) { this.table = table; this.operation = 'select'; this.values = null; }
@@ -27,10 +27,6 @@ function createRuntime() {
     }
     upsert(values, options) {
       calls.push({ table: this.table, operation: 'upsert', values, options });
-      if (failNextUpsert) {
-        failNextUpsert = false;
-        return Promise.resolve({ error: new Error('temporary database failure') });
-      }
       rows[this.table].push(...(Array.isArray(values) ? values : [values]));
       return Promise.resolve({ error: null });
     }
@@ -48,7 +44,8 @@ function createRuntime() {
       if (name === 'save_guest_operations') {
         const working = {
           guests: rows.guests.map(row => ({ ...row })),
-          reservations: rows.reservations.map(row => ({ ...row }))
+          reservations: rows.reservations.map(row => ({ ...row })),
+          workspace_settings: rows.workspace_settings.map(row => ({ ...row }))
         };
         const versions = { guests: [], reservations: [] };
         try {
@@ -72,12 +69,27 @@ function createRuntime() {
             }
           };
 
-          // Mirror the database transaction: reservation writes happen before guest writes,
-          // but neither table is committed unless the entire batch succeeds.
+          // Mirror the database transaction: settings, reservations and guests commit together.
           apply('reservations', args.p_reservations || []);
           apply('guests', args.p_guests || []);
+          if (args.p_settings) {
+            const setting = working.workspace_settings.find(row =>
+              row.workspace_id === args.p_workspace_id && row.setting_key === 'guest_operations'
+            );
+            if (setting) setting.setting_value = args.p_settings;
+            else working.workspace_settings.push({
+              workspace_id: args.p_workspace_id,
+              setting_key: 'guest_operations',
+              setting_value: args.p_settings
+            });
+          }
+          if (failNextBatch) {
+            failNextBatch = false;
+            throw new Error('temporary database failure');
+          }
           rows.guests.splice(0, rows.guests.length, ...working.guests);
           rows.reservations.splice(0, rows.reservations.length, ...working.reservations);
+          rows.workspace_settings.splice(0, rows.workspace_settings.length, ...working.workspace_settings);
           return { data: versions, error: null };
         } catch (error) {
           return { data: null, error };
@@ -126,7 +138,7 @@ function createRuntime() {
     client,
     calls,
     rows,
-    failOnce() { failNextUpsert = true; }
+    failOnce() { failNextBatch = true; }
   };
 }
 
@@ -217,9 +229,11 @@ test('Guest Operations persists guests and reservations in one RPC transaction',
   assert.equal(save.args.p_reservations.length, 1);
   assert.equal(save.args.p_guests[0].expected_updated_at, null);
   assert.equal(save.args.p_reservations[0].expected_updated_at, null);
+  assert.deepEqual(save.args.p_settings, { seatingDurationMinutes: 90 });
   assert.ok(rows.guests[0].updated_at);
   assert.ok(rows.reservations[0].updated_at);
-  assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 1);
+  assert.equal(rows.workspace_settings.length, 1);
+  assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 0);
 });
 
 test('Guest Operations write queue recovers after a failed database write', async () => {
@@ -233,8 +247,11 @@ test('Guest Operations write queue recovers after a failed database write', asyn
 
   failOnce();
   await assert.rejects(runtime.GuestOpsService.persist(state), /temporary database failure/);
+  assert.equal(rows.reservations.length, 0);
+  assert.equal(rows.workspace_settings.length, 0);
   await runtime.GuestOpsService.persist(state);
   assert.equal(rows.reservations.length, 1);
+  assert.equal(rows.workspace_settings.length, 1);
 });
 
 test('Guest Operations writes only changed rows with their last-seen versions', async () => {
@@ -273,11 +290,13 @@ test('Guest Operations writes only changed rows with their last-seen versions', 
   assert.equal(saves.length, 2);
   assert.equal(saves[0].args.p_guests.length, 1);
   assert.equal(saves[0].args.p_reservations.length, 1);
+  assert.deepEqual(saves[0].args.p_settings, { seatingDurationMinutes: 90 });
   assert.ok(saves[1].args.p_guests[0].expected_updated_at);
   assert.equal(saves[1].args.p_reservations.length, 0);
+  assert.equal(saves[1].args.p_settings, null);
   assert.equal(calls.filter(call => call.table === 'guests' && call.operation === 'upsert').length, 0);
   assert.equal(calls.filter(call => call.table === 'reservations' && call.operation === 'upsert').length, 0);
-  assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 1);
+  assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 0);
 });
 
 test('Guest Operations batch rejects a stale guest without partially saving the reservation', async () => {
