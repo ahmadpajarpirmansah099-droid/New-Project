@@ -1594,3 +1594,17 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
     vertical-align:middle;
   }
 }
+
+
+/* Match mobile seated action labels to the Duduk badge typography. */
+@media (max-width:520px) {
+  .guest-is-seated .guest-seated-inline-actions .mini,
+  .guest-is-seated .guest-seated-inline-status {
+    font-family:inherit !important;
+    font-size:9px !important;
+    font-weight:800 !important;
+    line-height:1 !important;
+    letter-spacing:normal !important;
+    text-transform:none !important;
+  }
+}
