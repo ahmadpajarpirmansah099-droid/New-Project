@@ -1560,3 +1560,19 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
     white-space:nowrap;
   }
 }
+
+
+/* Make the two mobile seated actions and the status badge the same height. */
+@media (max-width:520px) {
+  .guest-seated-inline-actions .mini,
+  .guest-seated-inline-status {
+    box-sizing:border-box;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:27px;
+    padding:5px 7px;
+    font-size:9px;
+    line-height:1;
+  }
+}
