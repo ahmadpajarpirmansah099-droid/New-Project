@@ -298,36 +298,42 @@
     return operation;
   }
 
-  async function correctGuestRecord(guestId, changes) {
+  function correctGuestRecord(guestId, changes) {
     requireReady();
-    const guard = await assertWorkspaceSession();
-    if (!changes || !Number.isFinite(Date.parse(changes.expectedUpdatedAt))) {
-      throw new Error('Versi data tamu tidak tersedia. Muat ulang sebelum mengoreksi.');
-    }
-    const { data, error } = await client.rpc('correct_guest_record', {
-      p_guest_id: guestId,
-      p_guest_name: String(changes.name || ''),
-      p_pack: Number(changes.pack),
-      p_phone: String(changes.phone || '') || null,
-      p_reason: String(changes.reason || ''),
-      p_expected_updated_at: String(changes.expectedUpdatedAt)
-    });
-    if (error) throw error;
-    await assertWorkspaceSession(guard.generation);
-    if (!data?.guest || data.guest.id !== guestId || data.guest.workspace_id !== guard.workspaceId) {
-      throw new Error('Respons koreksi tamu tidak cocok dengan workspace aktif.');
-    }
-    const mapped = mapGuest(data.guest);
-    persistedGuestRows.set(guestId, recordFingerprint(guestRecord(mapped)));
-    return {
-      guest: mapped,
-      audit: {
-        at: toMs(data.audit?.changed_at),
-        label: data.audit?.label || 'Dikoreksi',
-        detail: data.audit?.detail || '',
-        reason: data.audit?.reason || ''
+    const requestedGeneration = serviceGeneration;
+    const run = async () => {
+      const guard = await assertWorkspaceSession(requestedGeneration);
+      if (!changes || !Number.isFinite(Date.parse(changes.expectedUpdatedAt))) {
+        throw new Error('Versi data tamu tidak tersedia. Muat ulang sebelum mengoreksi.');
       }
+      const { data, error } = await client.rpc('correct_guest_record', {
+        p_guest_id: guestId,
+        p_guest_name: String(changes.name || ''),
+        p_pack: Number(changes.pack),
+        p_phone: String(changes.phone || '') || null,
+        p_reason: String(changes.reason || ''),
+        p_expected_updated_at: String(changes.expectedUpdatedAt)
+      });
+      if (error) throw error;
+      await assertWorkspaceSession(guard.generation);
+      if (!data?.guest || data.guest.id !== guestId || data.guest.workspace_id !== guard.workspaceId) {
+        throw new Error('Respons koreksi tamu tidak cocok dengan workspace aktif.');
+      }
+      const mapped = mapGuest(data.guest);
+      persistedGuestRows.set(guestId, recordFingerprint(guestRecord(mapped)));
+      return {
+        guest: mapped,
+        audit: {
+          at: toMs(data.audit?.changed_at),
+          label: data.audit?.label || 'Dikoreksi',
+          detail: data.audit?.detail || '',
+          reason: data.audit?.reason || ''
+        }
+      };
     };
+    const operation = writeQueue.catch(() => undefined).then(run);
+    writeQueue = operation;
+    return operation;
   }
 
   function reset() {
