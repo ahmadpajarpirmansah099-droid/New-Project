@@ -9,6 +9,7 @@ DECLARE
   original_updated_at timestamptz;
   result jsonb;
   history_count integer;
+  history_changed_at timestamptz;
 BEGIN
   SELECT id INTO STRICT service_id FROM public.profiles WHERE role = 'service' LIMIT 1;
 
@@ -40,11 +41,14 @@ BEGIN
     RAISE EXCEPTION 'Correction RPC returned unexpected data';
   END IF;
 
-  SELECT count(*) INTO history_count
+  SELECT count(*), max(h.changed_at) INTO history_count, history_changed_at
   FROM public.guest_status_history AS h
   WHERE h.guest_id = v_guest_id AND h.label = 'Dikoreksi' AND h.changed_by = service_id;
   IF history_count <> 1 THEN
     RAISE EXCEPTION 'Correction audit was not committed exactly once';
+  END IF;
+  IF history_changed_at IS DISTINCT FROM (result->'audit'->>'changed_at')::timestamptz THEN
+    RAISE EXCEPTION 'Correction RPC returned a different audit timestamp than the stored row';
   END IF;
 
   BEGIN
