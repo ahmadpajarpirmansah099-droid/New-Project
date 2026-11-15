@@ -18,6 +18,36 @@ begin
  v:=public.stock_opname_write(d,0,gen_random_uuid(),'initial',jsonb_build_object('date',tx_day,'counts',counts));
  perform public.stock_opname_write(t,0,gen_random_uuid(),'initial',jsonb_build_object('date',tx_day,'counts',counts));
 
+ -- A user assigned only to the source division must not discover or mutate the target.
+ delete from public.workspace_division_memberships where workspace_id=w and user_id=u and division_id=t;
+ if (public.stock_opname_read(d)->'targets') @> jsonb_build_array(jsonb_build_object('id',t)) then
+  raise exception 'Unauthorized target leaked in Move choices';
+ end if;
+ begin
+  perform public.stock_opname_target_catalog(d,t);
+  raise exception 'Regression: unauthorized target catalog was returned';
+ exception when others then
+  if sqlerrm not like 'Tujuan tidak tersedia%' then raise;end if;
+ end;
+ before_source:=public.stock_opname_read(d);
+ select payload into before_target from public.stock_opname_state where division_id=t;
+ req:=gen_random_uuid();
+ begin
+  perform public.stock_opname_write(d,(before_source->>'revision')::bigint,req,'save',
+   jsonb_build_object('type','expense','category','Move','target',t,
+    'mapping','[{"source":"m:a","target":"m:a"}]'::jsonb,
+    'start',tx_day,'end',tx_day,'lines','[{"key":"m:a","qty":"10","unit":"ML"}]'::jsonb));
+  raise exception 'Regression: unauthorized Move was accepted';
+ exception when others then
+  if sqlerrm not like 'Tujuan Move tidak tersedia%' then raise;end if;
+ end;
+ if public.stock_opname_read(d) is distinct from before_source
+   or (select payload from public.stock_opname_state where division_id=t) is distinct from before_target
+   or exists(select 1 from public.stock_opname_requests where request_id=req) then
+  raise exception 'Rejected unauthorized Move changed stock or request history';
+ end if;
+ insert into public.workspace_division_memberships(workspace_id,user_id,division_id) values(w,u,t);
+
  -- A cancelled transfer must not be reversed again after both periods roll over.
  req:=gen_random_uuid();move_id:=req::text;
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,req,'save',jsonb_build_object('type','expense','category','Move','target',t,'mapping','[{"source":"m:a","target":"m:a"}]'::jsonb,'start',tx_day,'end',tx_day,'lines','[{"key":"m:a","qty":"10","unit":"ML"}]'::jsonb));
