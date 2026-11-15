@@ -1367,3 +1367,37 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
   .scope-dialog { padding: 18px; }
   .scope-dialog .workspace-scope-switcher { grid-template-columns: 1fr; }
 }
+
+
+/* Required table number in the guest seating confirmation. */
+.guest-confirm-field {
+  margin:0 0 20px;
+  text-align:left;
+}
+.guest-confirm-field label {
+  display:block;
+  margin-bottom:8px;
+  color:#343544;
+  font-size:12px;
+  font-weight:800;
+}
+.guest-confirm-field input {
+  width:100%;
+  min-height:46px;
+  padding:0 13px;
+  border:1px solid #dedfe5;
+  border-radius:12px;
+  background:#fff;
+  color:#171827;
+  font:600 14px Manrope,sans-serif;
+  outline:none;
+}
+.guest-confirm-field input:focus {
+  border-color:#a6c94a;
+  box-shadow:0 0 0 3px rgba(190,224,91,.2);
+}
+.guest-confirm-accept:disabled {
+  cursor:not-allowed;
+  opacity:.45;
+  box-shadow:none;
+}
