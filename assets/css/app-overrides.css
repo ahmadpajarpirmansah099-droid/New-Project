@@ -1471,3 +1471,39 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
     font-size:19px;
   }
 }
+
+
+/* Mobile seated cards: keep actions on one line beside the seated status. */
+.guest-seated-mobile-actions {
+  display:none;
+}
+@media (max-width:520px) {
+  .guest-is-seated .guest-status-desktop,
+  .guest-is-seated .guest-bottom {
+    display:none;
+  }
+  .guest-seated-mobile-actions {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    min-height:30px;
+    margin:9px 0 0 55px;
+  }
+  .guest-seated-mobile-actions .actions {
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .guest-seated-mobile-actions .mini {
+    min-height:29px;
+    padding:6px 9px;
+    font-size:10px;
+  }
+  .guest-seated-mobile-actions > .status {
+    flex:none;
+  }
+  .guest-seated-info {
+    margin-top:8px;
+  }
+}

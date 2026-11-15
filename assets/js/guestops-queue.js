@@ -147,7 +147,10 @@ function guestCard(g, i, history = false) {
     '<div class="guest-row" data-app-action="openDetail" data-app-id="' + esc(g.id) + '">' + ticketMarkup +
       '<div class="guest-main"><div class="guest-name">' + esc(g.name) + '</div>' +
       '<div class="guest-meta"><span>' + g.pack + ' pack</span><span>·</span><span>' + fmtTime(g.created) + '</span></div></div>' +
-      '<span class="status ' + statusClass(g.status) + '">' + statusLabel(g.status) + '</span></div>' +
+      '<span class="status guest-status-desktop ' + statusClass(g.status) + '">' + statusLabel(g.status) + '</span></div>' +
+    (g.status === 'seated' ? '<div class="guest-seated-mobile-actions"><div class="actions">' + act +
+      '<button class="mini" data-app-action="openDetail" data-app-id="' + esc(g.id) + '">Detail</button></div>' +
+      '<span class="status ' + statusClass(g.status) + '">' + statusLabel(g.status) + '</span></div>' : '') +
     seatedInfo +
     '<div class="guest-bottom">' + bottomTime +
       '<div class="actions">' + act + '<button class="mini" data-app-action="openDetail" data-app-id="' + esc(g.id) + '">Detail</button></div></div></article>';
