@@ -22,6 +22,8 @@ DECLARE
   v_table_label text;
   v_guest_phone text;
   batch_result jsonb;
+  v_saved_settings jsonb;
+  v_requested_settings jsonb := jsonb_build_object('seatingDurationMinutes', 120);
 BEGIN
   SELECT id INTO STRICT service_id FROM public.profiles WHERE role = 'service' LIMIT 1;
 
@@ -106,14 +108,20 @@ BEGIN
     'expected_updated_at', v_initial_reservation_updated_at
   ));
 
-  batch_result := public.save_guest_operations(test_workspace, batch_guests, batch_reservations);
+  batch_result := public.save_guest_operations(test_workspace, batch_guests, batch_reservations, v_requested_settings);
   v_batch_guest_updated_at := (batch_result->'guests'->0->>'updated_at')::timestamptz;
   v_reservation_updated_at := (batch_result->'reservations'->0->>'updated_at')::timestamptz;
 
   -- Replaying the exact request after a lost response must not duplicate rows or audit events.
-  retry_result := public.save_guest_operations(test_workspace, batch_guests, batch_reservations);
+  retry_result := public.save_guest_operations(test_workspace, batch_guests, batch_reservations, v_requested_settings);
   IF retry_result IS DISTINCT FROM batch_result THEN
     RAISE EXCEPTION 'Identical Guest Operations retry did not return the original versions';
+  END IF;
+  SELECT setting_value INTO v_saved_settings
+  FROM public.workspace_settings
+  WHERE workspace_id = test_workspace AND setting_key = 'guest_operations';
+  IF v_saved_settings IS DISTINCT FROM v_requested_settings THEN
+    RAISE EXCEPTION 'Guest Operations settings were not saved with the batch';
   END IF;
 
   SELECT count(*) INTO history_count
@@ -179,7 +187,8 @@ BEGIN
         'status', 'seated',
         'created_at', now(),
         'expected_updated_at', v_reservation_updated_at
-      ))
+      )),
+      jsonb_build_object('seatingDurationMinutes', 180)
     );
     RAISE EXCEPTION 'Stale Guest Operations batch unexpectedly succeeded';
   EXCEPTION WHEN OTHERS THEN
@@ -188,8 +197,12 @@ BEGIN
 
   SELECT table_label INTO v_table_label FROM public.reservations WHERE id = v_reservation_id;
   SELECT phone INTO v_guest_phone FROM public.guests WHERE id = v_batch_guest_id;
+  SELECT setting_value INTO v_saved_settings
+  FROM public.workspace_settings
+  WHERE workspace_id = test_workspace AND setting_key = 'guest_operations';
   IF v_table_label IS DISTINCT FROM 'Meja 1'
-     OR v_guest_phone IS DISTINCT FROM '089999999999' THEN
+     OR v_guest_phone IS DISTINCT FROM '089999999999'
+     OR v_saved_settings IS DISTINCT FROM v_requested_settings THEN
     RAISE EXCEPTION 'Stale Guest Operations batch partially committed';
   END IF;
 
@@ -216,7 +229,7 @@ BEGIN
   IF has_function_privilege('anon', 'public.correct_guest_record(uuid,text,integer,text,text,timestamptz)', 'EXECUTE') THEN
     RAISE EXCEPTION 'Anonymous access to correction RPC is granted';
   END IF;
-  IF has_function_privilege('anon', 'public.save_guest_operations(uuid,jsonb,jsonb)', 'EXECUTE') THEN
+  IF has_function_privilege('anon', 'public.save_guest_operations(uuid,jsonb,jsonb,jsonb)', 'EXECUTE') THEN
     RAISE EXCEPTION 'Anonymous access to Guest Operations batch RPC is granted';
   END IF;
 END;
