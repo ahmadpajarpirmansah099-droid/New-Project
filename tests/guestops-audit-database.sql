@@ -13,6 +13,7 @@ DECLARE
   v_reservation_id uuid := gen_random_uuid();
   v_batch_guest_id uuid := gen_random_uuid();
   v_reservation_updated_at timestamptz;
+  v_reservation_created_at timestamptz;
   v_initial_reservation_updated_at timestamptz;
   v_batch_guest_updated_at timestamptz;
   batch_guests jsonb;
@@ -44,7 +45,7 @@ BEGIN
     (now() AT TIME ZONE 'Asia/Jakarta')::date, '19:00',
     'Tamu Reservasi', 2, 'pending', service_id
   )
-  RETURNING updated_at INTO v_reservation_updated_at;
+  RETURNING created_at, updated_at INTO v_reservation_created_at, v_reservation_updated_at;
   v_initial_reservation_updated_at := v_reservation_updated_at;
 
   PERFORM set_config('request.jwt.claim.sub', service_id::text, true);
@@ -101,7 +102,7 @@ BEGIN
     'note', NULL,
     'table_label', 'Meja 1',
     'status', 'seated',
-    'created_at', now(),
+    'created_at', v_reservation_created_at,
     'expected_updated_at', v_initial_reservation_updated_at
   ));
 
