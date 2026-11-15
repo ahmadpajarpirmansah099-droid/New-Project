@@ -132,15 +132,24 @@ function guestCard(g, i, history = false) {
   const ticketMarkup = isReservation
     ? '<div class="ticket reservation-ticket"><strong>' + esc(reservation.code) + '</strong><small>' + esc(g.ticket) + '</small></div>'
     : '<div class="ticket">' + esc(g.ticket) + '</div>';
+  const tableLabel = g.tableLabel || (isReservation ? reservation.table : '');
+  const seatedInfo = g.status === 'seated'
+    ? '<div class="guest-seated-info">' +
+        '<div class="guest-seated-metric guest-seated-time"><small>SEATING TIME</small><strong data-seating-countdown="' + esc(g.id) + '">' + seatingCountdownText(g) + '</strong></div>' +
+        '<div class="guest-seated-metric guest-seated-table' + (tableLabel ? '' : ' is-missing') + '"><small>NOMOR MEJA</small><strong>' + (tableLabel ? esc(tableLabel) : 'Belum dicatat') + '</strong></div>' +
+      '</div>'
+    : '';
+  const bottomTime = g.status === 'seated'
+    ? ''
+    : '<span class="waittime">Waiting time <b>' + duration(g) + '</b></span>';
 
-  return '<article class="guest' + (isReservation ? ' guest-reservation' : '') + '" data-stagger-index="' + Math.min(i, 7) + '">' +
+  return '<article class="guest' + (isReservation ? ' guest-reservation' : '') + (g.status === 'seated' ? ' guest-is-seated' : '') + '" data-stagger-index="' + Math.min(i, 7) + '">' +
     '<div class="guest-row" data-app-action="openDetail" data-app-id="' + esc(g.id) + '">' + ticketMarkup +
       '<div class="guest-main"><div class="guest-name">' + esc(g.name) + '</div>' +
       '<div class="guest-meta"><span>' + g.pack + ' pack</span><span>·</span><span>' + fmtTime(g.created) + '</span></div></div>' +
       '<span class="status ' + statusClass(g.status) + '">' + statusLabel(g.status) + '</span></div>' +
-    '<div class="guest-bottom"><span class="waittime">' + (g.status === 'seated' ? 'Seating time' : 'Waiting time') +
-      ' <b' + (g.status === 'seated' ? ' data-seating-countdown="' + esc(g.id) + '"' : '') + '>' +
-      (g.status === 'seated' ? seatingCountdownText(g) : duration(g)) + '</b></span>' +
+    seatedInfo +
+    '<div class="guest-bottom">' + bottomTime +
       '<div class="actions">' + act + '<button class="mini" data-app-action="openDetail" data-app-id="' + esc(g.id) + '">Detail</button></div></div></article>';
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
