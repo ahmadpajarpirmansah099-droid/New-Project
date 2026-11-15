@@ -125,12 +125,20 @@ BEGIN
     RAISE EXCEPTION 'Guest Operations settings were not saved with the batch';
   END IF;
 
-  -- Missing settings fields must be rejected instead of silently bypassing validation.
+  -- A non-object and a missing setting must both be rejected.
+  BEGIN
+    PERFORM public.save_guest_operations(
+      test_workspace, '[]'::jsonb, '[]'::jsonb, '"invalid"'::jsonb
+    );
+    RAISE EXCEPTION 'Non-object Guest Operations settings were accepted';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM <> 'Pengaturan Guest Operations tidak valid.' THEN RAISE; END IF;
+  END;
   BEGIN
     PERFORM public.save_guest_operations(
       test_workspace, '[]'::jsonb, '[]'::jsonb, '{}'::jsonb
     );
-    RAISE EXCEPTION 'Invalid Guest Operations settings were accepted';
+    RAISE EXCEPTION 'Missing Guest Operations settings were accepted';
   EXCEPTION WHEN OTHERS THEN
     IF SQLERRM <> 'Pengaturan Guest Operations tidak valid.' THEN RAISE; END IF;
   END;
