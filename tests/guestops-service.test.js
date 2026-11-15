@@ -287,14 +287,14 @@ test('Guest Operations batch rejects a stale guest without partially saving the 
   rows.guests.push({
     id: 'guest-1', workspace_id: 'workspace-1', ticket: 'WL-001',
     service_date: '2026-11-03', guest_name: 'Tamu', pack: 2, phone: '081111111111',
-    status: 'waiting', created_at: '2026-11-03T07:00:00.000Z',
+    status: 'waiting', created_at: '2026-11-03T07:00:00.123456+00:00',
     updated_at: guestVersion, resolved_at: null, seated_at: null, reservation_id: null
   });
   rows.reservations.push({
     id: 'reservation-1', workspace_id: 'workspace-1', code: 'RSV-001',
     reservation_date: '2026-11-03', reservation_time: '19:00:00', guest_name: 'Tamu',
     pack: 2, phone: null, smoking: null, note: null, table_label: null, status: 'pending',
-    created_at: '2026-11-03T07:00:00.000Z', updated_at: reservationVersion
+    created_at: '2026-11-03T07:00:00.654321+00:00', updated_at: reservationVersion
   });
 
   const state = await runtime.GuestOpsService.initialize(client, 'workspace-1');
@@ -310,6 +310,8 @@ test('Guest Operations batch rejects a stale guest without partially saving the 
   const attemptedSave = calls.find(call => call.rpc === 'save_guest_operations');
   assert.equal(attemptedSave.args.p_guests[0].expected_updated_at, guestVersion);
   assert.equal(attemptedSave.args.p_reservations[0].expected_updated_at, reservationVersion);
+  assert.equal(attemptedSave.args.p_guests[0].created_at, '2026-11-03T07:00:00.123456+00:00');
+  assert.equal(attemptedSave.args.p_reservations[0].created_at, '2026-11-03T07:00:00.654321+00:00');
   assert.equal(rows.guests[0].phone, '089999999999');
   assert.equal(rows.guests[0].status, 'waiting');
   assert.equal(rows.reservations[0].table_label, null);
