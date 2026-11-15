@@ -17,6 +17,7 @@ DECLARE
   v_guest public.guests%rowtype;
   v_updated public.guests%rowtype;
   v_detail text;
+  v_changed_at timestamptz;
 BEGIN
   IF auth.uid() IS NULL THEN
     RAISE EXCEPTION 'Sesi akun tidak valid.';
@@ -81,12 +82,12 @@ BEGIN
   ) VALUES (
     v_updated.workspace_id, v_updated.id, v_updated.status,
     'Dikoreksi', v_detail, btrim(p_reason), auth.uid(), v_updated.updated_at
-  );
+  ) RETURNING changed_at INTO v_changed_at;
 
   RETURN pg_catalog.jsonb_build_object(
     'guest', pg_catalog.to_jsonb(v_updated),
     'audit', pg_catalog.jsonb_build_object(
-      'changed_at', v_updated.updated_at,
+      'changed_at', v_changed_at,
       'label', 'Dikoreksi',
       'detail', v_detail,
       'reason', btrim(p_reason)
