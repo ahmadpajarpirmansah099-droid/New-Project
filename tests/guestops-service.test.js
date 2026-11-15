@@ -298,6 +298,8 @@ test('Guest Operations batch rejects a stale guest without partially saving the 
   });
 
   const state = await runtime.GuestOpsService.initialize(client, 'workspace-1');
+  assert.equal(state.guests[0].updatedAt, guestVersion);
+  assert.equal(state.reservations[0].updatedAt, reservationVersion);
   // Simulate another device saving the guest after this device loaded both rows.
   rows.guests[0].phone = '089999999999';
   rows.guests[0].updated_at = '2026-11-03T10:00:00.000Z';
@@ -305,6 +307,9 @@ test('Guest Operations batch rejects a stale guest without partially saving the 
   state.reservations[0].table = 'VIP 1';
 
   await assert.rejects(runtime.GuestOpsService.persist(state), /Data tamu sudah berubah/);
+  const attemptedSave = calls.find(call => call.rpc === 'save_guest_operations');
+  assert.equal(attemptedSave.args.p_guests[0].expected_updated_at, guestVersion);
+  assert.equal(attemptedSave.args.p_reservations[0].expected_updated_at, reservationVersion);
   assert.equal(rows.guests[0].phone, '089999999999');
   assert.equal(rows.guests[0].status, 'waiting');
   assert.equal(rows.reservations[0].table_label, null);
