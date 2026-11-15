@@ -272,13 +272,20 @@
           ...record,
           expected_updated_at: persistedGuestRows.get(record.id)?.updatedAt || null
         }));
+      const settingValue = {
+        seatingDurationMinutes: Number(state.settings?.seatingDurationMinutes) || 90
+      };
+      const settingFingerprint = JSON.stringify(settingValue);
+      const changedSettings = root.AppAuth?.getContext()?.role !== 'service'
+        && settingFingerprint !== persistedSettingsFingerprint;
 
       await assertWorkspaceSession(guard.generation);
-      if (changedReservations.length || changedGuests.length) {
+      if (changedReservations.length || changedGuests.length || changedSettings) {
         const { data, error } = await client.rpc('save_guest_operations', {
           p_workspace_id: workspaceId,
           p_guests: changedGuests,
-          p_reservations: changedReservations
+          p_reservations: changedReservations,
+          p_settings: changedSettings ? settingValue : null
         });
         if (error) throw error;
         await assertWorkspaceSession(guard.generation);
@@ -307,22 +314,7 @@
           }
           persistedReservationRows.set(record.id, { fingerprint: recordFingerprint(record), updatedAt });
         });
-      }
-      if (root.AppAuth?.getContext()?.role !== 'service') {
-        const settingValue = {
-          seatingDurationMinutes: Number(state.settings?.seatingDurationMinutes) || 90
-        };
-        const settingFingerprint = JSON.stringify(settingValue);
-        if (settingFingerprint !== persistedSettingsFingerprint) {
-          const setting = await client.from('workspace_settings').upsert({
-            workspace_id: workspaceId,
-            setting_key: 'guest_operations',
-            setting_value: settingValue,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'workspace_id,setting_key' });
-          if (setting.error) throw setting.error;
-          persistedSettingsFingerprint = settingFingerprint;
-        }
+        if (changedSettings) persistedSettingsFingerprint = settingFingerprint;
       }
     };
 
