@@ -92,7 +92,7 @@ window.addEventListener('app:auth-signed-out', function () {
     counters: {},
     reservations: [],
     reservationCounters: {},
-    settings: { seatingDurationMinutes: 90 }
+    settings: { seatingDurationMinutes: 90, whatsappTemplates: { called: 'Halo Kak {nama}, nomor antrean {nomor_antrean} sudah dipanggil. Mohon menuju area greeter kami. Terima kasih.', seated: 'Halo Kak {nama}, reservasi {kode_reservasi} sudah kami tempatkan di meja {nomor_meja}. Terima kasih.' } }
   };
   remoteSaveQueue = Promise.resolve();
   window.GuestOpsService?.reset();
