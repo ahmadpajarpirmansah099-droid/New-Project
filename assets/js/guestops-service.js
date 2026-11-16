@@ -27,6 +27,7 @@
       name: row.guest_name,
       pack: row.pack,
       phone: row.phone || '',
+      smoking: typeof row.smoking === 'boolean' ? row.smoking : null,
       status: row.status,
       created: toMs(row.created_at),
       resolved: toMs(row.resolved_at),
@@ -68,6 +69,7 @@
       guest_name: item.name,
       pack: item.pack,
       phone: item.phone || null,
+      smoking: typeof item.smoking === 'boolean' ? item.smoking : null,
       status: item.status,
       created_at: toIso(item.created),
       seated_at: item.seatedAt ? toIso(item.seatedAt) : null,
@@ -133,7 +135,7 @@
     const guard = await assertWorkspaceSession();
     const [guestResult, reservationResult, settingResult] = await Promise.all([
       client.from('guests')
-        .select('id,ticket,service_date,guest_name,pack,phone,status,created_at,resolved_at,seated_at,table_label,reservation_id')
+        .select('id,ticket,service_date,guest_name,pack,phone,smoking,status,created_at,resolved_at,seated_at,table_label,reservation_id')
         .eq('workspace_id', workspaceId)
         .order('created_at', { ascending: true }),
       client.from('reservations')
