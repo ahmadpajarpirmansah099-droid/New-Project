@@ -446,10 +446,9 @@
     visibility: visible !important;
     box-shadow: none;
   }
-  /* Keep the header's vertical space so collapsed icons stay aligned with expanded mode. */
+  /* Remove the hidden header's layout space so the icon rail starts at the top. */
   body.desktop-sidebar-collapsed .drawer-head {
-    visibility: hidden;
-    border-bottom-color: transparent;
+    display: none;
   }
   body.desktop-sidebar-collapsed .drawer-nav { padding-top: 20px; justify-items: center; }
   body.desktop-sidebar-collapsed .drawer-item {
