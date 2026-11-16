@@ -210,8 +210,6 @@ async function saveEdit(event, id) {
   event.preventDefault();
 
   const guest = state.guests.find(item => item.id === id);
-  const now = Date.now();
-
   guest.name = $('editName').value.trim();
   guest.pack = Number($('editPack').value);
   guest.phone = $('editPhone').value.trim();
