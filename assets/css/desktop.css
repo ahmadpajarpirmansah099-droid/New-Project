@@ -1705,14 +1705,13 @@
 }
 
 @media (min-width: 900px) and (max-height: 700px) {
-  .sidebar-mascot { display: none !important; }
+  /* Keep the mascot visible and move Logout lower to preserve clear separation. */
+  .sidebar-mascot { display: block; bottom: 122px; }
+  body:has(.page.active) #authLogoutButton { bottom: 14px; }
   .drawer-nav { max-height: calc(100dvh - 210px); }
 }
 
 @media (min-width: 900px) and (max-height: 560px) {
   body:has(.page.active) .drawer-guide-icon { display: none !important; }
-  body:has(.page.active) #authLogoutButton {
-    bottom: 14px;
-  }
   .drawer-nav { max-height: calc(100dvh - 110px); }
 }
