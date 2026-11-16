@@ -11,7 +11,7 @@ alter table public.reservation_edit_history enable row level security;
 drop policy if exists reservation_edit_history_service_read on public.reservation_edit_history;
 create policy reservation_edit_history_service_read on public.reservation_edit_history
  for select to authenticated using (public.has_workspace_role(workspace_id,array['service']::text[]));
-revoke all on public.reservation_edit_history from public,anon;
+revoke all on public.reservation_edit_history from public,anon,authenticated;
 grant select on public.reservation_edit_history to authenticated;
 create or replace function public.log_reservation_edit()
 returns trigger language plpgsql security definer set search_path=''
