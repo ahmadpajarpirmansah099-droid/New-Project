@@ -297,6 +297,23 @@
     return operation;
   }
 
+  async function loadReservationAudit(reservationId) {
+    requireReady();
+    const guard = await assertWorkspaceSession();
+    const { data, error } = await client.from('reservation_edit_history')
+      .select('before_data,after_data,edited_by,edited_at')
+      .eq('workspace_id', workspaceId).eq('reservation_id', reservationId)
+      .order('edited_at', { ascending: false });
+    if (error) throw error;
+    await assertWorkspaceSession(guard.generation);
+    return (data || []).map(item => {
+      const before=item.before_data||{},after=item.after_data||{};
+      const labels={guest_name:'Nama',pack:'Pack',reservation_date:'Tanggal',reservation_time:'Jam',phone:'WhatsApp',smoking:'Smoking',note:'Catatan'};
+      const changes=Object.keys(labels).filter(key=>before[key]!==after[key]).map(key=>labels[key]+': '+(before[key]??'—')+' → '+(after[key]??'—'));
+      return {at:toMs(item.edited_at),summary:changes.join(' · ')};
+    });
+  }
+
   async function correctGuest(guest, reason) {
     requireReady();
     if (!guest?.id) throw new Error('Data tamu tidak valid.');
@@ -335,6 +352,7 @@
     reset,
     load,
     loadGuestAudit,
+    loadReservationAudit,
     persist,
     correctGuest,
     nextTicket,
