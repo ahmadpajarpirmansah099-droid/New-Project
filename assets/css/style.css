@@ -4263,11 +4263,23 @@ textarea::-webkit-input-placeholder {
 }
 
 
-/* MOBILE — keep the guide mark in the drawer footer at its compact original size. */
+/* MOBILE — compact, clickable guide shortcut in the drawer footer. */
+.drawer-mobile-guide-button { display: none; }
 @media (max-width: 899px) {
-  .drawer-foot > svg {
-    width: 36px;
-    height: 36px;
-    flex: 0 0 36px;
+  .drawer-foot > span { flex: 1 1 auto; }
+  .drawer-mobile-guide-button {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: #f4f3f7;
+    color: #777585;
+    cursor: pointer;
   }
+  .drawer-mobile-guide-button svg { width: 20px; height: 20px; }
+  .drawer-mobile-guide-button:focus-visible { outline: 2px solid #111225; outline-offset: 3px; }
 }
