@@ -36,7 +36,7 @@ async function callGuestWhatsApp(id){
   const isSeated = guest.status === 'seated';
   const message = isSeated
   ? 'Halo Kak '+guest.name+', reservasi '+(guest.reservationCode || '')+' sudah kami tempatkan. Terima kasih.'
-  : 'Halo Kak '+guest.name+', nomor antrean '+guest.ticket+' sudah dipanggil. Mohon menuju area greeter kami. Terima kasih.';
+  : 'Hallo kak '+guest.name+', saat ini nomor antrian '+guest.ticket+' tinggal menunggu 1 antrian lagi.\nMohon kesediannya untuk menunggu di area greeter kami agar mempermudah ketika kami panggil nama kakanya. Terima kasih.';
   const waUrl='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
   window.open(waUrl,'_blank','noopener,noreferrer');
   // Mengirim WhatsApp tidak boleh mengubah status tamu yang sudah duduk.
