@@ -223,47 +223,21 @@ function renderReservations(animateDateChange = false) {
 let reservationDatePickerMonth = new Date();
 let reservationDatePickerDraft = '';
 
-function openReservationForm() {
-  const minDate = todayKey();
-  const initialDate = reservationDate < minDate ? minDate : reservationDate;
-
-  openSheet(
-    '<div class="sheet-head"><h2>Reservasi baru</h2><button class="close" data-app-action="closeSheet">✕</button></div>' +
-    '<form data-app-submit="saveReservation">' +
-      '<div class="field"><label>Nama tamu *</label><input id="rName" required maxlength="120" placeholder="Nama tamu"></div>' +
-      '<div class="field"><label>Jumlah pack *</label><input id="rPack" type="number" min="1" max="500" value="2" required></div>' +
-      '<div class="field"><label>Tanggal reservasi *</label>' +
-        '<input id="rDate" type="hidden" value="' + initialDate + '">' +
-        '<button class="reservation-picker-trigger" id="rDateTrigger" type="button" data-app-action="openReservationDatePicker">' +
-          '<span id="rDateLabel">' + historyDateLabel(initialDate) + '</span>' +
-          '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>' +
-        '</button>' +
-      '</div>' +
-      '<div class="field"><label>Jam reservasi *</label>' +
-        '<input id="rTime" type="hidden" value="19:00">' +
-        '<button class="reservation-picker-trigger" id="rTimeTrigger" type="button" data-app-action="openReservationTimePicker">' +
-          '<span id="rTimeLabel">19.00 WIB</span>' +
-          '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>' +
-        '</button>' +
-      '</div>' +
-      '<div class="field"><label>WhatsApp (opsional)</label><input id="rPhone" inputmode="tel" maxlength="24" placeholder="08xxxxxxxxxx"></div>' +
-      '<div class="field"><label>Preferensi smoking</label>' +
-        '<input id="rSmoking" type="hidden" value="Non Smoking">' +
-        '<div class="reservation-select">' +
-          '<button class="reservation-select-trigger" id="rSmokingTrigger" type="button" data-app-action="toggleReservationSmokingOptions" aria-expanded="false" aria-controls="rSmokingOptions">' +
-            '<span id="rSmokingLabel">Non Smoking</span>' +
-            '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>' +
-          '</button>' +
-          '<div class="reservation-select-options" id="rSmokingOptions" hidden>' +
-            '<button class="reservation-select-option selected" type="button" data-app-action="selectReservationSmoking" data-app-value="Non Smoking"><span>Non Smoking</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button>' +
-            '<button class="reservation-select-option" type="button" data-app-action="selectReservationSmoking" data-app-value="Smoking"><span>Smoking</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="field"><label>Catatan (opsional)</label><textarea id="rNote" rows="2" maxlength="1000" placeholder="Catatan untuk staf"></textarea></div>' +
-      '<div class="sheet-actions"><button type="button" class="secondary" data-app-action="closeSheet">Batal</button><button class="primary" type="submit">Simpan reservasi</button></div>' +
-    '</form>'
-  );
+function openReservationForm(id) {
+ const r=id?state.reservations.find(x=>x.id===id):null;
+ if(id&&(!r||r.status!=='pending')){toast('Hanya reservasi yang masih menunggu yang bisa diedit');return;}
+ const date=r?.date||(reservationDate<todayKey()?todayKey():reservationDate),time=r?.time||'19:00',smoking=r?.smoking||'Non Smoking',v=x=>esc(x==null?'':x);
+ openSheet('<div class="sheet-head"><h2>'+(r?'Edit reservasi':'Reservasi baru')+'</h2><button class="close" data-app-action="closeSheet">✕</button></div>'+
+ '<form data-app-submit="saveReservation"><input id="rEditId" type="hidden" value="'+v(r?.id||'')+'">'+
+ '<div class="field"><label>Nama tamu *</label><input id="rName" required maxlength="120" value="'+v(r?.name||'')+'"></div>'+
+ '<div class="field"><label>Jumlah pack *</label><input id="rPack" type="number" min="1" max="500" value="'+v(r?.pack||2)+'" required></div>'+
+ '<div class="field"><label>Tanggal reservasi *</label><input id="rDate" type="hidden" value="'+date+'"><button class="reservation-picker-trigger" id="rDateTrigger" type="button" data-app-action="openReservationDatePicker"><span id="rDateLabel">'+historyDateLabel(date)+'</span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></button></div>'+
+ '<div class="field"><label>Jam reservasi *</label><input id="rTime" type="hidden" value="'+time+'"><button class="reservation-picker-trigger" id="rTimeTrigger" type="button" data-app-action="openReservationTimePicker"><span id="rTimeLabel">'+time.replace(':','.')+' WIB</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button></div>'+
+ '<div class="field"><label>WhatsApp (opsional)</label><input id="rPhone" inputmode="tel" maxlength="24" value="'+v(r?.phone||'')+'"></div>'+
+ '<div class="field"><label>Preferensi smoking</label><input id="rSmoking" type="hidden" value="'+v(smoking)+'"><div class="reservation-select"><button class="reservation-select-trigger" id="rSmokingTrigger" type="button" data-app-action="toggleReservationSmokingOptions" aria-expanded="false" aria-controls="rSmokingOptions"><span id="rSmokingLabel">'+v(smoking)+'</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="reservation-select-options" id="rSmokingOptions" hidden>'+
+ ['Non Smoking','Smoking'].map(x=>'<button class="reservation-select-option'+(x===smoking?' selected':'')+'" type="button" data-app-action="selectReservationSmoking" data-app-value="'+x+'"><span>'+x+'</span></button>').join('')+
+ '</div></div></div><div class="field"><label>Catatan (opsional)</label><textarea id="rNote" rows="2" maxlength="1000">'+v(r?.note||'')+'</textarea></div>'+
+ '<div class="sheet-actions"><button type="button" class="secondary" data-app-action="closeSheet">Batal</button><button class="primary" type="submit">'+(r?'Simpan perubahan':'Simpan reservasi')+'</button></div></form>');
 }
 
 function toggleReservationSmokingOptions() {
@@ -445,70 +419,21 @@ function applyReservationTime() {
 }
 
 async function saveReservation(e) {
-  e.preventDefault();
-
-  const name = $('rName').value.trim();
-  const pack = Number($('rPack').value);
-  const date = $('rDate').value;
-  const time = $('rTime').value;
-  const phone = $('rPhone').value.trim();
-
-  if (!name || !Number.isInteger(pack) || pack < 1 || pack > 500 || !date || !time) {
-    toast('Lengkapi data reservasi terlebih dahulu');
-    return;
-  }
-
-  if (date < todayKey() || (date === todayKey() &&
-      time < new Intl.DateTimeFormat('en-GB', {
-        timeZone: 'Asia/Jakarta',
-        hour: '2-digit',
-        minute: '2-digit',
-        hourCycle: 'h23'
-      }).format(new Date()))) {
-    toast('Tanggal dan jam tidak boleh di masa lalu');
-    return;
-  }
-
-  if (phone && !/^(\+?62|0)\d{8,13}$/.test(phone.replace(/[\s-]/g, ''))) {
-    toast('Format WhatsApp belum sesuai');
-    return;
-  }
-
-  const reservation = {
-    id: uid(),
-    code: '',
-    name,
-    pack,
-    date,
-    time,
-    phone,
-    smoking: $('rSmoking').value,
-    note: $('rNote').value.trim(),
-    status: 'pending',
-    created: Date.now(),
-    guestId: null
-  };
-
-  reservationMonth = date.slice(0, 7);
-  reservationDate = date;
-  closeSheet();
-
-  try {
-    reservation.code = await window.GuestOpsService.nextReservationCode(date);
-    state.reservations.push(reservation);
-    renderAll();
-    if (await save() === false) {
-      state.reservations = state.reservations.filter(item => item.id !== reservation.id);
-      renderAll();
-      toast('Reservasi belum tersimpan. Coba lagi.');
-      return;
-    }
-  } catch (error) {
-    console.error(error);
-    toast('Reservasi belum berhasil disimpan. Coba lagi.');
-    return;
-  }
-  toast('Reservasi tersimpan · ' + reservation.code);
+ e.preventDefault();
+ const id=$('rEditId')?.value||'',existing=id?state.reservations.find(x=>x.id===id):null;
+ if(id&&(!existing||existing.status!=='pending')){toast('Reservasi tidak bisa diedit karena statusnya sudah berubah');return;}
+ const name=$('rName').value.trim(),pack=Number($('rPack').value),date=$('rDate').value,time=$('rTime').value,phone=$('rPhone').value.trim(),smoking=$('rSmoking').value,note=$('rNote').value.trim();
+ if(!name||!Number.isInteger(pack)||pack<1||pack>500||!date||!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){toast('Lengkapi data reservasi terlebih dahulu');return;}
+ if(date<todayKey()||(date===todayKey()&&time<new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date()))){toast('Tanggal dan jam tidak boleh di masa lalu');return;}
+ if(phone&&!/^(\+?62|0)\d{8,13}$/.test(phone.replace(/[\s-]/g,''))){toast('Format WhatsApp belum sesuai');return;}
+ const previous=existing?{...existing}:null,reservation=existing||{id:uid(),code:'',status:'pending',created:Date.now(),guestId:null};
+ Object.assign(reservation,{name,pack,date,time,phone,smoking,note});reservationMonth=date.slice(0,7);reservationDate=date;closeSheet();
+ try{
+  if(!existing)reservation.code=await window.GuestOpsService.nextReservationCode(date);
+  if(!existing)state.reservations.push(reservation);renderAll();
+  if(await save()===false){if(existing)Object.assign(existing,previous);else state.reservations=state.reservations.filter(x=>x.id!==reservation.id);renderAll();toast('Perubahan reservasi belum tersimpan. Coba lagi.');return;}
+ }catch(error){if(existing)Object.assign(existing,previous);else state.reservations=state.reservations.filter(x=>x.id!==reservation.id);renderAll();console.error(error);toast('Reservasi belum berhasil disimpan. Coba lagi.');return;}
+ toast(existing?'Perubahan reservasi tersimpan':'Reservasi tersimpan · '+reservation.code);
 }
 
 function callReservationWhatsApp(id) {
@@ -532,7 +457,16 @@ function callReservationWhatsApp(id) {
   window.open(waUrl, '_blank', 'noopener,noreferrer');
 }
 
-function openReservationDetail(id){const r=state.reservations.find(x=>x.id===id);if(!r)return;openSheet('<div class="sheet-head"><h2>Detail reservasi</h2><button class="close" data-app-action="closeSheet">✕</button></div><div class="detail-ticket"><small>KODE RESERVASI</small><strong>'+esc(r.code)+'</strong><small>'+esc(reservationDateText(r.date))+'</small></div><div class="detail-name">'+esc(r.name)+'</div><div class="detail-grid"><div class="detail-cell"><small>Jam reservasi</small><b>'+esc(r.time)+' WIB</b></div><div class="detail-cell"><small>Jumlah pack</small><b>'+r.pack+' pack</b></div><div class="detail-cell"><small>Status</small><b>'+reservationStatusLabel(r.status)+'</b></div><div class="detail-cell"><small>Smoking</small><b>'+esc(r.smoking)+'</b></div><div class="detail-cell detail-cell-full"><small>WhatsApp</small><b>'+esc(r.phone||'—')+'</b></div><div class="detail-cell detail-cell-full"><small>Catatan</small><b>'+esc(r.note||'—')+'</b></div></div><div class="sheet-actions"><button class="secondary" data-app-action="closeSheet">Tutup</button></div>')}
+function openReservationDetail(id) {
+ const r=state.reservations.find(x=>x.id===id);if(!r)return;
+ openSheet('<div class="sheet-head"><h2>Detail reservasi</h2><button class="close" data-app-action="closeSheet">✕</button></div>'+
+ '<div class="detail-ticket"><small>KODE RESERVASI</small><strong>'+esc(r.code)+'</strong><small>'+esc(reservationDateText(r.date))+'</small></div><div class="detail-name">'+esc(r.name)+'</div>'+
+ '<div class="detail-grid"><div class="detail-cell"><small>Jam reservasi</small><b>'+esc(r.time)+' WIB</b></div><div class="detail-cell"><small>Jumlah pack</small><b>'+r.pack+' pack</b></div><div class="detail-cell"><small>Status</small><b>'+reservationStatusLabel(r.status)+'</b></div><div class="detail-cell"><small>Smoking</small><b>'+esc(r.smoking)+'</b></div><div class="detail-cell detail-cell-full"><small>WhatsApp</small><b>'+esc(r.phone||'—')+'</b></div><div class="detail-cell detail-cell-full"><small>Catatan</small><b>'+esc(r.note||'—')+'</b></div></div>'+
+ '<div class="detail-cell detail-cell-full"><small>Riwayat perubahan</small><div id="reservationEditHistory">Memuat riwayat...</div></div><div class="sheet-actions">'+(r.status==='pending'?'<button class="primary" data-app-action="openReservationForm" data-app-id="'+esc(r.id)+'">Edit Reservasi</button>':'')+'<button class="secondary" data-app-action="closeSheet">Tutup</button></div>');
+ const host=$('reservationEditHistory');
+ window.GuestOpsService.loadReservationAudit(id).then(items=>{if(!host||!host.isConnected)return;host.innerHTML=items.length?items.map(x=>'<div><b>'+esc(new Date(x.at).toLocaleString('id-ID'))+'</b><p>'+esc(x.summary)+'</p></div>').join(''):'<small>Belum ada perubahan data.</small>';}).catch(error=>{console.error(error);if(host&&host.isConnected)host.textContent='Riwayat belum dapat dimuat.';});
+}
+
 async function cancelReservation(id) {
   const reservation = state.reservations.find(item => item.id === id);
   if (!reservation || reservation.status !== 'pending') return;
