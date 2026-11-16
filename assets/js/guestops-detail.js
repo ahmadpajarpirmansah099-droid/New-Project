@@ -65,6 +65,8 @@ function openDetail(id) {
   const tableCell = tableLabel
     ? '<div class="detail-cell"><small>Meja</small><b>' + esc(tableLabel) + '</b></div>'
     : '';
+  const smokingLabel = guest.smoking === true ? 'Smoking' : guest.smoking === false ? 'Non Smoking' : 'Belum diisi';
+  const smokingCell = '<div class="detail-cell"><small>Area merokok</small><b>' + smokingLabel + '</b></div>';
 
   const whatsappButton = guest.phone
     ? '<button class="primary" data-app-action="callGuestWhatsApp" data-app-id="' + esc(guest.id) + '">Kirim WhatsApp</button>'
@@ -88,6 +90,7 @@ function openDetail(id) {
     '<div class="detail-grid">' +
       '<div class="detail-cell"><small>Jumlah pack</small><b>' + guest.pack + ' orang</b></div>' +
       '<div class="detail-cell"><small>Status</small><b>' + statusLabel(guest.status) + '</b></div>' +
+      smokingCell +
       '<div class="detail-cell"><small>Waktu daftar</small><b>' + fmtTime(guest.created) + '</b></div>' +
       '<div class="detail-cell"><small>' + (guest.status === 'seated' ? 'Seating time' : 'Waiting time') + '</small><b>' +
       (guest.status === 'seated' ? '<span data-seating-countdown="' + esc(guest.id) + '">' + seatingCountdownText(guest) + '</span>' : duration(guest)) +
