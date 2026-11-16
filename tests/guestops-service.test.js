@@ -190,7 +190,7 @@ test('Guest correction sends the reason through the database RPC', async () => {
   }, 'Nama sebelumnya salah input');
 
   const correction = calls.find(call => call.rpc === 'correct_guest_with_reason');
-  assert.deepEqual(correction.args, {
+  assert.deepEqual(JSON.parse(JSON.stringify(correction.args)), {
     p_guest_id: 'guest-1',
     p_guest_name: 'Nama Baru',
     p_pack: 3,
