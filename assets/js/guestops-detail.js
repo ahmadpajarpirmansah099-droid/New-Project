@@ -96,7 +96,9 @@ function openDetail(id) {
       (guest.status === 'seated' ? '<span data-seating-countdown="' + esc(guest.id) + '">' + seatingCountdownText(guest) + '</span>' : duration(guest)) +
       '</b></div>' + tableCell +
       '<div class="detail-cell"><small>WhatsApp</small><b>' +
-      esc(guest.phone || 'Tidak diisi') + '</b></div></div>' +
+      esc(guest.phone || 'Tidak diisi') + '</b></div>' +
+      (canFinish ? '<button type="button" class="primary detail-move-table" data-app-action="moveGuestTable" data-app-id="' + esc(guest.id) + '">Pindah Meja</button>' : '') +
+    '</div>' +
     '<div class="sheet-actions"><button class="secondary" data-app-action="editGuest" data-app-id="' + esc(guest.id) + '">Koreksi data</button>' +
       whatsappButton + '</div>' + cancelActions + finishAction +
     '<div class="detail-history-heading">Riwayat perubahan</div>' +
@@ -117,6 +119,75 @@ function openDetail(id) {
     });
   }
 }
+
+
+async function moveGuestTable(id) {
+  const guest = state.guests.find(item => item.id === id);
+  if (!guest || guest.status !== 'seated') return;
+
+  const existing = document.getElementById('guestMoveTableDialog');
+  if (existing) existing.remove();
+
+  const backdrop = document.createElement('div');
+  backdrop.id = 'guestMoveTableDialog';
+  backdrop.className = 'guest-confirm-backdrop';
+  backdrop.innerHTML =
+    '<section class="guest-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="guestMoveTableTitle">' +
+      '<h2 id="guestMoveTableTitle">Pindah Meja</h2>' +
+      '<p>Meja saat ini: ' + esc(guest.tableLabel || 'Belum ditentukan') + '</p>' +
+      '<div class="guest-confirm-field"><label for="guestNewTableLabel">Nomor meja baru *</label>' +
+      '<input id="guestNewTableLabel" type="text" maxlength="30" autocomplete="off" placeholder="Masukkan nomor meja baru" required></div>' +
+      '<div class="guest-confirm-actions"><button type="button" class="guest-confirm-cancel">Kembali</button>' +
+      '<button type="button" class="guest-confirm-accept" disabled>Simpan pindah meja</button></div>' +
+    '</section>';
+
+  document.body.appendChild(backdrop);
+  const input = backdrop.querySelector('#guestNewTableLabel');
+  const accept = backdrop.querySelector('.guest-confirm-accept');
+  const close = () => {
+    document.removeEventListener('keydown', onKeydown);
+    backdrop.remove();
+  };
+  const onKeydown = event => {
+    if (event.key === 'Escape') close();
+  };
+  backdrop.querySelector('.guest-confirm-cancel').addEventListener('click', close);
+  input.addEventListener('input', () => {
+    accept.disabled = !input.value.trim() || input.value.trim() === String(guest.tableLabel || '').trim();
+  });
+  accept.addEventListener('click', async () => {
+    const nextTable = input.value.trim();
+    if (!nextTable || nextTable === String(guest.tableLabel || '').trim()) {
+      input.focus();
+      return;
+    }
+    const previousTable = guest.tableLabel;
+    guest.tableLabel = nextTable;
+    accept.disabled = true;
+    try {
+      if (await save() === false) {
+        guest.tableLabel = previousTable;
+        renderAll();
+        return;
+      }
+      close();
+      renderAll();
+      openDetail(id);
+      toast('Meja berhasil dipindahkan');
+    } catch (error) {
+      guest.tableLabel = previousTable;
+      renderAll();
+      console.error(error);
+      toast('Pindah meja belum berhasil disimpan');
+    }
+  });
+  backdrop.addEventListener('click', event => {
+    if (event.target === backdrop) close();
+  });
+  document.addEventListener('keydown', onKeydown);
+  input.focus();
+}
+window.moveGuestTable = moveGuestTable;
 
 function renderGuestAuditTimeline(audit) {
   return (audit || []).slice().reverse().map(item =>
@@ -139,22 +210,11 @@ async function saveEdit(event, id) {
   event.preventDefault();
 
   const guest = state.guests.find(item => item.id === id);
-  const now = Date.now();
-
-  guest.audit.push({
-    at: now,
-    label: 'Dikoreksi',
-    detail: `Nama: ${guest.name} → ${$('editName').value}; Pack: ${guest.pack} → ${$('editPack').value}`,
-    reason: $('editReason').value.trim(),
-    status: guest.status
-  });
-
   guest.name = $('editName').value.trim();
   guest.pack = Number($('editPack').value);
   guest.phone = $('editPhone').value.trim();
 
   try {
-    await window.GuestOpsService.appendGuestAudit(id, guest.audit[guest.audit.length - 1]);
     if (await save() === false) throw new Error('Database menolak penyimpanan');
     renderAll();
     openDetail(id);
