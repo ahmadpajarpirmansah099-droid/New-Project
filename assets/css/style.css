@@ -4283,3 +4283,13 @@ textarea::-webkit-input-placeholder {
   .drawer-mobile-guide-button svg { width: 20px; height: 20px; }
   .drawer-mobile-guide-button:focus-visible { outline: 2px solid #111225; outline-offset: 3px; }
 }
+
+
+/* GUEST FORM — Smoking / Non Smoking selection */
+#sheet .smoking-seg::before { display:none; }
+#sheet .smoking-seg button.selected {
+  background:#f9dce8!important;
+  border-color:#edb5cc!important;
+  color:#8f3f62!important;
+  box-shadow:0 4px 10px rgba(190,91,133,.14),inset 0 0 0 1px rgba(190,91,133,.08);
+}
