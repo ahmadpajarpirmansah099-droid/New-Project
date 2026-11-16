@@ -1723,5 +1723,9 @@
 }
 
 @media (min-width: 900px) and (max-height: 560px) {
-  .drawer-nav { max-height: calc(100dvh - 110px); }
+  /* Add clear vertical gaps between mascot, Logout, and guide on short screens. */
+  .sidebar-mascot { bottom: 150px; }
+  body:has(.page.active) #authLogoutButton { bottom: 82px; }
+  body:has(.page.active) .drawer-guide-icon { bottom: 14px; }
+  .drawer-nav { max-height: calc(100dvh - 170px); }
 }
