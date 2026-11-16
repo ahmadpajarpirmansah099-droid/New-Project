@@ -94,7 +94,9 @@ function renderWhatsAppTemplateSettings() {
   if (document.activeElement !== called) called.value = templates.called;
   if (document.activeElement !== seated) seated.value = templates.seated;
   const context = window.AppAuth?.getContext();
-  const canEdit = context?.role !== 'service';
+  const canEdit = context?.role === 'developer' || context?.workspaceRole === 'admin';
+  called.disabled = !canEdit;
+  seated.disabled = !canEdit;
   document.querySelectorAll('[data-whatsapp-template-save]').forEach(button => {
     button.disabled = !canEdit;
   });
@@ -110,7 +112,7 @@ async function saveWhatsAppTemplates() {
   const seated = $('whatsappSeatedTemplate');
   if (!called || !seated) return;
   const context = window.AppAuth?.getContext();
-  if (!context || context.role === 'service') {
+  if (!context || (context.role !== 'developer' && context.workspaceRole !== 'admin')) {
     toast('Akun ini hanya dapat menggunakan template, bukan mengubahnya.');
     return;
   }
