@@ -336,6 +336,7 @@
     load,
     loadGuestAudit,
     persist,
+    correctGuest,
     nextTicket,
     nextReservationCode,
     isReady: () => ready,
