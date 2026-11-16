@@ -1805,3 +1805,13 @@
   .drawer-nav > .sidebar-mascot,
   .drawer-nav > .drawer-guide-icon { display: none !important; }
 }
+
+
+/* DESKTOP — blend the full-height icon rail into the application's main background. */
+@media (min-width: 900px) {
+  body.desktop-sidebar-collapsed .menu-drawer {
+    background: var(--bg);
+    border-right: 0;
+    box-shadow: none;
+  }
+}
