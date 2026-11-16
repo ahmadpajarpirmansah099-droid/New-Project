@@ -92,7 +92,7 @@ window.addEventListener('app:auth-signed-out', function () {
     counters: {},
     reservations: [],
     reservationCounters: {},
-    settings: { seatingDurationMinutes: 90 }
+    settings: { seatingDurationMinutes: 90, whatsappTemplates: { called: 'Halo Kak {nama}, nomor antrean {nomor_antrean} sudah dipanggil. Mohon menuju area greeter kami. Terima kasih.', seated: 'Halo Kak {nama}, reservasi {kode_reservasi} sudah kami tempatkan di meja {nomor_meja}. Terima kasih.' } }
   };
   remoteSaveQueue = Promise.resolve();
   window.GuestOpsService?.reset();
@@ -107,7 +107,7 @@ async function initializeWorkspace(event, switchingContext) {
     workspaceReturnPage = document.querySelector('.page.active')?.id.replace(/^page-/, '') || null;
     appSessionGeneration += 1; appInitializationGeneration += 1; appDataReady = false; appInitializing = false;
     clearSessionIntervals();
-    state = {schemaVersion:3,guests:[],counters:{},reservations:[],reservationCounters:{},settings:{seatingDurationMinutes:90}};
+    state = {schemaVersion:3,guests:[],counters:{},reservations:[],reservationCounters:{},settings:{seatingDurationMinutes:90,whatsappTemplates:{called:'Halo Kak {nama}, nomor antrean {nomor_antrean} sudah dipanggil. Mohon menuju area greeter kami. Terima kasih.',seated:'Halo Kak {nama}, reservasi {kode_reservasi} sudah kami tempatkan di meja {nomor_meja}. Terima kasih.'}}};
     remoteSaveQueue = Promise.resolve();
     window.GuestOpsService?.reset(); window.MasterDataStore?.reset(); window.StockOpnameUI?.reset();
     closeQuickMenu(); closeMenu(); closeSheet();

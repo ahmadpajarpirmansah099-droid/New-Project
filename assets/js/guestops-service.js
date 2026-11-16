@@ -9,6 +9,11 @@
   let persistedGuestRows = new Map();
   let persistedReservationRows = new Map();
   let persistedSettingsFingerprint = null;
+  let persistedWhatsAppTemplatesFingerprint = null;
+  const defaultWhatsAppTemplates = {
+      called: 'Halo Kak {nama}, nomor antrean {nomor_antrean} sudah dipanggil. Mohon menuju area greeter kami. Terima kasih.',
+      seated: 'Halo Kak {nama}, reservasi {kode_reservasi} sudah kami tempatkan di meja {nomor_meja}. Terima kasih.'
+    };
 
   const toIso = value => new Date(Number(value) || Date.now()).toISOString();
   const toMs = value => value ? new Date(value).getTime() : null;
@@ -131,7 +136,7 @@
   async function load() {
     requireReady();
     const guard = await assertWorkspaceSession();
-    const [guestResult, reservationResult, settingResult] = await Promise.all([
+    const [guestResult, reservationResult, settingResult, whatsappTemplateResult] = await Promise.all([
       client.from('guests')
         .select('id,ticket,service_date,guest_name,pack,phone,status,created_at,resolved_at,seated_at,table_label,reservation_id')
         .eq('workspace_id', workspaceId)
@@ -145,12 +150,18 @@
         .select('setting_value')
         .eq('workspace_id', workspaceId)
         .eq('setting_key', 'guest_operations')
+        .maybeSingle(),
+      client.from('workspace_settings')
+        .select('setting_value')
+        .eq('workspace_id', workspaceId)
+        .eq('setting_key', 'guest_whatsapp_templates')
         .maybeSingle()
     ]);
 
     if (guestResult.error) throw guestResult.error;
     if (reservationResult.error) throw reservationResult.error;
     if (settingResult.error) throw settingResult.error;
+    if (whatsappTemplateResult.error) throw whatsappTemplateResult.error;
     await assertWorkspaceSession(guard.generation);
 
     const guests = (guestResult.data || []).map(mapGuest);
@@ -191,13 +202,20 @@
     });
 
     const settings = settingResult.data?.setting_value || {};
+    const storedTemplates = whatsappTemplateResult.data?.setting_value || {};
+    const whatsappTemplates = {
+      called: typeof storedTemplates.called === 'string' ? storedTemplates.called : defaultWhatsAppTemplates.called,
+      seated: typeof storedTemplates.seated === 'string' ? storedTemplates.seated : defaultWhatsAppTemplates.seated
+    };
+    persistedWhatsAppTemplatesFingerprint = JSON.stringify(whatsappTemplates);
     return {
       guests,
       reservations,
       counters,
       reservationCounters,
       settings: {
-        seatingDurationMinutes: Number(settings.seatingDurationMinutes) || 90
+        seatingDurationMinutes: Number(settings.seatingDurationMinutes) || 90,
+        whatsappTemplates
       }
     };
   }
@@ -287,6 +305,21 @@
           if (setting.error) throw setting.error;
           persistedSettingsFingerprint = settingFingerprint;
         }
+        const whatsappTemplates = {
+          called: String(state.settings?.whatsappTemplates?.called || defaultWhatsAppTemplates.called),
+          seated: String(state.settings?.whatsappTemplates?.seated || defaultWhatsAppTemplates.seated)
+        };
+        const whatsappTemplatesFingerprint = JSON.stringify(whatsappTemplates);
+        if (whatsappTemplatesFingerprint !== persistedWhatsAppTemplatesFingerprint) {
+          const templateSetting = await client.from('workspace_settings').upsert({
+            workspace_id: workspaceId,
+            setting_key: 'guest_whatsapp_templates',
+            setting_value: whatsappTemplates,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'workspace_id,setting_key' });
+          if (templateSetting.error) throw templateSetting.error;
+          persistedWhatsAppTemplatesFingerprint = whatsappTemplatesFingerprint;
+        }
       }
     };
 
@@ -323,6 +356,7 @@
     persistedGuestRows = new Map();
     persistedReservationRows = new Map();
     persistedSettingsFingerprint = null;
+    persistedWhatsAppTemplatesFingerprint = null;
   }
 
   root.GuestOpsService = {

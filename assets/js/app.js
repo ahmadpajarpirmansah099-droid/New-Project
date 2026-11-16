@@ -22,7 +22,10 @@ function loadState() {
     counters: {},
     reservations: [],
     reservationCounters: {},
-    settings: { seatingDurationMinutes: 90 }
+    settings: { seatingDurationMinutes: 90, whatsappTemplates: {
+      called: 'Halo Kak {nama}, nomor antrean {nomor_antrean} sudah dipanggil. Mohon menuju area greeter kami. Terima kasih.',
+      seated: 'Halo Kak {nama}, reservasi {kode_reservasi} sudah kami tempatkan di meja {nomor_meja}. Terima kasih.'
+    } }
   };
 }
 
@@ -44,6 +47,94 @@ function save() {
       return false;
     });
   return remoteSaveQueue;
+}
+
+function whatsappTemplateDefaults() {
+  return {
+    called: 'Halo Kak {nama}, nomor antrean {nomor_antrean} sudah dipanggil. Mohon menuju area greeter kami. Terima kasih.',
+    seated: 'Halo Kak {nama}, reservasi {kode_reservasi} sudah kami tempatkan di meja {nomor_meja}. Terima kasih.'
+  };
+}
+
+function getWhatsAppTemplates() {
+  return { ...whatsappTemplateDefaults(), ...(state.settings?.whatsappTemplates || {}) };
+}
+
+function renderWhatsAppTemplateMessage(template, guest = {}) {
+  const values = {
+    nama: guest.name || 'Budi',
+    nomor_antrean: guest.ticket || 'WL-001',
+    nomor_meja: guest.tableLabel || '2',
+    jumlah_pack: guest.pack || '2',
+    kode_reservasi: guest.reservationCode || 'RSV-001'
+  };
+  return String(template || '').replace(/\{([a-z_]+)\}/g, (match, key) =>
+    Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : match
+  );
+}
+
+function previewWhatsAppTemplates() {
+  const called = $('whatsappCalledTemplate');
+  const seated = $('whatsappSeatedTemplate');
+  if ($('whatsappCalledPreview') && called) {
+    $('whatsappCalledPreview').textContent = renderWhatsAppTemplateMessage(called.value);
+  }
+  if ($('whatsappSeatedPreview') && seated) {
+    $('whatsappSeatedPreview').textContent = renderWhatsAppTemplateMessage(seated.value, {
+      name: 'Budi', reservationCode: 'RSV-001', tableLabel: '2', pack: 2
+    });
+  }
+}
+
+function renderWhatsAppTemplateSettings() {
+  const called = $('whatsappCalledTemplate');
+  const seated = $('whatsappSeatedTemplate');
+  if (!called || !seated) return;
+  const templates = getWhatsAppTemplates();
+  if (document.activeElement !== called) called.value = templates.called;
+  if (document.activeElement !== seated) seated.value = templates.seated;
+  const context = window.AppAuth?.getContext();
+  const canEdit = context?.role === 'developer' || context?.workspaceRole === 'admin';
+  called.disabled = !canEdit;
+  seated.disabled = !canEdit;
+  document.querySelectorAll('[data-whatsapp-template-save]').forEach(button => {
+    button.disabled = !canEdit;
+  });
+  const note = $('whatsappTemplateAccessNote');
+  if (note) note.textContent = canEdit
+    ? 'Template tersimpan di database outlet aktif dan digunakan bersama oleh tim.'
+    : 'Template hanya dapat diubah oleh akun dengan hak pengelolaan pengaturan outlet.';
+  previewWhatsAppTemplates();
+}
+
+async function saveWhatsAppTemplates() {
+  const called = $('whatsappCalledTemplate');
+  const seated = $('whatsappSeatedTemplate');
+  if (!called || !seated) return;
+  const context = window.AppAuth?.getContext();
+  if (!context || (context.role !== 'developer' && context.workspaceRole !== 'admin')) {
+    toast('Akun ini hanya dapat menggunakan template, bukan mengubahnya.');
+    return;
+  }
+  const templates = { called: called.value.trim(), seated: seated.value.trim() };
+  if (!templates.called || !templates.seated) {
+    toast('Kedua template WhatsApp wajib diisi.');
+    return;
+  }
+  if (templates.called.length > 1000 || templates.seated.length > 1000) {
+    toast('Template maksimal 1.000 karakter.');
+    return;
+  }
+  const previous = getWhatsAppTemplates();
+  state.settings = state.settings || {};
+  state.settings.whatsappTemplates = templates;
+  if (await save() === false) {
+    state.settings.whatsappTemplates = previous;
+    renderWhatsAppTemplateSettings();
+    return;
+  }
+  renderWhatsAppTemplateSettings();
+  toast('Template WhatsApp berhasil disimpan ke database.');
 }
 
 function seatingDurationMinutes() {
@@ -271,7 +362,7 @@ function go(page) {
 
   $('fab').style.display = ['settings', 'user-monitoring', 'user-guide'].includes(page) ? 'none' : 'grid';
 
-  if (page === 'settings') syncSeatingSettingInput();
+  if (page === 'settings') { syncSeatingSettingInput(); renderWhatsAppTemplateSettings(); }
   if (page === 'user-monitoring') window.UserMonitoring?.onPageShown?.();
   if (page === 'dashboard') dashboardCountUpPending = true;
   if (page === 'all-divisions') loadAllDivisionsOverview();
