@@ -1806,3 +1806,56 @@
   .drawer-nav > .drawer-guide-icon { display: none !important; }
 }
 
+
+
+/* DESKTOP — keep every collapsed-rail control inside its single scroll area. */
+@media (min-width: 900px) {
+  body.desktop-sidebar-collapsed .menu-drawer {
+    box-sizing: border-box;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  body.desktop-sidebar-collapsed .drawer-nav {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+  }
+
+  body.desktop-sidebar-collapsed:has(.page.active) .drawer-nav > #authLogoutButton {
+    position: relative;
+    inset: auto;
+    z-index: auto;
+    display: grid !important;
+    place-items: center;
+    width: 48px;
+    height: 46px;
+    min-height: 46px;
+    flex: 0 0 46px;
+    margin: 0;
+  }
+
+  body.desktop-sidebar-collapsed:has(.page.active) .drawer-nav > .drawer-guide-icon {
+    position: relative;
+    inset: auto;
+    z-index: auto;
+    display: grid !important;
+    width: 48px;
+    height: 46px;
+    min-height: 46px;
+    flex: 0 0 46px;
+    margin: 0;
+  }
+
+  body.desktop-sidebar-collapsed .drawer-nav > .sidebar-mascot {
+    position: relative;
+    inset: auto;
+    flex: 0 0 34px;
+    margin: 0;
+  }
+}
