@@ -1731,17 +1731,25 @@
 }
 
 
-/* DESKTOP — keep mascot, Logout, and Guide inside the scrollable icon rail. */
+/* DESKTOP — make the icon rail a full-height column with one continuous scroll area. */
 @media (min-width: 900px) {
+  body.desktop-sidebar-collapsed .menu-drawer {
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
   body.desktop-sidebar-collapsed .drawer-nav {
+    display: flex;
     flex: 1 1 auto;
+    flex-direction: column;
+    align-items: center;
     min-height: 0;
     max-height: none;
+    width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
-    align-content: start;
     gap: 7px;
-    padding-bottom: 12px;
+    padding: 18px 0 16px;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -1758,6 +1766,7 @@
     height: 46px;
     min-height: 46px;
     flex: 0 0 46px;
+    margin: 0;
     padding: 0;
     border: 0;
     border-radius: 12px;
@@ -1777,14 +1786,16 @@
     left: auto;
     bottom: auto;
     inset: auto;
+    display: block;
     width: 48px;
     height: 34px;
     flex: 0 0 34px;
-    margin: 3px 0 0;
+    margin: 0;
   }
+  /* Keep the requested order directly after Pengaturan. */
+  body.desktop-sidebar-collapsed .drawer-nav > .sidebar-mascot { order: 7; }
   body.desktop-sidebar-collapsed .drawer-nav > .drawer-logout-item { order: 8; }
-  body.desktop-sidebar-collapsed .drawer-nav > .sidebar-mascot { order: 9; }
-  body.desktop-sidebar-collapsed .drawer-nav > .drawer-guide-icon { order: 10; }
+  body.desktop-sidebar-collapsed .drawer-nav > .drawer-guide-icon { order: 9; }
   body.desktop-sidebar-collapsed .drawer-foot { display: none; }
 }
 
