@@ -1,7 +1,7 @@
 /* =========================================================
     3. WAITING LIST: ADD GUEST AND QUEUE NUMBER
     ========================================================= */
-function openAdd(){sheetGuest=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" data-app-action="closeSheet">✕</button></div><form data-app-submit="saveGuest"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" data-app-action="changePack" data-app-value="-1">−</button><strong id="packValue">2</strong><button type="button" data-app-action="changePack" data-app-value="1">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span class="text-muted-note">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg" data-selected="waiting"><button type="button" class="selected" id="segWait" data-app-action="chooseInitial" data-app-value="waiting">Menunggu</button><button type="button" id="segSeated" data-app-action="chooseInitial" data-app-value="seated">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="field" id="initialTableField" hidden><label for="initialTableLabel">Nomor meja *</label><input id="initialTableLabel" type="text" maxlength="30" autocomplete="off" placeholder="Masukkan nomor meja"></div><div class="sheet-actions"><button type="button" class="secondary" data-app-action="closeSheet">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`)}
+function openAdd(){sheetGuest=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" data-app-action="closeSheet">✕</button></div><form data-app-submit="saveGuest"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" data-app-action="changePack" data-app-value="-1">−</button><strong id="packValue">2</strong><button type="button" data-app-action="changePack" data-app-value="1">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span class="text-muted-note">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg" data-selected="waiting"><button type="button" class="selected" id="segWait" data-app-action="chooseInitial" data-app-value="waiting">Menunggu</button><button type="button" id="segSeated" data-app-action="chooseInitial" data-app-value="seated">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="field"><label>Area merokok *</label><div class="seg smoking-seg" data-selected=""><button type="button" id="segSmoking" data-app-action="chooseSmoking" data-app-value="true">Smoking</button><button type="button" id="segNonSmoking" data-app-action="chooseSmoking" data-app-value="false">Non Smoking</button></div><input type="hidden" id="guestSmoking" value=""></div><div class="field" id="initialTableField" hidden><label for="initialTableLabel">Nomor meja *</label><input id="initialTableLabel" type="text" maxlength="30" autocomplete="off" placeholder="Masukkan nomor meja"></div><div class="sheet-actions"><button type="button" class="secondary" data-app-action="closeSheet">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`)}
 function changePack(d){
   let v=Math.max(1,Math.min(30,Number($('guestPack').value)+d));
   $('guestPack').value=v;
@@ -12,6 +12,15 @@ function changePack(d){
   value.classList.add('pack-number-animate');
 }
 /* BAGIAN: Pilihan status awal tamu dan pemicu animasi liquid toggle */
+function chooseSmoking(value) {
+  const selected = String(value);
+  if (!['true', 'false'].includes(selected)) return;
+  $('guestSmoking').value = selected;
+  $('segSmoking').classList.toggle('selected', selected === 'true');
+  $('segNonSmoking').classList.toggle('selected', selected === 'false');
+  $('segSmoking').setAttribute('aria-pressed', String(selected === 'true'));
+  $('segNonSmoking').setAttribute('aria-pressed', String(selected === 'false'));
+}
 function chooseInitial(status) {
   const group = $('segWait').parentElement;
   const currentStatus = $('initialStatus').value;
@@ -50,6 +59,12 @@ async function saveGuest(e){
   try {
     const day=todayKey(),now=Date.now(),status=$('initialStatus').value;
     const tableLabel = status === 'seated' ? $('initialTableLabel').value.trim() : '';
+    const smokingValue = $('guestSmoking').value;
+    if (!['true', 'false'].includes(smokingValue)) {
+      toast('Pilih Smoking atau Non Smoking terlebih dahulu');
+      $('segSmoking').focus();
+      return;
+    }
     if (status === 'seated' && !tableLabel) {
       toast('Nomor meja wajib diisi sebelum tamu langsung didudukkan');
       $('initialTableLabel').focus();
@@ -60,6 +75,7 @@ async function saveGuest(e){
       name:$('guestName').value.trim(),
       pack:Number($('guestPack').value),
       phone:$('guestPhone').value.trim(),
+      smoking:smokingValue === 'true',
       status,created:now,
       tableLabel:tableLabel||'',
       resolved:status==='seated'?now:null,
