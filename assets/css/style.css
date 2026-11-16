@@ -4293,3 +4293,11 @@ textarea::-webkit-input-placeholder {
   color:#8f3f62!important;
   box-shadow:0 4px 10px rgba(190,91,133,.14),inset 0 0 0 1px rgba(190,91,133,.08);
 }
+
+/* Fill the spare guest-detail grid cell with the table-move action. */
+.detail-move-table {
+  width:100%;
+  min-height:48px;
+  height:100%;
+  border-radius:12px;
+}
