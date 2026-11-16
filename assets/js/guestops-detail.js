@@ -34,17 +34,9 @@ async function callGuestWhatsApp(id){
   return;
   }
   const isSeated = guest.status === 'seated';
-  const templates = state.settings?.whatsappTemplates || {};
-  const template = isSeated ? templates.seated : templates.called;
-  const message = renderWhatsAppTemplateMessage(template || (isSeated
-    ? 'Halo Kak {nama}, reservasi {kode_reservasi} sudah kami tempatkan di meja {nomor_meja}. Terima kasih.'
-    : 'Halo Kak {nama}, nomor antrean {nomor_antrean} sudah dipanggil. Mohon menuju area greeter kami. Terima kasih.'), {
-    name: guest.name,
-    ticket: guest.ticket,
-    pack: guest.pack,
-    tableLabel: guest.tableLabel || guest.reservationTable || '',
-    reservationCode: guest.reservationCode || ''
-  });
+  const message = isSeated
+  ? 'Halo Kak '+guest.name+', reservasi '+(guest.reservationCode || '')+' sudah kami tempatkan. Terima kasih.'
+  : 'Halo Kak '+guest.name+', nomor antrean '+guest.ticket+' sudah dipanggil. Mohon menuju area greeter kami. Terima kasih.';
   const waUrl='https://wa.me/'+phone+'?text='+encodeURIComponent(message);
   window.open(waUrl,'_blank','noopener,noreferrer');
   // Mengirim WhatsApp tidak boleh mengubah status tamu yang sudah duduk.
