@@ -1729,3 +1729,68 @@
   body:has(.page.active) .drawer-guide-icon { bottom: 14px; }
   .drawer-nav { max-height: calc(100dvh - 170px); }
 }
+
+
+/* DESKTOP — keep mascot, Logout, and Guide inside the scrollable icon rail. */
+@media (min-width: 900px) {
+  body.desktop-sidebar-collapsed .drawer-nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-content: start;
+    gap: 7px;
+    padding-bottom: 12px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  body.desktop-sidebar-collapsed .drawer-nav::-webkit-scrollbar { display: none; }
+  body.desktop-sidebar-collapsed .drawer-nav > .drawer-logout-item,
+  body.desktop-sidebar-collapsed .drawer-nav > .drawer-guide-icon {
+    position: relative;
+    z-index: auto;
+    left: auto;
+    bottom: auto;
+    display: grid !important;
+    place-items: center;
+    width: 48px;
+    height: 46px;
+    min-height: 46px;
+    flex: 0 0 46px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: #fff;
+    color: #111225;
+    box-shadow: 0 3px 10px rgba(20, 35, 63, .07);
+  }
+  body.desktop-sidebar-collapsed .drawer-nav > .drawer-logout-item svg,
+  body.desktop-sidebar-collapsed .drawer-nav > .drawer-guide-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  body.desktop-sidebar-collapsed .drawer-nav > .drawer-logout-item > span,
+  body.desktop-sidebar-collapsed .drawer-nav > .drawer-guide-icon > span { display: none; }
+  body.desktop-sidebar-collapsed .drawer-nav > .sidebar-mascot {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    inset: auto;
+    width: 48px;
+    height: 34px;
+    flex: 0 0 34px;
+    margin: 3px 0 0;
+  }
+  body.desktop-sidebar-collapsed .drawer-nav > .drawer-logout-item { order: 8; }
+  body.desktop-sidebar-collapsed .drawer-nav > .sidebar-mascot { order: 9; }
+  body.desktop-sidebar-collapsed .drawer-nav > .drawer-guide-icon { order: 10; }
+  body.desktop-sidebar-collapsed .drawer-foot { display: none; }
+}
+
+/* Mobile keeps its existing profile-based logout and drawer layout. */
+@media (max-width: 899px) {
+  .drawer-nav > .drawer-logout-item,
+  .drawer-nav > .sidebar-mascot,
+  .drawer-nav > .drawer-guide-icon { display: none !important; }
+}
