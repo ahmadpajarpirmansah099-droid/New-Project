@@ -1748,6 +1748,10 @@
   body.desktop-sidebar-collapsed .drawer-nav::-webkit-scrollbar { display: none; }
   body.desktop-sidebar-collapsed .drawer-nav > .drawer-logout-item,
   body.desktop-sidebar-collapsed .drawer-nav > .drawer-guide-icon {
+    position: relative;
+    z-index: auto;
+    left: auto;
+    bottom: auto;
     display: grid !important;
     place-items: center;
     width: 48px;
@@ -1770,6 +1774,8 @@
   body.desktop-sidebar-collapsed .drawer-nav > .drawer-guide-icon > span { display: none; }
   body.desktop-sidebar-collapsed .drawer-nav > .sidebar-mascot {
     position: relative;
+    left: auto;
+    bottom: auto;
     inset: auto;
     width: 48px;
     height: 34px;
@@ -1780,14 +1786,6 @@
   body.desktop-sidebar-collapsed .drawer-nav > .sidebar-mascot { order: 9; }
   body.desktop-sidebar-collapsed .drawer-nav > .drawer-guide-icon { order: 10; }
   body.desktop-sidebar-collapsed .drawer-foot { display: none; }
-}
-
-/* Keep the desktop expanded menu readable; the rail-only mascot stays hidden. */
-@media (min-width: 900px) and (not (max-width: 899px)) {
-  .drawer-nav > .drawer-logout-item { display: flex; }
-  .drawer-nav > .drawer-logout-item > span { display: inline; }
-  .drawer-nav > .sidebar-mascot { display: none; }
-  .drawer-nav > .drawer-guide-icon { display: none; }
 }
 
 /* Mobile keeps its existing profile-based logout and drawer layout. */
