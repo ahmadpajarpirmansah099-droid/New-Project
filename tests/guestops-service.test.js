@@ -49,9 +49,9 @@ function createRuntime() {
   const client = {
     auth: { async getUser() { return { data: { user: { id: 'user-1' } }, error: null }; } },
     from(table) { return new Query(table); },
-    async rpc(name) {
-      calls.push({ rpc: name });
-      return { data: name === 'next_guest_ticket' ? 'WL-001' : 'RSV-001', error: null };
+    async rpc(name, args) {
+      calls.push({ rpc: name, args });
+      return { data: name === 'next_guest_ticket' ? 'WL-001' : name === 'next_reservation_code' ? 'RSV-001' : null, error: null };
     }
   };
 
@@ -174,19 +174,30 @@ test('Guest Operations writes only records that changed after the first save', a
   assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 1);
 });
 
-test('Guest status correction audit is appended to the history table', async () => {
+test('Guest correction sends the reason through the database RPC', async () => {
   const { runtime, client, calls } = createRuntime();
   await runtime.GuestOpsService.initialize(client, 'workspace-1');
 
-  await runtime.GuestOpsService.appendGuestAudit('guest-1', {
-    at: 1793700000000,
-    label: 'Dikoreksi',
-    detail: 'Nama diperbarui',
-    reason: 'Salah input',
-    status: 'waiting'
-  });
+  await runtime.GuestOpsService.correctGuest({
+    id: 'guest-1',
+    ticket: 'WL-001',
+    day: '2026-11-03',
+    name: 'Nama Baru',
+    pack: 3,
+    phone: '08123456789',
+    status: 'waiting',
+    created: 1793700000000
+  }, 'Nama sebelumnya salah input');
 
-  assert.equal(calls.some(call => call.table === 'guest_status_history' && call.operation === 'insert'), true);
+  const correction = calls.find(call => call.rpc === 'correct_guest_with_reason');
+  assert.deepEqual(JSON.parse(JSON.stringify(correction.args)), {
+    p_guest_id: 'guest-1',
+    p_guest_name: 'Nama Baru',
+    p_pack: 3,
+    p_phone: '08123456789',
+    p_reason: 'Nama sebelumnya salah input'
+  });
+  assert.equal(calls.some(call => call.table === 'guest_status_history' && call.operation === 'insert'), false);
 });
 
 test('Guest Operations blocks initialization when auth context points to another workspace', async () => {

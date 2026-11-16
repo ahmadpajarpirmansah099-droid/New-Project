@@ -297,23 +297,26 @@
     return operation;
   }
 
-  async function appendGuestAudit(guestId, entry) {
+  async function correctGuest(guest, reason) {
     requireReady();
+    if (!guest?.id) throw new Error('Data tamu tidak valid.');
+    const normalizedReason = String(reason || '').trim();
+    if (!normalizedReason || normalizedReason.length > 500) {
+      throw new Error('Alasan koreksi wajib diisi (maksimal 500 karakter).');
+    }
+
     const guard = await assertWorkspaceSession();
-    const guest = await client.from('guests').select('workspace_id').eq('id', guestId).single();
-    if (guest.error) throw guest.error;
-    if (guest.data?.workspace_id !== guard.workspaceId) throw new Error('Tamu berasal dari workspace lain. Perubahan diblokir.');
-    await assertWorkspaceSession(guard.generation);
-    const { error } = await client.from('guest_status_history').insert({
-      workspace_id: workspaceId,
-      guest_id: guestId,
-      status: entry.status || 'waiting',
-      label: entry.label || 'Dikoreksi',
-      detail: entry.detail || null,
-      reason: entry.reason || null,
-      changed_at: toIso(entry.at)
+    const record = guestRecord(guest);
+    const { error } = await client.rpc('correct_guest_with_reason', {
+      p_guest_id: record.id,
+      p_guest_name: record.guest_name,
+      p_pack: record.pack,
+      p_phone: record.phone,
+      p_reason: normalizedReason
     });
     if (error) throw error;
+    await assertWorkspaceSession(guard.generation);
+    persistedGuestRows.set(record.id, recordFingerprint(record));
   }
 
   function reset() {
@@ -333,9 +336,9 @@
     load,
     loadGuestAudit,
     persist,
+    correctGuest,
     nextTicket,
     nextReservationCode,
-    appendGuestAudit,
     isReady: () => ready,
     workspaceId: () => workspaceId
   };

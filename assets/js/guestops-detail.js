@@ -203,23 +203,41 @@ function editGuest(id) {
   if (!guest) return;
 
   sheetGuest = id;
-  openSheet(`<div class="sheet-head"><h2>Koreksi data tamu</h2><button class="close" data-app-action="openDetail" data-app-id="${id}">✕</button></div><form data-app-submit="saveEdit" data-app-id="${id}"><div class="field"><label>Nama tamu *</label><input id="editName" required value="${esc(guest.name)}"></div><div class="field"><label>Jumlah pack *</label><input id="editPack" type="number" min="1" max="30" required value="${guest.pack}"></div><div class="field"><label>WhatsApp</label><input id="editPhone" value="${esc(guest.phone)}"></div><div class="field"><label>Alasan koreksi *</label><textarea id="editReason" required placeholder="Tuliskan alasan perubahan data..."></textarea></div><div class="sheet-actions"><button type="button" class="secondary" data-app-action="openDetail" data-app-id="${id}">Kembali</button><button class="primary">Simpan koreksi</button></div></form>`);
+  openSheet(`<div class="sheet-head"><h2>Koreksi data tamu</h2><button class="close" data-app-action="openDetail" data-app-id="${id}">✕</button></div><form data-app-submit="saveEdit" data-app-id="${id}"><div class="field"><label>Nama tamu *</label><input id="editName" required value="${esc(guest.name)}"></div><div class="field"><label>Jumlah pack *</label><input id="editPack" type="number" min="1" max="30" required value="${guest.pack}"></div><div class="field"><label>WhatsApp</label><input id="editPhone" value="${esc(guest.phone)}"></div><div class="field"><label>Alasan koreksi *</label><textarea id="editReason" maxlength="500" required placeholder="Tuliskan alasan perubahan data..."></textarea></div><div class="sheet-actions"><button type="button" class="secondary" data-app-action="openDetail" data-app-id="${id}">Kembali</button><button class="primary">Simpan koreksi</button></div></form>`);
 }
 
 async function saveEdit(event, id) {
   event.preventDefault();
 
   const guest = state.guests.find(item => item.id === id);
+  if (!guest) return;
+
+  const previous = {
+    name: guest.name,
+    pack: guest.pack,
+    phone: guest.phone
+  };
+  const reason = $('editReason').value.trim();
+  if (!reason) {
+    toast('Alasan koreksi wajib diisi');
+    $('editReason').focus();
+    return;
+  }
+
   guest.name = $('editName').value.trim();
   guest.pack = Number($('editPack').value);
   guest.phone = $('editPhone').value.trim();
 
   try {
-    if (await save() === false) throw new Error('Database menolak penyimpanan');
+    if (!window.GuestOpsService?.correctGuest) {
+      throw new Error('Fitur pencatatan alasan koreksi belum tersedia di database.');
+    }
+    await window.GuestOpsService.correctGuest(guest, reason);
     renderAll();
     openDetail(id);
     toast('Koreksi berhasil disimpan');
   } catch (error) {
+    Object.assign(guest, previous);
     console.error(error);
     toast('Koreksi belum berhasil disimpan ke database');
   }
