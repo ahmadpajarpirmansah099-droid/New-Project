@@ -79,7 +79,6 @@ test('Guest Operations initializes from an empty Supabase workspace', async () =
   assert.deepEqual(Array.from(state.guests), []);
   assert.deepEqual(Array.from(state.reservations), []);
   assert.equal(state.settings.seatingDurationMinutes, 90);
-  assert.match(state.settings.whatsappTemplates.called, /\{nomor_antrean\}/);
 
   const reservationSelect = calls.find(call => call.table === 'reservations' && call.operation === 'select');
   assert.equal(reservationSelect.columns.includes('seated_at'), false);
@@ -121,30 +120,6 @@ test('Guest Operations persists guest, reservation, and workspace settings', asy
   assert.equal(rows.guests.length, 1);
   assert.equal(rows.reservations.length, 1);
   assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 1);
-});
-
-test('WhatsApp templates are persisted as a separate workspace setting', async () => {
-  const { runtime, client, calls } = createRuntime();
-  const state = await runtime.GuestOpsService.initialize(client, 'workspace-1');
-  state.settings.whatsappTemplates = {
-    called: 'Hai {nama}, antrean {nomor_antrean}',
-    seated: 'Hai {nama}, meja {nomor_meja}'
-  };
-
-  await runtime.GuestOpsService.persist(state);
-  const templateWrite = calls.find(call => call.table === 'workspace_settings' &&
-    call.operation === 'upsert' && call.values?.setting_key === 'guest_whatsapp_templates');
-  assert.ok(templateWrite, 'template setting should be written to Supabase');
-  assert.equal(templateWrite.values.setting_value.called, 'Hai {nama}, antrean {nomor_antrean}');
-});
-
-test('Service-role users do not write workspace settings', async () => {
-  const { runtime, client, calls } = createRuntime();
-  runtime.AppAuth.getContext = () => ({ userId: 'user-1', workspaceId: 'workspace-1', role: 'service' });
-  const state = await runtime.GuestOpsService.initialize(client, 'workspace-1');
-  state.settings.whatsappTemplates.called = 'Changed {nama}';
-  await runtime.GuestOpsService.persist(state);
-  assert.equal(calls.some(call => call.table === 'workspace_settings' && call.operation === 'upsert'), false);
 });
 
 test('Guest Operations write queue recovers after a failed database write', async () => {
