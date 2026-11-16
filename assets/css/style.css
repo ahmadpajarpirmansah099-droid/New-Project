@@ -4261,3 +4261,13 @@ textarea::-webkit-input-placeholder {
   font-weight:800;
   color:#55566a;
 }
+
+
+/* MOBILE — keep the guide mark in the drawer footer at its compact original size. */
+@media (max-width: 899px) {
+  .drawer-foot > svg {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+  }
+}
