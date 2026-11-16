@@ -21,6 +21,7 @@ function chooseSmoking(value) {
   $('segSmoking').setAttribute('aria-pressed', String(selected === 'true'));
   $('segNonSmoking').setAttribute('aria-pressed', String(selected === 'false'));
 }
+window.chooseSmoking = chooseSmoking;
 function chooseInitial(status) {
   const group = $('segWait').parentElement;
   const currentStatus = $('initialStatus').value;
