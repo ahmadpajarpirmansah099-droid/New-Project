@@ -1705,13 +1705,24 @@
 }
 
 @media (min-width: 900px) and (max-height: 700px) {
-  /* Keep the mascot visible and move Logout lower to preserve clear separation. */
+  /* Preserve the intended bottom-to-top order: guide, Logout, mascot. */
   .sidebar-mascot { display: block; bottom: 122px; }
-  body:has(.page.active) #authLogoutButton { bottom: 14px; }
+  body:has(.page.active) #authLogoutButton { bottom: 68px; }
+  body:has(.page.active) .drawer-guide-icon {
+    position: fixed;
+    z-index: 95;
+    left: 14px;
+    bottom: 14px;
+    display: grid !important;
+    place-items: center;
+    width: 48px;
+    height: 46px;
+    flex: 0 0 46px;
+    padding: 0;
+  }
   .drawer-nav { max-height: calc(100dvh - 210px); }
 }
 
 @media (min-width: 900px) and (max-height: 560px) {
-  body:has(.page.active) .drawer-guide-icon { display: none !important; }
   .drawer-nav { max-height: calc(100dvh - 110px); }
 }
