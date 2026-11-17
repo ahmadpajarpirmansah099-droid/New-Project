@@ -264,7 +264,7 @@ test('history follows the selected feature without touching an unfinished local 
   t.input({ soKey: 'm:a', soProp: 'qty' }, '2');
   assert.match(t.page.innerHTML, /Riwayat Barang Masuk/);
   assert.match(t.page.innerHTML, /2 November 2026/);
-  assert.doesNotMatch(t.page.innerHTML, /8 November 2026/);
+  assert.doesNotMatch(t.page.innerHTML, /\b8 November 2026\b/);
   await t.click('history-tab', { soKind: 'sales' });
   assert.match(t.page.innerHTML, /Riwayat Sales/);
   assert.match(t.page.innerHTML, /8 November 2026/);
