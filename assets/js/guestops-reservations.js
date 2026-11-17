@@ -223,6 +223,11 @@ function renderReservations(animateDateChange = false) {
 let reservationDatePickerMonth = new Date();
 let reservationDatePickerDraft = '';
 
+function isEditingExistingReservation() {
+  const id = $('rEditId')?.value;
+  return Boolean(id && state.reservations.some(reservation => reservation.id === id));
+}
+
 function openReservationForm(id) {
  const r=id?state.reservations.find(x=>x.id===id):null;
  if(id&&!r){toast('Reservasi tidak ditemukan');return;}
@@ -290,7 +295,7 @@ function changeReservationDatePickerMonth(delta) {
 }
 
 function selectReservationDateDraft(value) {
-  if (value < todayKey()) return;
+  if (!isEditingExistingReservation() && value < todayKey()) return;
   reservationDatePickerDraft = value;
   renderReservationDatePicker();
 }
@@ -303,7 +308,7 @@ function selectTodayForReservation() {
 }
 
 function applyReservationDate() {
-  if (!reservationDatePickerDraft || reservationDatePickerDraft < todayKey()) {
+  if (!reservationDatePickerDraft || (!isEditingExistingReservation() && reservationDatePickerDraft < todayKey())) {
     toast('Tanggal reservasi tidak boleh di masa lalu');
     return;
   }
@@ -318,8 +323,8 @@ function renderReservationDatePicker() {
   const month = reservationDatePickerMonth.getMonth();
   const today = todayKey();
   const todayDate = parseHistoryDate(today);
-  const previousMonth = year < todayDate.getFullYear() ||
-    (year === todayDate.getFullYear() && month <= todayDate.getMonth());
+  const previousMonth = !isEditingExistingReservation() && (year < todayDate.getFullYear() ||
+    (year === todayDate.getFullYear() && month <= todayDate.getMonth()));
 
   $('reservationDateMonthLabel').textContent = new Intl.DateTimeFormat('id-ID', {
     month: 'long',
@@ -336,7 +341,7 @@ function renderReservationDatePicker() {
     const date = new Date(year, month, 1 - firstDayOffset + index);
     const key = historyDateKey(date);
     const outside = date.getMonth() !== month;
-    const disabled = outside || key < today;
+    const disabled = outside || (!isEditingExistingReservation() && key < today);
     const classes = ['calendar-day'];
 
     if (outside) classes.push('outside');
@@ -424,7 +429,7 @@ async function saveReservation(e) {
  if(id&&!existing){toast('Reservasi tidak ditemukan');return;}
  const name=$('rName').value.trim(),pack=Number($('rPack').value),date=$('rDate').value,time=$('rTime').value,phone=$('rPhone').value.trim(),smoking=$('rSmoking').value,note=$('rNote').value.trim();
  if(!name||!Number.isInteger(pack)||pack<1||pack>500||!date||!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){toast('Lengkapi data reservasi terlebih dahulu');return;}
- if(date<todayKey()||(date===todayKey()&&time<new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date()))){toast('Tanggal dan jam tidak boleh di masa lalu');return;}
+ if(!existing&&(date<todayKey()||(date===todayKey()&&time<new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date())))){toast('Tanggal dan jam tidak boleh di masa lalu');return;}
  if(phone&&!/^(\+?62|0)\d{8,13}$/.test(phone.replace(/[\s-]/g,''))){toast('Format WhatsApp belum sesuai');return;}
  const previous=existing?{...existing}:null,reservation=existing||{id:uid(),code:'',status:'pending',created:Date.now(),guestId:null};
  Object.assign(reservation,{name,pack,date,time,phone,smoking,note});reservationMonth=date.slice(0,7);reservationDate=date;closeSheet();
