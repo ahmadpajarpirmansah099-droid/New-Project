@@ -67,6 +67,9 @@ function openDetail(id) {
     : '';
   const smokingLabel = guest.smoking === true ? 'Smoking' : guest.smoking === false ? 'Non Smoking' : 'Belum diisi';
   const smokingCell = '<div class="detail-cell"><small>Area merokok</small><b>' + smokingLabel + '</b></div>';
+  const automaticCloseNote = guest.status === 'missed'
+    ? '<div class="detail-cell detail-cell-full"><small>Catatan otomatis</small><b>Data antrean ini belum diselesaikan sampai pergantian tanggal. Sistem otomatis menutup antrean saat reset operasional pukul 00.00 WIB.</b></div>'
+    : '';
 
   const whatsappButton = guest.phone
     ? '<button class="primary" data-app-action="callGuestWhatsApp" data-app-id="' + esc(guest.id) + '">Kirim WhatsApp</button>'
@@ -90,7 +93,7 @@ function openDetail(id) {
     '<div class="detail-grid">' +
       '<div class="detail-cell"><small>Jumlah pack</small><b>' + guest.pack + ' orang</b></div>' +
       '<div class="detail-cell"><small>Status</small><b>' + statusLabel(guest.status) + '</b></div>' +
-      smokingCell +
+      smokingCell + automaticCloseNote +
       '<div class="detail-cell"><small>Waktu daftar</small><b>' + fmtTime(guest.created) + '</b></div>' +
       '<div class="detail-cell"><small>' + (guest.status === 'seated' ? 'Seating time' : 'Waiting time') + '</small><b>' +
       (guest.status === 'seated' ? '<span data-seating-countdown="' + esc(guest.id) + '">' + seatingCountdownText(guest) + '</span>' : duration(guest)) +
