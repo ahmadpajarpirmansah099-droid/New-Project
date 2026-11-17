@@ -225,7 +225,7 @@ let reservationDatePickerDraft = '';
 
 function openReservationForm(id) {
  const r=id?state.reservations.find(x=>x.id===id):null;
- if(id&&(!r||r.status!=='pending')){toast('Hanya reservasi yang masih menunggu yang bisa diedit');return;}
+ if(id&&!r){toast('Reservasi tidak ditemukan');return;}
  const date=r?.date||(reservationDate<todayKey()?todayKey():reservationDate),time=r?.time||'19:00',smoking=r?.smoking||'Non Smoking',v=x=>esc(x==null?'':x);
  openSheet('<div class="sheet-head"><h2>'+(r?'Edit reservasi':'Reservasi baru')+'</h2><button class="close" data-app-action="closeSheet">✕</button></div>'+
  '<form data-app-submit="saveReservation"><input id="rEditId" type="hidden" value="'+v(r?.id||'')+'">'+
@@ -421,7 +421,7 @@ function applyReservationTime() {
 async function saveReservation(e) {
  e.preventDefault();
  const id=$('rEditId')?.value||'',existing=id?state.reservations.find(x=>x.id===id):null;
- if(id&&(!existing||existing.status!=='pending')){toast('Reservasi tidak bisa diedit karena statusnya sudah berubah');return;}
+ if(id&&!existing){toast('Reservasi tidak ditemukan');return;}
  const name=$('rName').value.trim(),pack=Number($('rPack').value),date=$('rDate').value,time=$('rTime').value,phone=$('rPhone').value.trim(),smoking=$('rSmoking').value,note=$('rNote').value.trim();
  if(!name||!Number.isInteger(pack)||pack<1||pack>500||!date||!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){toast('Lengkapi data reservasi terlebih dahulu');return;}
  if(date<todayKey()||(date===todayKey()&&time<new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date()))){toast('Tanggal dan jam tidak boleh di masa lalu');return;}
@@ -462,7 +462,7 @@ function openReservationDetail(id) {
  openSheet('<div class="sheet-head"><h2>Detail reservasi</h2><button class="close" data-app-action="closeSheet">✕</button></div>'+
  '<div class="detail-ticket"><small>KODE RESERVASI</small><strong>'+esc(r.code)+'</strong><small>'+esc(reservationDateText(r.date))+'</small></div><div class="detail-name">'+esc(r.name)+'</div>'+
  '<div class="detail-grid"><div class="detail-cell"><small>Jam reservasi</small><b>'+esc(r.time)+' WIB</b></div><div class="detail-cell"><small>Jumlah pack</small><b>'+r.pack+' pack</b></div><div class="detail-cell"><small>Status</small><b>'+reservationStatusLabel(r.status)+'</b></div><div class="detail-cell"><small>Smoking</small><b>'+esc(r.smoking)+'</b></div><div class="detail-cell detail-cell-full"><small>WhatsApp</small><b>'+esc(r.phone||'—')+'</b></div><div class="detail-cell detail-cell-full"><small>Catatan</small><b>'+esc(r.note||'—')+'</b></div></div>'+
- '<div class="detail-cell detail-cell-full"><small>Riwayat perubahan</small><div id="reservationEditHistory">Memuat riwayat...</div></div><div class="sheet-actions">'+(r.status==='pending'?'<button class="primary" data-app-action="openReservationForm" data-app-id="'+esc(r.id)+'">Edit Reservasi</button>':'')+'<button class="secondary" data-app-action="closeSheet">Tutup</button></div>');
+ '<div class="detail-cell detail-cell-full"><small>Riwayat perubahan</small><div id="reservationEditHistory">Memuat riwayat...</div></div><div class="sheet-actions"><button class="primary" data-app-action="openReservationForm" data-app-id="'+esc(r.id)+'">Edit Reservasi</button><button class="secondary" data-app-action="closeSheet">Tutup</button></div>');
  const host=$('reservationEditHistory');
  window.GuestOpsService.loadReservationAudit(id).then(items=>{if(!host||!host.isConnected)return;host.innerHTML=items.length?items.map(x=>'<div><b>'+esc(new Date(x.at).toLocaleString('id-ID'))+'</b><p>'+esc(x.summary)+'</p></div>').join(''):'<small>Belum ada perubahan data.</small>';}).catch(error=>{console.error(error);if(host&&host.isConnected)host.textContent='Riwayat belum dapat dimuat.';});
 }
