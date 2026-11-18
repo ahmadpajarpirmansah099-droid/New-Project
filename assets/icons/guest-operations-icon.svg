@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <filter id="mascot-remove-white" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 -4 4 0"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#f6f6f1"/>
+  <image xlink:href="../images/maskot-new-project-lime-body.png"
+         x="24" y="24" width="464" height="464"
+         preserveAspectRatio="xMidYMid meet"
+         filter="url(#mascot-remove-white)"/>
+  <g fill="#060643">
+    <ellipse cx="283.5" cy="245.8" rx="8.6" ry="25.9"
+             transform="rotate(9 283.5 245.8)"/>
+    <ellipse cx="312.1" cy="245.8" rx="8.6" ry="25.9"
+             transform="rotate(-9 312.1 245.8)"/>
+  </g>
+</svg>
