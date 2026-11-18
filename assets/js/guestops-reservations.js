@@ -490,9 +490,28 @@ async function cancelReservation(id) {
   toast('Reservasi dibatalkan');
 }
 
+const reservationSeatInFlight = new Set();
+
+function beginReservationSeatLoading(button) {
+  if (!button || !(button instanceof HTMLButtonElement)) return () => {};
+  const previousHtml = button.innerHTML;
+  const wasDisabled = button.disabled;
+  button.disabled = true;
+  button.classList.add('guest-action-loading');
+  button.setAttribute('aria-busy', 'true');
+  button.innerHTML = '<span class="guest-action-spinner" aria-hidden="true"></span><span>Menyimpan...</span>';
+  return () => {
+    if (!button.isConnected) return;
+    button.disabled = wasDisabled;
+    button.classList.remove('guest-action-loading');
+    button.removeAttribute('aria-busy');
+    button.innerHTML = previousHtml;
+  };
+}
+
 function seatReservation(id) {
   const reservation = state.reservations.find(item => item.id === id);
-  if (!reservation || reservation.status !== 'pending') return;
+  if (!reservation || reservation.status !== 'pending' || reservationSeatInFlight.has(id)) return;
 
   if (reservation.date !== todayKey()) {
     toast('Tamu hanya bisa didudukkan pada tanggal reservasinya');
@@ -504,7 +523,7 @@ function seatReservation(id) {
     '<p class="page-sub">' + esc(reservation.code) + ' · ' + esc(reservation.name) + '</p>' +
     '<form data-app-submit="confirmSeatReservation" data-app-id="' + esc(id) + '">' +
       '<div class="field"><label>Nomor / nama meja *</label><input id="rTable" required maxlength="80" placeholder="Contoh: Meja 05, VIP 2"></div>' +
-      '<div class="sheet-actions"><button type="button" class="secondary" data-app-action="closeSheet">Batal</button><button class="primary">Konfirmasi duduk</button></div>' +
+      '<div class="sheet-actions"><button type="button" class="secondary" data-app-action="closeSheet">Batal</button><button type="submit" class="primary">Konfirmasi duduk</button></div>' +
     '</form>'
   );
 }
@@ -513,9 +532,13 @@ async function confirmSeatReservation(event, id) {
   event.preventDefault();
 
   const reservation = state.reservations.find(item => item.id === id);
-  const table = $('rTable').value.trim();
-  if (!reservation || !table) return;
+  const table = $('rTable')?.value.trim();
+  if (!reservation || reservation.status !== 'pending' || !table || reservationSeatInFlight.has(id)) return;
 
+  reservationSeatInFlight.add(id);
+  const form = event.target;
+  const submitButton = event.submitter || form.querySelector('button[type="submit"]');
+  const restoreButton = beginReservationSeatLoading(submitButton);
   const now = Date.now();
   const guest = {
     id: uid(),
@@ -545,7 +568,6 @@ async function confirmSeatReservation(event, id) {
     table: reservation.table,
     seatedAt: reservation.seatedAt
   };
-  closeSheet();
 
   try {
     guest.ticket = await window.GuestOpsService.nextTicket(todayKey());
@@ -561,16 +583,22 @@ async function confirmSeatReservation(event, id) {
       Object.assign(reservation, previousReservation);
       renderAll();
       toast('Tamu belum berhasil didudukkan. Coba lagi.');
-      return;
+      return false;
     }
+
+    if (form.isConnected && $('sheet')?.contains(form)) closeSheet();
+    toast('Tamu masuk ke catatan operasional · ' + guest.ticket);
+    return true;
   } catch (error) {
     state.guests = state.guests.filter(item => item.id !== guest.id);
     Object.assign(reservation, previousReservation);
     renderAll();
     console.error(error);
     toast('Tamu belum berhasil didudukkan. Coba lagi.');
-    return;
+    return false;
+  } finally {
+    reservationSeatInFlight.delete(id);
+    restoreButton();
   }
-  toast('Tamu masuk ke catatan operasional · ' + guest.ticket);
 }
 
