@@ -1,0 +1,19 @@
+{
+  "id": "./",
+  "name": "Guest Operations",
+  "short_name": "Guest Ops",
+  "description": "Aplikasi operasional kedatangan tamu, antrean, dan reservasi.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f6f1",
+  "theme_color": "#f6f6f1",
+  "icons": [
+    {
+      "src": "assets/images/pwa-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
