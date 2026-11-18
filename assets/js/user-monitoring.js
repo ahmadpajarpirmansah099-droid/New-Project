@@ -202,7 +202,7 @@
       console.error('User Monitoring session registration failed:', error);
     }
 
-    await startPresence();
+    if (isDeveloper()) await startPresence();
     await sendHeartbeat();
 
     heartbeatTimer = window.setInterval(sendHeartbeat, HEARTBEAT_MS);
