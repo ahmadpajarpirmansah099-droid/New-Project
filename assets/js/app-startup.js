@@ -28,9 +28,31 @@ function clearSessionIntervals() {
   guestRefreshBusy = false;
 }
 
+function resetWorkspaceRuntime() {
+  state = loadState();
+  remoteSaveQueue = Promise.resolve();
+  window.GuestOpsService?.reset();
+  window.MasterDataStore?.reset();
+  window.StockOpnameUI?.reset();
+  closeQuickMenu();
+  closeMenu();
+  closeSheet();
+}
+
 function isGuestOperationalPageActive() {
   const activePage = document.querySelector('.page.active')?.id || '';
   return GUEST_OPERATION_PAGES.includes(activePage.replace(/^page-/, ''));
+}
+
+function resolveWorkspaceLandingPage(requestedPage, authContext, hasGuestOpsAccess) {
+  const requestedPageExists = requestedPage && $('page-' + requestedPage) &&
+    (requestedPage !== 'stock-opname' || window.StockOpnameService?.available()) &&
+    (requestedPage !== 'stock-dashboard' || window.StockOpnameService?.dashboardAvailable());
+  const guestPageUnavailable = GUEST_OPERATION_PAGES.includes(requestedPage) && !hasGuestOpsAccess;
+  const divisionsOverviewUnavailable = requestedPage === 'all-divisions' && authContext.divisionMode !== 'all';
+
+  if (requestedPageExists && !guestPageUnavailable && !divisionsOverviewUnavailable) return requestedPage;
+  return hasGuestOpsAccess ? 'dashboard' : 'master-items';
 }
 
 async function refreshGuestOperationalData() {
@@ -86,20 +108,7 @@ window.addEventListener('app:auth-signed-out', function () {
   appDataReady = false;
   appInitializing = false;
   clearSessionIntervals();
-  state = {
-    schemaVersion: 3,
-    guests: [],
-    counters: {},
-    reservations: [],
-    reservationCounters: {},
-    settings: { seatingDurationMinutes: 90 }
-  };
-  remoteSaveQueue = Promise.resolve();
-  window.GuestOpsService?.reset();
-  window.MasterDataStore?.reset(); window.StockOpnameUI?.reset();
-  closeQuickMenu();
-  closeMenu();
-  closeSheet();
+  resetWorkspaceRuntime();
 });
 
 async function initializeWorkspace(event, switchingContext) {
@@ -107,10 +116,7 @@ async function initializeWorkspace(event, switchingContext) {
     workspaceReturnPage = document.querySelector('.page.active')?.id.replace(/^page-/, '') || null;
     appSessionGeneration += 1; appInitializationGeneration += 1; appDataReady = false; appInitializing = false;
     clearSessionIntervals();
-    state = {schemaVersion:3,guests:[],counters:{},reservations:[],reservationCounters:{},settings:{seatingDurationMinutes:90}};
-    remoteSaveQueue = Promise.resolve();
-    window.GuestOpsService?.reset(); window.MasterDataStore?.reset(); window.StockOpnameUI?.reset();
-    closeQuickMenu(); closeMenu(); closeSheet();
+    resetWorkspaceRuntime();
   }
   if (appDataReady || appInitializing) return;
   appInitializing = true;
@@ -131,26 +137,14 @@ async function initializeWorkspace(event, switchingContext) {
       state=remoteState; syncSeatingSettingInput();
       const requestedPage = workspaceReturnPage;
       workspaceReturnPage = null;
-      const requestedPageExists = requestedPage && $('page-' + requestedPage) && (requestedPage !== 'stock-opname' || window.StockOpnameService?.available()) && (requestedPage !== 'stock-dashboard' || window.StockOpnameService?.dashboardAvailable());
-      const guestPageUnavailable = GUEST_OPERATION_PAGES.includes(requestedPage) && !canAccessGuestOperations();
-      const divisionsOverviewUnavailable = requestedPage === 'all-divisions' && authContext.divisionMode !== 'all';
-      const targetPage = requestedPageExists && !guestPageUnavailable && !divisionsOverviewUnavailable
-        ? requestedPage
-        : 'dashboard';
-      go(targetPage);
+      go(resolveWorkspaceLandingPage(requestedPage, authContext, true));
       guestRefreshInterval=window.setInterval(refreshGuestOperationalData,30000);
       seatingCountdownInterval=window.setInterval(()=>{if(isCurrent()) updateSeatingCountdowns();},1000);
     } else {
       if(!isCurrent()) return;
       const requestedPage = workspaceReturnPage;
       workspaceReturnPage = null;
-      const requestedPageExists = requestedPage && $('page-' + requestedPage) && (requestedPage !== 'stock-opname' || window.StockOpnameService?.available()) && (requestedPage !== 'stock-dashboard' || window.StockOpnameService?.dashboardAvailable());
-      const guestPageUnavailable = GUEST_OPERATION_PAGES.includes(requestedPage);
-      const divisionsOverviewUnavailable = requestedPage === 'all-divisions' && authContext.divisionMode !== 'all';
-      const targetPage = requestedPageExists && !guestPageUnavailable && !divisionsOverviewUnavailable
-        ? requestedPage
-        : 'master-items';
-      go(targetPage);
+      go(resolveWorkspaceLandingPage(requestedPage, authContext, false));
     }
     if(!isCurrent()) return;
     const revealed=await window.AppAuth.markReady(authContext.userId,authContext.workspaceId);
