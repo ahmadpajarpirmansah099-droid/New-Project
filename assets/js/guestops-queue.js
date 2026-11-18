@@ -51,12 +51,30 @@ function chooseInitial(status) {
   );
 }
 let guestSaveInFlight = false;
+function beginGuestRegistrationLoading(button) {
+  if (!button || !(button instanceof HTMLButtonElement)) return () => {};
+  const previousHtml = button.innerHTML;
+  const wasDisabled = button.disabled;
+  button.disabled = true;
+  button.classList.add('guest-action-loading');
+  button.setAttribute('aria-busy', 'true');
+  button.innerHTML = '<span class="guest-action-spinner" aria-hidden="true"></span><span>Menyimpan...</span>';
+  return () => {
+    if (!button.isConnected) return;
+    button.disabled = wasDisabled;
+    button.classList.remove('guest-action-loading');
+    button.removeAttribute('aria-busy');
+    button.innerHTML = previousHtml;
+  };
+}
 async function saveGuest(e){
   e.preventDefault();
   const form = e.target;
   if (guestSaveInFlight || !form || form.tagName !== 'FORM') return;
 
   guestSaveInFlight = true;
+  const submitButton = e.submitter || form.querySelector('button[type="submit"],button:not([type])');
+  const restoreButton = beginGuestRegistrationLoading(submitButton);
   try {
     const day=todayKey(),now=Date.now(),status=$('initialStatus').value;
     const tableLabel = status === 'seated' ? $('initialTableLabel').value.trim() : '';
@@ -97,6 +115,7 @@ async function saveGuest(e){
     toast('Tamu belum berhasil disimpan. Coba lagi.');
   } finally {
     guestSaveInFlight = false;
+    restoreButton();
   }
 }
 // Expose handler explicitly for the delegated submit listener.
