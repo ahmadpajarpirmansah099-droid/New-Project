@@ -60,6 +60,31 @@ jobs:
           index.write_text(updated, encoding="utf-8")
           print(f"Applied a fresh cache version to {count} local assets.")
           PY
+      - name: Generate PWA icon PNGs
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes librsvg2-bin
+          rsvg-convert --width=180 --height=180 --output=assets/icons/guest-operations-180.png assets/icons/guest-operations-icon.svg
+          rsvg-convert --width=192 --height=192 --output=assets/icons/guest-operations-192.png assets/icons/guest-operations-icon.svg
+          rsvg-convert --width=512 --height=512 --output=assets/icons/guest-operations-512.png assets/icons/guest-operations-icon.svg
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct
+
+          expected = {
+              "assets/icons/guest-operations-180.png": 180,
+              "assets/icons/guest-operations-192.png": 192,
+              "assets/icons/guest-operations-512.png": 512,
+          }
+          for filename, size in expected.items():
+              data = Path(filename).read_bytes()
+              if data[:8] != b"\\x89PNG\\r\\n\\x1a\\n":
+                  raise SystemExit(f"Invalid PNG generated: {filename}")
+              dimensions = struct.unpack(">II", data[16:24])
+              if dimensions != (size, size):
+                  raise SystemExit(f"Unexpected dimensions for {filename}: {dimensions}")
+          print("PWA icons generated and dimensions verified.")
+          PY
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
