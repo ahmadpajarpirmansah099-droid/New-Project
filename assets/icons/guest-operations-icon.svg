@@ -11,7 +11,7 @@
                 0 0 -4 4 0"/>
     </filter>
   </defs>
-  <rect width="512" height="512" rx="112" fill="#f6f6f1"/>
+  <rect width="512" height="512" fill="#f6f6f1"/>
   <image xlink:href="../images/maskot-new-project-lime-body.png"
          x="24" y="24" width="464" height="464"
          preserveAspectRatio="xMidYMid meet"
