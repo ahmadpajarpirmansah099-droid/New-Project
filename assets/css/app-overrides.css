@@ -1664,3 +1664,34 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
     box-sizing:border-box;
   }
 }
+
+
+/* Guest actions: show an inline progress indicator and prevent repeat taps. */
+.guest-action-loading {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  cursor:progress !important;
+  opacity:.78;
+  pointer-events:none;
+}
+.guest-confirm-accept.guest-action-loading {
+  opacity:.88;
+}
+.guest-action-spinner {
+  display:inline-block;
+  width:13px;
+  height:13px;
+  flex:0 0 13px;
+  border:2px solid currentColor;
+  border-right-color:transparent;
+  border-radius:50%;
+  animation:guest-action-spin .7s linear infinite;
+}
+@keyframes guest-action-spin {
+  to { transform:rotate(360deg); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .guest-action-spinner { animation-duration:1.8s; }
+}

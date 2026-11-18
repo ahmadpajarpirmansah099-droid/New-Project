@@ -1,26 +1,68 @@
 /* =========================================================
     7. GUEST DETAIL, EDITING, AND EXPORT
     ========================================================= */
-async function setGuestStatus(id,status,tableLabel=''){
+const guestActionInFlight = new Set();
+
+function beginGuestActionLoading(button, label = 'Menyimpan...') {
+  if (!button || !(button instanceof HTMLButtonElement)) return () => {};
+  const previousHtml = button.innerHTML;
+  const wasDisabled = button.disabled;
+  button.disabled = true;
+  button.classList.add('guest-action-loading');
+  button.setAttribute('aria-busy', 'true');
+  button.innerHTML = '<span class="guest-action-spinner" aria-hidden="true"></span><span>' + esc(label) + '</span>';
+  return () => {
+    if (!button.isConnected) return;
+    button.disabled = wasDisabled;
+    button.classList.remove('guest-action-loading');
+    button.removeAttribute('aria-busy');
+    button.innerHTML = previousHtml;
+  };
+}
+
+async function setGuestStatus(id,status,tableLabel='',actionButton=null){
   const guest=state.guests.find(item=>item.id===id);
-  if(!guest||['done','cancelled'].includes(guest.status))return;
+  if(!guest||['done','cancelled'].includes(guest.status)||guestActionInFlight.has(id)||guest.status===status)return false;
+  if(status==='called'&&guest.status!=='waiting')return false;
+  if(status==='seated'&&!['waiting','called'].includes(guest.status))return false;
+  if(status==='done'&&guest.status!=='seated')return false;
+  if(status==='cancelled'&&!['waiting','called'].includes(guest.status))return false;
   const normalizedTable=String(tableLabel||'').trim();
-  if(status==='seated'&&!normalizedTable){toast('Nomor meja wajib diisi sebelum mendudukkan tamu');return;}
+  if(status==='seated'&&!normalizedTable){toast('Nomor meja wajib diisi sebelum mendudukkan tamu');return false;}
+
+  const clickedButton = actionButton || (
+    typeof HTMLButtonElement !== 'undefined' && this instanceof HTMLButtonElement ? this : null
+  );
+  guestActionInFlight.add(id);
+  const restoreButton = beginGuestActionLoading(clickedButton);
   const now=Date.now();
-  const previous={status:guest.status,resolved:guest.resolved,seatedAt:guest.seatedAt,tableLabel:guest.tableLabel,audit:guest.audit.slice()};
-  guest.status=status;
-  if(status==='seated'){guest.resolved=guest.resolved||now;guest.seatedAt=now;guest.tableLabel=normalizedTable}else if(status==='cancelled')guest.resolved=guest.resolved||now;
-  const labels={called:'Dipanggil',seated:'Duduk',done:'Selesai',cancelled:'Dibatalkan'};
-  guest.audit.push({at:now,label:labels[status]||status,detail:status==='seated'?'Meja '+normalizedTable:''});
-  if (await save() === false) {
-    Object.assign(guest, previous);
+  const previous={status:guest.status,resolved:guest.resolved,seatedAt:guest.seatedAt,tableLabel:guest.tableLabel,audit:Array.isArray(guest.audit)?guest.audit.slice():[]};
+
+  try {
+    guest.status=status;
+    if(status==='seated'){guest.resolved=guest.resolved||now;guest.seatedAt=now;guest.tableLabel=normalizedTable}else if(status==='cancelled')guest.resolved=guest.resolved||now;
+    const labels={called:'Dipanggil',seated:'Duduk',done:'Selesai',cancelled:'Dibatalkan'};
+    guest.audit.push({at:now,label:labels[status]||status,detail:status==='seated'?'Meja '+normalizedTable:''});
+    if (await save() === false) {
+      Object.assign(guest, previous);
+      renderAll();
+      return false;
+    }
     renderAll();
-    return;
+    if($('sheet').classList.contains('show'))openDetail(id);
+    const messages={called:'Tamu dipanggil',seated:'Tamu sudah duduk',done:'Kunjungan ditandai selesai',cancelled:'Antrean dibatalkan'};
+    toast(messages[status]||'Status tamu diperbarui');
+    return true;
+  } catch (error) {
+    Object.assign(guest, previous);
+    console.error('Guest status update failed:', error);
+    renderAll();
+    toast('Status tamu belum berhasil disimpan. Coba lagi.');
+    return false;
+  } finally {
+    guestActionInFlight.delete(id);
+    restoreButton();
   }
-  renderAll();
-  if($('sheet').classList.contains('show'))openDetail(id);
-  const messages={called:'Tamu dipanggil',seated:'Tamu sudah duduk',done:'Kunjungan ditandai selesai',cancelled:'Antrean dibatalkan'};
-  toast(messages[status]||'Status tamu diperbarui');
 }
 async function callGuestWhatsApp(id){
   const guest=state.guests.find(item=>item.id===id);
@@ -126,7 +168,7 @@ function openDetail(id) {
 
 async function moveGuestTable(id) {
   const guest = state.guests.find(item => item.id === id);
-  if (!guest || guest.status !== 'seated') return;
+  if (!guest || guest.status !== 'seated' || guestActionInFlight.has(id)) return;
 
   const existing = document.getElementById('guestMoveTableDialog');
   if (existing) existing.remove();
@@ -160,13 +202,14 @@ async function moveGuestTable(id) {
   });
   accept.addEventListener('click', async () => {
     const nextTable = input.value.trim();
-    if (!nextTable || nextTable === String(guest.tableLabel || '').trim()) {
+    if (!nextTable || nextTable === String(guest.tableLabel || '').trim() || guestActionInFlight.has(id)) {
       input.focus();
       return;
     }
+    guestActionInFlight.add(id);
+    const restoreButton = beginGuestActionLoading(accept);
     const previousTable = guest.tableLabel;
     guest.tableLabel = nextTable;
-    accept.disabled = true;
     try {
       if (await save() === false) {
         guest.tableLabel = previousTable;
@@ -182,6 +225,9 @@ async function moveGuestTable(id) {
       renderAll();
       console.error(error);
       toast('Pindah meja belum berhasil disimpan');
+    } finally {
+      guestActionInFlight.delete(id);
+      restoreButton();
     }
   });
   backdrop.addEventListener('click', event => {
@@ -350,10 +396,11 @@ function confirmGuestStatus(id, status) {
     acceptButton.disabled = !tableInput.value.trim();
   });
   acceptButton.addEventListener('click', async () => {
+    if (acceptButton.disabled || guestActionInFlight.has(id)) return;
     const tableLabel = tableInput ? tableInput.value.trim() : '';
     if (isSeated && !tableLabel) { tableInput?.focus(); return; }
-    close();
-    await setGuestStatus(id, status, tableLabel);
+    const saved = await setGuestStatus(id, status, tableLabel, acceptButton);
+    if (saved) close();
   });
   backdrop.addEventListener('click', event => {
     if (event.target === backdrop) close();
