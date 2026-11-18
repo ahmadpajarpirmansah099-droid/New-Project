@@ -1799,18 +1799,22 @@
   body.desktop-sidebar-collapsed .drawer-foot { display: none; }
 }
 
-/* Keep the logout action in Settings instead of the mobile drawer. */
+/* Keep logout visible directly below Settings in the mobile drawer. */
 @media (max-width: 899px) {
-  .drawer-nav > .drawer-logout-item,
+  .drawer-nav > .drawer-logout-item {
+    display: flex !important;
+    width: 100%;
+    height: 54px;
+    min-height: 54px;
+    justify-content: flex-start;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: inherit;
+  }
   .drawer-nav > .sidebar-mascot,
   .drawer-nav > .drawer-guide-icon { display: none !important; }
-  .settings-logout-card .setting-row { align-items: center; }
-  .settings-logout-card .auth-logout-button {
-    min-width: 76px;
-    min-height: 42px;
-    padding: 0 16px;
-    border-radius: 12px;
-  }
 }
 
 
