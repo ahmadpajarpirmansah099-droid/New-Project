@@ -1799,9 +1799,20 @@
   body.desktop-sidebar-collapsed .drawer-foot { display: none; }
 }
 
-/* Mobile keeps its existing profile-based logout and drawer layout. */
+/* Keep logout visible directly below Settings in the mobile drawer. */
 @media (max-width: 899px) {
-  .drawer-nav > .drawer-logout-item,
+  .drawer-nav > .drawer-logout-item {
+    display: flex !important;
+    width: 100%;
+    height: 54px;
+    min-height: 54px;
+    justify-content: flex-start;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: inherit;
+  }
   .drawer-nav > .sidebar-mascot,
   .drawer-nav > .drawer-guide-icon { display: none !important; }
 }
