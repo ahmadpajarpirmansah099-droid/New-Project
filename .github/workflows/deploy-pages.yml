@@ -16,6 +16,33 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install SVG icon renderer
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes librsvg2-bin
+      - name: Validate PWA manifest and render icons
+        run: |
+          mkdir -p /tmp/pwa-icons
+          rsvg-convert --width=180 --height=180 --output=/tmp/pwa-icons/guest-operations-180.png assets/icons/guest-operations-icon.svg
+          rsvg-convert --width=192 --height=192 --output=/tmp/pwa-icons/guest-operations-192.png assets/icons/guest-operations-icon.svg
+          rsvg-convert --width=512 --height=512 --output=/tmp/pwa-icons/guest-operations-512.png assets/icons/guest-operations-icon.svg
+          python3 - <<'PY'
+          import json
+          import struct
+          from pathlib import Path
+
+          manifest = json.loads(Path("manifest.webmanifest").read_text(encoding="utf-8"))
+          assert manifest["start_url"] == "./"
+          assert manifest["scope"] == "./"
+          assert manifest["display"] == "standalone"
+          declared_sizes = {icon["sizes"] for icon in manifest["icons"] if icon.get("type") == "image/png"}
+          assert {"192x192", "512x512"}.issubset(declared_sizes)
+          for size in (180, 192, 512):
+              data = Path(f"/tmp/pwa-icons/guest-operations-{size}.png").read_bytes()
+              assert data[:8] == bytes([137, 80, 78, 71, 13, 10, 26, 10])
+              assert struct.unpack(">II", data[16:24]) == (size, size)
+          print("PWA manifest and generated icons verified.")
+          PY
       - name: Check JavaScript syntax
         run: |
           find assets/js -type f -name '*.js' -print0 | xargs -0 -r -n1 node --check
@@ -59,6 +86,31 @@ jobs:
               raise SystemExit("No local CSS/JS assets found in index.html")
           index.write_text(updated, encoding="utf-8")
           print(f"Applied a fresh cache version to {count} local assets.")
+          PY
+      - name: Generate PWA icon PNGs
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes librsvg2-bin
+          rsvg-convert --width=180 --height=180 --output=assets/icons/guest-operations-180.png assets/icons/guest-operations-icon.svg
+          rsvg-convert --width=192 --height=192 --output=assets/icons/guest-operations-192.png assets/icons/guest-operations-icon.svg
+          rsvg-convert --width=512 --height=512 --output=assets/icons/guest-operations-512.png assets/icons/guest-operations-icon.svg
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct
+
+          expected = {
+              "assets/icons/guest-operations-180.png": 180,
+              "assets/icons/guest-operations-192.png": 192,
+              "assets/icons/guest-operations-512.png": 512,
+          }
+          for filename, size in expected.items():
+              data = Path(filename).read_bytes()
+              if data[:8] != bytes([137, 80, 78, 71, 13, 10, 26, 10]):
+                  raise SystemExit(f"Invalid PNG generated: {filename}")
+              dimensions = struct.unpack(">II", data[16:24])
+              if dimensions != (size, size):
+                  raise SystemExit(f"Unexpected dimensions for {filename}: {dimensions}")
+          print("PWA icons generated and dimensions verified.")
           PY
       - name: Configure Pages
         uses: actions/configure-pages@v5
