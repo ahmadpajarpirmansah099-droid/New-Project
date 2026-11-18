@@ -474,20 +474,36 @@ function openReservationDetail(id) {
 
 async function cancelReservation(id) {
   const reservation = state.reservations.find(item => item.id === id);
-  if (!reservation || reservation.status !== 'pending') return;
+  if (!reservation || reservation.status !== 'pending' || reservationSeatInFlight.has(id)) return;
   if (!confirm('Batalkan reservasi ' + reservation.code + '?')) return;
 
+  reservationSeatInFlight.add(id);
+  const actionButton = typeof HTMLButtonElement !== 'undefined' && this instanceof HTMLButtonElement ? this : null;
+  const restoreButton = beginReservationSeatLoading(actionButton);
   const previousStatus = reservation.status;
   reservation.status = 'cancelled';
   reservation.cancelledAt = Date.now();
-  if (await save() === false) {
+  try {
+    if (await save() === false) {
+      reservation.status = previousStatus;
+      delete reservation.cancelledAt;
+      renderAll();
+      return false;
+    }
+    renderAll();
+    toast('Reservasi dibatalkan');
+    return true;
+  } catch (error) {
     reservation.status = previousStatus;
     delete reservation.cancelledAt;
     renderAll();
-    return;
+    console.error(error);
+    toast('Reservasi belum berhasil dibatalkan. Coba lagi.');
+    return false;
+  } finally {
+    reservationSeatInFlight.delete(id);
+    restoreButton();
   }
-  renderAll();
-  toast('Reservasi dibatalkan');
 }
 
 const reservationSeatInFlight = new Set();
