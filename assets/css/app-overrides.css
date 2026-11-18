@@ -1676,6 +1676,9 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
   opacity:.78;
   pointer-events:none;
 }
+.guest-confirm-accept.guest-action-loading {
+  opacity:.88;
+}
 .guest-action-spinner {
   display:inline-block;
   width:13px;
