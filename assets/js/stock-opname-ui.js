@@ -501,14 +501,23 @@
   const rows=(get()?.catalog||[]).filter(row=>String(row.key||'').startsWith('m:')).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'id'));
   const columns=['STOK AWAL','BARANG MASUK','BARANG KELUAR','TERPAKAI OPERASIONAL','STOK SISTEM','STOK FISIK'];
   const opening=period()?.opening||{},movements=tableMovementTotals();
-  const body=rows.length?rows.map(row=>'<tr><th scope="row" data-label="ITEM">'+e(row.name||'Tanpa nama')+'</th>'+columns.map(label=>{
-   let value=null;
-   if(label==='STOK AWAL')value=opening[row.key]??0;
-   else if(label==='BARANG MASUK')value=movements.incoming[row.key]??0;
-   else if(label==='BARANG KELUAR')value=movements.outgoing[row.key]??0;
-   else if(label==='TERPAKAI OPERASIONAL')value=movements.operational[row.key]??0;
-   return '<td data-label="'+e(label)+'">'+(value!==null?'<span>'+number(value)+' '+e(row.unit||'')+'</span>':'<span class="so-table-placeholder">—</span>')+'</td>';
-  }).join('')+'</tr>').join(''):'<tr><td class="so-table-empty" colspan="7">Belum ada Master Barang aktif di divisi ini.</td></tr>';
+  const body=rows.length?rows.map(row=>{
+   const openingQty=Number(opening[row.key]??0)||0;
+   const incomingQty=Number(movements.incoming[row.key]??0)||0;
+   const outgoingQty=Number(movements.outgoing[row.key]??0)||0;
+   const operationalQty=Number(movements.operational[row.key]??0)||0;
+   const systemQty=openingQty+incomingQty-outgoingQty-operationalQty;
+   return '<tr><th scope="row" data-label="ITEM">'+e(row.name||'Tanpa nama')+'</th>'+columns.map(label=>{
+    let value=null;
+    if(label==='STOK AWAL')value=openingQty;
+    else if(label==='BARANG MASUK')value=incomingQty;
+    else if(label==='BARANG KELUAR')value=outgoingQty;
+    else if(label==='TERPAKAI OPERASIONAL')value=operationalQty;
+    else if(label==='STOK SISTEM')value=systemQty;
+    const negative=value!==null&&value<0;
+    return '<td data-label="'+e(label)+'">'+(value!==null?'<span'+(negative?' class="so-table-negative"':'')+'>'+number(value)+' '+e(row.unit||'')+'</span>':'<span class="so-table-placeholder">—</span>')+'</td>';
+   }).join('')+'</tr>';
+  }).join(''):'<tr><td class="so-table-empty" colspan="7">Belum ada Master Barang aktif di divisi ini.</td></tr>';
   return '<section class="so-layout-table" aria-label="Tabel Stock Opname"><div class="so-layout-table-scroll"><table class="so-layout-ledger"><thead><tr><th scope="col">ITEM</th>'+columns.map(label=>'<th scope="col">'+e(label)+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div></section>';
  }
  async function submit(){
