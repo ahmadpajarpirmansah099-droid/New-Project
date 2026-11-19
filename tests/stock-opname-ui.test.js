@@ -667,9 +667,44 @@ test('new Stock Opname table shows active master items and all requested columns
   }
   assert.match(t.page.innerHTML, /Susu/);
   assert.match(t.page.innerHTML, /data-label="STOK AWAL"><span>0 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>0 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>0 ML<\/span>/);
   t.data.state.periods[0].opening['m:a'] = 125;
   t.ui.render();
   assert.match(t.page.innerHTML, /data-label="STOK AWAL"><span>125 ML<\/span>/);
   assert.doesNotMatch(t.page.innerHTML, /<th scope="row" data-label="ITEM">WIP<\/th>/);
   assert.doesNotMatch(t.page.innerHTML, /<th scope="row" data-label="ITEM">Menu<\/th>/);
+});
+
+test('main table accumulates receipt and expense postings by master item until the first opname closes', () => {
+  const t = runtime();
+  t.data.state.documents = [
+    { id: 'r-current', period_id: 'period', type: 'receipt', postings: [{ key: 'm:a', qty: 100 }, { key: 'w:a', qty: 999 }] },
+    { id: 'r-legacy', period_id: 'old-period', type: 'receipt', postings: [{ key: 'm:a', qty: 25 }] },
+    { id: 'e-current', period_id: 'period', type: 'expense', category: 'Waste', postings: [{ key: 'm:a', qty: -7 }] },
+    { id: 'e-legacy', period_id: 'old-period', type: 'expense', category: 'QC', postings: [{ key: 'm:a', qty: -3 }] },
+    { id: 'e-void', period_id: 'period', type: 'expense', category: 'Waste', void: true, postings: [{ key: 'm:a', qty: -500 }] },
+    { id: 'production', period_id: 'period', type: 'production', postings: [{ key: 'm:a', qty: -40 }] },
+    { id: 'sales', period_id: 'period', type: 'sales', postings: [{ key: 'm:a', qty: -20 }] }
+  ];
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>125 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>10 ML<\/span>/);
+});
+
+test('movement table resets on completed opname and then reads only the new period', () => {
+  const t = runtime();
+  t.data.state.documents = [
+    { id: 'legacy', period_id: 'old-period', type: 'receipt', postings: [{ key: 'm:a', qty: 40 }] },
+    { id: 'new-receipt', period_id: 'next-period', type: 'receipt', postings: [{ key: 'm:a', qty: 6 }] },
+    { id: 'new-expense', period_id: 'next-period', type: 'expense', category: 'Waste', postings: [{ key: 'm:a', qty: -2 }] }
+  ];
+  t.data.state.periods[0].status = 'closed';
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>0 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>0 ML<\/span>/);
+  t.data.state.periods.push({ id: 'next-period', previous_id: 'period', start: '2026-11-09', status: 'active', opening: {} });
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>6 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>2 ML<\/span>/);
 });
