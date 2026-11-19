@@ -447,11 +447,37 @@
 #page-stock-opname .so-category-options button[aria-pressed="true"] { background: var(--ui-lime); }
 #page-stock-opname .so-category-options button:hover { background: var(--ui-lime-soft); }
 
-/* Temporary blank canvas for the Stock Opname layout redesign. */
-#page-stock-opname {
-  padding: 0 !important;
-  min-height: 0 !important;
+/* Stock Opname master-item table: initial layout shell. */
+#page-stock-opname { padding: 0 !important; min-height: 0 !important; }
+#page-stock-opname > *:not(.so-layout-table) { display: none !important; }
+#page-stock-opname .so-layout-table {
+  display: block;
+  margin: 18px 0 32px;
+  padding: 14px;
+  border: 1px solid var(--so-line);
+  border-radius: 20px;
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow-card);
 }
-#page-stock-opname > * {
-  display: none !important;
+.so-layout-table-scroll { width: 100%; }
+.so-layout-ledger { width: 100%; border-collapse: separate; border-spacing: 0; color: var(--so-ink); }
+.so-layout-ledger th, .so-layout-ledger td { padding: 13px 10px; border-bottom: 1px solid var(--so-line); text-align: right; font-size: 12px; }
+.so-layout-ledger thead th { background: var(--ui-surface-soft, #f4f5f1); color: var(--so-muted); font-size: 10px; font-weight: 800; letter-spacing: .035em; line-height: 1.35; white-space: normal; }
+.so-layout-ledger thead th:first-child, .so-layout-ledger tbody th { text-align: left; }
+.so-layout-ledger thead th:first-child { min-width: 170px; }
+.so-layout-ledger tbody th { font-size: 13px; font-weight: 750; overflow-wrap: anywhere; }
+.so-layout-ledger tbody tr:last-child th, .so-layout-ledger tbody tr:last-child td { border-bottom: 0; }
+.so-layout-ledger .so-table-placeholder { color: var(--so-muted); }
+.so-layout-ledger .so-table-empty { padding: 24px 12px; color: var(--so-muted); text-align: center; }
+@media (max-width: 700px) {
+  #page-stock-opname .so-layout-table { margin: 12px 0 24px; padding: 12px; }
+  .so-layout-table-scroll { overflow: visible; }
+  .so-layout-ledger, .so-layout-ledger tbody { display: block; width: 100%; }
+  .so-layout-ledger thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; clip-path: inset(50%); }
+  .so-layout-ledger tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; padding: 10px 0; border-bottom: 1px solid var(--so-line); }
+  .so-layout-ledger tbody tr:last-child { border-bottom: 0; }
+  .so-layout-ledger tbody th { grid-column: 1 / -1; padding: 8px 2px 10px; font-size: 14px; }
+  .so-layout-ledger tbody td { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0; padding: 7px 2px; border: 0; text-align: right; }
+  .so-layout-ledger tbody td::before { content: attr(data-label); color: var(--so-muted); font-size: 10px; font-weight: 700; text-align: left; }
+  .so-layout-ledger .so-table-empty { display: block; grid-column: 1 / -1; text-align: center; }
 }
