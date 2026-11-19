@@ -12,6 +12,7 @@ function createRuntime() {
   const calls = [];
   const rows = { guests: [], reservations: [], workspace_settings: [] };
   let failNextUpsert = false;
+  let reservationSeatResponse = null;
 
   class Query {
     constructor(table) { this.table = table; this.operation = 'select'; this.values = null; }
@@ -51,6 +52,7 @@ function createRuntime() {
     from(table) { return new Query(table); },
     async rpc(name, args) {
       calls.push({ rpc: name, args });
+      if (name === 'seat_guest_reservation') return { data: reservationSeatResponse, error: null };
       return { data: name === 'next_guest_ticket' ? 'WL-001' : name === 'next_reservation_code' ? 'RSV-001' : null, error: null };
     }
   };
@@ -66,7 +68,8 @@ function createRuntime() {
     client,
     calls,
     rows,
-    failOnce() { failNextUpsert = true; }
+    failOnce() { failNextUpsert = true; },
+    setReservationSeatResponse(value) { reservationSeatResponse = value; }
   };
 }
 
@@ -105,6 +108,78 @@ test('Ticket and reservation numbers are requested from database RPCs', async ()
   assert.deepEqual(calls.filter(call => call.rpc).map(call => call.rpc), [
     'next_guest_ticket', 'next_reservation_code'
   ]);
+});
+
+
+test('Reservation seating is delegated to the atomic database RPC', async () => {
+  const { runtime, client, calls, setReservationSeatResponse } = createRuntime();
+  await runtime.GuestOpsService.initialize(client, 'workspace-1');
+  setReservationSeatResponse({
+    created: true,
+    guest: {
+      id: 'guest-seated-1', workspace_id: 'workspace-1', reservation_id: 'reservation-1',
+      ticket: 'WL-009', service_date: '2026-11-19', guest_name: 'Tamu Reservasi',
+      pack: 3, phone: '08123456789', smoking: false, status: 'seated',
+      created_at: '2026-11-19T10:00:00.123Z', seated_at: '2026-11-19T10:00:00.123Z',
+      resolved_at: '2026-11-19T10:00:00.123Z', table_label: 'VIP 2'
+    },
+    reservation: {
+      id: 'reservation-1', workspace_id: 'workspace-1', code: 'RSV-009',
+      reservation_date: '2026-11-19', reservation_time: '19:00:00',
+      guest_name: 'Tamu Reservasi', pack: 3, phone: '08123456789',
+      smoking: 'Non Smoking', note: null, table_label: 'VIP 2',
+      status: 'seated', created_at: '2026-11-18T10:00:00.000Z'
+    }
+  });
+
+  const result = await runtime.GuestOpsService.seatReservation('reservation-1', ' VIP 2 ');
+
+  const call = calls.find(item => item.rpc === 'seat_guest_reservation');
+  assert.deepEqual(JSON.parse(JSON.stringify(call.args)), {
+    p_reservation_id: 'reservation-1',
+    p_table_label: 'VIP 2'
+  });
+  assert.equal(result.created, true);
+  assert.equal(result.guest.ticket, 'WL-009');
+  assert.equal(result.guest.reservationId, 'reservation-1');
+  assert.equal(result.reservation.status, 'seated');
+  assert.equal(result.reservation.table, 'VIP 2');
+  assert.equal(calls.some(item => ['guests', 'reservations'].includes(item.table) && ['insert', 'upsert'].includes(item.operation)), false);
+});
+
+test('Reservation seating returns the existing guest for a safe retry', async () => {
+  const { runtime, client, setReservationSeatResponse } = createRuntime();
+  await runtime.GuestOpsService.initialize(client, 'workspace-1');
+  setReservationSeatResponse({
+    created: false,
+    guest: {
+      id: 'guest-seated-1', workspace_id: 'workspace-1', reservation_id: 'reservation-1',
+      ticket: 'WL-009', service_date: '2026-11-19', guest_name: 'Tamu Reservasi',
+      pack: 3, phone: null, smoking: null, status: 'seated',
+      created_at: '2026-11-19T10:00:00.000Z', seated_at: '2026-11-19T10:00:00.000Z',
+      resolved_at: '2026-11-19T10:00:00.000Z', table_label: 'Meja 05'
+    },
+    reservation: {
+      id: 'reservation-1', workspace_id: 'workspace-1', code: 'RSV-009',
+      reservation_date: '2026-11-19', reservation_time: '19:00:00',
+      guest_name: 'Tamu Reservasi', pack: 3, phone: null, smoking: null,
+      note: null, table_label: 'Meja 05', status: 'seated',
+      created_at: '2026-11-18T10:00:00.000Z'
+    }
+  });
+
+  const result = await runtime.GuestOpsService.seatReservation('reservation-1', 'Meja 05');
+  assert.equal(result.created, false);
+  assert.equal(result.guest.ticket, 'WL-009');
+  assert.equal(result.reservation.table, 'Meja 05');
+});
+
+test('Reservation seating rejects invalid table labels before calling the database', async () => {
+  const { runtime, client, calls } = createRuntime();
+  await runtime.GuestOpsService.initialize(client, 'workspace-1');
+
+  await assert.rejects(runtime.GuestOpsService.seatReservation('reservation-1', ' '.repeat(81)), /Nomor atau nama meja belum sesuai/);
+  assert.equal(calls.some(item => item.rpc === 'seat_guest_reservation'), false);
 });
 
 test('Guest Operations persists guest, reservation, and workspace settings', async () => {

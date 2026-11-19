@@ -555,62 +555,35 @@ async function confirmSeatReservation(event, id) {
   const form = event.target;
   const submitButton = event.submitter || form.querySelector('button[type="submit"]');
   const restoreButton = beginReservationSeatLoading(submitButton);
-  const now = Date.now();
-  const guest = {
-    id: uid(),
-    ticket: '',
-    day: todayKey(),
-    name: reservation.name,
-    pack: reservation.pack,
-    phone: reservation.phone,
-    status: 'seated',
-    source: 'reservation',
-    reservationId: reservation.id,
-    reservationCode: reservation.code,
-    reservationTable: table,
-    created: now,
-    resolved: now,
-    seatedAt: now,
-    audit: [{
-      at: now,
-      label: 'Reservasi ' + reservation.code + ' · Duduk',
-      detail: 'Meja ' + table
-    }]
-  };
-
-  const previousReservation = {
-    status: reservation.status,
-    guestId: reservation.guestId,
-    table: reservation.table,
-    seatedAt: reservation.seatedAt
-  };
 
   try {
-    guest.ticket = await window.GuestOpsService.nextTicket(todayKey());
-    state.guests.push(guest);
-    reservation.status = 'seated';
-    reservation.guestId = guest.id;
-    reservation.table = table;
-    reservation.seatedAt = now;
+    const result = await window.GuestOpsService.seatReservation(id, table);
+    const guest = {
+      ...result.guest,
+      source: 'reservation',
+      audit: state.guests.find(item => item.id === result.guest.id)?.audit || []
+    };
+    const existingGuest = state.guests.find(item => item.id === guest.id);
+    if (existingGuest) Object.assign(existingGuest, guest);
+    else state.guests.push(guest);
+
+    Object.assign(reservation, {
+      status: result.reservation.status,
+      guestId: guest.id,
+      table: result.reservation.table || guest.tableLabel,
+      seatedAt: guest.seatedAt
+    });
+
     renderAll();
-
-    if (await save() === false) {
-      state.guests = state.guests.filter(item => item.id !== guest.id);
-      Object.assign(reservation, previousReservation);
-      renderAll();
-      toast('Tamu belum berhasil didudukkan. Coba lagi.');
-      return false;
-    }
-
     if (form.isConnected && $('sheet')?.contains(form)) closeSheet();
-    toast('Tamu masuk ke catatan operasional · ' + guest.ticket);
+
+    toast(result.created
+      ? 'Tamu masuk ke catatan operasional · ' + guest.ticket
+      : 'Reservasi sudah didudukkan sebelumnya · ' + guest.ticket);
     return true;
   } catch (error) {
-    state.guests = state.guests.filter(item => item.id !== guest.id);
-    Object.assign(reservation, previousReservation);
-    renderAll();
     console.error(error);
-    toast('Tamu belum berhasil didudukkan. Coba lagi.');
+    toast(error.message || 'Tamu belum berhasil didudukkan. Coba lagi.');
     return false;
   } finally {
     reservationSeatInFlight.delete(id);
