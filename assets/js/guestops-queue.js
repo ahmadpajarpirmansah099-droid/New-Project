@@ -239,7 +239,6 @@ function openDashboardRangePicker(trigger) {
   dialog.className = 'dashboard-date-dialog';
   dialog.setAttribute('aria-label', operational ? 'Pilih rentang tanggal operasional' : 'Pilih rentang tanggal dashboard');
   dialog.innerHTML = '<header><div><small>' + (operational ? 'FILTER OPERASIONAL' : 'FILTER DASHBOARD') + '</small><h2>Pilih rentang tanggal</h2></div><button type="button" class="dashboard-date-close" aria-label="Tutup">×</button></header>' +
-    '<div class="dashboard-range-summary"><div><small>Dari</small><strong data-range-start></strong></div><span aria-hidden="true">→</span><div><small>Sampai</small><strong data-range-end></strong></div></div>' +
     '<div class="dashboard-calendar-panel"><div class="dashboard-calendar-nav"><strong></strong><div><button type="button" data-dashboard-month="-1" aria-label="Bulan sebelumnya">‹</button><button type="button" data-dashboard-month="1" aria-label="Bulan berikutnya">›</button></div></div><div class="dashboard-calendar-grid"></div></div>' +
     '<p class="dashboard-calendar-limit" role="status">Pilih tanggal awal, lalu tanggal akhir. Maksimal 1 bulan.</p>' +
     '<footer><button type="button" class="dashboard-range-clear">Hapus</button><button type="button" class="dashboard-range-apply">Terapkan rentang</button></footer>';
@@ -251,8 +250,6 @@ function openDashboardRangePicker(trigger) {
     const offset = cursor.getUTCDay();
     const dayCount = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
     const max = start && !end ? dashboardDateLimit(start) : todayKey();
-    dialog.querySelector('[data-range-start]').textContent = start ? dashboardDateText(start) : 'Pilih tanggal';
-    dialog.querySelector('[data-range-end]').textContent = end ? dashboardDateText(end) : 'Pilih tanggal';
     dialog.querySelector('.dashboard-range-apply').disabled = !start || !end;
     dialog.querySelector('.dashboard-calendar-nav strong').textContent = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(cursor);
     dialog.querySelector('[data-dashboard-month="1"]').disabled = new Date(Date.UTC(year, month + 1, 1)).toISOString().slice(0, 10) > todayKey();
