@@ -506,6 +506,11 @@
   ${formHTML()}${historyHTML()}`;
   page().innerHTML+=itemTableHTML();
  }
+ function compactItemName(value){
+  const name=String(value||'Tanpa nama').trim();
+  if(name.length<=15)return name;
+  return name.slice(0,7).trimEnd()+'.. '+name.slice(-6).trimStart();
+ }
  function itemTableHTML(){
   const all=catalog().filter(row=>/^[mw]:/.test(String(row.key||'')));
   const materials=all.filter(row=>row.key.startsWith('m:')).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'id'));
@@ -518,7 +523,7 @@
    const outgoingQty=Number(movements.outgoing[row.key]??0)||0;
    const operationalQty=Number(movements.operational[row.key]??0)||0;
    const systemQty=openingQty+incomingQty-outgoingQty-operationalQty;
-   return '<tr><th scope="row" data-label="ITEM">'+e(row.name||'Tanpa nama')+'</th>'+columns.map(label=>{
+   return '<tr><th scope="row" data-label="ITEM"><span class="so-item-name" title="'+e(row.name||'Tanpa nama')+'"><span class="so-item-name-full">'+e(row.name||'Tanpa nama')+'</span><span class="so-item-name-mobile">'+e(compactItemName(row.name))+'</span></span></th>'+columns.map(label=>{
     let value=null;
     if(label==='STOK AWAL')value=openingQty;
     else if(label==='BARANG MASUK')value=incomingQty;
