@@ -666,6 +666,10 @@ test('new Stock Opname table shows active master items and all requested columns
     assert.match(t.page.innerHTML, new RegExp(label));
   }
   assert.match(t.page.innerHTML, /Susu/);
+  assert.match(t.page.innerHTML, /data-label="STOK AWAL"><span>0 ML<\/span>/);
+  t.data.state.periods[0].opening['m:a'] = 125;
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="STOK AWAL"><span>125 ML<\/span>/);
   assert.doesNotMatch(t.page.innerHTML, /<th scope="row" data-label="ITEM">WIP<\/th>/);
   assert.doesNotMatch(t.page.innerHTML, /<th scope="row" data-label="ITEM">Menu<\/th>/);
 });
