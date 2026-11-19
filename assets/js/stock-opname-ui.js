@@ -539,7 +539,7 @@
    }).join('')+'</tr>';
   }).join('');
   let body=renderRows(materials);
-  if(wips.length)body+='<tr class="so-table-group"><th scope="rowgroup" colspan="7">WIP</th></tr>'+renderRows(wips);
+  if(wips.length)body+='<tr class="so-table-group"><th scope="rowgroup" colspan="7"><span class="so-table-header-pill">WIP</span></th></tr>'+renderRows(wips);
   if(!materials.length&&!wips.length)body='<tr><td class="so-table-empty" colspan="7">Belum ada Master Barang atau WIP aktif di divisi ini.</td></tr>';
   return '<section class="so-layout-table" aria-label="Tabel Stock Opname"><div class="so-layout-table-scroll"><table class="so-layout-ledger"><thead><tr><th scope="col"><span class="so-table-header-pill">ITEM</span></th>'+columns.map(label=>'<th scope="col"><span class="so-table-header-pill">'+e(label)+'</span></th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div></section>';
  }
