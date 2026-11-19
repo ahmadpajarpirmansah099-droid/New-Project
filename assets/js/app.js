@@ -134,7 +134,7 @@ function returnToGuestOperational() {
 }
 
 function setWorkspaceHeader(page) {
-  const isMasterWorkspace = ['master-items', 'wips', 'menus', 'all-divisions', 'stock-opname', 'stock-dashboard'].includes(page);
+  const isMasterWorkspace = ['master-items', 'wips', 'menus', 'all-divisions', 'stock-opname'].includes(page);
   const mark = $('workspaceBrandmark');
   const name = $('workspaceBrandname');
   const meta = $('workspaceBrandmeta');
@@ -149,7 +149,6 @@ function setWorkspaceHeader(page) {
       'wips': 'WIP PRODUKSI',
       'menus': 'MENU & RESEP',
       'stock-opname': 'STOCK OPNAME',
-      'stock-dashboard': 'DASHBOARD STOCK OPNAME'
     };
     name.textContent = pageTitles[page] || 'MASTER BARANG';
     const context = window.AppAuth?.getContext();
@@ -238,7 +237,6 @@ function loadUserGuideFeature() {
 }
 
 function go(page) {
-  if (page === 'stock-dashboard' && !window.StockOpnameService?.dashboardAvailable()) { toast('Dashboard Stock Opname belum tersedia untuk akun/divisi ini.'); return; }
   if (page === 'stock-opname' && !window.StockOpnameService?.available()) { toast('Stock Opname belum aktif untuk akun/divisi ini.'); return; }
   if (page === 'user-guide' && !window.UserGuideInitialized) {
     loadUserGuideFeature()
@@ -266,7 +264,7 @@ function go(page) {
   $('page-' + page).classList.add('active');
 
   document.querySelectorAll('.drawer-item').forEach(item => {
-    item.classList.toggle('active', item.dataset.page === (page === 'stock-dashboard' ? 'stock-opname' : page));
+    item.classList.toggle('active', item.dataset.page === page);
   });
 
   $('fab').style.display = ['settings', 'user-monitoring', 'user-guide'].includes(page) ? 'none' : 'grid';
@@ -284,7 +282,6 @@ function go(page) {
   if (window.WipUI && page === 'wips') window.WipUI.renderPage(page);
   if (window.MenuUI && page === 'menus') window.MenuUI.renderPage(page);
   if (page === 'stock-opname') window.StockOpnameUI?.render();
-  if (page === 'stock-dashboard') window.StockDashboardUI?.show();
   window.scrollTo({ top: 0, behavior: 'auto' });
 
 }
@@ -292,7 +289,7 @@ function go(page) {
 function toggleQuickMenu() {
   const menu = $('quickMenu');
   const open = !menu.classList.contains('show');
-  const context = ['stock-opname','stock-dashboard'].some(id => $('page-' + id)?.classList.contains('active')) ? 'stock' : ['master-items','wips','menus'].some(page => $('page-' + page).classList.contains('active')) ? 'master' : 'guest';
+  const context = ['stock-opname'].some(id => $('page-' + id)?.classList.contains('active')) ? 'stock' : ['master-items','wips','menus'].some(page => $('page-' + page).classList.contains('active')) ? 'master' : 'guest';
 
   if (open && $('menuDrawer').classList.contains('show')) {
     closeMenu();
@@ -336,7 +333,6 @@ function closeQuickMenu() {
 
 function runQuickAction(action) {
   closeQuickMenu();
-  if (action === 'stock:dashboard') { go('stock-dashboard'); return; }
   if (action.startsWith('stock:')) { go('stock-opname'); window.StockOpnameUI?.open(action.slice(6)); return; }
 
   if (action === 'add') {

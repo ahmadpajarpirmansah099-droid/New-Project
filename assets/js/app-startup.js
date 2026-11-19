@@ -46,8 +46,7 @@ function isGuestOperationalPageActive() {
 
 function resolveWorkspaceLandingPage(requestedPage, authContext, hasGuestOpsAccess) {
   const requestedPageExists = requestedPage && $('page-' + requestedPage) &&
-    (requestedPage !== 'stock-opname' || window.StockOpnameService?.available()) &&
-    (requestedPage !== 'stock-dashboard' || window.StockOpnameService?.dashboardAvailable());
+    (requestedPage !== 'stock-opname' || window.StockOpnameService?.available());
   const guestPageUnavailable = GUEST_OPERATION_PAGES.includes(requestedPage) && !hasGuestOpsAccess;
   const divisionsOverviewUnavailable = requestedPage === 'all-divisions' && authContext.divisionMode !== 'all';
 
