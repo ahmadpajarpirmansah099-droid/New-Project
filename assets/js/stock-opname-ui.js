@@ -27,13 +27,14 @@
   // After completion, only documents belonging to the next active period count.
   if(p?.status==='closed')scopedDocuments=[];
   else if(p?.previous_id)scopedDocuments=documents.filter(doc=>doc?.period_id===p.id);
-  const totals={incoming:Object.create(null),outgoing:Object.create(null)};
+  const totals={incoming:Object.create(null),outgoing:Object.create(null),operational:Object.create(null)};
   for(const doc of scopedDocuments){
-   if(doc?.void===true||String(doc?.void)==='true'||!['receipt','expense'].includes(doc?.type))continue;
+   if(doc?.void===true||String(doc?.void)==='true'||!['receipt','expense','production','sales'].includes(doc?.type))continue;
    for(const posting of Array.isArray(doc.postings)?doc.postings:[]){
     const key=String(posting?.key||''),qty=Number(posting?.qty);
+    // The table is grouped by Master Barang. WIP/menu postings are not material rows.
     if(!key.startsWith('m:')||!Number.isFinite(qty))continue;
-    const bucket=doc.type==='receipt'?totals.incoming:totals.outgoing;
+    const bucket=doc.type==='receipt'?totals.incoming:doc.type==='expense'?totals.outgoing:totals.operational;
     bucket[key]=(bucket[key]||0)+Math.abs(qty);
    }
   }
@@ -505,6 +506,7 @@
    if(label==='STOK AWAL')value=opening[row.key]??0;
    else if(label==='BARANG MASUK')value=movements.incoming[row.key]??0;
    else if(label==='BARANG KELUAR')value=movements.outgoing[row.key]??0;
+   else if(label==='TERPAKAI OPERASIONAL')value=movements.operational[row.key]??0;
    return '<td data-label="'+e(label)+'">'+(value!==null?'<span>'+number(value)+' '+e(row.unit||'')+'</span>':'<span class="so-table-placeholder">—</span>')+'</td>';
   }).join('')+'</tr>').join(''):'<tr><td class="so-table-empty" colspan="7">Belum ada Master Barang aktif di divisi ini.</td></tr>';
   return '<section class="so-layout-table" aria-label="Tabel Stock Opname"><div class="so-layout-table-scroll"><table class="so-layout-ledger"><thead><tr><th scope="col">ITEM</th>'+columns.map(label=>'<th scope="col">'+e(label)+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div></section>';
