@@ -445,34 +445,11 @@
   </section>`;
  }
  function render(){
-  if(!page())return;const d=get();
-  if(!d){page().innerHTML='<p class="so-notice">Stock Opname belum siap.</p>';return;}
-  if(d.developer){page().innerHTML=(d.enabled?'<button type="button" data-sd="open">Dashboard Stock Opname</button>':'')+'<div class="so-head"><h1>Stock Opname</h1></div><section class="so-panel"><h2>Aktivasi divisi</h2><p>Atur akses untuk outlet dan divisi yang sedang dipilih. Transaksi dikerjakan admin divisi.</p><p>Status: '+(d.enabled?'Aktif':'Nonaktif')+'</p>'+button(d.enabled?'Nonaktifkan akses':'Aktifkan akses','configure','',true)+'</section>';return;}
-  if(!d.state){page().innerHTML='<p class="so-notice">Stock Opname belum tersedia untuk akun/divisi ini.</p>';return;}
-  if(staleOpeningDraft(form)){service.clearDraft('initial');form=null;draftSaved=false;notice='Draft Stock Awal lama diabaikan setelah reset. Isi ulang manual.';}
-  if(staleCorrectionDraft(form)){service.clearDraft('close');form=null;draftSaved=false;notice='Koreksi opname sudah dibatalkan. Form koreksi lama ditutup.';}
-  const p=period(),last=d.state.periods.at(-1),b=balances(),negative=Object.values(b).some(n=>n<0);
-  let controls='';
-  if(!p)controls=button('Isi Stock Awal','open','data-so-kind="initial"',true);
-  else if(p.status==='opening_pending')controls=button('Isi Ulang Stock Awal','open','data-so-kind="initial"',true);
-  else if(last?.status==='closed')controls=button('Jadikan Stock Awal Berikutnya','activate','',true)+button('Buka Kembali Opname','reopen');
-  else if(last?.status==='held'&&p?.status==='closed')controls=button('Konfirmasi Stock Awal Hasil Koreksi','reactivate','',true);
-  else controls=button('Isi Stock Opname','open','data-so-kind="close"',true)+(p.status==='reopened'&&d.state.periods.length===1?button('Isi Ulang Stock Awal','reset-opening'):'')+(d.state.periods.some(x=>x.status==='closed')&&p?.status==='active'?button('Buka Opname Terakhir','reopen'):'');
-  const context=root.AppAuth?.getContext();
-  const scope=[context?.workspaceName,context?.activeDivisionName].filter(Boolean).join(' · ');
-  const status=p?periodStatus[p.status]||p.status:'Isi Stock Awal untuk memulai';
-  page().innerHTML=`<header class="so-head">
-   <div><h1>Stock Opname</h1>${scope?`<p>${e(scope)}</p>`:''}</div>
-   <div class="so-actions"><button type="button" data-sd="open">Dashboard</button>${button('Muat Ulang','refresh')}</div>
-  </header>
-  <section class="so-overview" aria-label="Periode stok" data-so-period-status="${e(p?.status||'')}">
-   <div class="so-period-copy">${p?`<span>Periode mulai ${e(dateLabel(p.start))}</span>`:''}<strong>${e(status)}</strong></div>
-   <div class="so-actions">${controls}${button('Pulihkan Draft','restore')}</div>
-  </section>
-  ${notice?`<p class="so-notice" role="alert">${e(notice)}</p>`:''}
-  ${negative&&p?.status!=='opening_pending'?'<p class="so-notice so-warning">Ada stok sistem minus. Periksa transaksi dan cocokkan saat opname.</p>':''}
-  ${formHTML()}${historyHTML()}`;
+  const container=page();
+  if(!container)return;
+  container.replaceChildren();
  }
+
  async function submit(){
   if(!form)return;const k=form.kind,counts={},lines=[];
   for(const r of rowsForForm()){
