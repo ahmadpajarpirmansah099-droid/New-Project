@@ -557,3 +557,25 @@
   .so-layout-ledger thead th .so-table-header-pill { min-height: 28px; padding: 4px 2px; border-radius: 5px; font-size: 7px; }
   .so-layout-ledger .so-physical-input { min-height: 28px; padding: 3px 1px; border-radius: 4px; font-size: 8px; text-align: center; }
 }
+
+/* Center the WIP section label and reuse the lime table-header pill. */
+.so-layout-ledger tbody .so-table-group th { text-align: center; }
+.so-layout-ledger tbody .so-table-group .so-table-header-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  box-sizing: border-box;
+  padding: 6px 18px;
+  border-radius: 8px;
+  background: var(--ui-lime, #d9ef91);
+  color: var(--ui-ink, #20251a);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.25;
+  letter-spacing: .025em;
+  text-align: center;
+}
+@media (max-width: 700px) {
+  .so-layout-ledger tbody .so-table-group .so-table-header-pill { min-height: 26px; padding: 4px 14px; border-radius: 5px; font-size: 8px; }
+}
