@@ -675,7 +675,7 @@ test('new Stock Opname table shows active master items and all requested columns
   const t = runtime();
   t.data.catalog.push({ key: 'm:cup', name: 'Cup takeaway Dingin', unit: 'PCS' });
   t.ui.render();
-  for (const label of ['ITEM', 'STOK AWAL', 'BARANG MASUK', 'BARANG KELUAR', 'TERPAKAI OPERASIONAL', 'STOK SISTEM', 'STOK FISIK']) {
+  for (const label of ['NAMA ITEM', 'STOK AWAL', 'BARANG MASUK', 'BARANG KELUAR', 'TERPAKAI OPERASIONAL', 'STOK SISTEM', 'STOK FISIK']) {
     assert.match(t.page.innerHTML, new RegExp(label));
   }
   assert.match(t.page.innerHTML, /Susu/);
