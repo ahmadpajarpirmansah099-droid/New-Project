@@ -444,6 +444,7 @@
    ${total>historyLimit?`<div class="so-history-more">${button('Tampilkan lebih banyak','history-more')}</div>`:''}
   </section>`;
  }
+ // Keep the Stock Opname page empty while its layout is redesigned.
  function render(){
   const container=page();
   if(!container)return;
