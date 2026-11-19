@@ -472,6 +472,13 @@
   ${notice?`<p class="so-notice" role="alert">${e(notice)}</p>`:''}
   ${negative&&p?.status!=='opening_pending'?'<p class="so-notice so-warning">Ada stok sistem minus. Periksa transaksi dan cocokkan saat opname.</p>':''}
   ${formHTML()}${historyHTML()}`;
+  page().innerHTML+=itemTableHTML();
+ }
+ function itemTableHTML(){
+  const rows=(get()?.catalog||[]).filter(row=>String(row.key||'').startsWith('m:')).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'id'));
+  const columns=['STOK AWAL','BARANG MASUK','BARANG KELUAR','TERPAKAI OPERASIONAL','STOK SISTEM','STOK FISIK'];
+  const body=rows.length?rows.map(row=>'<tr><th scope="row" data-label="ITEM">'+e(row.name||'Tanpa nama')+'</th>'+columns.map(label=>'<td data-label="'+e(label)+'"><span class="so-table-placeholder">—</span></td>').join('')+'</tr>').join(''):'<tr><td class="so-table-empty" colspan="7">Belum ada Master Barang aktif di divisi ini.</td></tr>';
+  return '<section class="so-layout-table" aria-label="Tabel Stock Opname"><div class="so-layout-table-scroll"><table class="so-layout-ledger"><thead><tr><th scope="col">ITEM</th>'+columns.map(label=>'<th scope="col">'+e(label)+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div></section>';
  }
  async function submit(){
   if(!form)return;const k=form.kind,counts={},lines=[];
