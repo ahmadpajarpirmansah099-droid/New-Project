@@ -386,7 +386,7 @@ function renderQueue(){
     const searchText=(g.name+' '+g.ticket+' '+(reservation?.code||'')).toLowerCase();
     return g.day >= selectedOperationalStartDate && g.day <= selectedOperationalEndDate && matchesFilter(g) && searchText.includes(q);
   })
-  .sort((a,b)=>a.created-b.created);
+  .sort((a,b)=>['done','cancelled'].includes(activeFilter) ? b.created-a.created : a.created-b.created);
   $('queueList').innerHTML=list.length
   ? list.map((g,i)=>guestCard(g,i)).join('')
   : `<div class="empty"><div class="empty-icon">⌕</div><h3>Tidak ada antrean</h3><p>Coba ubah filter atau kata pencarian.</p></div>`;
