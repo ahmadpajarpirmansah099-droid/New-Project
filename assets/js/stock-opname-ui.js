@@ -531,13 +531,17 @@
     else if(label==='TERPAKAI OPERASIONAL')value=operationalQty;
     else if(label==='STOK SISTEM')value=systemQty;
     const negative=value!==null&&value<0;
+    if(label==='STOK FISIK'&&form?.kind==='close'){
+     const physical=form.counts?.[row.key]?.qty??'';
+     return '<td data-label="'+e(label)+'"><input class="so-physical-input" type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(row.key)+'" data-so-prop="qty" aria-label="Stok fisik '+e(row.name||'')+'" value="'+e(physical)+'" placeholder="Isi" /></td>';
+    }
     return '<td data-label="'+e(label)+'">'+(value!==null?'<span'+(negative?' class="so-table-negative"':'')+'>'+number(value)+' '+e(row.unit||'')+'</span>':'<span class="so-table-placeholder">—</span>')+'</td>';
    }).join('')+'</tr>';
   }).join('');
   let body=renderRows(materials);
   if(wips.length)body+='<tr class="so-table-group"><th scope="rowgroup" colspan="7">WIP</th></tr>'+renderRows(wips);
   if(!materials.length&&!wips.length)body='<tr><td class="so-table-empty" colspan="7">Belum ada Master Barang atau WIP aktif di divisi ini.</td></tr>';
-  return '<section class="so-layout-table" aria-label="Tabel Stock Opname"><div class="so-layout-table-scroll"><table class="so-layout-ledger"><thead><tr><th scope="col">ITEM</th>'+columns.map(label=>'<th scope="col">'+e(label)+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div></section>';
+  return '<section class="so-layout-table" aria-label="Tabel Stock Opname"><div class="so-layout-table-scroll"><table class="so-layout-ledger"><thead><tr><th scope="col"><span class="so-table-header-pill">ITEM</span></th>'+columns.map(label=>'<th scope="col"><span class="so-table-header-pill">'+e(label)+'</span></th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div></section>';
  }
  async function submit(){
   if(!form)return;const k=form.kind,counts={},lines=[];
