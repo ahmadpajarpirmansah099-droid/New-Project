@@ -497,3 +497,7 @@
   .so-layout-ledger tbody td::before { content: none; }
   .so-layout-ledger .so-table-empty { display: table-cell; text-align: center; }
 }
+
+@media (max-width: 700px) {
+  .so-layout-ledger tbody .so-table-group th { padding: 8px 4px; font-size: 8px; }
+}
