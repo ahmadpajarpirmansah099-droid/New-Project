@@ -1,7 +1,7 @@
 /* =========================================================
     3. WAITING LIST: ADD GUEST AND QUEUE NUMBER
     ========================================================= */
-function openAdd(){sheetGuest=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" data-app-action="closeSheet">✕</button></div><form data-app-submit="saveGuest"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" data-app-action="changePack" data-app-value="-1">−</button><strong id="packValue">2</strong><button type="button" data-app-action="changePack" data-app-value="1">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span class="text-muted-note">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg" data-selected="waiting"><button type="button" class="selected" id="segWait" data-app-action="chooseInitial" data-app-value="waiting">Menunggu</button><button type="button" id="segSeated" data-app-action="chooseInitial" data-app-value="seated">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="field"><label>Area merokok *</label><div class="seg smoking-seg" data-selected=""><button type="button" id="segSmoking" data-app-action="chooseSmoking" data-app-value="true">Smoking</button><button type="button" id="segNonSmoking" data-app-action="chooseSmoking" data-app-value="false">Non Smoking</button></div><input type="hidden" id="guestSmoking" value=""></div><div class="field" id="initialTableField" hidden><label for="initialTableLabel">Nomor meja *</label><input id="initialTableLabel" type="text" maxlength="30" autocomplete="off" placeholder="Masukkan nomor meja"></div><div class="sheet-actions"><button type="button" class="secondary" data-app-action="closeSheet">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`)}
+function openAdd(){sheetGuest=null;pendingGuestDraft=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" data-app-action="closeSheet">✕</button></div><form data-app-submit="saveGuest"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" data-app-action="changePack" data-app-value="-1">−</button><strong id="packValue">2</strong><button type="button" data-app-action="changePack" data-app-value="1">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span class="text-muted-note">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg" data-selected="waiting"><button type="button" class="selected" id="segWait" data-app-action="chooseInitial" data-app-value="waiting">Menunggu</button><button type="button" id="segSeated" data-app-action="chooseInitial" data-app-value="seated">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="field"><label>Area merokok *</label><div class="seg smoking-seg" data-selected=""><button type="button" id="segSmoking" data-app-action="chooseSmoking" data-app-value="true">Smoking</button><button type="button" id="segNonSmoking" data-app-action="chooseSmoking" data-app-value="false">Non Smoking</button></div><input type="hidden" id="guestSmoking" value=""></div><div class="field" id="initialTableField" hidden><label for="initialTableLabel">Nomor meja *</label><input id="initialTableLabel" type="text" maxlength="30" autocomplete="off" placeholder="Masukkan nomor meja"></div><div class="sheet-actions"><button type="button" class="secondary" data-app-action="closeSheet">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`)}
 function changePack(d){
   let v=Math.max(1,Math.min(30,Number($('guestPack').value)+d));
   $('guestPack').value=v;
@@ -51,6 +51,8 @@ function chooseInitial(status) {
   );
 }
 let guestSaveInFlight = false;
+// Reused while the add form is open, so retrying after a failed save keeps the same id and ticket.
+let pendingGuestDraft = null;
 function beginGuestRegistrationLoading(button) {
   if (!button || !(button instanceof HTMLButtonElement)) return () => {};
   const previousHtml = button.innerHTML;
@@ -89,24 +91,26 @@ async function saveGuest(e){
       $('initialTableLabel').focus();
       return;
     }
+    const draft = pendingGuestDraft || (pendingGuestDraft = { id: uid(), day, created: now, ticket: '' });
+    if (!draft.ticket) draft.ticket = await window.GuestOpsService.nextTicket(day);
     const g={
-      id:uid(),ticket:'',day,
+      id:draft.id,ticket:draft.ticket,day:draft.day,
       name:$('guestName').value.trim(),
       pack:Number($('guestPack').value),
       phone:$('guestPhone').value.trim(),
       smoking:smokingValue === 'true',
-      status,created:now,
+      status,created:draft.created,
       tableLabel:tableLabel||'',
       resolved:status==='seated'?now:null,
-      audit:[{at:now,label:'Terdaftar',detail:$('guestPack').value+' pack'}]
+      audit:[{at:draft.created,label:'Terdaftar',detail:$('guestPack').value+' pack'}]
     };
-    if(status==='seated')g.audit.push({at:now,label:'Langsung Duduk',detail:'Meja '+tableLabel});
-    g.ticket = await window.GuestOpsService.nextTicket(day);
+    if(status==='seated')g.audit.push({at:draft.created,label:'Langsung Duduk',detail:'Meja '+tableLabel});
     state.guests.push(g);
     if (await save() === false) {
       state.guests = state.guests.filter(item => item.id !== g.id);
       return;
     }
+    pendingGuestDraft = null;
     closeSheet();
     renderAll();
     toast('Tamu berhasil ditambahkan · '+g.ticket);
