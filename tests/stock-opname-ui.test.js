@@ -658,3 +658,14 @@ test('expense selection updates form sections without replacing page or form', a
  assert.equal(t.draft('expense').category,'Move');
  assert.equal(t.writes.length,0);
 });
+
+test('new Stock Opname table shows active master items and all requested columns', () => {
+  const t = runtime();
+  t.ui.render();
+  for (const label of ['ITEM', 'STOK AWAL', 'BARANG MASUK', 'BARANG KELUAR', 'TERPAKAI OPERASIONAL', 'STOK SISTEM', 'STOK FISIK']) {
+    assert.match(t.page.innerHTML, new RegExp(label));
+  }
+  assert.match(t.page.innerHTML, /Susu/);
+  assert.doesNotMatch(t.page.innerHTML, /<th scope="row" data-label="ITEM">WIP<\/th>/);
+  assert.doesNotMatch(t.page.innerHTML, /<th scope="row" data-label="ITEM">Menu<\/th>/);
+});
