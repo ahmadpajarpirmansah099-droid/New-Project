@@ -659,6 +659,18 @@ test('expense selection updates form sections without replacing page or form', a
  assert.equal(t.writes.length,0);
 });
 
+test('Stock Opname table uses lime header pills and inline physical counts during opname', async () => {
+  const t = runtime();
+  await t.ui.open('close');
+  t.ui.render();
+  assert.match(t.page.innerHTML, /class="so-table-header-pill">STOK AWAL<\/span>/);
+  assert.match(t.page.innerHTML, /class="so-table-header-pill">STOK FISIK<\/span>/);
+  assert.match(t.page.innerHTML, /class="so-physical-input"[^>]*data-so-key="m:a"[^>]*placeholder="Isi"/);
+  t.input({soKey:'m:a',soProp:'qty'},'17');
+  assert.equal(t.draft('close').counts['m:a'].qty,'17');
+  assert.match(t.page.innerHTML, /so-layout-ledger/);
+});
+
 test('new Stock Opname table shows active master items and all requested columns', () => {
   const t = runtime();
   t.data.catalog.push({ key: 'm:cup', name: 'Cup takeaway Dingin', unit: 'PCS' });
