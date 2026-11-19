@@ -468,6 +468,7 @@
 .so-layout-ledger tbody th { font-size: 13px; font-weight: 750; overflow-wrap: anywhere; }
 .so-layout-ledger tbody tr:last-child th, .so-layout-ledger tbody tr:last-child td { border-bottom: 0; }
 .so-layout-ledger .so-table-placeholder { color: var(--so-muted); }
+.so-layout-ledger .so-table-negative { color: var(--so-shortage); font-weight: 800; }
 .so-layout-ledger .so-table-empty { padding: 24px 12px; color: var(--so-muted); text-align: center; }
 @media (max-width: 700px) {
   #page-stock-opname .so-layout-table { margin: 10px 0 20px; padding: 6px; }
