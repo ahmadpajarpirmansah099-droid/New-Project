@@ -470,14 +470,27 @@
 .so-layout-ledger .so-table-placeholder { color: var(--so-muted); }
 .so-layout-ledger .so-table-empty { padding: 24px 12px; color: var(--so-muted); text-align: center; }
 @media (max-width: 700px) {
-  #page-stock-opname .so-layout-table { margin: 12px 0 24px; padding: 12px; }
-  .so-layout-table-scroll { overflow: visible; }
-  .so-layout-ledger, .so-layout-ledger tbody { display: block; width: 100%; }
-  .so-layout-ledger thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; clip-path: inset(50%); }
-  .so-layout-ledger tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; padding: 10px 0; border-bottom: 1px solid var(--so-line); }
-  .so-layout-ledger tbody tr:last-child { border-bottom: 0; }
-  .so-layout-ledger tbody th { grid-column: 1 / -1; padding: 8px 2px 10px; font-size: 14px; }
-  .so-layout-ledger tbody td { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0; padding: 7px 2px; border: 0; text-align: right; }
-  .so-layout-ledger tbody td::before { content: attr(data-label); color: var(--so-muted); font-size: 10px; font-weight: 700; text-align: left; }
-  .so-layout-ledger .so-table-empty { display: block; grid-column: 1 / -1; text-align: center; }
+  #page-stock-opname .so-layout-table { margin: 10px 0 20px; padding: 6px; }
+  .so-layout-table-scroll { width: 100%; overflow: visible; }
+  .so-layout-ledger { display: table; width: 100%; table-layout: fixed; }
+  .so-layout-ledger thead { position: static; width: auto; height: auto; overflow: visible; clip: auto; clip-path: none; white-space: normal; }
+  .so-layout-ledger tbody { display: table-row-group; width: auto; }
+  .so-layout-ledger thead tr, .so-layout-ledger tbody tr { display: table-row; }
+  .so-layout-ledger thead th, .so-layout-ledger tbody th, .so-layout-ledger tbody td {
+    display: table-cell;
+    min-width: 0;
+    padding: 6px 2px;
+    font-size: 8px;
+    line-height: 1.2;
+    text-align: center;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .so-layout-ledger thead th { font-size: 7px; letter-spacing: 0; }
+  .so-layout-ledger thead th:first-child, .so-layout-ledger tbody th { width: 22%; text-align: left; }
+  .so-layout-ledger thead th:not(:first-child), .so-layout-ledger tbody td { width: 13%; }
+  .so-layout-ledger tbody th { font-size: 8px; font-weight: 750; }
+  .so-layout-ledger tbody td::before { content: none; }
+  .so-layout-ledger .so-table-empty { display: table-cell; text-align: center; }
 }
