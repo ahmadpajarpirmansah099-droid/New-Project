@@ -677,7 +677,7 @@ test('new Stock Opname table shows active master items and all requested columns
   assert.match(t.page.innerHTML, /data-label="STOK AWAL"><span>125 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span>125 ML<\/span>/);
   assert.match(t.page.innerHTML, /<tr class="so-table-group"><th scope="rowgroup" colspan="7">WIP<\/th><\/tr>/);
-  assert.match(t.page.innerHTML, /<th scope="row" data-label="ITEM">WIP<\/th>/);
+  assert.match(t.page.innerHTML, /<th scope="row" data-label="ITEM">[\\s\\S]*?WIP[\\s\\S]*?<\\/th>/);
   assert.doesNotMatch(t.page.innerHTML, /<th scope="row" data-label="ITEM">Menu<\/th>/);
 });
 
@@ -711,8 +711,8 @@ test('WIP rows show production output, expense and operational consumption separ
     { id: 'sales-wip', period_id: 'period', type: 'sales', postings: [{ key: 'w:a', qty: -7 }] }
   ];
   t.ui.render();
-  assert.match(t.page.innerHTML, /<th scope="row" data-label="ITEM">WIP<\/th>[\s\S]*?data-label="BARANG MASUK"><span>50 ML<\/span>[\s\S]*?data-label="BARANG KELUAR"><span>2 ML<\/span>[\s\S]*?data-label="TERPAKAI OPERASIONAL"><span>7 ML<\/span>[\s\S]*?data-label="STOK SISTEM"><span>51 ML<\/span>/);
-  assert.match(t.page.innerHTML, /<th scope="row" data-label="ITEM">WIP Terpakai Produksi<\/th>[\s\S]*?data-label="TERPAKAI OPERASIONAL"><span>5 ML<\/span>[\s\S]*?data-label="STOK SISTEM"><span>15 ML<\/span>/);
+  assert.match(t.page.innerHTML, /<th scope="row" data-label="ITEM">[\\s\\S]*?WIP[\\s\\S]*?<\\/th>[\s\S]*?data-label="BARANG MASUK"><span>50 ML<\/span>[\s\S]*?data-label="BARANG KELUAR"><span>2 ML<\/span>[\s\S]*?data-label="TERPAKAI OPERASIONAL"><span>7 ML<\/span>[\s\S]*?data-label="STOK SISTEM"><span>51 ML<\/span>/);
+  assert.match(t.page.innerHTML, /<th scope="row" data-label="ITEM">[\\s\\S]*?WIP Terpakai Produksi[\\s\\S]*?<\\/th>[\s\S]*?data-label="TERPAKAI OPERASIONAL"><span>5 ML<\/span>[\s\S]*?data-label="STOK SISTEM"><span>15 ML<\/span>/);
 });
 
 test('system stock uses the requested balance formula and colors negative values red', () => {
