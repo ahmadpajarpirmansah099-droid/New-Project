@@ -297,6 +297,53 @@
     return operation;
   }
 
+  async function seatReservation(reservationId, tableLabel) {
+    requireReady();
+
+    const normalizedTable = String(tableLabel || '').trim();
+    if (!reservationId || !normalizedTable || normalizedTable.length > 80) {
+      throw new Error('Nomor atau nama meja belum sesuai.');
+    }
+
+    const requestedGeneration = serviceGeneration;
+    const run = async () => {
+      const guard = await assertWorkspaceSession(requestedGeneration);
+      const { data, error } = await client.rpc('seat_guest_reservation', {
+        p_reservation_id: reservationId,
+        p_table_label: normalizedTable
+      });
+      if (error) throw error;
+      await assertWorkspaceSession(guard.generation);
+
+      if (!data?.guest || !data?.reservation ||
+          data.guest.workspace_id !== guard.workspaceId ||
+          data.reservation.workspace_id !== guard.workspaceId ||
+          data.guest.reservation_id !== reservationId ||
+          data.reservation.id !== reservationId) {
+        throw new Error('Respons dudukkan reservasi tidak cocok dengan workspace aktif.');
+      }
+
+      const guest = mapGuest(data.guest);
+      const reservation = mapReservation(data.reservation);
+      guest.reservationCode = reservation.code;
+      guest.reservationTable = reservation.table || guest.tableLabel;
+      reservation.guestId = guest.id;
+
+      persistedGuestRows.set(guest.id, recordFingerprint(guestRecord(guest)));
+      persistedReservationRows.set(reservation.id, recordFingerprint(reservationRecord(reservation)));
+
+      return {
+        guest,
+        reservation,
+        created: data.created === true
+      };
+    };
+
+    const operation = writeQueue.catch(() => undefined).then(run);
+    writeQueue = operation;
+    return operation;
+  }
+
   async function loadReservationAudit(reservationId) {
     requireReady();
     const guard = await assertWorkspaceSession();
@@ -357,6 +404,7 @@
     correctGuest,
     nextTicket,
     nextReservationCode,
+    seatReservation,
     isReady: () => ready,
     workspaceId: () => workspaceId
   };
