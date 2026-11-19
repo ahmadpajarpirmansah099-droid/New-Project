@@ -586,7 +586,7 @@
 
 
 /* Sticky Stock Opname column headings and WIP section marker while scrolling. */
-.so-layout-ledger { --so-sticky-header-height: 58px; }
+.so-layout-ledger { border-collapse: separate; border-spacing: 0; --so-sticky-header-height: 58px; }
 .so-layout-ledger thead th {
   position: sticky;
   top: 0;
@@ -597,7 +597,7 @@
   position: sticky;
   top: var(--so-sticky-header-height);
   z-index: 7;
-  background: var(--ui-surface-soft, #f4f5f1);
+  background: var(--ui-surface, #fff);
   box-shadow: 0 2px 3px rgba(0, 0, 0, .06);
 }
 @media (max-width: 700px) {
