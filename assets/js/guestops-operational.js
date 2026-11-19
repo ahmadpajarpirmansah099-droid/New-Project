@@ -183,6 +183,8 @@ function renderDashboardTrend() {
     };
   });
   const max = Math.max(1, ...totals.map(item => item.value));
+  const axisMax = Math.ceil(max / 10) * 10;
+  const gridlines = Array.from({ length: Math.floor(max / 10) }, (_, index) => (index + 1) * 10);
   const label = $('dashboardTrendMonthLabel');
   if (label) {
     label.textContent = new Intl.DateTimeFormat('id-ID', {
@@ -192,8 +194,11 @@ function renderDashboardTrend() {
     }).format(new Date(Date.UTC(year, month - 1, 1)));
   }
 
-  chart.innerHTML = totals.map(item => {
-    const height = item.value ? Math.max(2, Math.round((item.value / max) * 100)) : 0;
+  const gridlineMarkup = '<div class="dashboard-trend-gridlines" aria-hidden="true">' +
+    gridlines.map(value => '<span class="dashboard-trend-gridline" style="bottom:' + ((value / axisMax) * 100).toFixed(3) + '%"></span>').join('') +
+    '</div>';
+  chart.innerHTML = gridlineMarkup + totals.map(item => {
+    const height = item.value ? Math.max(2, Math.round((item.value / axisMax) * 100)) : 0;
     const dateLabel = new Intl.DateTimeFormat('id-ID', {
       day: 'numeric',
       month: 'long',
