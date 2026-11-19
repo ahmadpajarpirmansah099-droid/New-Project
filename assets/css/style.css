@@ -242,6 +242,20 @@ button:focus-visible,input:focus-visible,select:focus-visible {
   animation:rise .55s both;
 }
 
+.metric[role="button"] {
+  cursor:pointer;
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+
+.metric[role="button"]:focus-visible {
+  outline:3px solid #aaa3e8;
+  outline-offset:3px;
+}
+
+.metric[role="button"]:active {
+  transform:translateY(1px);
+}
+
 .metric:nth-child(1) {
   animation-delay:.08s;
 }

@@ -371,6 +371,12 @@ function renderAll() {
   if ($('page-reservations')?.classList.contains('active')) renderReservations();
 }
 function setFilter(f){activeFilter=f;document.querySelectorAll('#queueFilters .filter').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));renderQueue()}
+function openDashboardStatus(status){
+  const targetStatus=status||this?.dataset.status;
+  if(!['waiting','done','cancelled'].includes(targetStatus))return;
+  go('waiting');
+  setFilter(targetStatus);
+}
 function renderQueue(){
   if(!$('queueList'))return;
   const q=($('queueSearch')?.value||'').toLowerCase();
