@@ -18,6 +18,27 @@
  function staleCorrectionDraft(draft){return draft?.kind==='close'&&draft.basePeriod&&draft.basePeriod!==period()?.id;}
  function balances(){const s=get()?.state||{},p=period();const b={...p?.opening};for(const d of s.documents||[])if(d.period_id===p?.id&&!d.void)for(const l of d.postings||[])b[l.key]=(Number(b[l.key])||0)+Number(l.qty);return b;}
  function catalog(){const all=[...(get()?.catalog||[])];for(const r of period()?.opening_catalog||[])if(!all.some(x=>x.key===r.key))all.push(r);for(const d of get()?.state?.documents||[])if(d.period_id===period()?.id&&!d.void)for(const r of d.postings||[])if(!all.some(x=>x.key===r.key))all.push(r);return all;}
+ 
+ function tableMovementTotals(){
+  const state=get()?.state||{},documents=Array.isArray(state.documents)?state.documents:[];
+  const p=period();
+  let scopedDocuments=documents;
+  // Legacy transactions remain visible until the first Stock Opname is completed.
+  // After completion, only documents belonging to the next active period count.
+  if(p?.status==='closed')scopedDocuments=[];
+  else if(p?.previous_id)scopedDocuments=documents.filter(doc=>doc?.period_id===p.id);
+  const totals={incoming:Object.create(null),outgoing:Object.create(null)};
+  for(const doc of scopedDocuments){
+   if(doc?.void===true||String(doc?.void)==='true'||!['receipt','expense'].includes(doc?.type))continue;
+   for(const posting of Array.isArray(doc.postings)?doc.postings:[]){
+    const key=String(posting?.key||''),qty=Number(posting?.qty);
+    if(!key.startsWith('m:')||!Number.isFinite(qty))continue;
+    const bucket=doc.type==='receipt'?totals.incoming:totals.outgoing;
+    bucket[key]=(bucket[key]||0)+Math.abs(qty);
+   }
+  }
+  return totals;
+ }
  function draftStatus(){return draftSaved?'Draft lokal tersimpan di perangkat ini; belum masuk database.':'Draft lokal belum tersimpan. Jangan tutup halaman sebelum berhasil menyimpan.';}
  function snapshot(){
   if(!form)return true;
@@ -478,8 +499,14 @@
  function itemTableHTML(){
   const rows=(get()?.catalog||[]).filter(row=>String(row.key||'').startsWith('m:')).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'id'));
   const columns=['STOK AWAL','BARANG MASUK','BARANG KELUAR','TERPAKAI OPERASIONAL','STOK SISTEM','STOK FISIK'];
-  const opening=period()?.opening||{};
-  const body=rows.length?rows.map(row=>'<tr><th scope="row" data-label="ITEM">'+e(row.name||'Tanpa nama')+'</th>'+columns.map(label=>'<td data-label="'+e(label)+'">'+(label==='STOK AWAL'?'<span>'+number(opening[row.key]??0)+' '+e(row.unit||'')+'</span>':'<span class="so-table-placeholder">—</span>')+'</td>').join('')+'</tr>').join(''):'<tr><td class="so-table-empty" colspan="7">Belum ada Master Barang aktif di divisi ini.</td></tr>';
+  const opening=period()?.opening||{},movements=tableMovementTotals();
+  const body=rows.length?rows.map(row=>'<tr><th scope="row" data-label="ITEM">'+e(row.name||'Tanpa nama')+'</th>'+columns.map(label=>{
+   let value=null;
+   if(label==='STOK AWAL')value=opening[row.key]??0;
+   else if(label==='BARANG MASUK')value=movements.incoming[row.key]??0;
+   else if(label==='BARANG KELUAR')value=movements.outgoing[row.key]??0;
+   return '<td data-label="'+e(label)+'">'+(value!==null?'<span>'+number(value)+' '+e(row.unit||'')+'</span>':'<span class="so-table-placeholder">—</span>')+'</td>';
+  }).join('')+'</tr>').join(''):'<tr><td class="so-table-empty" colspan="7">Belum ada Master Barang aktif di divisi ini.</td></tr>';
   return '<section class="so-layout-table" aria-label="Tabel Stock Opname"><div class="so-layout-table-scroll"><table class="so-layout-ledger"><thead><tr><th scope="col">ITEM</th>'+columns.map(label=>'<th scope="col">'+e(label)+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div></section>';
  }
  async function submit(){
