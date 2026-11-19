@@ -16,26 +16,35 @@
  function isPending(){return period()?.status!=='reopened' && ['closed','held','opening_pending'].includes(get()?.state?.periods?.at(-1)?.status);}
  function staleOpeningDraft(draft){return draft?.kind==='initial'&&period()?.status==='opening_pending'&&draft.resetMarker!==period().opening_reset_at;}
  function staleCorrectionDraft(draft){return draft?.kind==='close'&&draft.basePeriod&&draft.basePeriod!==period()?.id;}
- function balances(){const s=get()?.state||{},p=period();const b={...p?.opening};for(const d of s.documents||[])if(d.period_id===p?.id&&!d.void)for(const l of d.postings||[])b[l.key]=(Number(b[l.key])||0)+Number(l.qty);return b;}
+ function balances(){const s=get()?.state||{},p=period(),ids=new Set([p?.id,...(p?.legacy_period_ids||[])].filter(Boolean));const b={...p?.opening};for(const d of s.documents||[])if(ids.has(d.period_id)&&!d.void)for(const l of d.postings||[])b[l.key]=(Number(b[l.key])||0)+Number(l.qty);return b;}
  function catalog(){const all=[...(get()?.catalog||[])];for(const r of period()?.opening_catalog||[])if(!all.some(x=>x.key===r.key))all.push(r);for(const d of get()?.state?.documents||[])if(d.period_id===period()?.id&&!d.void)for(const r of d.postings||[])if(!all.some(x=>x.key===r.key))all.push(r);return all;}
  
  function tableMovementTotals(){
   const state=get()?.state||{},documents=Array.isArray(state.documents)?state.documents:[];
   const p=period();
   let scopedDocuments=documents;
-  // Legacy transactions remain visible until the first Stock Opname is completed.
-  // After completion, only documents belonging to the next active period count.
+  // Keep the old period IDs attached to the restored opening until this first
+  // period is closed. Later periods remain strictly scoped to their own ID.
   if(p?.status==='closed')scopedDocuments=[];
   else if(p?.previous_id)scopedDocuments=documents.filter(doc=>doc?.period_id===p.id);
   const totals={incoming:Object.create(null),outgoing:Object.create(null),operational:Object.create(null)};
+  const add=(bucket,key,qty)=>{bucket[key]=(bucket[key]||0)+qty;};
   for(const doc of scopedDocuments){
    if(doc?.void===true||String(doc?.void)==='true'||!['receipt','expense','production','sales'].includes(doc?.type))continue;
    for(const posting of Array.isArray(doc.postings)?doc.postings:[]){
     const key=String(posting?.key||''),qty=Number(posting?.qty);
-    // The table is grouped by Master Barang. WIP/menu postings are not material rows.
-    if(!key.startsWith('m:')||!Number.isFinite(qty))continue;
-    const bucket=doc.type==='receipt'?totals.incoming:doc.type==='expense'?totals.outgoing:totals.operational;
-    bucket[key]=(bucket[key]||0)+Math.abs(qty);
+    if((!key.startsWith('m:')&&!key.startsWith('w:'))||!Number.isFinite(qty))continue;
+    const material=key.startsWith('m:'),amount=Math.abs(qty);
+    if(doc.type==='receipt'){
+     if(material&&qty>0)add(totals.incoming,key,qty);
+    }else if(doc.type==='expense'){
+     if(qty<0)add(totals.outgoing,key,amount);
+    }else if(doc.type==='production'){
+     if(!material&&qty>0)add(totals.incoming,key,qty);
+     else if(qty<0)add(totals.operational,key,amount);
+    }else if(doc.type==='sales'&&qty<0){
+     add(totals.operational,key,amount);
+    }
    }
   }
   return totals;
@@ -498,10 +507,12 @@
   page().innerHTML+=itemTableHTML();
  }
  function itemTableHTML(){
-  const rows=(get()?.catalog||[]).filter(row=>String(row.key||'').startsWith('m:')).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'id'));
+  const all=catalog().filter(row=>/^[mw]:/.test(String(row.key||'')));
+  const materials=all.filter(row=>row.key.startsWith('m:')).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'id'));
+  const wips=all.filter(row=>row.key.startsWith('w:')).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'id'));
   const columns=['STOK AWAL','BARANG MASUK','BARANG KELUAR','TERPAKAI OPERASIONAL','STOK SISTEM','STOK FISIK'];
   const opening=period()?.opening||{},movements=tableMovementTotals();
-  const body=rows.length?rows.map(row=>{
+  const renderRows=rows=>rows.map(row=>{
    const openingQty=Number(opening[row.key]??0)||0;
    const incomingQty=Number(movements.incoming[row.key]??0)||0;
    const outgoingQty=Number(movements.outgoing[row.key]??0)||0;
@@ -517,7 +528,10 @@
     const negative=value!==null&&value<0;
     return '<td data-label="'+e(label)+'">'+(value!==null?'<span'+(negative?' class="so-table-negative"':'')+'>'+number(value)+' '+e(row.unit||'')+'</span>':'<span class="so-table-placeholder">—</span>')+'</td>';
    }).join('')+'</tr>';
-  }).join(''):'<tr><td class="so-table-empty" colspan="7">Belum ada Master Barang aktif di divisi ini.</td></tr>';
+  }).join('');
+  let body=renderRows(materials);
+  if(wips.length)body+='<tr class="so-table-group"><th scope="rowgroup" colspan="7">WIP</th></tr>'+renderRows(wips);
+  if(!materials.length&&!wips.length)body='<tr><td class="so-table-empty" colspan="7">Belum ada Master Barang atau WIP aktif di divisi ini.</td></tr>';
   return '<section class="so-layout-table" aria-label="Tabel Stock Opname"><div class="so-layout-table-scroll"><table class="so-layout-ledger"><thead><tr><th scope="col">ITEM</th>'+columns.map(label=>'<th scope="col">'+e(label)+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div></section>';
  }
  async function submit(){
