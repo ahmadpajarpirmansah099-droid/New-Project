@@ -501,3 +501,12 @@
 @media (max-width: 700px) {
   .so-layout-ledger tbody .so-table-group th { padding: 8px 4px; font-size: 8px; }
 }
+
+/* Keep Stock Opname item names on one line on mobile. */
+.so-item-name-mobile { display: none; }
+@media (max-width: 700px) {
+  .so-layout-ledger tbody th[data-label="ITEM"] { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .so-item-name { display: block; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .so-item-name-full { display: none; }
+  .so-item-name-mobile { display: inline; }
+}
