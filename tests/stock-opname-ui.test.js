@@ -688,7 +688,7 @@ test('new Stock Opname table shows active master items and all requested columns
   t.ui.render();
   assert.match(t.page.innerHTML, /data-label="STOK AWAL"><span>125 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span>125 ML<\/span>/);
-  assert.match(t.page.innerHTML, /<tr class="so-table-group"><th scope="rowgroup" colspan="7">WIP<\/th><\/tr>/);
+  assert.match(t.page.innerHTML, /<tr class="so-table-group"><th scope="rowgroup" colspan="7"><span class="so-table-header-pill">WIP<\/span><\/th><\/tr>/);
   assert.match(t.page.innerHTML, /<th scope="row" data-label="ITEM">[\s\S]*?WIP[\s\S]*?<\/th>/);
   assert.doesNotMatch(t.page.innerHTML, /<th scope="row" data-label="ITEM">Menu<\/th>/);
 });
