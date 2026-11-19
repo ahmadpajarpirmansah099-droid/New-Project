@@ -466,7 +466,7 @@
 .so-layout-ledger thead th:first-child, .so-layout-ledger tbody th { text-align: left; }
 .so-layout-ledger thead th:first-child { min-width: 170px; }
 .so-layout-ledger tbody th { font-size: 13px; font-weight: 750; overflow-wrap: anywhere; }
-.so-layout-ledger tbody .so-table-group th { padding: 10px 12px; border-top: 2px solid currentColor; color: var(--so-muted); font-size: 11px; font-weight: 850; letter-spacing: .06em; text-align: left; text-transform: uppercase; }
+.so-layout-ledger tbody .so-table-group th { padding: 5px 12px; border-top: 2px solid currentColor; color: var(--so-muted); font-size: 11px; font-weight: 850; letter-spacing: .06em; text-align: left; text-transform: uppercase; }
 
 .so-layout-ledger tbody tr:last-child th, .so-layout-ledger tbody tr:last-child td { border-bottom: 0; }
 .so-layout-ledger .so-table-placeholder { color: var(--so-muted); }
@@ -499,7 +499,7 @@
 }
 
 @media (max-width: 700px) {
-  .so-layout-ledger tbody .so-table-group th { padding: 8px 4px; font-size: 8px; }
+  .so-layout-ledger tbody .so-table-group th { padding: 4px 4px; font-size: 8px; }
 }
 
 /* Keep Stock Opname item names on one line on mobile. */
