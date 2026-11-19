@@ -447,7 +447,7 @@
  function render(){
   const container=page();
   if(!container)return;
-  container.replaceChildren();
+  container.innerHTML='';
  }
 
  async function submit(){
