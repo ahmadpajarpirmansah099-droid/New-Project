@@ -31,3 +31,10 @@ Until the missing historical SQL is recovered or a reviewed baseline is prepared
 4. For every new production migration, commit the exact SQL file to this folder and verify its version against Supabase migration history.
 
 The live database remains the source of truth until the historical source gap is resolved.
+
+## Rebuildable baseline
+
+A full schema snapshot (tables, RLS policies, triggers, private helpers, no data) is
+committed at `../schema/2026-11-20-baseline.sql`. It can rebuild an empty Supabase
+project while the migration gap above stays open. Restore instructions are in
+`../schema/README.md`.
