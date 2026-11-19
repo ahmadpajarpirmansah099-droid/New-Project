@@ -523,7 +523,7 @@
    const outgoingQty=Number(movements.outgoing[row.key]??0)||0;
    const operationalQty=Number(movements.operational[row.key]??0)||0;
    const systemQty=openingQty+incomingQty-outgoingQty-operationalQty;
-   return '<tr><th scope="row" data-label="ITEM"><span class="so-item-name" title="'+e(row.name||'Tanpa nama')+'"><span class="so-item-name-full">'+e(row.name||'Tanpa nama')+'</span><span class="so-item-name-mobile">'+e(compactItemName(row.name))+'</span></span></th>'+columns.map(label=>{
+   return '<tr><th scope="row" data-label="NAMA ITEM"><span class="so-item-name" title="'+e(row.name||'Tanpa nama')+'"><span class="so-item-name-full">'+e(row.name||'Tanpa nama')+'</span><span class="so-item-name-mobile">'+e(compactItemName(row.name))+'</span></span></th>'+columns.map(label=>{
     let value=null;
     if(label==='STOK AWAL')value=openingQty;
     else if(label==='BARANG MASUK')value=incomingQty;
@@ -541,7 +541,7 @@
   let body=renderRows(materials);
   if(wips.length)body+='<tr class="so-table-group"><th scope="rowgroup" colspan="7"><span class="so-table-header-pill">WIP</span></th></tr>'+renderRows(wips);
   if(!materials.length&&!wips.length)body='<tr><td class="so-table-empty" colspan="7">Belum ada Master Barang atau WIP aktif di divisi ini.</td></tr>';
-  return '<section class="so-layout-table" aria-label="Tabel Stock Opname"><div class="so-layout-table-scroll"><table class="so-layout-ledger"><thead><tr><th scope="col"><span class="so-table-header-pill">ITEM</span></th>'+columns.map(label=>'<th scope="col"><span class="so-table-header-pill">'+e(label)+'</span></th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div></section>';
+  return '<section class="so-layout-table" aria-label="Tabel Stock Opname"><div class="so-layout-table-scroll"><table class="so-layout-ledger"><thead><tr><th scope="col"><span class="so-table-header-pill">NAMA ITEM</span></th>'+columns.map(label=>'<th scope="col"><span class="so-table-header-pill">'+e(label)+'</span></th>').join('')+'</tr></thead><tbody>'+body+'</tbody></table></div></section>';
  }
  async function submit(){
   if(!form)return;const k=form.kind,counts={},lines=[];

@@ -583,3 +583,23 @@
 /* Center every Stock Opname column heading, including ITEM, within its own column. */
 .so-layout-ledger thead th,
 .so-layout-ledger thead th:first-child { text-align: center; }
+
+
+/* Sticky Stock Opname column headings and WIP section marker while scrolling. */
+.so-layout-ledger { --so-sticky-header-height: 58px; }
+.so-layout-ledger thead th {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  background: var(--ui-surface, #fff) !important;
+}
+.so-layout-ledger tbody .so-table-group th {
+  position: sticky;
+  top: var(--so-sticky-header-height);
+  z-index: 7;
+  background: var(--ui-surface-soft, #f4f5f1);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, .06);
+}
+@media (max-width: 700px) {
+  .so-layout-ledger { --so-sticky-header-height: 43px; }
+}
