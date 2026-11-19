@@ -666,6 +666,7 @@ test('new Stock Opname table shows active master items and all requested columns
     assert.match(t.page.innerHTML, new RegExp(label));
   }
   assert.match(t.page.innerHTML, /Susu/);
+  assert.match(t.page.innerHTML, /Cup tak\.\. Dingin/);
   assert.match(t.page.innerHTML, /data-label="STOK AWAL"><span>0 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>0 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>0 ML<\/span>/);
