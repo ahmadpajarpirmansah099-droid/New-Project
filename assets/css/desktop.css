@@ -1352,16 +1352,43 @@
   }
 }
 
+@media (min-width: 900px) {
+  .drawer-item {
+    transition: background .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
+  }
+
+  .drawer-item svg {
+    transition: stroke-width .18s ease, transform .18s ease;
+  }
+
+  .drawer-item:focus-visible {
+    outline: 2px solid #9aae55;
+    outline-offset: 3px;
+  }
+}
+
 @media (min-width: 900px) and (hover: hover) and (pointer: fine) {
   .drawer-item:not(.active):hover {
-    background: #f4f6fa;
-    box-shadow: none;
-    transform: none;
+    background: #eaf2c2;
+    color: #111225;
+    box-shadow: 0 5px 13px rgba(78,96,38,.16);
+    transform: translateY(-1px) scale(1.04);
+  }
+
+  .drawer-item:not(.active):hover svg {
+    stroke-width: 2.5;
+    transform: scale(1.06);
   }
 
   .drawer-item.active:hover {
-    background: #e6efad;
-    box-shadow: 0 4px 12px rgba(104,126,43,.10);
+    background: #dce99b;
+    box-shadow: 0 6px 15px rgba(78,96,38,.18);
+    transform: translateY(-1px) scale(1.04);
+  }
+
+  .drawer-item.active:hover svg {
+    stroke-width: 2.5;
+    transform: scale(1.06);
   }
 }
 
