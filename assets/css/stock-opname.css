@@ -579,3 +579,7 @@
 @media (max-width: 700px) {
   .so-layout-ledger tbody .so-table-group .so-table-header-pill { min-height: 26px; padding: 4px 14px; border-radius: 5px; font-size: 8px; }
 }
+
+/* Center every Stock Opname column heading, including ITEM, within its own column. */
+.so-layout-ledger thead th,
+.so-layout-ledger thead th:first-child { text-align: center; }
