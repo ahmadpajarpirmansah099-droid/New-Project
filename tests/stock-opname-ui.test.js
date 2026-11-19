@@ -669,9 +669,11 @@ test('new Stock Opname table shows active master items and all requested columns
   assert.match(t.page.innerHTML, /data-label="STOK AWAL"><span>0 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>0 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>0 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span>0 ML<\/span>/);
   t.data.state.periods[0].opening['m:a'] = 125;
   t.ui.render();
   assert.match(t.page.innerHTML, /data-label="STOK AWAL"><span>125 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span>125 ML<\/span>/);
   assert.doesNotMatch(t.page.innerHTML, /<th scope="row" data-label="ITEM">WIP<\/th>/);
   assert.doesNotMatch(t.page.innerHTML, /<th scope="row" data-label="ITEM">Menu<\/th>/);
 });
@@ -692,6 +694,31 @@ test('main table accumulates receipt and expense postings by master item until t
   assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>125 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>10 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="TERPAKAI OPERASIONAL"><span>60 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span>55 ML<\/span>/);
+});
+
+test('system stock uses the requested balance formula and colors negative values red', () => {
+  const t = runtime();
+  t.data.state.periods[0].opening['m:a'] = 15;
+  t.data.state.documents = [
+    { id: 'receipt', period_id: 'period', type: 'receipt', postings: [{ key: 'm:a', qty: 5 }] },
+    { id: 'expense', period_id: 'period', type: 'expense', postings: [{ key: 'm:a', qty: -2 }] },
+    { id: 'production', period_id: 'period', type: 'production', postings: [{ key: 'm:a', qty: -8 }] },
+    { id: 'sales', period_id: 'period', type: 'sales', postings: [{ key: 'm:a', qty: -7 }] }
+  ];
+
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span>3 ML<\/span>/);
+  assert.doesNotMatch(t.page.innerHTML, /class="so-table-negative"/);
+
+  t.data.state.periods[0].opening['m:a'] = 12;
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span>0 ML<\/span>/);
+  assert.doesNotMatch(t.page.innerHTML, /class="so-table-negative"/);
+
+  t.data.state.periods[0].opening['m:a'] = 10;
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span class="so-table-negative">-2 ML<\/span>/);
 });
 
 test('movement table resets on completed opname and then reads only the new period', () => {
@@ -714,4 +741,5 @@ test('movement table resets on completed opname and then reads only the new peri
   assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>6 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>2 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="TERPAKAI OPERASIONAL"><span>11 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span class="so-table-negative">-7 ML<\/span>/);
 });
