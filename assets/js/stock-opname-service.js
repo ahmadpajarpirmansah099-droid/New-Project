@@ -23,8 +23,6 @@
     return res.data;
   }
   async function read(){const result=await rpc('stock_opname_read',{division:context.activeDivisionId});data={...data,...result};return data;}
-  function dashboardAvailable(){return !!(data?.enabled && (data.developer || data.state));}
-  async function readDashboard(){return rpc('stock_opname_dashboard_read',{division:context?.activeDivisionId});}
   async function write(action,input,request){
     const result=await rpc('stock_opname_write',{division:context.activeDivisionId,expected_revision:data.revision,request,action,input});
     data={...data,...result};return data;
@@ -58,5 +56,5 @@
     else root.localStorage.removeItem(key);
   }
   async function targetCatalog(destination){return rpc('stock_opname_target_catalog',{origin:context.activeDivisionId,destination});}
-  root.StockOpnameService={initialize,reset,current,available,read,write,resetOpening,configure,saveDraft,loadDraft,clearDraft,targetCatalog,dashboardAvailable,readDashboard};
+  root.StockOpnameService={initialize,reset,current,available,read,write,resetOpening,configure,saveDraft,loadDraft,clearDraft,targetCatalog};
 })(window);
