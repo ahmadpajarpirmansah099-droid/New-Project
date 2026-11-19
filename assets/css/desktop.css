@@ -1041,6 +1041,8 @@
     box-shadow: 0 2px 7px rgba(17,18,37,.16);
   }
   .dashboard-trend-chart {
+    position: relative;
+    isolation: isolate;
     display: grid;
     grid-template-columns: repeat(31, minmax(0, 1fr));
     align-items: end;
@@ -1048,7 +1050,22 @@
     min-height: 250px;
     padding: 10px 0 0;
   }
+  .dashboard-trend-gridlines {
+    position: absolute;
+    inset: 45px 0 29px;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .dashboard-trend-gridline {
+    position: absolute;
+    right: 0;
+    left: 0;
+    height: 1px;
+    background: color-mix(in srgb, var(--ink) 12%, transparent);
+  }
   .dashboard-trend-column {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-rows: 18px minmax(0, 1fr) 22px;
     align-items: end;
