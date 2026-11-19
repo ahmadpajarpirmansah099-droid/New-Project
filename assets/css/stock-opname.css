@@ -603,3 +603,19 @@
 @media (max-width: 700px) {
   .so-layout-ledger { --so-sticky-header-height: 43px; }
 }
+
+
+/* Desktop context label for the latest Stock Opname period. */
+.so-table-period-label { display: none; }
+@media (min-width: 701px) {
+  .so-table-period-label {
+    display: flex;
+    align-items: center;
+    min-height: 34px;
+    margin: 0 0 10px;
+    color: var(--so-muted);
+    font-size: 13px;
+    font-weight: 750;
+    letter-spacing: .01em;
+  }
+}
