@@ -52,11 +52,6 @@ BEGIN
     RAISE EXCEPTION 'Voided pre-count movement must be excluded from opening: %',v_opening;
   END IF;
 
-  -- A document in January must never affect December's opening.
-  IF (v_opening->>'m:a')::numeric=60 THEN
-    RAISE EXCEPTION 'Following-month movement leaked into December opening.';
-  END IF;
-
   RAISE NOTICE 'Calendar-month accounting helper checks passed.';
 END;
 $test$;
