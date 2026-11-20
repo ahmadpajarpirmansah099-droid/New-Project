@@ -24,8 +24,8 @@ BEGIN
     INTO v_result
   FROM (
     SELECT posting->>'key' AS key, sum((posting->>'qty')::numeric) AS qty
-    FROM jsonb_array_elements(coalesce(s->'documents','[]'::jsonb)) AS doc
-    CROSS JOIN LATERAL jsonb_array_elements(coalesce(doc->'postings','[]'::jsonb)) AS posting
+    FROM jsonb_array_elements(coalesce(s->'documents','[]'::jsonb)) AS docs(doc)
+    CROSS JOIN LATERAL jsonb_array_elements(coalesce(doc->'postings','[]'::jsonb)) AS postings(posting)
     WHERE coalesce(doc->>'void','false')<>'true'
       AND (doc->>'start')::date>=month_start
       AND (doc->>'end')::date<=v_cutoff
