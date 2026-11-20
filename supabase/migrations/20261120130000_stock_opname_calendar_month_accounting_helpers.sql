@@ -20,6 +20,23 @@ BEGIN
     RAISE EXCEPTION 'Batas bulan Stock Opname tidak valid.';
   END IF;
 
+  -- A legacy document that straddles a calendar boundary cannot be
+  -- assigned to one month's ledger without silently losing or double-counting
+  -- part of its postings. Stop and require explicit correction instead.
+  IF EXISTS (
+    SELECT 1
+    FROM jsonb_array_elements(coalesce(s->'documents','[]'::jsonb)) AS docs(doc)
+    WHERE coalesce(doc->>'void','false')<>'true'
+      AND (doc->>'start')::date<=(v_cutoff)
+      AND (doc->>'end')::date>=month_start
+      AND (
+        (doc->>'start')::date<month_start
+        OR (doc->>'end')::date>=(month_start + interval '1 month')::date
+      )
+  ) THEN
+    RAISE EXCEPTION 'Ada transaksi lama yang melewati batas bulan. Perbaiki rentang tanggal sebelum menghitung Stock Awal.';
+  END IF;
+
   SELECT coalesce(jsonb_object_agg(t.key,to_jsonb(t.qty)),'{}'::jsonb)
     INTO v_result
   FROM (
@@ -62,10 +79,14 @@ BEGIN
 
   v_movements:=private.so_month_movements(s,next_month_start,physical_count_date);
   v_result:='{}'::jsonb;
-  FOR v_key,v_qty IN
-    SELECT key,(value#>>'{}')::numeric
-    FROM jsonb_each(coalesce(physical,'{}'::jsonb))
+  -- Union both key sets. A new item may have movements in the next month
+  -- even though it did not exist in the previous month's count snapshot.
+  FOR v_key IN
+    SELECT key FROM jsonb_object_keys(coalesce(physical,'{}'::jsonb)) AS keys(key)
+    UNION
+    SELECT key FROM jsonb_object_keys(coalesce(v_movements,'{}'::jsonb)) AS keys(key)
   LOOP
+    v_qty:=coalesce((physical->>v_key)::numeric,0);
     v_result:=jsonb_set(
       v_result,
       ARRAY[v_key],
