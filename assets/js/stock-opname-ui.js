@@ -564,6 +564,7 @@
     lines.push({key:r.key,qty:String(qty),unit:v.unit||r.unit,invoice_total:v.invoice_total??''});
    }
   }
+  if(k==='sales'&&String(form.start||'').slice(0,7)!==String(form.end||'').slice(0,7))throw Error('Rentang Sales tidak boleh melewati pergantian bulan. Pisahkan menjadi dua transaksi: satu untuk tiap bulan.');
   const saved=snapshot();if(isPending()&&!['close','initial'].includes(k)){if(saved)notice='Transaksi tersimpan sebagai draft. Konfirmasi Stock Awal, lalu simpan draft ini.';return;}
   const isMove=k==='expense'&&form.category==='Move';
   if(isMove&&!form.target)throw Error('Pilih tujuan Move yang sudah aktif sebelum menyimpan.');
