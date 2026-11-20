@@ -7,6 +7,7 @@ DECLARE
     jsonb_build_object('id','dec-void','type','expense','start','2026-12-03','end','2026-12-03','void',true,'postings',jsonb_build_array(jsonb_build_object('key','m:a','qty',-99))),
     jsonb_build_object('id','jan-receipt','type','receipt','start','2027-01-01','end','2027-01-01','postings',jsonb_build_array(jsonb_build_object('key','m:a','qty',50)))
   ));
+  v_clean jsonb;
   v_movements jsonb;
   v_opening jsonb;
   v_balance jsonb;
@@ -40,6 +41,7 @@ BEGIN
 
   -- A legacy document straddling the month boundary must fail closed rather
   -- than disappear from both monthly ledgers.
+  v_clean:=v_state;
   v_state:=jsonb_set(v_state,'{documents}',(v_state->'documents')||jsonb_build_array(
     jsonb_build_object('id','legacy-cross-month','type','sales','start','2026-11-30','end','2026-12-01','postings',jsonb_build_array(jsonb_build_object('key','m:a','qty',-1)))
   ));
@@ -50,6 +52,7 @@ BEGIN
     IF SQLERRM='Cross-month legacy document should have been rejected.' THEN RAISE; END IF;
     IF SQLERRM NOT LIKE 'Ada transaksi lama yang melewati batas bulan.%' THEN RAISE; END IF;
   END;
+  v_state:=v_clean;
 
   v_movements:=private.so_month_movements(v_state,'2026-12-01','2026-12-31');
   v_balance:=jsonb_build_object('m:a',(v_opening->>'m:a')::numeric+(v_movements->>'m:a')::numeric);
