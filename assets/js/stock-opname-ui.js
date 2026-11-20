@@ -493,6 +493,17 @@
   const context=root.AppAuth?.getContext();
   const scope=[context?.workspaceName,context?.activeDivisionName].filter(Boolean).join(' · ');
   const status=p?periodStatus[p.status]||p.status:'Isi Stock Awal untuk memulai';
+  const canTransact=!!p&&['active','reopened'].includes(p.status);
+  const transactionActions=canTransact?`<section class="so-panel so-transaction-actions" aria-label="Transaksi stok">
+   <h2>Transaksi Stok</h2>
+   <p>Pilih transaksi yang ingin dicatat.</p>
+   <div class="so-actions">
+    ${button('Barang Masuk','open','data-so-kind="receipt"')}
+    ${button('Pengeluaran','open','data-so-kind="expense"')}
+    ${button('Produksi WIP','open','data-so-kind="production"')}
+    ${button('Sales','open','data-so-kind="sales"')}
+   </div>
+  </section>`:'';
   page().innerHTML=`<header class="so-head">
    <div><h1>Stock Opname</h1>${scope?`<p>${e(scope)}</p>`:''}</div>
    <div class="so-actions"><button type="button" data-sd="open">Dashboard</button>${button('Muat Ulang','refresh')}</div>
@@ -501,7 +512,8 @@
    <div class="so-period-copy">${p?`<span>Periode mulai ${e(dateLabel(p.start))}</span>`:''}<strong>${e(status)}</strong></div>
    <div class="so-actions">${controls}${button('Pulihkan Draft','restore')}</div>
   </section>
-  ${notice?`<p class="so-notice" role="alert">${e(notice)}</p>`:''}
+${transactionActions}
+    ${notice?`<p class="so-notice" role="alert">${e(notice)}</p>`:''}
   ${negative&&p?.status!=='opening_pending'?'<p class="so-notice so-warning">Ada stok sistem minus. Periksa transaksi dan cocokkan saat opname.</p>':''}
   ${formHTML()}${historyHTML()}`;
   page().innerHTML+=itemTableHTML();
