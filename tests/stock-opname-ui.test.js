@@ -773,3 +773,27 @@ test('movement table resets on completed opname and then reads only the new peri
   assert.match(t.page.innerHTML, /data-label="TERPAKAI OPERASIONAL"><span>11 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span class="so-table-negative">-7 ML<\/span>/);
 });
+
+
+test('Sales form rejects a date range that crosses a calendar month before writing', async () => {
+  const t = runtime(); await t.ui.open('sales');
+  t.input({ soField: 'start' }, '2026-11-30');
+  t.input({ soField: 'end' }, '2026-12-01');
+  await t.click('submit');
+  assert.equal(t.writes.length, 0);
+  assert.match(t.page.innerHTML, /Rentang Sales tidak boleh melewati pergantian bulan/);
+  assert.equal(t.draft('sales').start, '2026-11-30');
+  assert.equal(t.draft('sales').end, '2026-12-01');
+});
+
+test('Sales form accepts a date range contained within one calendar month', async () => {
+  const t = runtime(); await t.ui.open('sales');
+  t.input({ soField: 'start' }, '2026-11-10');
+  t.input({ soField: 'end' }, '2026-11-20');
+  t.input({ soKey: 's:a', soProp: 'qty' }, '3');
+  await t.click('submit');
+  assert.equal(t.writes.length, 1);
+  assert.equal(t.writes[0].action, 'save');
+  assert.equal(t.writes[0].input.start, '2026-11-10');
+  assert.equal(t.writes[0].input.end, '2026-11-20');
+});
