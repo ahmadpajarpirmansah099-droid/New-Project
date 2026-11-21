@@ -940,3 +940,11 @@ test('Sales form accepts a date range contained within one calendar month', asyn
   assert.equal(t.writes[0].input.start, '2026-11-10');
   assert.equal(t.writes[0].input.end, '2026-11-20');
 });
+
+test('Stock Opname notices stay compact and do not render as large colored cards', () => {
+  const css = contentsOfStockOpnameStyles();
+  assert.match(css, /\.so-notice\s*\{[^}]*padding:\s*0;[^}]*background:\s*transparent;[^}]*border:\s*0;/);
+  assert.match(css, /\.so-warning\s*\{[^}]*background:\s*transparent;[^}]*border:\s*0;[^}]*color:/);
+  assert.match(css, /\.so-form-head p\s*\{[^}]*font-size:\s*12px;[^}]*line-height:\s*1\.45;/);
+  assert.match(css, /\.so-status\s*\{[^}]*font-size:\s*11px;[^}]*line-height:\s*1\.4;/);
+});
