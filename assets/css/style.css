@@ -12672,3 +12672,51 @@ button, input, select, textarea { font-family: var(--ui-font); }
   html[data-desktop-theme="dark"] .so-warning { background: #4d3e1f; border-color: #927d43; color: #ffdf98; }
   html[data-desktop-theme="dark"] :is(.md-field input, .md-field select, .wip-field input, .wip-field select, .menu-field input, .menu-field select, .wip-component-search input, .menu-component-search input) { background: var(--ui-surface-soft); border-color: var(--ui-line); color: var(--ui-ink); }
 }
+
+
+/* Stock Opname — refine period status, month navigation, and primary actions. */
+#page-stock-opname .so-period-copy .so-period-status {
+  margin: 0;
+  color: var(--so-muted);
+  font: 500 13px/1.35 var(--ui-font);
+}
+#page-stock-opname .so-period-copy .so-month-name {
+  color: var(--so-ink);
+  font: 700 20px/1.25 var(--ui-heading-font);
+  white-space: nowrap;
+}
+#page-stock-opname .so-overview .so-month-nav > button {
+  display: inline-flex;
+  flex: 0 0 42px;
+  width: 42px;
+  min-width: 42px;
+  height: 48px;
+  min-height: 48px;
+  padding: 0;
+  border-radius: 13px;
+  box-shadow: 0 3px 9px rgba(17,18,37,.10);
+  transition: transform .22s cubic-bezier(.2,.8,.2,1), box-shadow .22s cubic-bezier(.2,.8,.2,1), background-color .18s ease, border-color .18s ease;
+}
+#page-stock-opname .so-overview .so-actions > button {
+  box-shadow: 0 4px 11px rgba(17,18,37,.09);
+  transition: transform .22s cubic-bezier(.2,.8,.2,1), box-shadow .22s cubic-bezier(.2,.8,.2,1), background-color .18s ease, border-color .18s ease;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  #page-stock-opname .so-overview .so-month-nav > button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 15px rgba(17,18,37,.15);
+  }
+  #page-stock-opname .so-overview .so-actions > button:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 9px 19px rgba(17,18,37,.15);
+  }
+  #page-stock-opname .so-overview .so-actions > button.so-primary:hover:not(:disabled) {
+    box-shadow: 0 10px 20px rgba(124,153,43,.24);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #page-stock-opname .so-overview .so-month-nav > button,
+  #page-stock-opname .so-overview .so-actions > button {
+    transition: none;
+  }
+}

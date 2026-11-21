@@ -515,7 +515,7 @@
   </header>
   <div class="so-dashboard-row">
    <section class="so-overview" aria-label="Periode stok" data-so-period-status="${e(p?.status||'')}">
-    <div class="so-period-copy">${p?monthNav:'<span>Periode Stock Opname belum dimulai</span>'}<strong>${e(status)}</strong></div>
+    <div class="so-period-copy">${p?monthNav:'<span>Periode Stock Opname belum dimulai</span>'}<strong class="so-period-status">${e(status)}</strong></div>
     <div class="so-actions">${controls}${button('Pulihkan Draft','restore')}</div>
    </section>
 ${transactionActions}
