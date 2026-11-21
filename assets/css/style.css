@@ -12720,3 +12720,21 @@ button, input, select, textarea { font-family: var(--ui-font); }
     transition: none;
   }
 }
+
+
+/* Let the month heading use the full period-card width between its arrows. */
+#page-stock-opname .so-period-copy {
+  width: 100%;
+}
+#page-stock-opname .so-period-copy .so-month-nav {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+#page-stock-opname .so-period-copy .so-month-name {
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+}
