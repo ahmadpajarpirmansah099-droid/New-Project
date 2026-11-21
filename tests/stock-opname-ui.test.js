@@ -180,7 +180,7 @@ test('receipt, expense, production, and sales forms render with visible in-app d
   const t = runtime();
   for (const kind of ['receipt', 'expense', 'production', 'sales']) {
     await t.ui.open(kind);
-    assert.match(t.page.innerHTML, /class="so-panel so-form"/, kind + ' form should render');
+    assert.match(t.page.innerHTML, kind==='receipt' ? /class="so-panel so-form so-receipt-reference-form"/ : /class="so-panel so-form"/, kind + ' form should render');
     assert.match(t.page.innerHTML, /data-so-action="pick-date"/, kind + ' should include a date picker button');
     assert.match(t.page.innerHTML, /data-so-field="end"/, kind + ' should include the transaction date');
     if (kind === 'sales') assert.match(t.page.innerHTML, /data-so-field="start"/, 'sales should include the start date');
@@ -999,7 +999,7 @@ test('Stock Opname feature forms do not show explanatory text beneath the title'
   const t=runtime();
   for (const kind of ['receipt','expense','production','sales','close']) {
     await t.ui.open(kind);
-    assert.match(t.page.innerHTML,/class="so-form-head"><h2>[^<]+<\/h2><\/header>/);
+    assert.match(t.page.innerHTML,kind==='receipt' ? /class="so-form-head so-receipt-reference-head"[\s\S]*?<h2>Catat Barang Masuk<\/h2>/ : /class="so-form-head"><h2>[^<]+<\/h2><\/header>/);
     assert.doesNotMatch(t.page.innerHTML,/Catat barang yang digunakan atau dipindahkan|Isi jumlah batch|Pilih rentang tanggal|Catat bahan dan suplies yang diterima|Cocokkan stok sistem dengan fisik/);
   }
 });
@@ -1010,13 +1010,7 @@ test('Stock Opname transaction icons are aligned and sized consistently', () => 
   assert.match(css, /\.so-transaction-actions \.so-transaction-icon\s*\{[^}]*width:\s*19px;[^}]*height:\s*19px;[^}]*flex:\s*0 0 19px;/);
 });
 
-test('Barang Masuk uses two-column cards, inline unit control and blurred search focus', () => {
- const css=contentsOfStockOpnameStyles();
- assert.match(css, /\.so-receipt-entry-grid,[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
- assert.match(css, /\.so-receipt-field-card,[\s\S]*?background:\s*var\(--ui-surface\)/);
- assert.match(css, /\.so-receipt-qty-unit\s*\{[^}]*display:\s*flex/);
- assert.match(css, /\.so-form\[data-so-receipt-form="true"\]\.is-receipt-searching::before\s*\{[^}]*backdrop-filter:\s*blur\(2px\)/);
-});
+
 
 test('Barang Masuk reference form uses the two-column quantity and unit row without gray cards', () => {
  const css=contentsOfStockOpnameStyles();
