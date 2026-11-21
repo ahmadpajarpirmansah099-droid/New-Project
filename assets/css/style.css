@@ -11979,10 +11979,13 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .so-ledger small { display: block; font-size: 11px; line-height: 1.5; color: var(--so-muted); margin-top: 4px; }
 .so-ledger tr:focus-within { background: var(--ui-lime-soft); }
 .so-ledger .so-error { color: var(--so-shortage); }
-.so-notice { padding: 14px 16px; background: var(--ui-lime-soft); border: 1px solid var(--so-line); border-radius: var(--ui-radius-control); font-size: 13px; line-height: 1.6; margin: 12px 0; overflow-wrap: anywhere; }
-.so-warning { background: #fff6df; border-color: #eee1b7; color: #765315; }
-.so-status { font-size: 12px; line-height: 1.6; color: var(--so-muted); }
-.so-form-footer { margin-top: 16px; padding-top: 4px; border-top: 1px solid var(--so-line); }
+.so-notice { padding: 0; background: transparent; border: 0; border-radius: 0; font-size: 12px; line-height: 1.45; margin: 7px 0; overflow-wrap: anywhere; color: var(--so-muted); }
+.so-warning { background: transparent; border: 0; color: #765315; }
+.so-warning::before { content: '⚠'; display: inline-block; margin-inline-end: 6px; font-size: 12px; }
+.so-form-head { padding-bottom: 10px; }
+.so-form-head p { margin: 0; color: var(--so-muted); font-size: 12px; line-height: 1.45; }
+.so-status { margin: 0 0 6px; font-size: 11px; line-height: 1.4; color: var(--so-muted); }
+.so-form-footer { margin-top: 10px; padding-top: 4px; border-top: 1px solid var(--so-line); }
 .so-form-footer .so-actions { margin-bottom: 0; }
 .so-form-footer .so-primary { margin-left: auto; }
 .so-history-head { margin-bottom: 12px; }
