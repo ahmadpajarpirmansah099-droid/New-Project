@@ -179,7 +179,7 @@
    historyKind=kind;historyLimit=10;render();return true;
   }
   const d=existing?(get().state.documents||[]).find(x=>x.id===existing):null;
-  form={kind,request:crypto.randomUUID(),id:d?.id||null,start:d?.start||today(),end:d?.end||today(),counts:{},category:d?.category||'Waste',target:d?.target||'',mapping:{},basePeriod:period()?.id||null,touched:false};
+  form={kind,request:crypto.randomUUID(),id:d?.id||null,start:d?.start||today(),end:d?.end||today(),counts:{},category:d?.category||'Waste',target:d?.target||'',mapping:{},note:d?.lines?.find(line=>line.note)?.note||'',basePeriod:period()?.id||null,touched:false};
   if(kind==='initial'&&period()?.status==='opening_pending'){form.start=form.end=period().start;form.resetMarker=period().opening_reset_at;}
   if(d)for(const l of d.lines||[])form.counts[l.key]={qty:String(l.qty),unit:l.unit||'',invoice_total:l.invoice_total??''};
   if(kind==='close'&&period()?.status==='reopened'){
@@ -240,6 +240,7 @@
   if(!form)return '';
   const k=form.kind,rows=rowsForForm(),b=balances(),isCount=['initial','close'].includes(k),withUnit=!['sales','production'].includes(k),receipt=k==='receipt',expense=k==='expense';
   const dateButton=(field,title)=>'<button type="button" class="so-picker-trigger" aria-haspopup="dialog" data-so-action="pick-date" data-so-field="'+field+'" data-so-title="'+title+'" '+(k==='initial'&&period()?.status==='opening_pending'?'disabled':'')+'><span>'+e(dateLabel(form[field]))+'</span><span class="so-picker-chevron" aria-hidden="true"></span></button>';
+  if(receipt)return receiptFormHTML(rows,dateButton);
   const dates=k==='close'?'':(k==='sales'?'<label>Dari tanggal'+dateButton('start','Pilih tanggal awal')+'</label>':'')+'<label>'+(k==='sales'?'Sampai tanggal':'Tanggal')+dateButton('end','Pilih tanggal')+'</label>';
   let extra='';
   if(k==='expense')extra='<div class="so-category-field"><span>Kategori</span><details class="so-category-dropdown"><summary aria-label="Kategori pengeluaran"><span>'+e(form.category)+'</span><span class="so-picker-chevron" aria-hidden="true"></span></summary><div class="so-category-options">'+expenseCategories.map(x=>'<button type="button" data-so-action="expense-category" data-so-value="'+e(x)+'" aria-pressed="'+(x===form.category)+'">'+e(x)+'</button>').join('')+'</div></details></div>';
@@ -278,6 +279,26 @@
   const receiptLedger=rows.length?'<div class="so-receipt-items-grid" aria-label="Daftar barang masuk">'+receiptCardsHTML+'</div>':'<p class="so-notice">Belum ada barang dipilih. Cari dan pilih barang di atas.</p>';
   const ledger=k==='close'?'<p class="so-notice">Isi jumlah fisik pada kolom STOK FISIK di tabel bawah, lalu tekan Konfirmasi.</p>':(rows.some(r=>r.error)?masterLinks():'')+(receipt?receiptLedger:(rows.length?'<table class="so-ledger'+(isCount?' so-count-ledger':'')+'" aria-label="'+e(labels[k])+'"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>':'<p class="so-notice">'+(expense?'Belum ada barang dipilih. Cari dan pilih barang di atas.':'Data belum tersedia.')+'</p>'))+(!rows.length&&(!(receipt||expense)||!catalog().some(r=>receipt?r.key.startsWith('m:'):/^[mw]:/.test(r.key)))?masterLinks():'');
   return '<section class="so-panel so-form"'+(receipt?' data-so-receipt-form="true"':'')+'><header class="so-form-head"><h2>'+e(labels[k])+'</h2></header>'+(expense?'<div data-so-expense-toolbar>'+toolbar+'</div>':toolbar)+(expense?expenseSearch:'')+excelActions+(isPending()&&k!=='close'?'<p class="so-notice">Stock Awal berikutnya belum dikonfirmasi. Isian ini disimpan sebagai draft.</p>':'')+(expense?'<div data-so-expense-rows>'+ledger+'</div>':ledger)+'<footer class="so-form-footer"><p id="soDraftStatus" class="so-status" role="status">'+e(draftStatus())+'</p><div class="so-actions">'+button('Simpan Draft','draft')+button('Tutup Form','cancel')+button(isCount?'Konfirmasi':'Simpan Transaksi','submit','',true)+'</div></footer></section>';
+ }
+ function receiptFormHTML(rows,dateButton){
+  const selected=rows[0]||null,v=selected?(form.counts[selected.key]||{}):{},units=selected?.units||[];
+  const unitOptions=units.map(u=>'<button type="button" data-so-action="unit-option" data-so-key="'+e(selected.key)+'" data-so-value="'+e(u.unit)+'" aria-pressed="'+(u.unit===(v.unit||selected.unit))+'">'+e(u.unit)+'</button>').join('');
+  const unitControl=selected?'<div class="so-receipt-unit-control"><details class="so-unit-dropdown" data-so-unit-key="'+e(selected.key)+'"><summary aria-label="Satuan dasar '+e(selected.name)+'"><span>'+e(v.unit||selected.unit)+'</span><span class="so-picker-chevron" aria-hidden="true"></span></summary><div class="so-unit-options">'+unitOptions+'</div></details><span class="so-unit-picker">'+pickerButton(v.unit||selected.unit,'data-so-key="'+e(selected.key)+'" data-so-title="Pilih satuan" aria-label="Satuan dasar '+e(selected.name)+'"',units.map(u=>({value:u.unit,label:u.unit})))+'</span></div>':'<button type="button" class="so-receipt-unit-placeholder" disabled>Pilih satuan</button>';
+  const searchValue=selected?selected.name:receiptQuery;
+  const receiptSearch='<div class="so-receipt-reference-field so-receipt-search"><label for="soReceiptSearch">Bahan baku</label><div class="so-receipt-search-input-wrap"><input id="soReceiptSearch" type="search" data-so-receipt-search placeholder="Cari nama barang..." aria-label="Cari nama barang" autocomplete="off" aria-controls="soReceiptResults" aria-autocomplete="list" value="'+e(searchValue)+'" '+(selected?'readonly':'')+'>'+(selected?'<button type="button" data-so-action="receipt-remove" data-so-item-key="'+e(selected.key)+'" aria-label="Ganti bahan baku" class="so-receipt-clear">×</button>':'')+'</div><div class="so-receipt-search-results" id="soReceiptResults" data-so-receipt-results role="listbox" aria-label="Hasil pencarian barang">'+receiptSuggestions(receiptQuery)+'</div></div>';
+  const quantity='<label class="so-receipt-reference-field"><span>Jumlah</span><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(selected?.key||'')+'" data-so-prop="qty" aria-label="Barang Masuk '+e(selected?.name||'')+'" value="'+e(v.qty??'')+'" placeholder="" '+(!selected||selected.error?'disabled':'')+'></label>';
+  const unit='<label class="so-receipt-reference-field"><span>Satuan</span>'+unitControl+'</label>';
+  const invoice='<label class="so-receipt-reference-field so-receipt-invoice-field"><span>Harga invoice total (opsional)</span><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(selected?.key||'')+'" data-so-prop="invoice_total" aria-label="Harga invoice total" value="'+e(v.invoice_total??'')+'" placeholder="Kosongkan jika tidak ada harga" '+(!selected||selected.error?'disabled':'')+'></label>';
+  const date='<label class="so-receipt-reference-field"><span>Tanggal diterima</span>'+dateButton('end','Pilih tanggal diterima')+'</label>';
+  const note='<label class="so-receipt-reference-field so-receipt-note-field"><span>Catatan / nomor invoice</span><input type="text" data-so-field="note" aria-label="Catatan atau nomor invoice" value="'+e(form.note||'')+'" placeholder=""></label>';
+  const extraRows=rows.slice(1).map(r=>{
+   const value=form.counts[r.key]||{},opts=(r.units||[]).map(u=>'<button type="button" data-so-action="unit-option" data-so-key="'+e(r.key)+'" data-so-value="'+e(u.unit)+'" aria-pressed="'+(u.unit===(value.unit||r.unit))+'">'+e(u.unit)+'</button>').join('');
+   const desktop='<details class="so-unit-dropdown" data-so-unit-key="'+e(r.key)+'"><summary><span>'+e(value.unit||r.unit)+'</span><span class="so-picker-chevron"></span></summary><div class="so-unit-options">'+opts+'</div></details>';
+   const mobile='<span class="so-unit-picker">'+pickerButton(value.unit||r.unit,'data-so-key="'+e(r.key)+'" data-so-title="Pilih satuan"',(r.units||[]).map(u=>({value:u.unit,label:u.unit})))+'</span>';
+   return '<article class="so-receipt-extra-item"><div class="so-receipt-extra-head"><strong>'+e(r.name)+'</strong><button type="button" data-so-action="receipt-remove" data-so-item-key="'+e(r.key)+'" aria-label="Hapus '+e(r.name)+'">Hapus</button></div><div class="so-receipt-quantity-unit-grid"><label class="so-receipt-reference-field"><span>Jumlah</span><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="qty" value="'+e(value.qty??'')+'" aria-label="Barang Masuk '+e(r.name)+'"></label><label class="so-receipt-reference-field"><span>Satuan</span><div class="so-receipt-unit-control">'+desktop+mobile+'</div></label></div><label class="so-receipt-reference-field"><span>Harga invoice total (opsional)</span><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="invoice_total" value="'+e(value.invoice_total??'')+'" aria-label="Harga invoice total '+e(r.name)+'" placeholder="Kosongkan jika tidak ada harga"></label></article>';
+  }).join('');
+  const icon='<span class="so-receipt-heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.3 7.6 7.7 4.3 7.7-4.3M12 12v9"/><path d="M8.5 5 16 9.2v5.3"/></svg></span>';
+  return '<section class="so-panel so-form so-receipt-reference-form" data-so-receipt-form="true"><header class="so-form-head so-receipt-reference-head">'+icon+'<h2>Catat Barang Masuk</h2></header><div class="so-receipt-reference-fields">'+receiptSearch+'<div class="so-receipt-quantity-unit-grid">'+quantity+unit+'</div>'+invoice+date+note+'</div>'+(extraRows?'<div class="so-receipt-extra-items">'+extraRows+'</div>':'')+'<footer class="so-form-footer so-receipt-reference-footer"><div class="so-actions"><button type="button" data-so-action="cancel" class="so-receipt-cancel">Batal</button>'+button('Simpan Barang Masuk','submit','',true)+'</div></footer></section>';
  }
  function updateExpenseParts(part){
   const current=page()?.querySelector?.('.so-form');
@@ -586,7 +607,7 @@ ${transactionActions}
    }else if(qty!==''&&qty!=null&&Number(qty)!==0){
     if(r.error)throw Error(r.name+': '+r.error);
     if(!Number.isFinite(Number(qty))||Number(qty)<0)throw Error('Jumlah '+r.name+' tidak valid.');
-    lines.push({key:r.key,qty:String(qty),unit:v.unit||r.unit,invoice_total:v.invoice_total??''});
+    lines.push({key:r.key,qty:String(qty),unit:v.unit||r.unit,invoice_total:v.invoice_total??'',...(k==='receipt'&&String(form.note||'').trim()?{note:String(form.note).trim()}: {})});
    }
   }
   if(k==='sales'&&String(form.start||'').slice(0,7)!==String(form.end||'').slice(0,7))throw Error('Rentang Sales tidak boleh melewati pergantian bulan. Pisahkan menjadi dua transaksi: satu untuk tiap bulan.');
@@ -595,7 +616,7 @@ ${transactionActions}
   if(isMove&&!form.target)throw Error('Pilih tujuan Move yang sudah aktif sebelum menyimpan.');
   const input={id:form.id||undefined,type:k,start:k==='sales'?form.start:form.end,end:form.end,date:form.end,month:k==='close'?period()?.start:undefined,counts,lines,category:k==='expense'?form.category:null,target:isMove?form.target:null,mapping:isMove?Object.entries(form.mapping||{}).map(([source,target])=>({source,target})):[]};
   if(!['initial','close'].includes(k)&&!lines.length)throw Error('Isi minimal satu jumlah lebih dari 0.');
-  if(!await confirmStock(k==='close'?'Hitung seluruh transaksi periode ini dan selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal pertama?':'Simpan transaksi ini?',k==='close'?'Selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal?':'Simpan transaksi?',k==='close'?'Selesaikan':'Simpan'))return;
+  if(!await confirmStock(k==='close'?'Hitung seluruh transaksi periode ini dan selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal pertama?':k==='receipt'?'Simpan barang masuk ini?':'Simpan transaksi ini?',k==='close'?'Selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal?':k==='receipt'?'Simpan Barang Masuk?':'Simpan transaksi?',k==='close'?'Selesaikan':k==='receipt'?'Simpan Barang Masuk':'Simpan'))return;
   try{if(k==='initial'&&period()?.status==='opening_pending')await service.resetOpening('confirm',{counts},form.request);else await service.write(['initial','close'].includes(k)?k:'save',input,form.request);}
   catch(error){if(error.message.includes('SALES_OVERLAP')&&await confirmStock('Rentang Sales bertumpuk. Simpan sebagai tambahan, bukan pengganti?','Rentang Sales bertumpuk','Simpan tambahan'))await service.write('save',{...input,confirm_overlap:true},form.request);else throw error;}
   service.clearDraft(k);form=null;notice='Berhasil tersimpan.';
@@ -738,7 +759,7 @@ ${transactionActions}
   }
   if(el.dataset.soReceiptSearch!==undefined&&form.kind==='receipt'){
    receiptQuery=el.value;
-   const results=el.parentElement?.querySelector('[data-so-receipt-results]');
+   const results=el.closest?.('.so-receipt-search')?.querySelector('[data-so-receipt-results]')||el.parentElement?.querySelector('[data-so-receipt-results]');
    if(results)results.innerHTML=receiptSuggestions(receiptQuery);
    el.closest('.so-receipt-search')?.classList.toggle('has-results',!!receiptQuery.trim());
    return;

@@ -180,7 +180,7 @@ test('receipt, expense, production, and sales forms render with visible in-app d
   const t = runtime();
   for (const kind of ['receipt', 'expense', 'production', 'sales']) {
     await t.ui.open(kind);
-    assert.match(t.page.innerHTML, /class="so-panel so-form"/, kind + ' form should render');
+    assert.match(t.page.innerHTML, kind==='receipt' ? /class="so-panel so-form so-receipt-reference-form"/ : /class="so-panel so-form"/, kind + ' form should render');
     assert.match(t.page.innerHTML, /data-so-action="pick-date"/, kind + ' should include a date picker button');
     assert.match(t.page.innerHTML, /data-so-field="end"/, kind + ' should include the transaction date');
     if (kind === 'sales') assert.match(t.page.innerHTML, /data-so-field="start"/, 'sales should include the start date');
@@ -525,30 +525,39 @@ test('missing recipe disables its input and offers master-data navigation', asyn
   assert.match(t.page.innerHTML, /data-so-page="wips"/);
 });
 
-test('Barang Masuk displays date and item search as clean two-column cards, then quantity with inline base unit',async()=>{
+test('Barang Masuk matches the compact reference form and keeps item quantity, unit, date, invoice and note',async()=>{
  const t=runtime();
  await t.ui.open('receipt');
- assert.match(t.page.innerHTML,/class="so-receipt-entry-grid"/);
- assert.match(t.page.innerHTML,/class="so-receipt-field-card so-receipt-date-card"/);
- assert.match(t.page.innerHTML,/class="so-receipt-field-card so-receipt-search"/);
+ assert.match(t.page.innerHTML,/Catat Barang Masuk/);
+ assert.match(t.page.innerHTML,/Bahan baku/);
  assert.match(t.page.innerHTML,/Cari nama barang/);
- assert.doesNotMatch(t.page.innerHTML,/class="so-toolbar"/);
- assert.doesNotMatch(t.page.innerHTML,/background: var\(--ui-surface-soft\)/);
- assert.doesNotMatch(t.page.innerHTML,/data-so-prop="qty" aria-label="Barang Masuk Susu"/);
+ assert.match(t.page.innerHTML,/Jumlah/);
+ assert.match(t.page.innerHTML,/Satuan/);
+ assert.match(t.page.innerHTML,/Pilih satuan/);
+ assert.match(t.page.innerHTML,/Harga invoice total \(opsional\)/);
+ assert.match(t.page.innerHTML,/Tanggal diterima/);
+ assert.match(t.page.innerHTML,/Catatan \/ nomor invoice/);
+ assert.match(t.page.innerHTML,/Batal/);
+ assert.match(t.page.innerHTML,/Simpan Barang Masuk/);
+ assert.doesNotMatch(t.page.innerHTML,/Simpan Draft/);
  t.input({soReceiptSearch:''},'su');
  assert.match(t.searchResults.innerHTML,/Susu/);
- assert.match(t.searchResults.innerHTML,/data-so-item-key="m:a"/);
  await t.click('receipt-add',{soItemKey:'m:a'});
- assert.match(t.page.innerHTML,/class="so-receipt-item-card"/);
+ assert.match(t.page.innerHTML,/readonly/);
+ assert.match(t.page.innerHTML,/value="Susu"/);
  assert.match(t.page.innerHTML,/data-so-prop="qty" aria-label="Barang Masuk Susu"/);
- assert.match(t.page.innerHTML,/class="so-receipt-qty-unit"/);
  assert.match(t.page.innerHTML,/aria-label="Satuan dasar Susu"/);
- assert.match(t.page.innerHTML,/ML/);
- assert.equal((t.draft('receipt').receiptItems||[]).length,1);
- t.input({soReceiptSearch:''},'su');
- assert.doesNotMatch(t.searchResults.innerHTML,/data-so-item-key="m:a"/);
- await t.click('receipt-add',{soItemKey:'m:a'});
- assert.equal(t.draft('receipt').receiptItems.length,1);
+ t.input({soKey:'m:a',soProp:'qty'},'3');
+ t.input({soKey:'m:a',soProp:'invoice_total'},'25000');
+ t.input({soField:'note'},'INV-2026-001');
+ assert.equal(t.draft('receipt').counts['m:a'].qty,'3');
+ assert.equal(t.draft('receipt').note,'INV-2026-001');
+ await t.click('submit');
+ assert.equal(t.writes.at(-1).input.lines.length,1);
+ assert.equal(t.writes.at(-1).input.lines[0].qty,'3');
+ assert.equal(t.writes.at(-1).input.lines[0].unit,'ML');
+ assert.equal(t.writes.at(-1).input.lines[0].invoice_total,'25000');
+ assert.equal(t.writes.at(-1).input.lines[0].note,'INV-2026-001');
 });
 
 test('Barang Masuk preserves selected entries and invoice values in draft and edit',async()=>{
@@ -990,7 +999,7 @@ test('Stock Opname feature forms do not show explanatory text beneath the title'
   const t=runtime();
   for (const kind of ['receipt','expense','production','sales','close']) {
     await t.ui.open(kind);
-    assert.match(t.page.innerHTML,/class="so-form-head"><h2>[^<]+<\/h2><\/header>/);
+    assert.match(t.page.innerHTML,kind==='receipt' ? /class="so-form-head so-receipt-reference-head"[\s\S]*?<h2>Catat Barang Masuk<\/h2>/ : /class="so-form-head"><h2>[^<]+<\/h2><\/header>/);
     assert.doesNotMatch(t.page.innerHTML,/Catat barang yang digunakan atau dipindahkan|Isi jumlah batch|Pilih rentang tanggal|Catat bahan dan suplies yang diterima|Cocokkan stok sistem dengan fisik/);
   }
 });
@@ -1001,10 +1010,12 @@ test('Stock Opname transaction icons are aligned and sized consistently', () => 
   assert.match(css, /\.so-transaction-actions \.so-transaction-icon\s*\{[^}]*width:\s*19px;[^}]*height:\s*19px;[^}]*flex:\s*0 0 19px;/);
 });
 
-test('Barang Masuk uses two-column cards, inline unit control and blurred search focus', () => {
+
+
+test('Barang Masuk reference form uses the two-column quantity and unit row without gray cards', () => {
  const css=contentsOfStockOpnameStyles();
- assert.match(css, /\.so-receipt-entry-grid,[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
- assert.match(css, /\.so-receipt-field-card,[\s\S]*?background:\s*var\(--ui-surface\)/);
- assert.match(css, /\.so-receipt-qty-unit\s*\{[^}]*display:\s*flex/);
- assert.match(css, /\.so-form\[data-so-receipt-form="true"\]\.is-receipt-searching::before\s*\{[^}]*backdrop-filter:\s*blur\(2px\)/);
+ assert.match(css, /\.so-receipt-quantity-unit-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0,1fr\) minmax\(0,1fr\)/);
+ assert.match(css, /\.so-receipt-reference-field > input,[\s\S]*?background:\s*#f4eedc/);
+ assert.match(css, /\.so-receipt-reference-form\.is-receipt-searching::before\s*\{[^}]*backdrop-filter:\s*blur\(2px\)/);
+ assert.match(css, /\.so-receipt-reference-footer \.so-actions\s*\{[^}]*grid-template-columns:\s*repeat\(2,minmax\(0,1fr\)\)/);
 });
