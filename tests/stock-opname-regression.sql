@@ -3,7 +3,7 @@ do $$
 declare
  u uuid; w uuid:=gen_random_uuid(); d uuid:=gen_random_uuid(); t uuid:=gen_random_uuid();
  c jsonb; counts jsonb:='{"m:a":{"qty":"100","unit":"ML"}}';
- v jsonb; before_source jsonb; before_target jsonb; req uuid; move_id text; tx_day text:=((now() at time zone 'Asia/Jakarta')::date-1)::text;
+ v jsonb; before_source jsonb; before_target jsonb; req uuid; move_id text; tx_day text:=((now() at time zone 'Asia/Jakarta')::date-40)::text;
 begin
  select id into u from public.profiles where role='admin' limit 1;
  if u is null then raise exception 'No test administrator available';end if;
@@ -38,7 +38,7 @@ begin
  exception when others then if sqlerrm not like 'Transaksi sudah dibatalkan%' then raise;end if;end;
  if public.stock_opname_read(d) is distinct from before_source or public.stock_opname_read(t) is distinct from before_target or exists(select 1 from public.stock_opname_requests where request_id=req) then raise exception 'Rejected adjustment changed stock or request history';end if;
 
- -- New transactions follow the activated period's next-day opening.
+ -- New transactions go into the calendar month created by the close.
  tx_day:=v->'state'->'periods'->-1->>'start';
  -- An invalid destination must reject the entire operation before either stock changes.
  req:=gen_random_uuid();
@@ -55,7 +55,7 @@ begin
  update public.stock_opname_state set payload=jsonb_set(payload,'{documents,1,category}','"Waste"') where division_id=d;
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'save',jsonb_build_object('type','expense','category','QC','start',tx_day,'end',tx_day,'lines','[{"key":"m:a","qty":"2","unit":"ML"}]'::jsonb));
  v:=public.stock_opname_write(d,(v->>'revision')::bigint,gen_random_uuid(),'close',jsonb_build_object('date',tx_day,'counts','{"m:a":{"qty":"103","unit":"ML"}}'::jsonb));
- c:=v->'state'->'periods'->-1->'result'->0;
+ c:=v->'state'->'periods'->-2->'result'->0;
  if (c->'movements'->>'receipt')::numeric is distinct from 5 or (c->'movements'->>'QC')::numeric is distinct from -2 or c->'movements' ? 'Waste' or (c->>'variance')::numeric is distinct from 0 then raise exception 'Receipt/expense movement grouping is incorrect';end if;
  raise notice 'Stock Opname regression scenarios passed';
 end $$;

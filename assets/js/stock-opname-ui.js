@@ -9,11 +9,15 @@
  const expenseCategories=['Kalibrasi','RnD','QC','Suplies','Move','Waste','Lainnya'];
  const periodStatus={active:'Berjalan',reopened:'Koreksi opname',opening_pending:'Stock Awal perlu diisi ulang',closed:'Menunggu konfirmasi Stock Awal',held:'Ditahan'};
  const formHelp={initial:'Isi stok pertama untuk seluruh bahan, suplies, dan WIP, termasuk angka 0.',receipt:'Catat bahan dan suplies yang diterima. Simpan Transaksi langsung menambah stok; Simpan Draft untuk isian yang belum selesai.',expense:'Catat barang yang digunakan atau dipindahkan. Simpan Transaksi langsung mengurangi stok; Simpan Draft belum mengubah stok.',production:'Isi jumlah batch. Simpan Transaksi langsung memproses bahan dan hasil WIP; Simpan Draft belum mengubah stok.',sales:'Pilih rentang tanggal, lalu isi total terjual setiap menu dalam satu form.',close:'Cocokkan stok sistem dengan fisik. Isi seluruh barang, termasuk angka 0.'};
- let form=null,busy=false,notice='',targetRows=[],receiptQuery='',expenseQuery='',viewGeneration=0,draftSaved=false,activeConfirm=null,historyKind='close',historyLimit=10;
+ let form=null,busy=false,notice='',targetRows=[],receiptQuery='',expenseQuery='',viewGeneration=0,draftSaved=false,activeConfirm=null,historyKind='close',historyLimit=10,selectedMonth=null;
  const page=()=>document.getElementById('page-stock-opname');
  const get=()=>service.current();
- function period(){const ps=get()?.state?.periods||[];const p=ps.at(-1);return p?.status==='held'?ps.at(-2):p;}
- function isPending(){return period()?.status!=='reopened' && ['closed','held','opening_pending'].includes(get()?.state?.periods?.at(-1)?.status);}
+ const periods=()=>get()?.state?.periods||[];
+ const monthOf=p=>String(p?.start||'').slice(0,7);
+ const monthLabel=p=>{const d=new Date(String(p?.start||'').slice(0,10)+'T12:00:00');return Number.isNaN(d.getTime())?String(p?.start||''):new Intl.DateTimeFormat('id-ID',{month:'long',year:'numeric'}).format(d);};
+ function period(){const ps=periods();if(selectedMonth){const hit=ps.findLast(x=>monthOf(x)===selectedMonth);if(hit)return hit;}return ps.at(-1)?.status==='held'?ps.at(-2):ps.at(-1);}
+ function isPending(){const p=period();return !!p&&p.status!=='reopened'&&['closed','held','opening_pending'].includes(p.status);}
+ function syncMonth(fallback){const ps=periods();if(!ps.some(x=>monthOf(x)===selectedMonth))selectedMonth=fallback&&ps.some(x=>monthOf(x)===fallback)?fallback:ps.at(-1)?monthOf(ps.at(-1)):null;}
  function staleOpeningDraft(draft){return draft?.kind==='initial'&&period()?.status==='opening_pending'&&draft.resetMarker!==period().opening_reset_at;}
  function staleCorrectionDraft(draft){return draft?.kind==='close'&&draft.basePeriod&&draft.basePeriod!==period()?.id;}
  function balances(){const s=get()?.state||{},p=period(),ids=new Set([p?.id,...(p?.legacy_period_ids||[])].filter(Boolean));const b={...p?.opening};for(const d of s.documents||[])if(ids.has(d.period_id)&&!d.void)for(const l of d.postings||[])b[l.key]=(Number(b[l.key])||0)+Number(l.qty);return b;}
@@ -23,10 +27,9 @@
   const state=get()?.state||{},documents=Array.isArray(state.documents)?state.documents:[];
   const p=period();
   let scopedDocuments=documents;
-  // Keep the old period IDs attached to the restored opening until this first
-  // period is closed. Later periods remain strictly scoped to their own ID.
-  if(p?.status==='closed')scopedDocuments=[];
-  else if(p?.previous_id)scopedDocuments=documents.filter(doc=>doc?.period_id===p.id);
+  // Scope the ledger to one calendar month, including any legacy period IDs
+  // that belong to the same month.
+  if(p){const ids=new Set([p.id,...(p.legacy_period_ids||[])]);scopedDocuments=documents.filter(doc=>ids.has(doc?.period_id));}
   const totals={incoming:Object.create(null),outgoing:Object.create(null),operational:Object.create(null)};
   const add=(bucket,key,qty)=>{bucket[key]=(bucket[key]||0)+qty;};
   for(const doc of scopedDocuments){
@@ -442,13 +445,15 @@
  }
  function historyHTML(){
   const {periods,documents}=get().state;
-  const p=period(),kinds=['initial','expense','receipt','production','sales','close'];
+  const p=period(),ids=new Set([p?.id,...(p?.legacy_period_ids||[])].filter(Boolean)),kinds=['initial','expense','receipt','production','sales','close'];
+  const months=p?periods.filter(x=>monthOf(x)===monthOf(p)):periods;
+  const scoped=p?documents.filter(doc=>ids.has(doc.period_id)):documents;
   const entries={
-   initial:periods.filter(x=>Object.keys(x.opening||{}).length),
-   close:periods.filter(x=>x.result),
+   initial:months.filter(x=>Object.keys(x.opening||{}).length),
+   close:months.filter(x=>x.result),
    receipt:[],expense:[],production:[],sales:[]
   };
-  for(const doc of documents){
+  for(const doc of scoped){
    const kind=['move_in','adjustment','adjustment_in'].includes(doc.type)?'expense':doc.type;
    if(['receipt','expense','production','sales'].includes(kind))entries[kind].push(doc);
   }
@@ -483,13 +488,16 @@
   page().classList?.add('so-table-only');
   if(staleOpeningDraft(form)){service.clearDraft('initial');form=null;draftSaved=false;notice='Draft Stock Awal lama diabaikan setelah reset. Isi ulang manual.';}
   if(staleCorrectionDraft(form)){service.clearDraft('close');form=null;draftSaved=false;notice='Koreksi opname sudah dibatalkan. Form koreksi lama ditutup.';}
-  const p=period(),last=d.state.periods.at(-1),b=balances(),negative=Object.values(b).some(n=>n<0);
+  syncMonth(d.month);
+  const ps=d.state.periods||[],p=period(),monthIndex=ps.findIndex(x=>x.id===p?.id),b=balances(),negative=Object.values(b).some(n=>n<0);
+  const hasNext=!!p&&ps.some(x=>monthOf(x)>monthOf(p));
   let controls='';
   if(!p)controls=button('Isi Stock Awal','open','data-so-kind="initial"',true);
   else if(p.status==='opening_pending')controls=button('Isi Ulang Stock Awal','open','data-so-kind="initial"',true);
-  else if(last?.status==='closed')controls=button('Jadikan Stock Awal Berikutnya','activate','',true)+button('Buka Kembali Opname','reopen');
-  else if(last?.status==='held'&&p?.status==='closed')controls=button('Konfirmasi Stock Awal Hasil Koreksi','reactivate','',true);
-  else controls=button('Isi Stock Opname','open','data-so-kind="close"',true)+(p.status==='reopened'&&d.state.periods.length===1?button('Isi Ulang Stock Awal','reset-opening'):'')+(d.state.periods.some(x=>x.status==='closed')&&p?.status==='active'?button('Buka Opname Terakhir','reopen'):'');
+  else if(p.status==='closed')controls=(hasNext?'':button('Jadikan Stock Awal Berikutnya','activate','',true))+button('Buka Kembali Opname','reopen');
+  else if(p.status==='held')controls=button('Konfirmasi Stock Awal Hasil Koreksi','reactivate','',true);
+  else controls=button('Isi Stock Opname','open','data-so-kind="close"',true)+(p.status==='reopened'&&ps.length===1?button('Isi Ulang Stock Awal','reset-opening'):'')+(ps.some(x=>x.status==='closed')&&p.status==='active'?button('Buka Opname Terakhir','reopen'):'');
+  const monthNav=p?`<div class="so-month-nav">${button('‹','month-prev','aria-label="Bulan sebelumnya" '+(monthIndex<=0?'disabled':''))}<span class="so-month-name">${e(monthLabel(p))}</span>${button('›','month-next','aria-label="Bulan berikutnya" '+(monthIndex>=ps.length-1?'disabled':''))}</div>`:'';
   const context=root.AppAuth?.getContext();
   const scope=[context?.workspaceName,context?.activeDivisionName].filter(Boolean).join(' · ');
   const status=p?periodStatus[p.status]||p.status:'Isi Stock Awal untuk memulai';
@@ -509,21 +517,19 @@
    <div class="so-actions"><button type="button" data-sd="open">Dashboard</button>${button('Muat Ulang','refresh')}</div>
   </header>
   <section class="so-overview" aria-label="Periode stok" data-so-period-status="${e(p?.status||'')}">
-   <div class="so-period-copy">${p?`<span>Periode mulai ${e(dateLabel(p.start))}</span>`:''}<strong>${e(status)}</strong></div>
+   <div class="so-period-copy">${p?monthNav:'<span>Periode Stock Opname belum dimulai</span>'}<strong>${e(status)}</strong></div>
    <div class="so-actions">${controls}${button('Pulihkan Draft','restore')}</div>
   </section>
 ${transactionActions}
-    ${notice?`<p class="so-notice" role="alert">${e(notice)}</p>`:''}
+  ${notice?`<p class="so-notice" role="alert">${e(notice)}</p>`:''}
   ${negative&&p?.status!=='opening_pending'?'<p class="so-notice so-warning">Ada stok sistem minus. Periksa transaksi dan cocokkan saat opname.</p>':''}
   ${formHTML()}${historyHTML()}`;
   page().innerHTML+=itemTableHTML();
  }
  function latestPeriodLabel(){
-  const start=period()?.start;
-  if(!start)return 'Periode Stock Opname belum dimulai';
-  const date=new Date(String(start).slice(0,10)+'T12:00:00');
-  if(Number.isNaN(date.getTime()))return 'Periode Stock Opname';
-  return 'Periode terbaru · '+new Intl.DateTimeFormat('id-ID',{month:'long',year:'numeric'}).format(date);
+  const p=period();
+  if(!p?.start)return 'Periode Stock Opname belum dimulai';
+  return 'Periode · '+monthLabel(p);
  }
  function compactItemName(value){
   const name=String(value||'Tanpa nama').trim();
@@ -576,15 +582,18 @@ ${transactionActions}
     lines.push({key:r.key,qty:String(qty),unit:v.unit||r.unit,invoice_total:v.invoice_total??''});
    }
   }
+  if(k==='sales'&&String(form.start||'').slice(0,7)!==String(form.end||'').slice(0,7))throw Error('Rentang Sales tidak boleh melewati pergantian bulan. Pisahkan menjadi dua transaksi: satu untuk tiap bulan.');
   const saved=snapshot();if(isPending()&&!['close','initial'].includes(k)){if(saved)notice='Transaksi tersimpan sebagai draft. Konfirmasi Stock Awal, lalu simpan draft ini.';return;}
   const isMove=k==='expense'&&form.category==='Move';
   if(isMove&&!form.target)throw Error('Pilih tujuan Move yang sudah aktif sebelum menyimpan.');
-  const input={id:form.id||undefined,type:k,start:k==='sales'?form.start:form.end,end:form.end,date:form.end,counts,lines,category:k==='expense'?form.category:null,target:isMove?form.target:null,mapping:isMove?Object.entries(form.mapping||{}).map(([source,target])=>({source,target})):[]};
+  const input={id:form.id||undefined,type:k,start:k==='sales'?form.start:form.end,end:form.end,date:form.end,month:k==='close'?period()?.start:undefined,counts,lines,category:k==='expense'?form.category:null,target:isMove?form.target:null,mapping:isMove?Object.entries(form.mapping||{}).map(([source,target])=>({source,target})):[]};
   if(!['initial','close'].includes(k)&&!lines.length)throw Error('Isi minimal satu jumlah lebih dari 0.');
   if(!await confirmStock(k==='close'?'Hitung seluruh transaksi periode ini dan selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal pertama?':'Simpan transaksi ini?',k==='close'?'Selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal?':'Simpan transaksi?',k==='close'?'Selesaikan':'Simpan'))return;
   try{if(k==='initial'&&period()?.status==='opening_pending')await service.resetOpening('confirm',{counts},form.request);else await service.write(['initial','close'].includes(k)?k:'save',input,form.request);}
   catch(error){if(error.message.includes('SALES_OVERLAP')&&await confirmStock('Rentang Sales bertumpuk. Simpan sebagai tambahan, bukan pengganti?','Rentang Sales bertumpuk','Simpan tambahan'))await service.write('save',{...input,confirm_overlap:true},form.request);else throw error;}
   service.clearDraft(k);form=null;notice='Berhasil tersimpan.';
+  // A close creates the next month; move the view there so the next count is visible.
+  if(['initial','close'].includes(k))selectedMonth=get()?.month||selectedMonth;
   // Reload shared catalog after invoice updates so other master pages see the new price.
   if(k==='receipt'){const ctx=root.AppAuth.getContext();await root.MasterDataStore.initialize(root.AppAuth.getClient(),ctx.workspaceId,ctx.activeDivisionId);}
  }
@@ -631,6 +640,7 @@ ${transactionActions}
    if(name==='excel-sales'){await excelHistory('sales',el.dataset.soId);return;}
    if(name==='history-tab'){historyKind=el.dataset.soKind;historyLimit=10;historyOnly=true;return;}
    if(name==='history-more'){historyLimit+=10;historyOnly=true;return;}
+   if(name==='month-prev'||name==='month-next'){const ps=periods(),i=ps.findIndex(x=>x.id===period()?.id),next=ps[i+(name==='month-next'?1:-1)];if(next){selectedMonth=monthOf(next);form=null;notice='';}return;}
    if(name==='pick-date'){openDatePicker(el.dataset.soField);return;}
    if(name==='pick-choice'){openChoicePicker(el);skipRender=form?.kind==='expense';return;}
    if(name==='expense-category'&&form?.kind==='expense'){const value=el.dataset.soValue;if(expenseCategories.includes(value)){form.category=value;form.touched=true;snapshot();expensePart='expense-category';}return;}
@@ -686,7 +696,8 @@ ${transactionActions}
     if(await confirmStock('Batalkan transaksi ini? Stok akan dihitung kembali.','Batalkan transaksi?','Batalkan transaksi'))await service.write('void',{id:doc.id},crypto.randomUUID());return;
    }
    if(['activate','reactivate','reopen'].includes(name)&&await confirmStock(name==='reopen'?'Buka kembali opname terakhir? Periode berikutnya ditahan sampai koreksi dikonfirmasi.':'Konfirmasi stok fisik sebagai Stock Awal periode berikutnya?',name==='reopen'?'Buka kembali opname?':'Aktifkan Stock Awal?',name==='reopen'?'Buka kembali':'Aktifkan')){
-    await service.write(name,{},crypto.randomUUID());notice=name==='reopen'?'Opname dibuka kembali. Koreksi transaksi atau stok fisik, lalu selesaikan ulang.':'Stock Awal dikonfirmasi. Draft transaksi dapat dipulihkan dan disimpan.';
+    await service.write(name,name==='reopen'&&period()?.status==='closed'?{month:period().start}:{},crypto.randomUUID());notice=name==='reopen'?'Opname dibuka kembali. Koreksi transaksi atau stok fisik, lalu selesaikan ulang.':'Stock Awal dikonfirmasi. Draft transaksi dapat dipulihkan dan disimpan.';
+    if(name==='activate')selectedMonth=get()?.month||selectedMonth;
    }
   }catch(error){historyOnly=false;expensePart='';skipRender=false;if(token===viewGeneration)notice=error.message;}
   finally{if(token===viewGeneration){busy=false;const history=page()?.querySelector('#soHistory');if(historyOnly&&history)history.outerHTML=historyHTML();else if(expensePart)updateExpenseParts(expensePart);else if(!skipRender)render();if(name==='expense-category')page()?.querySelector?.('.so-category-dropdown summary')?.focus();if(name==='unit-option')page()?.querySelectorAll?.('.so-unit-dropdown').forEach(node=>{if(node.dataset.soUnitKey===el.dataset.soKey)node.querySelector('summary')?.focus();});}}

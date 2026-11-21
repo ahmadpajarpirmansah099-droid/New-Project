@@ -695,6 +695,7 @@ test('new Stock Opname table shows active master items and all requested columns
 
 test('main table accumulates receipt and expense postings by master item until the first opname closes', () => {
   const t = runtime();
+  t.data.state.periods[0].legacy_period_ids = ['old-period'];
   t.data.state.documents = [
     { id: 'r-current', period_id: 'period', type: 'receipt', postings: [{ key: 'm:a', qty: 100 }, { key: 'w:a', qty: 999 }] },
     { id: 'r-legacy', period_id: 'old-period', type: 'receipt', postings: [{ key: 'm:a', qty: 25 }] },
@@ -751,7 +752,7 @@ test('system stock uses the requested balance formula and colors negative values
   assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span class="so-table-negative">-2 ML<\/span>/);
 });
 
-test('movement table resets on completed opname and then reads only the new period', () => {
+test('movement table shows only the selected calendar month and starts the next month fresh', async () => {
   const t = runtime();
   t.data.state.documents = [
     { id: 'legacy', period_id: 'old-period', type: 'receipt', postings: [{ key: 'm:a', qty: 40 }] },
@@ -762,14 +763,57 @@ test('movement table resets on completed opname and then reads only the new peri
     { id: 'new-sales', period_id: 'next-period', type: 'sales', postings: [{ key: 'm:a', qty: -6 }] }
   ];
   t.data.state.periods[0].status = 'closed';
+  t.data.state.periods[0].legacy_period_ids = ['old-period'];
+  t.data.month = '2026-11';
   t.ui.render();
-  assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>0 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>40 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>0 ML<\/span>/);
-  assert.match(t.page.innerHTML, /data-label="TERPAKAI OPERASIONAL"><span>0 ML<\/span>/);
-  t.data.state.periods.push({ id: 'next-period', previous_id: 'period', start: '2026-11-09', status: 'active', opening: {} });
+  assert.match(t.page.innerHTML, /data-label="TERPAKAI OPERASIONAL"><span>40 ML<\/span>/);
+  t.data.state.periods.push({ id: 'next-period', previous_id: 'period', start: '2026-12-01', status: 'active', opening: {} });
   t.ui.render();
+  await t.click('month-next');
   assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>6 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>2 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="TERPAKAI OPERASIONAL"><span>11 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span class="so-table-negative">-7 ML<\/span>/);
+});
+
+
+test('Stock Opname close targets the month selected in the navigator', async () => {
+  const t = runtime();
+  t.data.state.periods.push({ id: 'dec', previous_id: 'period', start: '2026-12-01', status: 'active', opening: {} });
+  t.data.month = '2026-12';
+  t.ui.render();
+  await t.click('month-prev');
+  assert.match(t.page.innerHTML, /November 2026/);
+  await t.ui.open('close');
+  t.input({ soKey: 'm:a', soProp: 'qty' }, '1');
+  t.input({ soKey: 'w:a', soProp: 'qty' }, '0');
+  await t.click('submit');
+  assert.equal(t.writes.length, 1);
+  assert.equal(t.writes[0].action, 'close');
+  assert.equal(t.writes[0].input.month, '2026-11-01');
+});
+
+test('Sales form rejects a date range that crosses a calendar month before writing', async () => {
+  const t = runtime(); await t.ui.open('sales');
+  t.input({ soField: 'start' }, '2026-11-30');
+  t.input({ soField: 'end' }, '2026-12-01');
+  await t.click('submit');
+  assert.equal(t.writes.length, 0);
+  assert.match(t.page.innerHTML, /Rentang Sales tidak boleh melewati pergantian bulan/);
+  assert.equal(t.draft('sales').start, '2026-11-30');
+  assert.equal(t.draft('sales').end, '2026-12-01');
+});
+
+test('Sales form accepts a date range contained within one calendar month', async () => {
+  const t = runtime(); await t.ui.open('sales');
+  t.input({ soField: 'start' }, '2026-11-10');
+  t.input({ soField: 'end' }, '2026-11-20');
+  t.input({ soKey: 's:a', soProp: 'qty' }, '3');
+  await t.click('submit');
+  assert.equal(t.writes.length, 1);
+  assert.equal(t.writes[0].action, 'save');
+  assert.equal(t.writes[0].input.start, '2026-11-10');
+  assert.equal(t.writes[0].input.end, '2026-11-20');
 });
