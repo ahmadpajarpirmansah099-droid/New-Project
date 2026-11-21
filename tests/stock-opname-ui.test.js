@@ -4,6 +4,10 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 
+function contentsOfStockOpnameUi() {
+  return fs.readFileSync('assets/js/stock-opname-ui.js', 'utf8');
+}
+
 function runtime() {
   const handlers = {}, writes = [], confirmations = [];
   let pageHtml = '', pageRenders = 0;
@@ -89,6 +93,36 @@ function runtime() {
     }
   };
 }
+
+test('Stock Opname render keeps month navigation visible and does not use the legacy table-only class', () => {
+  const t = runtime();
+  const classes = new Set();
+  t.page.classList = {
+    add: value => classes.add(value),
+    remove: value => classes.delete(value),
+    contains: value => classes.has(value)
+  };
+  t.ui.render();
+  assert.equal(classes.has('so-table-only'), false);
+  assert.doesNotMatch(t.page.innerHTML, /so-table-only/);
+  assert.match(t.page.innerHTML, /class="so-overview"/);
+  assert.match(t.page.innerHTML, /class="so-month-nav"/);
+  assert.match(t.page.innerHTML, /data-so-action="month-prev"/);
+  assert.match(t.page.innerHTML, /data-so-action="month-next"/);
+  assert.match(t.page.innerHTML, /class="so-layout-table"/);
+  assert.doesNotMatch(contentsOfStockOpnameUi(), /so-table-only/);
+});
+
+test('receipt, expense, production, and sales forms render with visible in-app date controls', async () => {
+  const t = runtime();
+  for (const kind of ['receipt', 'expense', 'production', 'sales']) {
+    await t.ui.open(kind);
+    assert.match(t.page.innerHTML, /class="so-panel so-form"/, kind + ' form should render');
+    assert.match(t.page.innerHTML, /data-so-action="pick-date"/, kind + ' should include a date picker button');
+    assert.match(t.page.innerHTML, /data-so-field="end"/, kind + ' should include the transaction date');
+    if (kind === 'sales') assert.match(t.page.innerHTML, /data-so-field="start"/, 'sales should include the start date');
+  }
+});
 
 for (const [kind, key] of [['receipt', 'm:a'], ['production', 'w:a'], ['sales', 's:a']]) {
   test(kind + ' does not send an expense category', async () => {
