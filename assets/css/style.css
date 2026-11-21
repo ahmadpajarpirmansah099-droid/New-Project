@@ -12745,12 +12745,12 @@ button, input, select, textarea { font-family: var(--ui-font); }
 #page-stock-opname .so-overview:is([data-so-period-status="reopened"], [data-so-period-status="opening_pending"], [data-so-period-status="closed"]) {
   border-inline-start: 1px solid var(--so-line);
 }
-#page-stock-opname .so-overview .so-month-nav > button:not(:disabled) {
+#page-stock-opname .so-overview .so-month-nav > button {
   color: var(--so-ink);
   background: #fff;
   border: 1px solid #d5d8e0;
   box-shadow: 0 4px 12px rgba(17,18,37,.16);
-  font: 800 18px/1 var(--ui-font);
+  font: 800 24px/1 var(--ui-font);
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   #page-stock-opname .so-overview .so-month-nav > button:hover:not(:disabled) {
