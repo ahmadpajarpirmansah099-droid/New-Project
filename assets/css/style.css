@@ -12918,14 +12918,14 @@ button, input, select, textarea { font-family: var(--ui-font); }
   width: 1%;
   min-height: 46px;
 }
-#page-stock-opname .so-receipt-unit-dropdown {
+#page-stock-opname .so-receipt-item-card .so-unit-dropdown {
   display: block !important;
   position: relative;
   flex: 0 0 96px;
   min-width: 0;
 }
-#page-stock-opname .so-receipt-unit-dropdown[open] { z-index: 30; }
-#page-stock-opname .so-receipt-unit-dropdown > summary,
+#page-stock-opname .so-receipt-item-card .so-unit-dropdown[open] { z-index: 30; }
+#page-stock-opname .so-receipt-item-card .so-unit-dropdown > summary,
 #page-stock-opname .so-receipt-unit-readonly {
   display: flex;
   align-items: center;
@@ -12942,9 +12942,9 @@ button, input, select, textarea { font-family: var(--ui-font); }
   font: 700 12px/1.3 var(--ui-font);
   list-style: none;
 }
-#page-stock-opname .so-receipt-unit-dropdown > summary { cursor: pointer; }
-#page-stock-opname .so-receipt-unit-dropdown > summary::-webkit-details-marker { display: none; }
-#page-stock-opname .so-receipt-unit-dropdown .so-unit-options {
+#page-stock-opname .so-receipt-item-card .so-unit-dropdown > summary { cursor: pointer; }
+#page-stock-opname .so-receipt-item-card .so-unit-dropdown > summary::-webkit-details-marker { display: none; }
+#page-stock-opname .so-receipt-item-card .so-unit-dropdown .so-unit-options {
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
@@ -12958,7 +12958,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   background: var(--ui-surface);
   box-shadow: var(--ui-shadow-card);
 }
-#page-stock-opname .so-receipt-unit-dropdown .so-unit-options button {
+#page-stock-opname .so-receipt-item-card .so-unit-dropdown .so-unit-options button {
   display: flex;
   width: 100%;
   min-height: 38px;
@@ -12968,7 +12968,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   box-shadow: none;
   text-align: left;
 }
-#page-stock-opname .so-receipt-unit-dropdown .so-unit-options button[aria-pressed="true"] { background: var(--ui-lime); }
+#page-stock-opname .so-receipt-item-card .so-unit-dropdown .so-unit-options button[aria-pressed="true"] { background: var(--ui-lime); }
 #page-stock-opname .so-form[data-so-receipt-form="true"].is-receipt-searching {
   position: relative;
   z-index: 120;
@@ -12994,5 +12994,5 @@ button, input, select, textarea { font-family: var(--ui-font); }
   #page-stock-opname .so-receipt-items-grid { gap: 8px; }
   #page-stock-opname .so-receipt-field-card,
   #page-stock-opname .so-receipt-item-card { padding: 10px; }
-  #page-stock-opname .so-receipt-unit-dropdown { flex-basis: 80px; }
+  #page-stock-opname .so-receipt-item-card .so-unit-dropdown { flex-basis: 80px; }
 }

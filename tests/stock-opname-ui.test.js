@@ -1006,5 +1006,5 @@ test('Barang Masuk uses two-column cards, inline unit control and blurred search
  assert.match(css, /\.so-receipt-entry-grid,[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
  assert.match(css, /\.so-receipt-field-card,[\s\S]*?background:\s*var\(--ui-surface\)/);
  assert.match(css, /\.so-receipt-qty-unit\s*\{[^}]*display:\s*flex/);
- assert.match(css, /\.so-receipt-form\.is-receipt-searching::before\s*\{[^}]*backdrop-filter:\s*blur\(2px\)/);
+ assert.match(css, /\.so-form\[data-so-receipt-form="true"\]\.is-receipt-searching::before\s*\{[^}]*backdrop-filter:\s*blur\(2px\)/);
 });
