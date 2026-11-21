@@ -152,6 +152,8 @@ test('Stock Opname period card gives secondary status, clear month controls, and
   assert.match(css, /#page-stock-opname \.so-overview \.so-month-nav > button\s*\{[^}]*box-shadow:/);
   assert.match(css, /#page-stock-opname \.so-overview \.so-actions > button\s*\{[^}]*box-shadow:/);
   assert.match(css, /#page-stock-opname \.so-overview \.so-actions > button:hover:not\(:disabled\)\s*\{[^}]*transform:\s*translateY\(-2px\) scale\(1\.01\)/);
+  assert.match(css, /#page-stock-opname \.so-period-copy \.so-month-nav\s*\{[^}]*grid-template-columns:\s*42px minmax\(0, 1fr\) 42px/);
+  assert.match(css, /#page-stock-opname \.so-period-copy \.so-month-name\s*\{[^}]*text-align:\s*center/);
 });
 
 test('receipt, expense, production, and sales forms render with visible in-app date controls', async () => {
