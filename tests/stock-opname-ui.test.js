@@ -133,7 +133,9 @@ test('active Stock Opname dashboard places period and transaction cards in one r
   assert.ok(transactionEnd > transactionStart, 'transaction card should be inside dashboard row');
   const row = html.slice(rowStart, transactionEnd + '</section>'.length);
   assert.match(row, /class="so-overview"/);
-  assert.match(row, /class="so-period-status">Berjalan<\/strong>/);
+  assert.match(html, /data-so-action="refresh"/);
+  assert.doesNotMatch(html, /data-sd="open">Dashboard<\/button>/);
+  assert.doesNotMatch(row, /Berjalan/);
   assert.match(row, /class="so-month-nav"/);
   assert.match(row, /class="so-month-name">November 2026<\/span>/);
   assert.match(row, /data-so-action="month-prev"/);
@@ -333,32 +335,37 @@ test('total selisih rupiah nets gains and losses at the bottom of each result', 
   assert.ok(t.page.innerHTML.indexOf('Bahan C') < t.page.innerHTML.indexOf('so-result-total'));
 });
 
-test('history follows the selected feature without touching an unfinished local draft', async () => {
+test('main page hides global history and each active form shows only its own history', async () => {
   const t = runtime(), p = t.data.state.periods[0];
   p.opening = { 'm:a': 100 };
   p.opening_catalog = [{ key: 'm:a', name: 'Susu', unit: 'ML' }];
   p.result = [{ key: 'm:a', name: 'Susu', unit: 'ML', movements: {}, system: 90, physical: 88, variance: -2, variance_value: -20 }];
   t.data.state.documents = [
     { id: 'r', period_id: 'period', type: 'receipt', start: '2026-11-02', end: '2026-11-02', postings: [{ key: 'm:a', name: 'Susu', qty: 10, unit: 'ML' }] },
-    { id: 's', period_id: 'period', type: 'sales', start: '2026-11-08', end: '2026-11-08', postings: [{ key: 'm:a', name: 'Susu', qty: -20, unit: 'ML' }] }
+    { id: 's', period_id: 'period', type: 'sales', start: '2026-11-08', end: '2026-11-08', postings: [{ key: 's:a', name: 'Menu', qty: 20, unit: 'PCS' }] }
   ];
   t.ui.render();
+  assert.doesNotMatch(t.page.innerHTML, /Riwayat /);
+  assert.doesNotMatch(t.page.innerHTML, /so-history-tabs/);
+  await t.ui.open('close');
   assert.match(t.page.innerHTML, /Riwayat Stock Opname/);
+  assert.doesNotMatch(t.page.innerHTML, /Riwayat (?:Barang Masuk|Sales)/);
   assert.doesNotMatch(t.page.innerHTML, /class="so-history-compact-details"/);
   await t.ui.open('receipt');
   await t.click('receipt-add',{soItemKey:'m:a'});
   t.input({ soKey: 'm:a', soProp: 'qty' }, '2');
   assert.match(t.page.innerHTML, /Riwayat Barang Masuk/);
   assert.match(t.page.innerHTML, /2 November 2026/);
-  assert.doesNotMatch(t.page.innerHTML, /\b8 November 2026\b/);
-  await t.click('history-tab', { soKind: 'sales' });
+  assert.doesNotMatch(t.page.innerHTML, /Riwayat Sales|8 November 2026/);
+  assert.equal(t.draft('receipt').counts['m:a'].qty, '2');
+  await t.ui.open('sales');
   assert.match(t.page.innerHTML, /Riwayat Sales/);
   assert.match(t.page.innerHTML, /8 November 2026/);
-  assert.doesNotMatch(t.page.innerHTML, /<summary><span>2 November 2026<\/span>/);
+  assert.doesNotMatch(t.page.innerHTML, /Riwayat Barang Masuk|2 November 2026/);
+  await t.ui.open('receipt');
+  assert.match(t.page.innerHTML, /Riwayat Barang Masuk/);
+  assert.doesNotMatch(t.page.innerHTML, /Riwayat Sales|8 November 2026/);
   assert.equal(t.draft('receipt').counts['m:a'].qty, '2');
-  await t.click('history-tab', { soKind: 'initial' });
-  assert.match(t.page.innerHTML, /Stock Awal 1 November 2026/);
-  assert.match(t.page.innerHTML, /100 ML/);
 });
 
 test('daily receipt history paginates complete dates without original transaction controls', async () => {
@@ -371,7 +378,7 @@ test('daily receipt history paginates complete dates without original transactio
     ...Array.from({ length: 12 }, (_, i) => receipt('recent-' + i, '2026-11-11', i + 1)),
     ...Array.from({ length: 10 }, (_, i) => receipt('older-' + i, '2026-11-' + String(i + 1).padStart(2, '0'), 1))
   ];
-  await t.click('history-tab', { soKind: 'receipt' });
+  await t.ui.open('receipt');
   const html = t.page.innerHTML;
   assert.equal((html.match(/class="so-history-date"/g) || []).length, 10);
   assert.match(html, /class="so-history-date"><details open>/);
@@ -553,7 +560,7 @@ test('daily expense history groups materials by category without original transa
   {id:'e2',period_id:'period',type:'expense',category:'Lainnya',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-3,unit:'ML'},{key:'m:b',name:'Gula',qty:-100,unit:'GR'}]},
   {id:'e3',period_id:'period',type:'expense',category:'QC',void:true,start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-99,unit:'ML'}]}
  ];
- await t.click('history-tab',{soKind:'expense'});
+ await t.ui.open('expense');
  const html=t.page.innerHTML;
  assert.match(html,/8 November 2026/);
  assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,3);
@@ -573,7 +580,7 @@ test('daily receipt history totals repeated materials without original records',
   {id:'r1',period_id:'period',type:'receipt',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:100,unit:'ML'}]},
   {id:'r2',period_id:'period',type:'receipt',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:50,unit:'ML'},{key:'m:b',name:'Gula',qty:20,unit:'GR'}]}
  ];
- await t.click('history-tab',{soKind:'receipt'});
+ await t.ui.open('receipt');
  const html=t.page.innerHTML;
  assert.match(html,/8 November 2026/);
  assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
@@ -585,7 +592,7 @@ test('daily receipt history totals repeated materials without original records',
 test('grouped Barang Masuk history exposes per-transaction cancellation and updates stock',async()=>{
  const t=runtime();
  t.data.state.documents=[{id:'receipt-1',period_id:'period',type:'receipt',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:10,unit:'ML'}]}];
- await t.click('history-tab',{soKind:'receipt'});
+ await t.ui.open('receipt');
  assert.match(t.page.innerHTML,/data-so-action="void" data-so-id="receipt-1"/);
  await t.click('void',{soId:'receipt-1'});
  assert.equal(t.writes.at(-1).action,'void');
@@ -598,7 +605,7 @@ test('daily expense history distinguishes inward adjustments from outward expens
  {id:'e1',period_id:'period',type:'expense',category:'Waste',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-5,unit:'ML'}]},
  {id:'m1',period_id:'period',type:'move_in',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:3,unit:'ML'}]}
  ];
- await t.click('history-tab',{soKind:'expense'});
+ await t.ui.open('expense');
  assert.match(t.page.innerHTML,/Susu<\/span><strong>5 ML/);
  assert.match(t.page.innerHTML,/Masuk \/ penyesuaian/);
  assert.match(t.page.innerHTML,/3 ML/);
@@ -611,7 +618,7 @@ test('expense material totals remain separated by category, including repeated m
  {id:'b',period_id:'period',type:'expense',category:'Waste',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-4,unit:'ML'}]},
  {id:'c',period_id:'period',type:'expense',category:'QC',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-5,unit:'ML'}]}
  ];
- await t.click('history-tab',{soKind:'expense'});
+ await t.ui.open('expense');
  const html=t.page.innerHTML;
  assert.match(html,/<h4>QC<\/h4>/);
  assert.match(html,/<h4>Waste<\/h4>/);
@@ -681,19 +688,26 @@ test('sales template leaves quantities blank even when the draft is filled', asy
   assert.equal(t.writes.length,0);
 });
 
-test('switching history tabs and showing more does not rerender an open sales form', async () => {
-  const t=runtime(); await t.ui.open('sales');
+test('feature history is isolated and switching forms preserves each local draft', async () => {
+  const t=runtime();
+  t.data.state.documents=[
+    {id:'expense-history',period_id:'period',type:'expense',category:'Waste',start:'2026-11-06',end:'2026-11-06',postings:[{key:'m:a',name:'Susu',qty:-4,unit:'ML'}]},
+    {id:'production-history',period_id:'period',type:'production',start:'2026-11-07',end:'2026-11-07',postings:[{key:'w:a',name:'WIP',qty:5,unit:'ML'}]},
+    {id:'sales-history',period_id:'period',type:'sales',start:'2026-11-08',end:'2026-11-08',postings:[{key:'s:a',name:'Menu',qty:3,unit:'PCS'}]}
+  ];
+  await t.ui.open('sales');
   t.input({soKey:'s:a',soProp:'qty'},'12');
-  const before=t.pageRenders();
-  await t.click('history-tab',{soKind:'expense'});
-  assert.equal(t.pageRenders(),before);
-  assert.match(t.page.innerHTML,/Riwayat Pengeluaran/);
-  assert.equal(t.draft('sales').counts['s:a'].qty,'12');
-  await t.click('history-tab',{soKind:'sales'});
-  await t.click('history-more');
-  assert.equal(t.pageRenders(),before);
   assert.match(t.page.innerHTML,/Riwayat Sales/);
+  assert.doesNotMatch(t.page.innerHTML,/Riwayat Pengeluaran|Riwayat Produksi WIP/);
+  await t.ui.open('expense');
+  assert.match(t.page.innerHTML,/Riwayat Pengeluaran/);
+  assert.doesNotMatch(t.page.innerHTML,/Riwayat Sales|Riwayat Produksi WIP/);
   assert.equal(t.draft('sales').counts['s:a'].qty,'12');
+  await t.ui.open('production');
+  assert.match(t.page.innerHTML,/Riwayat Produksi WIP/);
+  assert.doesNotMatch(t.page.innerHTML,/Riwayat Sales|Riwayat Pengeluaran/);
+  await t.click('history-more');
+  assert.match(t.page.innerHTML,/Riwayat Produksi WIP/);
   assert.equal(t.writes.length,0);
 });
 
@@ -947,4 +961,13 @@ test('Stock Opname notices stay compact and do not render as large colored cards
   assert.match(css, /\.so-warning\s*\{[^}]*background:\s*transparent;[^}]*border:\s*0;[^}]*color:/);
   assert.match(css, /\.so-form-head p\s*\{[^}]*font-size:\s*12px;[^}]*line-height:\s*1\.45;/);
   assert.match(css, /\.so-status\s*\{[^}]*font-size:\s*11px;[^}]*line-height:\s*1\.4;/);
+});
+
+test('Stock Opname feature forms do not show explanatory text beneath the title', async () => {
+  const t=runtime();
+  for (const kind of ['receipt','expense','production','sales','close']) {
+    await t.ui.open(kind);
+    assert.match(t.page.innerHTML,/class="so-form-head"><h2>[^<]+<\/h2><\/header>/);
+    assert.doesNotMatch(t.page.innerHTML,/Catat barang yang digunakan atau dipindahkan|Isi jumlah batch|Pilih rentang tanggal|Catat bahan dan suplies yang diterima|Cocokkan stok sistem dengan fisik/);
+  }
 });
