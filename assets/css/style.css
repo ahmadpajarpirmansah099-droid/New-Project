@@ -12738,3 +12738,25 @@ button, input, select, textarea { font-family: var(--ui-font); }
   min-width: 0;
   text-align: center;
 }
+
+
+/* Stock Opname — strengthen month arrows and remove the period-card accent. */
+#page-stock-opname .so-overview,
+#page-stock-opname .so-overview:is([data-so-period-status="reopened"], [data-so-period-status="opening_pending"], [data-so-period-status="closed"]) {
+  border-inline-start: 1px solid var(--so-line);
+}
+#page-stock-opname .so-overview .so-month-nav > button:not(:disabled) {
+  color: var(--so-ink);
+  background: #fff;
+  border: 1px solid #d5d8e0;
+  box-shadow: 0 4px 12px rgba(17,18,37,.16);
+  font: 800 18px/1 var(--ui-font);
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  #page-stock-opname .so-overview .so-month-nav > button:hover:not(:disabled) {
+    color: #17172b;
+    background: #f8f9fc;
+    border-color: #aeb4c1;
+    box-shadow: 0 7px 16px rgba(17,18,37,.22);
+  }
+}
