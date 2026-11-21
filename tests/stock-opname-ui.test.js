@@ -8,6 +8,10 @@ function contentsOfStockOpnameUi() {
   return fs.readFileSync('assets/js/stock-opname-ui.js', 'utf8');
 }
 
+function contentsOfStockOpnameStyles() {
+  return fs.readFileSync('assets/css/style.css', 'utf8');
+}
+
 function runtime() {
   const handlers = {}, writes = [], confirmations = [];
   let pageHtml = '', pageRenders = 0;
@@ -129,11 +133,25 @@ test('active Stock Opname dashboard places period and transaction cards in one r
   assert.ok(transactionEnd > transactionStart, 'transaction card should be inside dashboard row');
   const row = html.slice(rowStart, transactionEnd + '</section>'.length);
   assert.match(row, /class="so-overview"/);
+  assert.match(row, /class="so-period-status">Berjalan<\/strong>/);
+  assert.match(row, /class="so-month-nav"/);
+  assert.match(row, /class="so-month-name">November 2026<\/span>/);
+  assert.match(row, /data-so-action="month-prev"/);
+  assert.match(row, /data-so-action="month-next"/);
   assert.match(row, /class="so-panel so-transaction-actions"/);
   for (const label of ['Barang Masuk', 'Pengeluaran', 'Produksi WIP', 'Sales']) {
     assert.ok(row.includes('>' + label + '</button>'), label + ' action should remain');
   }
   assert.doesNotMatch(row, /Transaksi Stok|Pilih transaksi yang ingin dicatat\./);
+});
+
+test('Stock Opname period card gives secondary status, clear month controls, and soft action hover', () => {
+  const css = contentsOfStockOpnameStyles();
+  assert.match(css, /#page-stock-opname \.so-period-copy \.so-period-status\s*\{[^}]*font:\s*500 13px\/1\.35/);
+  assert.match(css, /#page-stock-opname \.so-period-copy \.so-month-name\s*\{[^}]*font:\s*700 20px/);
+  assert.match(css, /#page-stock-opname \.so-overview \.so-month-nav > button\s*\{[^}]*box-shadow:/);
+  assert.match(css, /#page-stock-opname \.so-overview \.so-actions > button\s*\{[^}]*box-shadow:/);
+  assert.match(css, /#page-stock-opname \.so-overview \.so-actions > button:hover:not\(:disabled\)\s*\{[^}]*transform:\s*translateY\(-2px\) scale\(1\.01\)/);
 });
 
 test('receipt, expense, production, and sales forms render with visible in-app date controls', async () => {
