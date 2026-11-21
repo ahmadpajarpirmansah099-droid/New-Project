@@ -420,7 +420,7 @@ test('Stock Opname close form removes its duplicate ledger and date control', as
   assert.match(html, /class="so-layout-table"/);
   t.input({ soKey: 'm:a', soProp: 'qty' }, '1.5');
   assert.equal(t.draft('close').counts['m:a'].qty, '1.5');
-  assert.match(t.page.innerHTML, /class="so-system-mobile">Sistem:/);
+  assert.match(html, /class="so-table-header-pill">STOK SISTEM<\/span>/);
 });
 
 test('Stock Opname close exposes a single physical count surface in the month table', async () => {
