@@ -403,7 +403,7 @@ test('failed transaction keeps its draft and reuses the same request on retry', 
   assert.equal(t.draft('expense'), undefined);
 });
 
-test('Stock Opname close form uses the month table as its only physical count input', async () => {
+test('Stock Opname close form removes its duplicate ledger and date control', async () => {
   const t = runtime();
   await t.ui.open('close');
   const html = t.page.innerHTML;
@@ -418,12 +418,35 @@ test('Stock Opname close form uses the month table as its only physical count in
   assert.match(panel, /Tutup Form/);
   assert.match(panel, /Konfirmasi/);
   assert.match(html, /class="so-layout-table"/);
-  assert.match(html, /class="so-physical-input"[^>]*data-so-key="m:a"/);
-  assert.match(html, /class="so-physical-input"[^>]*data-so-key="w:a"/);
-  assert.equal((html.match(/class="so-physical-input"/g) || []).length, 2);
   t.input({ soKey: 'm:a', soProp: 'qty' }, '1.5');
   assert.equal(t.draft('close').counts['m:a'].qty, '1.5');
   assert.match(t.page.innerHTML, /class="so-system-mobile">Sistem:/);
+});
+
+test('Stock Opname close exposes a single physical count surface in the month table', async () => {
+  const t = runtime();
+  await t.ui.open('close');
+  const html = t.page.innerHTML;
+  const panel = html.match(/<section class="so-panel so-form">[\s\S]*?<\/section>/)?.[0] || '';
+  const table = html.match(/<section class="so-layout-table"[\s\S]*?<\/section>/)?.[0] || '';
+  assert.ok(panel, 'Stock Opname form should be present');
+  assert.ok(table, 'month table should be present');
+  assert.doesNotMatch(panel, /<table\b|data-so-prop="qty"|data-so-key=/);
+  assert.match(table, /class="so-physical-input"[^>]*data-so-key="m:a"/);
+  assert.match(table, /class="so-physical-input"[^>]*data-so-key="w:a"/);
+  assert.equal((html.match(/class="so-physical-input"/g) || []).length, 2);
+});
+
+test('Stock Awal keeps its own count ledger and conversion controls', async () => {
+  const t = runtime();
+  t.data.state.periods[0].status = 'opening_pending';
+  t.data.state.periods[0].opening_reset_at = 'reset-1';
+  await t.ui.open('initial');
+  const panel = t.page.innerHTML.match(/<section class="so-panel so-form">[\s\S]*?<\/section>/)?.[0] || '';
+  assert.ok(panel);
+  assert.match(panel, /so-count-ledger/);
+  assert.match(panel, /Konversi fisik/);
+  assert.match(panel, /data-so-action="pick-date"/);
 });
 
 test('missing recipe disables its input and offers master-data navigation', async () => {
@@ -837,12 +860,15 @@ test('Stock Opname close targets the month selected in the navigator', async () 
   await t.click('month-prev');
   assert.match(t.page.innerHTML, /November 2026/);
   await t.ui.open('close');
+  const documentDate = t.draft('close').end;
   t.input({ soKey: 'm:a', soProp: 'qty' }, '1');
   t.input({ soKey: 'w:a', soProp: 'qty' }, '0');
   await t.click('submit');
   assert.equal(t.writes.length, 1);
   assert.equal(t.writes[0].action, 'close');
   assert.equal(t.writes[0].input.month, '2026-11-01');
+  assert.equal(t.writes[0].input.end, documentDate);
+  assert.equal(t.writes[0].input.date, documentDate);
 });
 
 test('Sales form rejects a date range that crosses a calendar month before writing', async () => {
