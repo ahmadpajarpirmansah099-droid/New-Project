@@ -249,8 +249,13 @@ test('changed date alone is protected as an unfinished draft', async () => {
   assert.equal(t.confirmations.length, 0);
 });
 
-test('stock opname dates and selections render as in-app web controls', async () => {
+test('transaction dates and unit selections remain available outside the Stock Opname close panel', async () => {
   const t = runtime(); await t.ui.open('close');
+  const closePanel = t.page.innerHTML.match(/<section class="so-panel so-form">[\s\S]*?<\/section>/)?.[0] || '';
+  assert.ok(closePanel);
+  assert.doesNotMatch(closePanel, /Tanggal|data-so-action="pick-date"/);
+  await t.ui.open('receipt');
+  await t.click('receipt-add', { soItemKey: 'm:a' });
   assert.match(t.page.innerHTML, /data-so-action="pick-date"/);
   assert.match(t.page.innerHTML, /data-so-action="pick-choice"/);
   assert.doesNotMatch(t.page.innerHTML, /type="date"/);
@@ -398,16 +403,50 @@ test('failed transaction keeps its draft and reuses the same request on retry', 
   assert.equal(t.draft('expense'), undefined);
 });
 
-test('counting form separates system stock and converted physical quantity for desktop', async () => {
-  const t = runtime(); t.data.catalog[0].units.push({ unit: 'Botol', factor: 1000 });
+test('Stock Opname close form removes its duplicate ledger and date control', async () => {
+  const t = runtime();
   await t.ui.open('close');
-  assert.match(t.page.innerHTML, /so-desktop-only so-stock">Stok sistem/);
-  assert.match(t.page.innerHTML, /so-desktop-only so-conversion">Konversi fisik/);
-  assert.match(t.page.innerHTML, /data-so-conversion="m:a">—/);
+  const html = t.page.innerHTML;
+  const panel = html.match(/<section class="so-panel so-form">[\s\S]*?<\/section>/)?.[0] || '';
+  assert.ok(panel, 'Stock Opname panel should remain visible');
+  assert.doesNotMatch(panel, /so-count-ledger|data-so-key=|data-so-prop=/);
+  assert.doesNotMatch(panel, /Tanggal|data-so-action="pick-date"/);
+  assert.match(panel, /Isi jumlah fisik pada kolom STOK FISIK di tabel bawah/);
+  assert.match(panel, /Unduh Template Kosong/);
+  assert.match(panel, /Impor Excel/);
+  assert.match(panel, /Simpan Draft/);
+  assert.match(panel, /Tutup Form/);
+  assert.match(panel, /Konfirmasi/);
+  assert.match(html, /class="so-layout-table"/);
   t.input({ soKey: 'm:a', soProp: 'qty' }, '1.5');
-  t.input({ soKey: 'm:a', soProp: 'unit' }, 'Botol'); t.ui.render();
-  assert.match(t.page.innerHTML, /data-so-conversion="m:a">1\.500 ML/);
-  assert.match(t.page.innerHTML, /class="so-system-mobile">Sistem:/);
+  assert.equal(t.draft('close').counts['m:a'].qty, '1.5');
+  assert.match(html, /class="so-table-header-pill">STOK SISTEM<\/span>/);
+});
+
+test('Stock Opname close exposes a single physical count surface in the month table', async () => {
+  const t = runtime();
+  await t.ui.open('close');
+  const html = t.page.innerHTML;
+  const panel = html.match(/<section class="so-panel so-form">[\s\S]*?<\/section>/)?.[0] || '';
+  const table = html.match(/<section class="so-layout-table"[\s\S]*?<\/section>/)?.[0] || '';
+  assert.ok(panel, 'Stock Opname form should be present');
+  assert.ok(table, 'month table should be present');
+  assert.doesNotMatch(panel, /<table\b|data-so-prop="qty"|data-so-key=/);
+  assert.match(table, /class="so-physical-input"[^>]*data-so-key="m:a"/);
+  assert.match(table, /class="so-physical-input"[^>]*data-so-key="w:a"/);
+  assert.equal((html.match(/class="so-physical-input"/g) || []).length, 2);
+});
+
+test('Stock Awal keeps its own count ledger and conversion controls', async () => {
+  const t = runtime();
+  t.data.state.periods[0].status = 'opening_pending';
+  t.data.state.periods[0].opening_reset_at = 'reset-1';
+  await t.ui.open('initial');
+  const panel = t.page.innerHTML.match(/<section class="so-panel so-form">[\s\S]*?<\/section>/)?.[0] || '';
+  assert.ok(panel);
+  assert.match(panel, /so-count-ledger/);
+  assert.match(panel, /Konversi fisik/);
+  assert.match(panel, /data-so-action="pick-date"/);
 });
 
 test('missing recipe disables its input and offers master-data navigation', async () => {
@@ -821,12 +860,15 @@ test('Stock Opname close targets the month selected in the navigator', async () 
   await t.click('month-prev');
   assert.match(t.page.innerHTML, /November 2026/);
   await t.ui.open('close');
+  const documentDate = t.draft('close').end;
   t.input({ soKey: 'm:a', soProp: 'qty' }, '1');
   t.input({ soKey: 'w:a', soProp: 'qty' }, '0');
   await t.click('submit');
   assert.equal(t.writes.length, 1);
   assert.equal(t.writes[0].action, 'close');
   assert.equal(t.writes[0].input.month, '2026-11-01');
+  assert.equal(t.writes[0].input.end, documentDate);
+  assert.equal(t.writes[0].input.date, documentDate);
 });
 
 test('Sales form rejects a date range that crosses a calendar month before writing', async () => {
