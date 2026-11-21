@@ -759,7 +759,7 @@ ${transactionActions}
   }
   if(el.dataset.soReceiptSearch!==undefined&&form.kind==='receipt'){
    receiptQuery=el.value;
-   const results=el.parentElement?.querySelector('[data-so-receipt-results]');
+   const results=el.closest('.so-receipt-search')?.querySelector('[data-so-receipt-results]');
    if(results)results.innerHTML=receiptSuggestions(receiptQuery);
    el.closest('.so-receipt-search')?.classList.toggle('has-results',!!receiptQuery.trim());
    return;
