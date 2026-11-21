@@ -8,7 +8,6 @@
  const labels={initial:'Stock Awal',receipt:'Barang Masuk',expense:'Pengeluaran',production:'Produksi WIP',sales:'Sales',close:'Stock Opname',move_in:'Move Masuk',adjustment:'Penyesuaian Move',adjustment_in:'Penyesuaian Move Masuk'};
  const expenseCategories=['Kalibrasi','RnD','QC','Suplies','Move','Waste','Lainnya'];
  const periodStatus={active:'Berjalan',reopened:'Koreksi opname',opening_pending:'Stock Awal perlu diisi ulang',closed:'Menunggu konfirmasi Stock Awal',held:'Ditahan'};
- const formHelp={initial:'Isi stok pertama untuk seluruh bahan, suplies, dan WIP, termasuk angka 0.',receipt:'Catat bahan dan suplies yang diterima. Simpan Transaksi langsung menambah stok; Simpan Draft untuk isian yang belum selesai.',expense:'Catat barang yang digunakan atau dipindahkan. Simpan Transaksi langsung mengurangi stok; Simpan Draft belum mengubah stok.',production:'Isi jumlah batch. Simpan Transaksi langsung memproses bahan dan hasil WIP; Simpan Draft belum mengubah stok.',sales:'Pilih rentang tanggal, lalu isi total terjual setiap menu dalam satu form.',close:'Cocokkan stok sistem dengan fisik. Isi seluruh barang, termasuk angka 0.'};
  let form=null,busy=false,notice='',targetRows=[],receiptQuery='',expenseQuery='',viewGeneration=0,draftSaved=false,activeConfirm=null,historyKind='close',historyLimit=10,selectedMonth=null;
  const page=()=>document.getElementById('page-stock-opname');
  const get=()=>service.current();
@@ -260,7 +259,7 @@
   }).join('');
   const toolbar=k==='close'?'':'<div class="so-toolbar">'+dates+extra+'</div>'+(noTarget?'<p class="so-notice">Belum ada outlet/divisi tujuan yang aktif.</p>':'');
   const ledger=k==='close'?'<p class="so-notice">Isi jumlah fisik pada kolom STOK FISIK di tabel bawah, lalu tekan Konfirmasi.</p>':(rows.some(r=>r.error)?masterLinks():'')+(rows.length?'<table class="so-ledger'+(isCount?' so-count-ledger':receipt?' so-receipt-ledger':'')+'" aria-label="'+e(labels[k])+'"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>':'<p class="so-notice">'+(receipt||expense?'Belum ada barang dipilih. Cari dan pilih barang di atas.':'Data belum tersedia.')+'</p>')+(!rows.length&&(!(receipt||expense)||!catalog().some(r=>receipt?r.key.startsWith('m:'):/^[mw]:/.test(r.key)))?masterLinks():'');
-  return '<section class="so-panel so-form"><header class="so-form-head"><h2>'+e(labels[k])+'</h2><p>'+e(formHelp[k])+'</p></header>'+(expense?'<div data-so-expense-toolbar>'+toolbar+'</div>':toolbar)+receiptSearch+expenseSearch+excelActions+(isPending()&&k!=='close'?'<p class="so-notice">Stock Awal berikutnya belum dikonfirmasi. Isian ini disimpan sebagai draft.</p>':'')+(expense?'<div data-so-expense-rows>'+ledger+'</div>':ledger)+'<footer class="so-form-footer"><p id="soDraftStatus" class="so-status" role="status">'+e(draftStatus())+'</p><div class="so-actions">'+button('Simpan Draft','draft')+button('Tutup Form','cancel')+button(isCount?'Konfirmasi':'Simpan Transaksi','submit','',true)+'</div></footer></section>';
+  return '<section class="so-panel so-form"><header class="so-form-head"><h2>'+e(labels[k])+'</h2></header>'+(expense?'<div data-so-expense-toolbar>'+toolbar+'</div>':toolbar)+receiptSearch+expenseSearch+excelActions+(isPending()&&k!=='close'?'<p class="so-notice">Stock Awal berikutnya belum dikonfirmasi. Isian ini disimpan sebagai draft.</p>':'')+(expense?'<div data-so-expense-rows>'+ledger+'</div>':ledger)+'<footer class="so-form-footer"><p id="soDraftStatus" class="so-status" role="status">'+e(draftStatus())+'</p><div class="so-actions">'+button('Simpan Draft','draft')+button('Tutup Form','cancel')+button(isCount?'Konfirmasi':'Simpan Transaksi','submit','',true)+'</div></footer></section>';
  }
  function updateExpenseParts(part){
   const current=page()?.querySelector?.('.so-form');
@@ -445,37 +444,28 @@
  }
  function historyHTML(){
   const {periods,documents}=get().state;
-  const p=period(),ids=new Set([p?.id,...(p?.legacy_period_ids||[])].filter(Boolean)),kinds=['initial','expense','receipt','production','sales','close'];
+  const p=period(),ids=new Set([p?.id,...(p?.legacy_period_ids||[])].filter(Boolean));
   const months=p?periods.filter(x=>monthOf(x)===monthOf(p)):periods;
   const scoped=p?documents.filter(doc=>ids.has(doc.period_id)):documents;
-  const entries={
-   initial:months.filter(x=>Object.keys(x.opening||{}).length),
-   close:months.filter(x=>x.result),
-   receipt:[],expense:[],production:[],sales:[]
-  };
+  const entries={initial:months.filter(x=>Object.keys(x.opening||{}).length),close:months.filter(x=>x.result),receipt:[],expense:[],production:[],sales:[]};
   for(const doc of scoped){
    const kind=['move_in','adjustment','adjustment_in'].includes(doc.type)?'expense':doc.type;
    if(['receipt','expense','production','sales'].includes(kind))entries[kind].push(doc);
   }
-  const current=entries[historyKind],recent=[...current].reverse();
+  const current=entries[historyKind]||[],recent=[...current].reverse();
   let list='',total=current.length;
   if(historyKind==='initial')list=groupedHistory(recent.slice(0,historyLimit),x=>x.start,x=>openingHistoryEntry(x,periods),'catatan');
   else if(historyKind==='close')list=groupedHistory(recent.slice(0,historyLimit),x=>x.end,closeHistoryEntry,'opname');
   else if(historyKind==='expense'||historyKind==='receipt'){
-   const dates=historyDates(recent,doc=>doc.start);
-   total=dates.length;
+   const dates=historyDates(recent,doc=>doc.start);total=dates.length;
    list=materialHistoryByDate(dates.slice(0,historyLimit),historyKind==='expense');
   }else if(historyKind==='production'){
-   const dates=historyDates(recent,doc=>doc.start);
-   total=dates.length;
+   const dates=historyDates(recent,doc=>doc.start);total=dates.length;
    list=productionHistoryByDate(dates.slice(0,historyLimit));
-  }else list=groupedHistory(recent.slice(0,historyLimit),doc=>doc.start,doc=>historyDocument(doc,p));
-
-  const tabs=kinds.map(kind=>`<button type="button" data-so-action="history-tab" data-so-kind="${kind}" aria-pressed="${kind===historyKind}" class="${kind===historyKind?'is-active':''}"><span>${e(labels[kind])}</span><small>${number(entries[kind].length)}</small></button>`).join('');
+  }else if(historyKind==='sales')list=groupedHistory(recent.slice(0,historyLimit),doc=>doc.start,doc=>historyDocument(doc,p));
   const empty=`<div class="so-empty"><strong>Belum ada riwayat ${e(labels[historyKind])}</strong></div>`;
   return `<section class="so-panel so-history-panel" id="soHistory">
    <header class="so-history-head"><h2>Riwayat ${e(labels[historyKind])}</h2></header>
-   <nav class="so-history-tabs" aria-label="Pilih riwayat fitur">${tabs}</nav>
    ${current.length?`<ul class="so-history">${list}</ul>`:empty}
    ${total>historyLimit?`<div class="so-history-more">${button('Tampilkan lebih banyak','history-more')}</div>`:''}
   </section>`;
@@ -511,18 +501,18 @@
   </section>`:'';
   page().innerHTML=`<header class="so-head">
    <div><h1>Stock Opname</h1>${scope?`<p>${e(scope)}</p>`:''}</div>
-   <div class="so-actions"><button type="button" data-sd="open">Dashboard</button>${button('Muat Ulang','refresh')}</div>
+   <div class="so-actions">${button('Muat Ulang','refresh')}</div>
   </header>
   <div class="so-dashboard-row">
    <section class="so-overview" aria-label="Periode stok" data-so-period-status="${e(p?.status||'')}">
-    <div class="so-period-copy">${p?monthNav:'<span>Periode Stock Opname belum dimulai</span>'}<strong class="so-period-status">${e(status)}</strong></div>
+    <div class="so-period-copy">${p?monthNav:'<span>Periode Stock Opname belum dimulai</span>'}${p?.status==='active'?'':`<strong class="so-period-status">${e(status)}</strong>`}</div>
     <div class="so-actions">${controls}${button('Pulihkan Draft','restore')}</div>
    </section>
 ${transactionActions}
   </div>
   ${notice?`<p class="so-notice" role="alert">${e(notice)}</p>`:''}
   ${negative&&p?.status!=='opening_pending'?'<p class="so-notice so-warning">Ada stok sistem minus. Periksa transaksi dan cocokkan saat opname.</p>':''}
-  ${formHTML()}${historyHTML()}`;
+  ${formHTML()}${form?historyHTML():''}`;
   page().innerHTML+=itemTableHTML();
  }
  function latestPeriodLabel(){
@@ -637,7 +627,6 @@ ${transactionActions}
    if(name==='excel-form'){await excelForm();return;}
    if(name==='excel-close'){await excelHistory('close',el.dataset.soId);return;}
    if(name==='excel-sales'){await excelHistory('sales',el.dataset.soId);return;}
-   if(name==='history-tab'){historyKind=el.dataset.soKind;historyLimit=10;historyOnly=true;return;}
    if(name==='history-more'){historyLimit+=10;historyOnly=true;return;}
    if(name==='month-prev'||name==='month-next'){const ps=periods(),i=ps.findIndex(x=>x.id===period()?.id),next=ps[i+(name==='month-next'?1:-1)];if(next){selectedMonth=monthOf(next);form=null;notice='';}return;}
    if(name==='pick-date'){openDatePicker(el.dataset.soField);return;}
