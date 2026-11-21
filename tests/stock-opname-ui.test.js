@@ -156,6 +156,8 @@ test('Stock Opname period card gives secondary status, clear month controls, and
   assert.match(css, /#page-stock-opname \.so-period-copy \.so-month-name\s*\{[^}]*text-align:\s*center/);
   assert.match(css, /#page-stock-opname \.so-overview,\s*#page-stock-opname \.so-overview:is\([^)]*\)\s*\{[^}]*border-inline-start:\s*1px solid var\(--so-line\)/);
   assert.match(css, /#page-stock-opname \.so-overview \.so-month-nav > button\s*\{[^}]*color:\s*var\(--so-ink\)[^}]*border:\s*1px solid #d5d8e0[^}]*box-shadow:\s*0 4px 12px[^}]*font:\s*800 24px\/1/);
+  assert.match(css, /#page-stock-opname \.so-transaction-actions \.so-actions > button:hover:not\(:disabled\)\s*\{[^}]*transform:\s*translateY\(-2px\) scale\(1\.01\)[^}]*box-shadow:\s*0 8px 17px/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?so-transaction-actions \.so-actions > button \{ transition: none/);
 });
 
 test('receipt, expense, production, and sales forms render with visible in-app date controls', async () => {
