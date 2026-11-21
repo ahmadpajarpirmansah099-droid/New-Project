@@ -127,9 +127,7 @@ test('active Stock Opname dashboard places period and transaction cards in one r
   assert.ok(overviewEnd > overviewStart, 'period card should close before transaction card');
   assert.ok(transactionStart > overviewEnd, 'transaction card should follow the period card');
   assert.ok(transactionEnd > transactionStart, 'transaction card should be inside dashboard row');
-  const row = html.slice(rowStart, html.indexOf('</div>\n  <p class="so-notice"', rowStart) > -1
-    ? html.indexOf('</div>\n  <p class="so-notice"', rowStart) + 6
-    : transactionEnd + '</section>'.length);
+  const row = html.slice(rowStart, transactionEnd + '</section>'.length);
   assert.match(row, /class="so-overview"/);
   assert.match(row, /class="so-transaction-actions"/);
   for (const label of ['Barang Masuk', 'Pengeluaran', 'Produksi WIP', 'Sales']) {

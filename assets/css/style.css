@@ -11850,6 +11850,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 
 .so-dashboard-row { display: grid; gap: 16px; margin: 16px 0; }
 .so-dashboard-row > * { margin: 0; height: 100%; min-width: 0; }
+.so-dashboard-row > .so-panel { margin: 0; }
 .so-overview {
   display: flex;
   flex-direction: column;
