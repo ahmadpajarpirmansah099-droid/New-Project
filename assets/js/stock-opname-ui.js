@@ -502,8 +502,6 @@
   const status=p?periodStatus[p.status]||p.status:'Isi Stock Awal untuk memulai';
   const canTransact=!!p&&['active','reopened'].includes(p.status);
   const transactionActions=canTransact?`<section class="so-panel so-transaction-actions" aria-label="Transaksi stok">
-   <h2>Transaksi Stok</h2>
-   <p>Pilih transaksi yang ingin dicatat.</p>
    <div class="so-actions">
     ${button('Barang Masuk','open','data-so-kind="receipt"')}
     ${button('Pengeluaran','open','data-so-kind="expense"')}
@@ -515,11 +513,13 @@
    <div><h1>Stock Opname</h1>${scope?`<p>${e(scope)}</p>`:''}</div>
    <div class="so-actions"><button type="button" data-sd="open">Dashboard</button>${button('Muat Ulang','refresh')}</div>
   </header>
-  <section class="so-overview" aria-label="Periode stok" data-so-period-status="${e(p?.status||'')}">
-   <div class="so-period-copy">${p?monthNav:'<span>Periode Stock Opname belum dimulai</span>'}<strong>${e(status)}</strong></div>
-   <div class="so-actions">${controls}${button('Pulihkan Draft','restore')}</div>
-  </section>
+  <div class="so-dashboard-row">
+   <section class="so-overview" aria-label="Periode stok" data-so-period-status="${e(p?.status||'')}">
+    <div class="so-period-copy">${p?monthNav:'<span>Periode Stock Opname belum dimulai</span>'}<strong>${e(status)}</strong></div>
+    <div class="so-actions">${controls}${button('Pulihkan Draft','restore')}</div>
+   </section>
 ${transactionActions}
+  </div>
   ${notice?`<p class="so-notice" role="alert">${e(notice)}</p>`:''}
   ${negative&&p?.status!=='opening_pending'?'<p class="so-notice so-warning">Ada stok sistem minus. Periksa transaksi dan cocokkan saat opname.</p>':''}
   ${formHTML()}${historyHTML()}`;

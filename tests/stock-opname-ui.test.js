@@ -113,6 +113,31 @@ test('Stock Opname render keeps month navigation visible and does not use the le
   assert.doesNotMatch(contentsOfStockOpnameUi(), /so-table-only/);
 });
 
+test('active Stock Opname dashboard places period and transaction cards in one row', () => {
+  const t = runtime();
+  t.ui.render();
+  const html = t.page.innerHTML;
+  const rowStart = html.indexOf('<div class="so-dashboard-row">');
+  const overviewStart = html.indexOf('<section class="so-overview"', rowStart);
+  const overviewEnd = html.indexOf('</section>', overviewStart);
+  const transactionStart = html.indexOf('<section class="so-panel so-transaction-actions"', overviewEnd);
+  const transactionEnd = html.indexOf('</section>', transactionStart);
+  assert.ok(rowStart >= 0, 'dashboard row wrapper should render');
+  assert.ok(overviewStart > rowStart, 'period card should be inside dashboard row');
+  assert.ok(overviewEnd > overviewStart, 'period card should close before transaction card');
+  assert.ok(transactionStart > overviewEnd, 'transaction card should follow the period card');
+  assert.ok(transactionEnd > transactionStart, 'transaction card should be inside dashboard row');
+  const row = html.slice(rowStart, html.indexOf('</div>\n  <p class="so-notice"', rowStart) > -1
+    ? html.indexOf('</div>\n  <p class="so-notice"', rowStart) + 6
+    : transactionEnd + '</section>'.length);
+  assert.match(row, /class="so-overview"/);
+  assert.match(row, /class="so-transaction-actions"/);
+  for (const label of ['Barang Masuk', 'Pengeluaran', 'Produksi WIP', 'Sales']) {
+    assert.ok(row.includes('>' + label + '</button>'), label + ' action should remain');
+  }
+  assert.doesNotMatch(row, /Transaksi Stok|Pilih transaksi yang ingin dicatat\./);
+});
+
 test('receipt, expense, production, and sales forms render with visible in-app date controls', async () => {
   const t = runtime();
   for (const kind of ['receipt', 'expense', 'production', 'sales']) {
