@@ -249,8 +249,13 @@ test('changed date alone is protected as an unfinished draft', async () => {
   assert.equal(t.confirmations.length, 0);
 });
 
-test('stock opname dates and selections render as in-app web controls', async () => {
+test('transaction dates and unit selections remain available outside the Stock Opname close panel', async () => {
   const t = runtime(); await t.ui.open('close');
+  const closePanel = t.page.innerHTML.match(/<section class="so-panel so-form">[\s\S]*?<\/section>/)?.[0] || '';
+  assert.ok(closePanel);
+  assert.doesNotMatch(closePanel, /Tanggal|data-so-action="pick-date"/);
+  await t.ui.open('receipt');
+  await t.click('receipt-add', { soItemKey: 'm:a' });
   assert.match(t.page.innerHTML, /data-so-action="pick-date"/);
   assert.match(t.page.innerHTML, /data-so-action="pick-choice"/);
   assert.doesNotMatch(t.page.innerHTML, /type="date"/);
@@ -398,15 +403,26 @@ test('failed transaction keeps its draft and reuses the same request on retry', 
   assert.equal(t.draft('expense'), undefined);
 });
 
-test('counting form separates system stock and converted physical quantity for desktop', async () => {
-  const t = runtime(); t.data.catalog[0].units.push({ unit: 'Botol', factor: 1000 });
+test('Stock Opname close form uses the month table as its only physical count input', async () => {
+  const t = runtime();
   await t.ui.open('close');
-  assert.match(t.page.innerHTML, /so-desktop-only so-stock">Stok sistem/);
-  assert.match(t.page.innerHTML, /so-desktop-only so-conversion">Konversi fisik/);
-  assert.match(t.page.innerHTML, /data-so-conversion="m:a">—/);
+  const html = t.page.innerHTML;
+  const panel = html.match(/<section class="so-panel so-form">[\s\S]*?<\/section>/)?.[0] || '';
+  assert.ok(panel, 'Stock Opname panel should remain visible');
+  assert.doesNotMatch(panel, /so-count-ledger|data-so-key=|data-so-prop=/);
+  assert.doesNotMatch(panel, /Tanggal|data-so-action="pick-date"/);
+  assert.match(panel, /Isi jumlah fisik pada kolom STOK FISIK di tabel bawah/);
+  assert.match(panel, /Unduh Template Kosong/);
+  assert.match(panel, /Impor Excel/);
+  assert.match(panel, /Simpan Draft/);
+  assert.match(panel, /Tutup Form/);
+  assert.match(panel, /Konfirmasi/);
+  assert.match(html, /class="so-layout-table"/);
+  assert.match(html, /class="so-physical-input"[^>]*data-so-key="m:a"/);
+  assert.match(html, /class="so-physical-input"[^>]*data-so-key="w:a"/);
+  assert.equal((html.match(/class="so-physical-input"/g) || []).length, 2);
   t.input({ soKey: 'm:a', soProp: 'qty' }, '1.5');
-  t.input({ soKey: 'm:a', soProp: 'unit' }, 'Botol'); t.ui.render();
-  assert.match(t.page.innerHTML, /data-so-conversion="m:a">1\.500 ML/);
+  assert.equal(t.draft('close').counts['m:a'].qty, '1.5');
   assert.match(t.page.innerHTML, /class="so-system-mobile">Sistem:/);
 });
 
