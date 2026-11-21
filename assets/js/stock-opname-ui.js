@@ -627,7 +627,6 @@ ${transactionActions}
    if(name==='excel-form'){await excelForm();return;}
    if(name==='excel-close'){await excelHistory('close',el.dataset.soId);return;}
    if(name==='excel-sales'){await excelHistory('sales',el.dataset.soId);return;}
-   if(name==='history-tab'){historyKind=el.dataset.soKind;historyLimit=10;historyOnly=true;return;}
    if(name==='history-more'){historyLimit+=10;historyOnly=true;return;}
    if(name==='month-prev'||name==='month-next'){const ps=periods(),i=ps.findIndex(x=>x.id===period()?.id),next=ps[i+(name==='month-next'?1:-1)];if(next){selectedMonth=monthOf(next);form=null;notice='';}return;}
    if(name==='pick-date'){openDatePicker(el.dataset.soField);return;}

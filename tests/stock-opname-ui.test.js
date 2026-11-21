@@ -314,23 +314,23 @@ test('transaction dates and unit selections remain available outside the Stock O
   assert.match(t.page.innerHTML, /data-so-action="expense-category"/);
 });
 
-test('opname results show two compact rows and keep full movements expandable', () => {
+test('opname results show two compact rows and keep full movements expandable', async () => {
   const t = runtime();
   t.data.state.periods[0].result = [{ name: 'Apple Juice', unit: 'ML', opening: 2388, movements: { sales: -300, receipt: 6000 }, system: 8088, physical: 5781, variance: -2307, price: 47, variance_value: -108429 }];
-  t.ui.render();
+  await t.ui.open('close');
   assert.match(t.page.innerHTML, /class="so-result-item"><summary><span class="so-result-top"/);
   assert.match(t.page.innerHTML, /class="so-result-bottom"><span>Sistem 8\.088 → Fisik 5\.781 ML<\/span><span>Selisih -2\.307 ML/);
   assert.match(t.page.innerHTML, /<dt>Stock Awal<\/dt>.*<dt>Sales<\/dt>.*<dt>Barang Masuk<\/dt>.*<dt>Harga \/ ML<\/dt>/);
 });
 
-test('total selisih rupiah nets gains and losses at the bottom of each result', () => {
+test('total selisih rupiah nets gains and losses at the bottom of each result', async () => {
   const t = runtime();
   t.data.state.periods[0].result = [
     { name: 'Bahan A', unit: 'GR', movements: {}, system: 2, physical: 1, variance: -1, variance_value: -2705 },
     { name: 'Bahan B', unit: 'GR', movements: {}, system: 1, physical: 3, variance: 2, variance_value: 7680 },
     { name: 'Bahan C', unit: 'GR', movements: {}, system: 1, physical: 1, variance: 0, variance_value: 0 }
   ];
-  t.ui.render();
+  await t.ui.open('close');
   assert.match(t.page.innerHTML, /<div class="so-result-total"><span>Total selisih rupiah<\/span><strong>Rp4\.975<\/strong><\/div>/);
   assert.ok(t.page.innerHTML.indexOf('Bahan C') < t.page.innerHTML.indexOf('so-result-total'));
 });
