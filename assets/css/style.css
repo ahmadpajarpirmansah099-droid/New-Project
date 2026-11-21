@@ -12265,8 +12265,6 @@ button, input, select, textarea { font-family: var(--ui-font); }
 #page-stock-opname .so-category-options button:hover { background: var(--ui-lime-soft); }
 
 /* Stock Opname master-item table: initial layout shell. */
-#page-stock-opname { padding: 0 !important; min-height: 0 !important; }
-#page-stock-opname.so-table-only > *:not(.so-layout-table) { display: none !important; }
 #page-stock-opname .so-layout-table {
   display: block;
   margin: 18px 0 32px;

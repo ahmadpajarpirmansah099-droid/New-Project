@@ -26,3 +26,9 @@ test('shared and lazy-loaded styles stay separate files', () => {
   assert.match(read('assets/user-guide-guest-operational.html'), /css\/visual-tokens\.css/, 'the embedded guide reuses shared tokens');
   assert.ok(fs.existsSync(path.join(root, 'assets/css/visual-tokens.css')));
 });
+
+
+test('Stock Opname overview and transaction forms are not hidden by legacy table-only styling', () => {
+  const css = read('assets/css/style.css');
+  assert.doesNotMatch(css, /so-table-only/);
+});
