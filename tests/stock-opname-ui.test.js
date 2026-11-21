@@ -141,8 +141,22 @@ test('active Stock Opname dashboard places period and transaction cards in one r
   assert.match(row, /data-so-action="month-prev"/);
   assert.match(row, /data-so-action="month-next"/);
   assert.match(row, /class="so-panel so-transaction-actions"/);
-  for (const label of ['Barang Masuk', 'Pengeluaran', 'Produksi WIP', 'Sales']) {
-    assert.ok(row.includes('>' + label + '</button>'), label + ' action should remain');
+  const iconByKind = {
+    receipt: 'package-plus',
+    expense: 'package-minus',
+    production: 'cooking-pot',
+    sales: 'receipt-text'
+  };
+  const labelByKind = {
+    receipt: 'Barang Masuk',
+    expense: 'Pengeluaran',
+    production: 'Produksi WIP',
+    sales: 'Sales'
+  };
+  for (const [kind, icon] of Object.entries(iconByKind)) {
+    assert.match(row, new RegExp('data-so-kind="' + kind + '" class="so-transaction-button"'));
+    assert.match(row, new RegExp('data-lucide="' + icon + '"'));
+    assert.ok(row.includes('<span>' + labelByKind[kind] + '</span>'), labelByKind[kind] + ' label should remain');
   }
   assert.doesNotMatch(row, /Transaksi Stok|Pilih transaksi yang ingin dicatat\./);
 });
@@ -970,4 +984,10 @@ test('Stock Opname feature forms do not show explanatory text beneath the title'
     assert.match(t.page.innerHTML,/class="so-form-head"><h2>[^<]+<\/h2><\/header>/);
     assert.doesNotMatch(t.page.innerHTML,/Catat barang yang digunakan atau dipindahkan|Isi jumlah batch|Pilih rentang tanggal|Catat bahan dan suplies yang diterima|Cocokkan stok sistem dengan fisik/);
   }
+});
+
+test('Stock Opname transaction icons are aligned and sized consistently', () => {
+  const css = contentsOfStockOpnameStyles();
+  assert.match(css, /\.so-transaction-actions \.so-transaction-button\s*\{[^}]*align-items:\s*center;[^}]*gap:\s*9px;/);
+  assert.match(css, /\.so-transaction-actions \.so-transaction-icon\s*\{[^}]*width:\s*19px;[^}]*height:\s*19px;[^}]*flex:\s*0 0 19px;/);
 });

@@ -12783,3 +12783,22 @@ button, input, select, textarea { font-family: var(--ui-font); }
 @media (prefers-reduced-motion: reduce) {
   #page-stock-opname .so-transaction-actions .so-actions > button { transition: none; }
 }
+
+
+/* Lucide icons for Stock Opname transaction shortcuts. */
+#page-stock-opname .so-transaction-actions .so-transaction-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+#page-stock-opname .so-transaction-actions .so-transaction-icon {
+  display: block;
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  stroke: currentColor;
+}
+#page-stock-opname .so-transaction-actions .so-transaction-button span {
+  line-height: 1.25;
+}

@@ -63,6 +63,16 @@
  async function initialize(client,context){activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];receiptQuery='';expenseQuery='';draftSaved=false;historyKind='close';historyLimit=10;await service.initialize(client,context);navigation();}
  function navigation(){const n=document.querySelector('[data-page="stock-opname"]');if(n)n.style.display=service.available()?'':'none';}
  function button(label,action,extra='',primary=false){return '<button type="button" data-so-action="'+action+'" '+extra+' class="'+(primary?'so-primary':'')+'" '+(busy?'disabled':'')+'>'+e(label)+'</button>';}
+ function transactionButton(label,kind){
+  const icons={
+   receipt:'<svg class="so-transaction-icon" data-lucide="package-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22V12"/><path d="M16 17h6"/><path d="M19 14v6"/><path d="M21 10.535V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.729l7 4a2 2 0 0 0 2 .001l1.675-.955"/><path d="M3.29 7 12 12l8.71-5"/><path d="m7.5 4.27 8.997 5.148"/></svg>',
+   expense:'<svg class="so-transaction-icon" data-lucide="package-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22V12"/><path d="M16 17h6"/><path d="M21 13V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.729l7 4a2 2 0 0 0 2 .001l1.675-.955"/><path d="M3.29 7 12 12l8.71-5"/><path d="m7.5 4.27 8.997 5.148"/></svg>',
+   production:'<svg class="so-transaction-icon" data-lucide="cooking-pot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12h20"/><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="m4 8 16-4"/><path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8"/></svg>',
+   sales:'<svg class="so-transaction-icon" data-lucide="receipt-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 16H8"/><path d="M14 8H8"/><path d="M16 12H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/></svg>'
+  };
+  if(!icons[kind])throw new Error('Ikon fitur Stock Opname tidak dikenal: '+kind);
+  return '<button type="button" data-so-action="open" data-so-kind="'+kind+'" class="so-transaction-button" '+(busy?'disabled':'')+'>'+icons[kind]+'<span>'+e(label)+'</span></button>';
+ }
  function hasDraftContent(draft){
   return !!draft&&(!!draft.id||!!draft.touched||Object.values(draft.counts||{}).some(value=>value&&[value.qty,value.invoice_total].some(v=>v!=null&&String(v).trim()!==''))||draft.kind==='expense'&&draft.category&&draft.category!=='Waste'||!!draft.target||Object.values(draft.mapping||{}).some(Boolean));
  }
@@ -493,10 +503,10 @@
   const canTransact=!!p&&['active','reopened'].includes(p.status);
   const transactionActions=canTransact?`<section class="so-panel so-transaction-actions" aria-label="Transaksi stok">
    <div class="so-actions">
-    ${button('Barang Masuk','open','data-so-kind="receipt"')}
-    ${button('Pengeluaran','open','data-so-kind="expense"')}
-    ${button('Produksi WIP','open','data-so-kind="production"')}
-    ${button('Sales','open','data-so-kind="sales"')}
+    ${transactionButton('Barang Masuk','receipt')}
+    ${transactionButton('Pengeluaran','expense')}
+    ${transactionButton('Produksi WIP','production')}
+    ${transactionButton('Sales','sales')}
    </div>
   </section>`:'';
   page().innerHTML=`<header class="so-head">
