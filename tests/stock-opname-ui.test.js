@@ -375,7 +375,7 @@ test('main page hides global history and each active form shows only its own his
   await t.ui.open('sales');
   assert.match(t.page.innerHTML, /Riwayat Sales/);
   assert.match(t.page.innerHTML, /8 November 2026/);
-  assert.doesNotMatch(t.page.innerHTML, /Riwayat Barang Masuk|2 November 2026/);
+  assert.doesNotMatch(t.page.innerHTML, /Riwayat Barang Masuk|(?:^|[^0-9])2 November 2026/);
   await t.ui.open('receipt');
   assert.match(t.page.innerHTML, /Riwayat Barang Masuk/);
   assert.doesNotMatch(t.page.innerHTML, /Riwayat Sales|8 November 2026/);
