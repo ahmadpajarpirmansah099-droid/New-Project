@@ -12802,3 +12802,197 @@ button, input, select, textarea { font-family: var(--ui-font); }
 #page-stock-opname .so-transaction-actions .so-transaction-button span {
   line-height: 1.25;
 }
+
+/* Barang Masuk: clean two-column entry cards with quantity and base unit kept together. */
+#page-stock-opname .so-receipt-entry-grid,
+#page-stock-opname .so-receipt-items-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 12px 0 16px;
+}
+#page-stock-opname .so-receipt-field-card,
+#page-stock-opname .so-receipt-item-card {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--so-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow-control);
+}
+#page-stock-opname .so-receipt-date-card,
+#page-stock-opname .so-receipt-search {
+  margin: 0;
+  padding: 14px;
+  background: var(--ui-surface);
+  border: 1px solid var(--so-line);
+}
+#page-stock-opname .so-receipt-date-card label,
+#page-stock-opname .so-receipt-search label,
+#page-stock-opname .so-receipt-item-fields label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  margin: 0;
+  color: var(--so-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+#page-stock-opname .so-receipt-date-card .so-picker-trigger,
+#page-stock-opname .so-receipt-search input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  box-sizing: border-box;
+  background: #fff;
+}
+#page-stock-opname .so-receipt-search { position: relative; z-index: auto; }
+#page-stock-opname .so-receipt-search-results {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  z-index: 5;
+  max-height: min(300px, 45vh);
+  margin: 0;
+  padding: 7px;
+  overflow-y: auto;
+  border: 1px solid var(--so-line);
+  border-radius: 12px;
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow-card);
+}
+#page-stock-opname .so-receipt-search.has-results .so-receipt-search-results,
+#page-stock-opname .so-receipt-form.is-receipt-searching .so-receipt-search-results { display: grid; }
+#page-stock-opname .so-receipt-search-results button {
+  min-height: 44px;
+  padding: 9px 11px;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+#page-stock-opname .so-receipt-search-results button:hover,
+#page-stock-opname .so-receipt-search-results button:focus-visible { background: var(--ui-surface-soft); }
+#page-stock-opname .so-receipt-item-card { align-self: start; }
+#page-stock-opname .so-receipt-item-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+#page-stock-opname .so-receipt-item-head > div { display: grid; gap: 4px; min-width: 0; }
+#page-stock-opname .so-receipt-item-head small,
+#page-stock-opname .so-receipt-item-fields label > span {
+  color: var(--so-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+#page-stock-opname .so-receipt-item-head strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--so-ink);
+  font-size: 14px;
+}
+#page-stock-opname .so-receipt-item-head .so-receipt-remove {
+  flex: 0 0 auto;
+  min-height: 32px;
+  margin: 0;
+  padding: 4px 8px;
+}
+#page-stock-opname .so-receipt-item-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+#page-stock-opname .so-receipt-qty-unit {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  gap: 6px;
+}
+#page-stock-opname .so-receipt-qty-unit input {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 1%;
+  min-height: 46px;
+}
+#page-stock-opname .so-receipt-unit-dropdown {
+  display: block !important;
+  position: relative;
+  flex: 0 0 96px;
+  min-width: 0;
+}
+#page-stock-opname .so-receipt-unit-dropdown[open] { z-index: 30; }
+#page-stock-opname .so-receipt-unit-dropdown > summary,
+#page-stock-opname .so-receipt-unit-readonly {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 46px;
+  box-sizing: border-box;
+  padding: 8px 9px;
+  border: 1px solid var(--so-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface);
+  color: var(--so-ink);
+  box-shadow: var(--ui-shadow-control);
+  font: 700 12px/1.3 var(--ui-font);
+  list-style: none;
+}
+#page-stock-opname .so-receipt-unit-dropdown > summary { cursor: pointer; }
+#page-stock-opname .so-receipt-unit-dropdown > summary::-webkit-details-marker { display: none; }
+#page-stock-opname .so-receipt-unit-dropdown .so-unit-options {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 31;
+  width: max(100%, 120px);
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid var(--so-line);
+  border-radius: 12px;
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow-card);
+}
+#page-stock-opname .so-receipt-unit-dropdown .so-unit-options button {
+  display: flex;
+  width: 100%;
+  min-height: 38px;
+  justify-content: flex-start;
+  padding: 7px 9px;
+  border: 0;
+  box-shadow: none;
+  text-align: left;
+}
+#page-stock-opname .so-receipt-unit-dropdown .so-unit-options button[aria-pressed="true"] { background: var(--ui-lime); }
+#page-stock-opname .so-receipt-form.is-receipt-searching {
+  position: relative;
+  z-index: 120;
+}
+#page-stock-opname .so-receipt-form.is-receipt-searching::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: rgba(20,22,34,.16);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+#page-stock-opname .so-receipt-form.is-receipt-searching .so-receipt-search {
+  position: relative;
+  z-index: 2;
+  border-color: var(--ui-olive, #617b2c);
+  box-shadow: 0 9px 26px rgba(17,18,37,.16);
+}
+@media (max-width: 420px) {
+  #page-stock-opname .so-receipt-entry-grid,
+  #page-stock-opname .so-receipt-items-grid { gap: 8px; }
+  #page-stock-opname .so-receipt-field-card,
+  #page-stock-opname .so-receipt-item-card { padding: 10px; }
+  #page-stock-opname .so-receipt-unit-dropdown { flex-basis: 80px; }
+}

@@ -525,16 +525,25 @@ test('missing recipe disables its input and offers master-data navigation', asyn
   assert.match(t.page.innerHTML, /data-so-page="wips"/);
 });
 
-test('Barang Masuk only displays selected items and searches names while typing', async()=>{
+test('Barang Masuk displays date and item search as clean two-column cards, then quantity with inline base unit',async()=>{
  const t=runtime();
  await t.ui.open('receipt');
- assert.match(t.page.innerHTML,/Cari barang masuk/);
+ assert.match(t.page.innerHTML,/class="so-receipt-entry-grid"/);
+ assert.match(t.page.innerHTML,/class="so-receipt-field-card so-receipt-date-card"/);
+ assert.match(t.page.innerHTML,/class="so-receipt-field-card so-receipt-search"/);
+ assert.match(t.page.innerHTML,/Cari nama barang/);
+ assert.doesNotMatch(t.page.innerHTML,/class="so-toolbar"/);
+ assert.doesNotMatch(t.page.innerHTML,/background: var\(--ui-surface-soft\)/);
  assert.doesNotMatch(t.page.innerHTML,/data-so-prop="qty" aria-label="Barang Masuk Susu"/);
  t.input({soReceiptSearch:''},'su');
  assert.match(t.searchResults.innerHTML,/Susu/);
  assert.match(t.searchResults.innerHTML,/data-so-item-key="m:a"/);
  await t.click('receipt-add',{soItemKey:'m:a'});
+ assert.match(t.page.innerHTML,/class="so-receipt-item-card"/);
  assert.match(t.page.innerHTML,/data-so-prop="qty" aria-label="Barang Masuk Susu"/);
+ assert.match(t.page.innerHTML,/class="so-receipt-qty-unit"/);
+ assert.match(t.page.innerHTML,/aria-label="Satuan dasar Susu"/);
+ assert.match(t.page.innerHTML,/ML/);
  assert.equal((t.draft('receipt').receiptItems||[]).length,1);
  t.input({soReceiptSearch:''},'su');
  assert.doesNotMatch(t.searchResults.innerHTML,/data-so-item-key="m:a"/);
@@ -990,4 +999,12 @@ test('Stock Opname transaction icons are aligned and sized consistently', () => 
   const css = contentsOfStockOpnameStyles();
   assert.match(css, /\.so-transaction-actions \.so-transaction-button\s*\{[^}]*align-items:\s*center;[^}]*gap:\s*9px;/);
   assert.match(css, /\.so-transaction-actions \.so-transaction-icon\s*\{[^}]*width:\s*19px;[^}]*height:\s*19px;[^}]*flex:\s*0 0 19px;/);
+});
+
+test('Barang Masuk uses two-column cards, inline unit control and blurred search focus', () => {
+ const css=contentsOfStockOpnameStyles();
+ assert.match(css, /\.so-receipt-entry-grid,[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+ assert.match(css, /\.so-receipt-field-card,[\s\S]*?background:\s*var\(--ui-surface\)/);
+ assert.match(css, /\.so-receipt-qty-unit\s*\{[^}]*display:\s*flex/);
+ assert.match(css, /\.so-receipt-form\.is-receipt-searching::before\s*\{[^}]*backdrop-filter:\s*blur\(2px\)/);
 });
