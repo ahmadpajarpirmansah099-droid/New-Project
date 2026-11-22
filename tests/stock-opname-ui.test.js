@@ -28,7 +28,7 @@ function contentsOfStockOpnameStyles() {
 function runtime() {
   const handlers = {}, writes = [], confirmations = [];
   let pageHtml = '', pageRenders = 0;
-  const history = { set outerHTML(value) { const start=pageHtml.indexOf('<section class="so-panel so-history-panel"'); if(start>=0)pageHtml=pageHtml.slice(0,start)+value; } };
+  const history = { set outerHTML(value) { const start=pageHtml.indexOf('<section class="so-history-panel"'), close=pageHtml.indexOf('</section>',start), end=close<0?-1:close+'</section>'.length; if(start>=0&&end>start)pageHtml=pageHtml.slice(0,start)+value+pageHtml.slice(end); } };
   let partsEnabled=false;
   const parts={toolbar:{innerHTML:''},rows:{innerHTML:''},input:{value:''},results:{innerHTML:''}};
   const liveForm={querySelector(selector){return ({'[data-so-expense-toolbar]':parts.toolbar,'[data-so-expense-rows]':parts.rows,'[data-so-expense-search]':parts.input,'[data-so-expense-results]':parts.results})[selector]||null;}};
@@ -468,7 +468,7 @@ test('history shows an empty today state and reveals previous dates only after c
   assert.doesNotMatch(t.page.innerHTML, /class="so-history-date"><details open>/);
 });
 
-test('history card styling and transaction evidence panel use the requested class structure', async () => {
+test('history is inline in the main form card without separate date cards', async () => {
   const source = contentsOfStockOpnameUi();
   const css = contentsOfStockOpnameStyles();
   const historyStart = css.indexOf('.so-history-head {');
@@ -476,8 +476,15 @@ test('history card styling and transaction evidence panel use the requested clas
   assert.ok(historyStart >= 0 && historyEnd > historyStart);
   const historyBlock = css.slice(historyStart, historyEnd);
   assert.doesNotMatch(historyBlock, /!important/);
-  assert.match(historyBlock, /\.so-history-date\s*\{[^}]*background:\s*var\(--ui-surface\)/s);
+  assert.match(historyBlock, /\.so-history-panel\s*\{[^}]*border-top:\s*1px solid var\(--ui-line\)/s);
+  assert.match(historyBlock, /\.so-history-date\s*\{[^}]*background:\s*transparent;/s);
+  assert.match(historyBlock, /\.so-history-date\s*\{[^}]*box-shadow:\s*none;/s);
+  assert.match(historyBlock, /\.so-history-date\s*\{[^}]*border:\s*0;/s);
   assert.match(historyBlock, /\.so-history-date:has\(> details\[open\]\)/);
+  assert.match(source, /<section class="so-history-panel" id="soHistory">/);
+  assert.doesNotMatch(source, /<section class="so-panel so-history-panel"/);
+  assert.match(source, /historyHTML\(\).*<\/section>/);
+  assert.doesNotMatch(source, /\$\{form\?historyHTML\(\):''\}/);
   assert.match(historyBlock, /\.so-history-category-chip/);
   assert.match(historyBlock, /\.so-history-transactions\s*\{[^}]*border-top:\s*1px solid var\(--ui-line\)/s);
   assert.match(historyBlock, /#page-stock-opname \.so-history-actions \.so-history-link\s*\{[^}]*background:\s*transparent;/s);
@@ -555,7 +562,7 @@ test('resetting Stock Awal preserves transactions and requires complete manual i
   assert.equal(t.data.state.periods[0].status, 'opening_pending');
   assert.equal(t.data.state.documents.length, 1);
   await t.ui.open('initial');
-  const history = t.page.innerHTML.match(/<section class="so-panel so-history-panel" id="soHistory">[\s\S]*?<\/section>/)?.[0] || '';
+  const history = t.page.innerHTML.match(/<section class="so-history-panel" id="soHistory">[\s\S]*?<\/section>/)?.[0] || '';
   assert.match(history, /Belum ada riwayat hari ini/);
   assert.doesNotMatch(history, /1 November 2026/);
   assert.doesNotMatch(t.page.innerHTML, /data-so-key="m:a"[^>]*value="[1-9]/);
