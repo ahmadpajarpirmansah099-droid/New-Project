@@ -686,7 +686,7 @@ ${transactionActions}
    if(name==='receipt-add'&&form?.kind==='receipt'){
     const key=el.dataset.soItemKey,row=catalog().find(r=>r.key===key&&r.key.startsWith('m:')&&!r.error);
     if(row&&!receiptItems().includes(key)){
-     receiptItems().push(key);
+     receiptItems().unshift(key);
      form.counts[key]={...form.counts[key],unit:form.counts[key]?.unit||row.unit};
      form.touched=true;snapshot();receiptQuery='';
     }
