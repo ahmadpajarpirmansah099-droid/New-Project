@@ -484,9 +484,9 @@ test('history card styling and transaction evidence panel use the requested clas
   assert.match(historyBlock, /#page-stock-opname \.so-history-actions \.so-history-link\s*\{[^}]*border:\s*0;/s);
   assert.match(historyBlock, /#page-stock-opname \.so-history-link::after/);
   assert.match(historyBlock, /#page-stock-opname \.so-history-link:hover::after/);
-  assert.match(source, /class="so-history-transactions"/);
-  assert.match(source, /class="so-history-transaction"/);
-  assert.match(source, /class="so-history-transaction-copy"/);
+  assert.match(source, /so-date-material-row--actions/);
+  assert.doesNotMatch(source, /class="so-history-transactions"/);
+  assert.doesNotMatch(source, /class="so-history-transaction"/);
   assert.doesNotMatch(source, /Transaksi per bukti/);
   assert.match(source, /class="so-history-category-chip"/);
   assert.match(source, /Tampilkan tanggal sebelumnya/);
