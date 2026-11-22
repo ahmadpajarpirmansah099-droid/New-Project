@@ -994,4 +994,222 @@ test('expense category uses in-page options and selection preserves selected ite
  await t.click('submit'); assert.equal(t.writes[0].input.category,'Kalibrasi');
 });
 
-test('selecting Move via in-page category retains safeguards', async () => {
+test('selecting Move via in-page category retains safeguards', async () => { const t=runtime(); await t.ui.open('expense');
+ await t.click('expense-add',{soItemKey:'m:a'}); t.input({soKey:'m:a',soProp:'qty'},'5');
+ await t.click('expense-category',{soValue:'Move'});
+ assert.match(t.page.innerHTML,/Belum ada outlet\/divisi tujuan yang aktif/);
+ await t.click('submit'); assert.equal(t.writes.length,0);
+ assert.equal(t.draft('expense').counts['m:a'].qty,'5');
+});
+
+test('expense selection updates form sections without replacing page or form', async () => {
+ const t=runtime(); t.data.catalog[0].units.push({unit:'Botol',factor:1000});
+ await t.ui.open('expense'); t.enableExpenseParts(); const before=t.pageRenders();
+ await t.click('expense-add',{soItemKey:'m:a'});
+ assert.equal(t.pageRenders(),before); assert.match(t.parts.rows.innerHTML,/Pengeluaran Susu/);
+ t.input({soKey:'m:a',soProp:'qty'},'4');
+ await t.click('expense-category',{soValue:'Move'});
+ assert.equal(t.pageRenders(),before); assert.match(t.parts.toolbar.innerHTML,/Belum ada outlet/);
+ await t.click('unit-option',{soKey:'m:a',soValue:'Botol'});
+ assert.equal(t.pageRenders(),before);
+ assert.equal(t.draft('expense').counts['m:a'].qty,'4');
+ assert.equal(t.draft('expense').counts['m:a'].unit,'Botol');
+ assert.equal(t.draft('expense').category,'Move');
+ assert.equal(t.writes.length,0);
+});
+
+test('Stock Opname table uses lime header pills and inline physical counts during opname', async () => {
+  const t = runtime();
+  await t.ui.open('close');
+  t.ui.render();
+  assert.match(t.page.innerHTML, /class="so-table-header-pill">STOK AWAL<\/span>/);
+  assert.match(t.page.innerHTML, /class="so-table-header-pill">STOK FISIK<\/span>/);
+  assert.match(t.page.innerHTML, /class="so-physical-input"[^>]*data-so-key="m:a"[^>]*placeholder="Isi"/);
+  t.input({soKey:'m:a',soProp:'qty'},'17');
+  assert.equal(t.draft('close').counts['m:a'].qty,'17');
+  assert.match(t.page.innerHTML, /so-layout-ledger/);
+});
+
+test('new Stock Opname table shows active master items and all requested columns', () => {
+  const t = runtime();
+  t.data.catalog.push({ key: 'm:cup', name: 'Cup takeaway Dingin', unit: 'PCS' });
+  t.ui.render();
+  for (const label of ['NAMA ITEM', 'STOK AWAL', 'BARANG MASUK', 'BARANG KELUAR', 'TERPAKAI OPERASIONAL', 'STOK SISTEM', 'STOK FISIK']) {
+    assert.match(t.page.innerHTML, new RegExp(label));
+  }
+  assert.match(t.page.innerHTML, /Susu/);
+  assert.match(t.page.innerHTML, /Cup tak\.\. Dingin/);
+  assert.match(t.page.innerHTML, /data-label="STOK AWAL"><span>0 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>0 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>0 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span>0 ML<\/span>/);
+  t.data.state.periods[0].opening['m:a'] = 125;
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="STOK AWAL"><span>125 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span>125 ML<\/span>/);
+  assert.match(t.page.innerHTML, /<tr class="so-table-group"><th scope="rowgroup" colspan="7"><span class="so-table-header-pill">WIP<\/span><\/th><\/tr>/);
+  assert.match(t.page.innerHTML, /<th scope="row" data-label="NAMA ITEM">[\s\S]*?WIP[\s\S]*?<\/th>/);
+  assert.doesNotMatch(t.page.innerHTML, /<th scope="row" data-label="NAMA ITEM">Menu<\/th>/);
+});
+
+test('main table accumulates receipt and expense postings by master item until the first opname closes', () => {
+  const t = runtime();
+  t.data.state.periods[0].legacy_period_ids = ['old-period'];
+  t.data.state.documents = [
+    { id: 'r-current', period_id: 'period', type: 'receipt', postings: [{ key: 'm:a', qty: 100 }, { key: 'w:a', qty: 999 }] },
+    { id: 'r-legacy', period_id: 'old-period', type: 'receipt', postings: [{ key: 'm:a', qty: 25 }] },
+    { id: 'e-current', period_id: 'period', type: 'expense', category: 'Waste', postings: [{ key: 'm:a', qty: -7 }] },
+    { id: 'e-legacy', period_id: 'old-period', type: 'expense', category: 'QC', postings: [{ key: 'm:a', qty: -3 }] },
+    { id: 'e-void', period_id: 'period', type: 'expense', category: 'Waste', void: true, postings: [{ key: 'm:a', qty: -500 }] },
+    { id: 'production', period_id: 'period', type: 'production', postings: [{ key: 'm:a', qty: -40 }, { key: 'w:a', qty: 8 }] },
+    { id: 'sales', period_id: 'period', type: 'sales', postings: [{ key: 'm:a', qty: -20 }, { key: 'w:a', qty: -4 }] },
+    { id: 'sales-void', period_id: 'period', type: 'sales', void: true, postings: [{ key: 'm:a', qty: -500 }] }
+  ];
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>125 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>10 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="TERPAKAI OPERASIONAL"><span>60 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span>55 ML<\/span>/);
+});
+
+test('WIP rows show production output, expense and operational consumption separately', () => {
+  const t = runtime();
+  t.data.state.periods[0].opening['w:a'] = 10;
+  t.data.state.periods[0].opening['w:b'] = 20;
+  t.data.catalog.push({ key: 'w:b', name: 'WIP Terpakai Produksi', unit: 'ML', units: [{ unit: 'ML', factor: 1 }] });
+  t.data.state.documents = [
+    { id: 'expense-wip', period_id: 'period', type: 'expense', category: 'Waste', postings: [{ key: 'w:a', qty: -2 }] },
+    { id: 'production-wip', period_id: 'period', type: 'production', postings: [{ key: 'w:a', qty: 50 }, { key: 'w:b', qty: -5 }] },
+    { id: 'sales-wip', period_id: 'period', type: 'sales', postings: [{ key: 'w:a', qty: -7 }] }
+  ];
+  t.ui.render();
+  assert.match(t.page.innerHTML, /<th scope="row" data-label="NAMA ITEM">[\s\S]*?WIP[\s\S]*?<\/th>[\s\S]*?data-label="BARANG MASUK"><span>50 ML<\/span>[\s\S]*?data-label="BARANG KELUAR"><span>2 ML<\/span>[\s\S]*?data-label="TERPAKAI OPERASIONAL"><span>7 ML<\/span>[\s\S]*?data-label="STOK SISTEM"><span>51 ML<\/span>/);
+  assert.match(t.page.innerHTML, /<th scope="row" data-label="NAMA ITEM">[\s\S]*?WIP Terpakai Produksi[\s\S]*?<\/th>[\s\S]*?data-label="TERPAKAI OPERASIONAL"><span>5 ML<\/span>[\s\S]*?data-label="STOK SISTEM"><span>15 ML<\/span>/);
+});
+
+test('system stock uses the requested balance formula and colors negative values red', () => {
+  const t = runtime();
+  t.data.state.periods[0].opening['m:a'] = 15;
+  t.data.state.documents = [
+    { id: 'receipt', period_id: 'period', type: 'receipt', postings: [{ key: 'm:a', qty: 5 }] },
+    { id: 'expense', period_id: 'period', type: 'expense', postings: [{ key: 'm:a', qty: -2 }] },
+    { id: 'production', period_id: 'period', type: 'production', postings: [{ key: 'm:a', qty: -8 }] },
+    { id: 'sales', period_id: 'period', type: 'sales', postings: [{ key: 'm:a', qty: -7 }] }
+  ];
+
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span>3 ML<\/span>/);
+  assert.doesNotMatch(t.page.innerHTML, /class="so-table-negative"/);
+
+  t.data.state.periods[0].opening['m:a'] = 12;
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span>0 ML<\/span>/);
+  assert.doesNotMatch(t.page.innerHTML, /class="so-table-negative"/);
+
+  t.data.state.periods[0].opening['m:a'] = 10;
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span class="so-table-negative">-2 ML<\/span>/);
+});
+
+test('movement table shows only the selected calendar month and starts the next month fresh', async () => {
+  const t = runtime();
+  t.data.state.documents = [
+    { id: 'legacy', period_id: 'old-period', type: 'receipt', postings: [{ key: 'm:a', qty: 40 }] },
+    { id: 'legacy-production', period_id: 'old-period', type: 'production', postings: [{ key: 'm:a', qty: -40 }] },
+    { id: 'new-receipt', period_id: 'next-period', type: 'receipt', postings: [{ key: 'm:a', qty: 6 }] },
+    { id: 'new-expense', period_id: 'next-period', type: 'expense', category: 'Waste', postings: [{ key: 'm:a', qty: -2 }] },
+    { id: 'new-production', period_id: 'next-period', type: 'production', postings: [{ key: 'm:a', qty: -5 }] },
+    { id: 'new-sales', period_id: 'next-period', type: 'sales', postings: [{ key: 'm:a', qty: -6 }] }
+  ];
+  t.data.state.periods[0].status = 'closed';
+  t.data.state.periods[0].legacy_period_ids = ['old-period'];
+  t.data.month = '2026-11';
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>40 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>0 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="TERPAKAI OPERASIONAL"><span>40 ML<\/span>/);
+  t.data.state.periods.push({ id: 'next-period', previous_id: 'period', start: '2026-12-01', status: 'active', opening: {} });
+  t.ui.render();
+  await t.click('month-next');
+  assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>6 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>2 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="TERPAKAI OPERASIONAL"><span>11 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span class="so-table-negative">-7 ML<\/span>/);
+});
+
+
+test('Stock Opname close targets the month selected in the navigator', async () => {
+  const t = runtime();
+  t.data.state.periods.push({ id: 'dec', previous_id: 'period', start: '2026-12-01', status: 'active', opening: {} });
+  t.data.month = '2026-12';
+  t.ui.render();
+  await t.click('month-prev');
+  assert.match(t.page.innerHTML, /November 2026/);
+  await t.ui.open('close');
+  const documentDate = t.draft('close').end;
+  t.input({ soKey: 'm:a', soProp: 'qty' }, '1');
+  t.input({ soKey: 'w:a', soProp: 'qty' }, '0');
+  await t.click('submit');
+  assert.equal(t.writes.length, 1);
+  assert.equal(t.writes[0].action, 'close');
+  assert.equal(t.writes[0].input.month, '2026-11-01');
+  assert.equal(t.writes[0].input.end, documentDate);
+  assert.equal(t.writes[0].input.date, documentDate);
+});
+
+test('Sales form rejects a date range that crosses a calendar month before writing', async () => {
+  const t = runtime(); await t.ui.open('sales');
+  t.input({ soField: 'start' }, '2026-11-30');
+  t.input({ soField: 'end' }, '2026-12-01');
+  await t.click('submit');
+  assert.equal(t.writes.length, 0);
+  assert.match(t.page.innerHTML, /Rentang Sales tidak boleh melewati pergantian bulan/);
+  assert.equal(t.draft('sales').start, '2026-11-30');
+  assert.equal(t.draft('sales').end, '2026-12-01');
+});
+
+test('Sales form accepts a date range contained within one calendar month', async () => {
+  const t = runtime(); await t.ui.open('sales');
+  t.input({ soField: 'start' }, '2026-11-10');
+  t.input({ soField: 'end' }, '2026-11-20');
+  t.input({ soKey: 's:a', soProp: 'qty' }, '3');
+  await t.click('submit');
+  assert.equal(t.writes.length, 1);
+  assert.equal(t.writes[0].action, 'save');
+  assert.equal(t.writes[0].input.start, '2026-11-10');
+  assert.equal(t.writes[0].input.end, '2026-11-20');
+});
+
+test('Stock Opname notices stay compact and do not render as large colored cards', () => {
+  const css = contentsOfStockOpnameStyles();
+  assert.match(css, /\.so-notice\s*\{[^}]*padding:\s*0;[^}]*background:\s*transparent;[^}]*border:\s*0;/);
+  assert.match(css, /\.so-warning\s*\{[^}]*background:\s*transparent;[^}]*border:\s*0;[^}]*color:/);
+  assert.match(css, /\.so-form-head p\s*\{[^}]*font-size:\s*12px;[^}]*line-height:\s*1\.45;/);
+  assert.match(css, /\.so-status\s*\{[^}]*font-size:\s*11px;[^}]*line-height:\s*1\.4;/);
+});
+
+test('Stock Opname feature forms do not show explanatory text beneath the title', async () => {
+  const t=runtime();
+  for (const kind of ['receipt','expense','production','sales','close']) {
+    await t.ui.open(kind);
+    assert.match(t.page.innerHTML,kind==='receipt' ? /class="so-form-head so-receipt-reference-head"[\s\S]*?<h2>Catat Barang Masuk<\/h2>/ : /class="so-form-head"><h2>[^<]+<\/h2><\/header>/);
+    assert.doesNotMatch(t.page.innerHTML,/Catat barang yang digunakan atau dipindahkan|Isi jumlah batch|Pilih rentang tanggal|Catat bahan dan suplies yang diterima|Cocokkan stok sistem dengan fisik/);
+  }
+});
+
+test('Stock Opname transaction icons are aligned and sized consistently', () => {
+  const css = contentsOfStockOpnameStyles();
+  assert.match(css, /\.so-transaction-actions \.so-transaction-button\s*\{[^}]*align-items:\s*center;[^}]*gap:\s*9px;/);
+  assert.match(css, /\.so-transaction-actions \.so-transaction-icon\s*\{[^}]*width:\s*19px;[^}]*height:\s*19px;[^}]*flex:\s*0 0 19px;/);
+});
+
+
+
+test('Barang Masuk reference form keeps search free of backdrop blur', () => {
+ const css=contentsOfStockOpnameStyles();
+ const js=contentsOfStockOpnameUi();
+ assert.ok(css.includes('.so-receipt-quantity-unit-grid'));
+ assert.ok(css.includes('.so-receipt-details-grid'));
+ assert.doesNotMatch(css, /so-receipt-search-active/);
+ assert.doesNotMatch(js, /updateReceiptSearchMask|scheduleReceiptSearchMask|so-receipt-search-active/);
+});
