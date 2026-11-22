@@ -4318,6 +4318,19 @@ textarea::-webkit-input-placeholder {
   box-shadow:0 4px 10px rgba(190,91,133,.14),inset 0 0 0 1px rgba(190,91,133,.08);
 }
 
+#sheet .smoking-seg.has-validation-error button {
+  border-color:#d45b65!important;
+}
+#sheet .field-validation-message {
+  margin:8px 0 0;
+  color:#bd3545;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.5;
+}
+#sheet .field-validation-message[hidden] { display:none; }
+
+
 /* Fill the spare guest-detail grid cell with the table-move action. */
 .detail-move-table {
   width:100%;
@@ -13468,5 +13481,18 @@ html:not([data-desktop-theme="dark"]) {
   .so-history .so-date-material-row--actions .so-history-actions {
     grid-column: 1 / -1;
     justify-content: flex-end;
+  }
+}
+
+/* DESKTOP — cap active queue height to the summary area; extra guests scroll inside it. */
+@media (min-width: 1150px) {
+  #page-dashboard > #dashboardList {
+    height: 324px;
+    min-height: 0;
+    max-height: 324px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-bottom: 0;
   }
 }

@@ -1,7 +1,7 @@
 /* =========================================================
     3. WAITING LIST: ADD GUEST AND QUEUE NUMBER
     ========================================================= */
-function openAdd(){sheetGuest=null;pendingGuestDraft=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" data-app-action="closeSheet">✕</button></div><form data-app-submit="saveGuest"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" data-app-action="changePack" data-app-value="-1">−</button><strong id="packValue">2</strong><button type="button" data-app-action="changePack" data-app-value="1">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span class="text-muted-note">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg" data-selected="waiting"><button type="button" class="selected" id="segWait" data-app-action="chooseInitial" data-app-value="waiting">Menunggu</button><button type="button" id="segSeated" data-app-action="chooseInitial" data-app-value="seated">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="field"><label>Area merokok *</label><div class="seg smoking-seg" data-selected=""><button type="button" id="segSmoking" data-app-action="chooseSmoking" data-app-value="true">Smoking</button><button type="button" id="segNonSmoking" data-app-action="chooseSmoking" data-app-value="false">Non Smoking</button></div><input type="hidden" id="guestSmoking" value=""></div><div class="field" id="initialTableField" hidden><label for="initialTableLabel">Nomor meja *</label><input id="initialTableLabel" type="text" maxlength="30" autocomplete="off" placeholder="Masukkan nomor meja"></div><div class="sheet-actions"><button type="button" class="secondary" data-app-action="closeSheet">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`)}
+function openAdd(){sheetGuest=null;pendingGuestDraft=null;openSheet(`<div class="sheet-head"><h2>Tambah tamu</h2><button class="close" data-app-action="closeSheet">✕</button></div><form data-app-submit="saveGuest"><div class="field"><label>Nama tamu *</label><input id="guestName" required maxlength="70" placeholder="Masukkan nama tamu" autocomplete="name"></div><div class="field"><label>Jumlah pack *</label><div class="pack-control"><button type="button" data-app-action="changePack" data-app-value="-1">−</button><strong id="packValue">2</strong><button type="button" data-app-action="changePack" data-app-value="1">+</button></div><input type="hidden" id="guestPack" value="2"></div><div class="field"><label>Nomor WhatsApp <span class="text-muted-note">(opsional)</span></label><input id="guestPhone" inputmode="tel" placeholder="08xxxxxxxxxx"></div><div class="field"><label>Status awal</label><div class="seg" data-selected="waiting"><button type="button" class="selected" id="segWait" data-app-action="chooseInitial" data-app-value="waiting">Menunggu</button><button type="button" id="segSeated" data-app-action="chooseInitial" data-app-value="seated">Langsung duduk</button></div><input type="hidden" id="initialStatus" value="waiting"></div><div class="field"><label>Area merokok *</label><div class="seg smoking-seg" data-selected=""><button type="button" id="segSmoking" data-app-action="chooseSmoking" data-app-value="true">Smoking</button><button type="button" id="segNonSmoking" data-app-action="chooseSmoking" data-app-value="false">Non Smoking</button></div><input type="hidden" id="guestSmoking" value=""><p id="guestSmokingError" class="field-validation-message" role="alert" aria-live="assertive" hidden></p></div><div class="field" id="initialTableField" hidden><label for="initialTableLabel">Nomor meja *</label><input id="initialTableLabel" type="text" maxlength="30" autocomplete="off" placeholder="Masukkan nomor meja"></div><div class="sheet-actions"><button type="button" class="secondary" data-app-action="closeSheet">Batal</button><button type="submit" class="primary">Simpan tamu</button></div></form>`)}
 function changePack(d){
   let v=Math.max(1,Math.min(30,Number($('guestPack').value)+d));
   $('guestPack').value=v;
@@ -16,6 +16,14 @@ function chooseSmoking(value) {
   const selected = String(value);
   if (!['true', 'false'].includes(selected)) return;
   $('guestSmoking').value = selected;
+  const error = $('guestSmokingError');
+  if (error) {
+    error.textContent = '';
+    error.hidden = true;
+    $('segSmoking').parentElement.classList.remove('has-validation-error');
+    $('segSmoking').removeAttribute('aria-invalid');
+    $('segNonSmoking').removeAttribute('aria-invalid');
+  }
   $('segSmoking').classList.toggle('selected', selected === 'true');
   $('segNonSmoking').classList.toggle('selected', selected === 'false');
   $('segSmoking').setAttribute('aria-pressed', String(selected === 'true'));
@@ -82,7 +90,15 @@ async function saveGuest(e){
     const tableLabel = status === 'seated' ? $('initialTableLabel').value.trim() : '';
     const smokingValue = $('guestSmoking').value;
     if (!['true', 'false'].includes(smokingValue)) {
-      toast('Pilih Smoking atau Non Smoking terlebih dahulu');
+      const error = $('guestSmokingError');
+      if (error) {
+        error.textContent = 'Area merokok wajib dipilih. Silakan pilih Smoking atau Non Smoking.';
+        error.hidden = false;
+        $('segSmoking').parentElement.classList.add('has-validation-error');
+        $('segSmoking').setAttribute('aria-invalid', 'true');
+        $('segNonSmoking').setAttribute('aria-invalid', 'true');
+      }
+      toast('Area merokok wajib dipilih');
       $('segSmoking').focus();
       return;
     }
