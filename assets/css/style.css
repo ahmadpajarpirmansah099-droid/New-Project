@@ -12057,7 +12057,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .so-history-date > details > summary:focus-visible,
 .so-history-compact-details > summary:focus-visible,
 .so-sales-menu > summary:focus-visible,
-.so-history-originals > summary:focus-visible {
+.so-history-date > details > summary:focus-visible,
   outline: 2px solid var(--ui-lime-strong);
   outline-offset: 3px;
   border-radius: var(--ui-radius-control);
