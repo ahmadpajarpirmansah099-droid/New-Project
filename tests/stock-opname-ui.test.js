@@ -22,7 +22,7 @@ function runtime() {
   const page = { get innerHTML(){return pageHtml;}, set innerHTML(value){pageHtml=value;pageRenders++;}, contains: () => true, querySelector: selector => selector==='.so-form'&&partsEnabled?liveForm:selector==='#soHistory' && pageHtml.includes('id="soHistory"') ? history : null };
   const searchResults = { innerHTML: '' };
   const searchContainerClasses = new Set();
-  const searchContainer = { classList: { toggle(name, force) { if (force) searchContainerClasses.add(name); else searchContainerClasses.delete(name); }, contains(name) { return searchContainerClasses.has(name); } } };
+  const searchContainer = { classList: { toggle(name, force) { if (force) searchContainerClasses.add(name); else searchContainerClasses.delete(name); }, contains(name) { return searchContainerClasses.has(name); } }, querySelector: () => searchResults };
   const drafts = {}, letHolder = { active: null };
   let allowConfirm = true, storageFails = false, writeFails = false;
   const data = {
