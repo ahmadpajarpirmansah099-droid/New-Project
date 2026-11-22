@@ -425,7 +425,7 @@
    return historyDate(date,entries,`
     <div class="so-date-materials">${lines||'<p class="so-sales-unavailable">Tidak ada transaksi aktif pada tanggal ini.</p>'}</div>
     <details class="so-history-originals"><summary>Transaksi per bukti</summary>${documents}</details>
-   `,'transaksi',index===0);
+   `,'transaksi');
   }).join('');
  }
  function productionHistoryByDate(dates){
@@ -450,7 +450,7 @@
    }).join('');
    return historyDate(date,entries,`
     <div class="so-date-materials">${rows||'<p class="so-sales-unavailable">Tidak ada hasil produksi aktif yang tersedia pada tanggal ini.</p>'}</div>
-   `,'transaksi',index===0);
+   `,'transaksi');
   }).join('');
  }
  function openingHistoryEntry(entry,periods){
