@@ -12052,7 +12052,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   min-height: 44px;
   padding: 0;
   color: var(--ui-ink);
-  font: 800 16px/1.35 var(--ui-heading-font);
+  font: 700 14px/1.4 var(--ui-heading-font);
 }
 .so-history-date > details > summary:focus-visible,
 .so-history-compact-details > summary:focus-visible,
