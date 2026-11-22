@@ -369,7 +369,7 @@
    : '';
   return `<div class="so-sales-menu-list">${rows.join('')}${fallback}</div>`;
  }
- function historyDocumentActions(doc,p){
+ function historyDocumentActions(doc,p,inline=false){
   if(doc.void)return '';
   const id=`data-so-id="${e(doc.id)}"`;
   const docMonth=String(doc.end||doc.start||'').slice(0,7);
@@ -379,7 +379,7 @@
   const editable=sameMonth&&['active','reopened'].includes(p?.status)&&!['move_in','adjustment_in','adjustment'].includes(doc.type);
   const actions=editable?link('Edit','edit')+link('Batalkan','void'):'';
   const adjust=sameMonth&&p?.status==='active'&&doc.type==='expense'&&doc.category==='Move'?link('Penyesuaian Move','adjust'):'';
-  return actions||adjust?`<div class="so-history-actions">${actions}${adjust}</div>`:'';
+  return actions||adjust?(inline?actions+adjust:`<div class="so-history-actions">${actions}${adjust}</div>`):'';
  }
  function historyDocument(doc,p,original=false){
   const name=e(labels[doc.type]||doc.type)+(doc.category&&['expense','adjustment'].includes(doc.type)?' · '+e(doc.category):'');
@@ -406,16 +406,21 @@
     if(!Number.isFinite(qty)||!qty)continue;
     const inbound=qty>0;
     const key=JSON.stringify([category,row.key||row.name,unit,inbound]);
-    if(!totals.has(key))totals.set(key,{name:row.name||row.key||'Barang',unit,qty:0,inbound,category});
-    totals.get(key).qty+=Math.abs(qty);
+    if(!totals.has(key))totals.set(key,{name:row.name||row.key||'Barang',unit,qty:0,inbound,category,documents:[]});
+    const item=totals.get(key);
+    item.qty+=Math.abs(qty);
+    if(!item.documents.some(source=>source.id===doc.id))item.documents.push(doc);
    }
   }
   return [...totals.values()].sort((a,b)=>a.name.localeCompare(b.name,'id'));
  }
  function materialHistoryByDate(dates,expense){
-  return dates.map(([date,entries],index)=>{
+  return dates.map(([date,entries])=>{
    const materials=materialTotals(entries,expense);
-   const row=m=>`<div class="so-date-material-row"><span>${e(m.name)}${expense&&m.inbound?'<small>Masuk / penyesuaian</small>':''}</span><strong${expense&&!m.inbound?' class="is-negative"':''}>${number(m.qty)} ${e(m.unit)}</strong></div>`;
+   const row=m=>{
+    const actions=m.documents.map(doc=>historyDocumentActions(doc,period(),true)).join('');
+    return `<div class="so-date-material-row so-date-material-row--actions"><span>${e(m.name)}${expense&&m.inbound?'<small>Masuk / penyesuaian</small>':''}</span><strong${expense&&!m.inbound?' class="is-negative"':''}>${number(m.qty)} ${e(m.unit)}</strong><div class="so-history-actions" aria-label="Aksi transaksi ${e(m.name)}">${actions}</div></div>`;
+   };
    let lines;
    if(expense){
     const categories=new Map();
@@ -427,15 +432,8 @@
      `<section class="so-date-material-category"><h4 class="so-history-category-chip">${e(category)}</h4>${items.map(row).join('')}</section>`
     ).join('');
    }else lines=materials.map(row).join('');
-   const transactions=entries.map(doc=>{
-    const title=e(labels[doc.type]||doc.type)+(doc.category&&['expense','adjustment'].includes(doc.type)?' · '+e(doc.category):'');
-    const itemCount=(doc.postings||[]).length;
-    const actions=historyDocumentActions(doc,period());
-    return `<div class="so-history-transaction"><div class="so-history-transaction-copy"><strong>${title}</strong><small>${itemCount} barang</small>${doc.void?'<span class="so-history-tag is-void">Dibatalkan</span>':''}</div>${actions}</div>`;
-   }).join('');
    return historyDate(date,entries,`
     <div class="so-date-materials">${lines||'<p class="so-sales-unavailable">Tidak ada transaksi aktif pada tanggal ini.</p>'}</div>
-    <div class="so-history-transactions" aria-label="Transaksi pada tanggal ini">${transactions}</div>
    `,'transaksi',date===today());
   }).join('');
  }
