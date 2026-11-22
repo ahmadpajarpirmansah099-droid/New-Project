@@ -13470,3 +13470,17 @@ html:not([data-desktop-theme="dark"]) {
     justify-content: flex-end;
   }
 }
+
+
+/* DESKTOP — cap active queue height to the summary area; extra guests scroll inside it. */
+@media (min-width: 1150px) {
+  #page-dashboard > #dashboardList {
+    height: 324px;
+    min-height: 0;
+    max-height: 324px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-bottom: 0;
+  }
+}
