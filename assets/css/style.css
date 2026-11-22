@@ -12052,7 +12052,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   min-height: 44px;
   padding: 0;
   color: var(--ui-ink);
-  font: 800 16px/1.35 var(--ui-heading-font);
+  font: 700 14px/1.4 var(--ui-heading-font);
 }
 .so-history-date > details > summary:focus-visible,
 .so-history-compact-details > summary:focus-visible,
@@ -13434,4 +13434,24 @@ html:not([data-desktop-theme="dark"]) :is(
 /* GLOBAL LIGHT THEME — remove remaining soft-gray surfaces used by feature panels and table headers. */
 html:not([data-desktop-theme="dark"]) {
   --ui-surface-soft: #fff;
+}
+
+
+/* Keep history actions attached to the material row they affect. */
+.so-history .so-date-material-row--actions {
+  grid-template-columns: minmax(0,1fr) auto auto;
+  align-items: center;
+}
+.so-history .so-date-material-row--actions .so-history-actions {
+  justify-content: flex-end;
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .so-history .so-date-material-row--actions {
+    grid-template-columns: minmax(0,1fr) auto;
+  }
+  .so-history .so-date-material-row--actions .so-history-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
 }

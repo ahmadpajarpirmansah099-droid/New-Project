@@ -484,13 +484,13 @@ test('history card styling and transaction evidence panel use the requested clas
   assert.match(historyBlock, /#page-stock-opname \.so-history-actions \.so-history-link\s*\{[^}]*border:\s*0;/s);
   assert.match(historyBlock, /#page-stock-opname \.so-history-link::after/);
   assert.match(historyBlock, /#page-stock-opname \.so-history-link:hover::after/);
-  assert.match(source, /class="so-history-transactions"/);
-  assert.match(source, /class="so-history-transaction"/);
-  assert.match(source, /class="so-history-transaction-copy"/);
+  assert.match(source, /so-date-material-row--actions/);
+  assert.doesNotMatch(source, /class="so-history-transactions"/);
+  assert.doesNotMatch(source, /class="so-history-transaction"/);
   assert.doesNotMatch(source, /Transaksi per bukti/);
   assert.match(source, /class="so-history-category-chip"/);
   assert.match(source, /Tampilkan tanggal sebelumnya/);
-  assert.match(historyBlock, /\.so-history-date > details > summary\s*\{[^}]*font: 800 16px\/1\.35/);
+  assert.match(historyBlock, /\.so-history-date > details > summary\s*\{[^}]*font: 700 14px\/1\.4/);
   assert.match(historyBlock, /\.so-history \.so-date-material-row span\s*\{[^}]*font-size: 13px/);
   assert.match(historyBlock, /\.so-history \.so-opening-lines > div\s*\{[^}]*font-size: 13px/);
   assert.match(historyBlock, /\.so-history \.so-date-material-category h4\.so-history-category-chip\s*\{[^}]*font-size: 10px/);
@@ -533,8 +533,8 @@ test('daily receipt history shows today first and loads older dates in order', a
   assert.match(html, /class="so-history-date"><details open>/);
   assert.match(html, /<span>23 November 2026<\/span>/);
   assert.match(html, /Susu<\/span><strong>78 ML/);
-  assert.match(html, /so-history-transaction/);
-  assert.match(html, /so-history-transaction-copy/);
+  assert.match(html, /so-date-material-row--actions/);
+  assert.doesNotMatch(html, /so-history-transaction/);
   assert.doesNotMatch(html, /Transaksi per bukti/);
   assert.match(html, /data-so-action="void"/);
   assert.doesNotMatch(html, /<span>22 November 2026<\/span>/);
@@ -745,7 +745,7 @@ test('daily expense history groups materials by category without original transa
  await t.ui.open('expense');
  const html=t.page.innerHTML;
  assert.match(html,/23 November 2026/);
- assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,3);
+ assert.equal((html.match(/class="so-date-material-row(?: so-date-material-row--actions)?"/g)||[]).length,3);
  assert.match(html,/Susu<\/span><strong class="is-negative">2 ML/);
  assert.match(html,/Susu<\/span><strong class="is-negative">3 ML/);
  assert.doesNotMatch(html,/Susu<\/span><strong>5 ML/);
@@ -765,10 +765,29 @@ test('daily receipt history totals repeated materials without original records',
  await t.ui.open('receipt');
  const html=t.page.innerHTML;
  assert.match(html,/23 November 2026/);
- assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
+ assert.equal((html.match(/class="so-date-material-row(?: so-date-material-row--actions)?"/g)||[]).length,2);
  assert.match(html,/Susu<\/span><strong>150 ML/);
  assert.match(html,/Gula<\/span><strong>20 GR/);
+ assert.equal((html.match(/class="so-date-material-row so-date-material-row--actions"/g)||[]).length,2);
  assert.match(html,/data-so-action="void"/);
+ assert.doesNotMatch(html,/so-history-transactions/);
+});
+
+
+
+test('multi-item receipt shows its transaction actions beside each related material row',async()=>{
+ const t=runtime();
+ t.data.state.documents=[{id:'receipt-multi',period_id:'period',type:'receipt',start:TEST_TODAY,end:TEST_TODAY,postings:[
+  {key:'m:a',name:'Susu',qty:10,unit:'ML'},
+  {key:'m:b',name:'Gula',qty:20,unit:'GR'}
+ ]}];
+ await t.ui.open('receipt');
+ const html=t.page.innerHTML;
+ assert.equal((html.match(/class="so-date-material-row so-date-material-row--actions"/g)||[]).length,2);
+ assert.equal((html.match(/data-so-action="void" data-so-id="receipt-multi"/g)||[]).length,2);
+ await t.click('void',{soId:'receipt-multi'});
+ assert.equal(t.writes.at(-1).action,'void');
+ assert.equal(t.writes.at(-1).input.id,'receipt-multi');
 });
 
 test('grouped Barang Masuk history exposes per-transaction cancellation and updates stock',async()=>{
@@ -824,7 +843,7 @@ test('expense material totals remain separated by category, including repeated m
  assert.match(html,/<h4 class="so-history-category-chip">Waste<\/h4>/);
  assert.match(html,/Susu<\/span><strong class="is-negative">6 ML/);
  assert.match(html,/Susu<\/span><strong class="is-negative">5 ML/);
- assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
+ assert.equal((html.match(/class="so-date-material-row(?: so-date-material-row--actions)?"/g)||[]).length,2);
 });
 
 
