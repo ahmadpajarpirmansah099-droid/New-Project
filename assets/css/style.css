@@ -12016,17 +12016,24 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .so-history-tabs button small { color: var(--so-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 #page-stock-opname .so-history-tabs button.is-active { background: var(--ui-lime); border-color: var(--ui-lime-strong); }
 .so-history { list-style: none; padding: 0; margin: 0; min-width: 0; }
-.so-history-panel > .so-history { margin-top: 12px; }
+.so-history-panel {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ui-line);
+}
+.so-history-panel > .so-history { margin-top: 0; }
 .so-history-date {
   min-width: 0;
-  margin: 0 0 12px;
-  padding: 14px 16px;
-  background: var(--ui-surface);
-  border: 1px solid var(--ui-line);
-  border-radius: var(--ui-radius-card);
-  box-shadow: var(--ui-shadow-card);
+  margin: 0;
+  padding: 8px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--ui-line);
+  border-radius: 0;
+  box-shadow: none;
 }
-.so-history-date:has(> details[open]) { border-color: var(--ui-lime-strong); }
+.so-history > .so-history-date:last-child { border-bottom: 0; }
+.so-history-date:has(> details[open]) { border-bottom-color: var(--ui-lime-strong); }
 .so-history-date > details { min-width: 0; }
 .so-history summary { min-height: 44px; padding: 10px 0; cursor: pointer; font-weight: 600; }
 .so-history-date > details > summary, .so-history-compact-details > summary, .so-sales-menu > summary {
@@ -12204,7 +12211,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .so-history .so-result-item > summary { min-height: 44px; cursor: pointer; }
 .so-history .so-result-total { font-variant-numeric: tabular-nums; }
 @media (max-width: 420px) {
-  .so-history-date { padding: 12px; }
+  .so-history-date { padding: 8px 0; }
   .so-history-date > details > summary { font-size: 15px; }
   .so-history-transaction { grid-template-columns: minmax(0,1fr); }
   .so-history .so-date-material-row,
