@@ -12084,8 +12084,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .so-history-tag.is-void { background: var(--ui-surface-soft); color: var(--ui-muted); }
 .so-history details { font-size: 13px; line-height: 1.6; }
 .so-history-compact-details > summary { padding-inline: 4px; }
-.so-history-compact-name { flex: 1 1 auto; min-width: 0; font-weight: 700;   font-size: 13px;
-}
+.so-history-compact-name { flex: 1 1 auto; min-width: 0; font-size: 13px; font-weight: 700; }
 .so-history-compact-meta, .so-history-compact-cue { color: var(--ui-muted); font-size: 11px; }
 .so-history-compact-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .so-history-compact-meta:empty { display: none; }
