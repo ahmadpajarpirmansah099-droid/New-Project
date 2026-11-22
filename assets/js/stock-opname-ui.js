@@ -173,9 +173,10 @@
   if(existing&&saved?.id!==existing)service.clearDraft(kind);
   if(saved&&!existing){
    form=saved;draftSaved=true;const recovered=restoreCorrectionCounts(form);
-   notice=recovered?'Draft Stock Opname dipulihkan; kolom yang kosong diisi dari stok fisik opname tersimpan. Periksa sebelum menyelesaikan.':'Draft '+labels[kind]+' dipulihkan. Lanjutkan isian.';
+   notice=recovered?'Draft Stock Opname dipulihkan; kolom yang kosong diisi dari stok fisik opname tersimpan. Periksa sebelum menyelesaikan.':kind==='receipt'?'Draft Barang Masuk dipulihkan; tanggal diterima diatur ke hari ini.':'Draft '+labels[kind]+' dipulihkan. Lanjutkan isian.';
    if(kind==='initial'&&period()?.status==='opening_pending')form.start=form.end=period().start;
-   if(recovered)snapshot();
+   if(kind==='receipt'&&!existing)form.end=today();
+   if(recovered||kind==='receipt'&&!existing)snapshot();
    if(form.target)targetRows=await service.targetCatalog(form.target);
    historyKind=kind;historyLimit=10;render();return true;
   }
