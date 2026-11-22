@@ -479,12 +479,18 @@ test('history card styling and transaction evidence panel use the requested clas
   assert.match(historyBlock, /\.so-history-date\s*\{[^}]*background:\s*var\(--ui-surface\)/s);
   assert.match(historyBlock, /\.so-history-date:has\(> details\[open\]\)/);
   assert.match(historyBlock, /\.so-history-category-chip/);
-  assert.match(historyBlock, /\.so-history-originals\s*\{[^}]*border:\s*1px dashed var\(--ui-line\)/s);
-  assert.match(source, /class="so-history-originals"/);
-  assert.match(source, /class="so-history-original-list"/);
-  assert.match(source, /class="so-history-original"/);
+  assert.match(historyBlock, /\.so-history-transactions\s*\{[^}]*border-top:\s*1px solid var\(--ui-line\)/s);
+  assert.match(source, /class="so-history-transactions"/);
+  assert.match(source, /class="so-history-transaction"/);
+  assert.match(source, /class="so-history-transaction-copy"/);
+  assert.doesNotMatch(source, /Transaksi per bukti/);
+  assert.match(source, /data-so-action="void"/);
   assert.match(source, /class="so-history-category-chip"/);
   assert.match(source, /Tampilkan tanggal sebelumnya/);
+  assert.match(historyBlock, /\.so-history-date > details > summary\s*\{[^}]*font: 800 16px\/1\.35/);
+  assert.match(historyBlock, /\.so-history \.so-date-material-row span\s*\{[^}]*font-size: 13px/);
+  assert.match(historyBlock, /\.so-history \.so-opening-lines > div\s*\{[^}]*font-size: 13px/);
+  assert.match(historyBlock, /\.so-history \.so-date-material-category h4\.so-history-category-chip\s*\{[^}]*font-size: 10px/);
 });
 
 test('history highlights expense outflows and consumed Sales ingredients in red', async () => {
@@ -524,7 +530,9 @@ test('daily receipt history shows today first and loads older dates in order', a
   assert.match(html, /class="so-history-date"><details open>/);
   assert.match(html, /<span>23 November 2026<\/span>/);
   assert.match(html, /Susu<\/span><strong>78 ML/);
-  assert.match(html, /so-history-originals/);
+  assert.match(html, /so-history-transaction/);
+  assert.match(html, /so-history-transaction-copy/);
+  assert.doesNotMatch(html, /Transaksi per bukti/);
   assert.match(html, /data-so-action="void"/);
   assert.doesNotMatch(html, /<span>22 November 2026<\/span>/);
   assert.match(html, /Tampilkan tanggal sebelumnya/);
