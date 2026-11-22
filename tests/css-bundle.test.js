@@ -37,7 +37,8 @@ test('wide desktop dashboard queue aligns with the summary cards and scrolls int
   const css = read('assets/css/style.css');
   const rule = css.slice(css.lastIndexOf('/* DESKTOP — cap active queue height'));
   assert.match(rule, /@media \(min-width: 1150px\)/);
-  assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*height: 324px/s);
-  assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*max-height: 324px/s);
+  assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*grid-row: 2 \/ 4/s);
+  assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*height: calc\(100% \+ 15px\)/s);
+  assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*margin-bottom: -15px/s);
   assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*overflow-y: auto/s);
 });
