@@ -340,8 +340,8 @@
  }
  function quantityLines(rows,displayQty=row=>row.qty){
   return `<div class="so-opening-lines">${rows.map(row=>{
-   const qty=displayQty(row);
-   return `<div><span>${e(row.name||row.key)}</span><strong class="${Number(qty)<0?'is-negative':''}">${number(qty)} ${e(row.unit||'')}</strong></div>`;
+   const qty=displayQty(row),negative=Number(row.qty)<0||Number(qty)<0;
+   return `<div><span>${e(row.name||row.key)}</span><strong class="${negative?'is-negative':''}">${number(qty)} ${e(row.unit||'')}</strong></div>`;
   }).join('')}</div>`;
  }
  function salesHistoryRows(doc){
@@ -411,7 +411,7 @@
  function materialHistoryByDate(dates,expense){
   return dates.map(([date,entries],index)=>{
    const materials=materialTotals(entries,expense);
-   const row=m=>`<div class="so-date-material-row"><span>${e(m.name)}${expense&&m.inbound?'<small>Masuk / penyesuaian</small>':''}</span><strong>${number(m.qty)} ${e(m.unit)}</strong></div>`;
+   const row=m=>`<div class="so-date-material-row"><span>${e(m.name)}${expense&&m.inbound?'<small>Masuk / penyesuaian</small>':''}</span><strong class="${expense&&!m.inbound?'is-negative':''}">${number(m.qty)} ${e(m.unit)}</strong></div>`;
    let lines;
    if(expense){
     const categories=new Map();
