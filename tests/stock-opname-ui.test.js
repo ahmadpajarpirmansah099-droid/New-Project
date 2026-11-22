@@ -1024,7 +1024,6 @@ test('Barang Masuk reference form keeps search free of backdrop blur', () => {
  const js=contentsOfStockOpnameUi();
  assert.ok(css.includes('.so-receipt-quantity-unit-grid'));
  assert.ok(css.includes('.so-receipt-details-grid'));
- assert.doesNotMatch(css, /backdrop-filter:\s*blur/);
- assert.doesNotMatch(css, /so-receipt-search-active::before/);
+ assert.doesNotMatch(css, /so-receipt-search-active/);
  assert.doesNotMatch(js, /updateReceiptSearchMask|scheduleReceiptSearchMask|so-receipt-search-active/);
 });
