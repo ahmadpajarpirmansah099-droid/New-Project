@@ -480,9 +480,9 @@ test('history card styling and transaction evidence panel use the requested clas
   assert.match(historyBlock, /\.so-history-date:has\(> details\[open\]\)/);
   assert.match(historyBlock, /\.so-history-category-chip/);
   assert.match(historyBlock, /\.so-history-transactions\s*\{[^}]*border-top:\s*1px solid var\(--ui-line\)/s);
-  assert.match(historyBlock, /#page-stock-opname \\.so-history-actions \\.so-history-link\\s*\\{[^}]*background:\\s*transparent;[^}]*border:\\s*0;/s);
-  assert.match(historyBlock, /#page-stock-opname \\.so-history-link::after/);
-  assert.match(historyBlock, /#page-stock-opname \\.so-history-link:hover::after/);
+  assert.match(historyBlock, /#page-stock-opname \.so-history-actions \.so-history-link\s*\\{[^}]*background:\s*transparent;[^}]*border:\s*0;/s);
+  assert.match(historyBlock, /#page-stock-opname \.so-history-link::after/);
+  assert.match(historyBlock, /#page-stock-opname \.so-history-link:hover::after/);
   assert.match(source, /class="so-history-transactions"/);
   assert.match(source, /class="so-history-transaction"/);
   assert.match(source, /class="so-history-transaction-copy"/);
