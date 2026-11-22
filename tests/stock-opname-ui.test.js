@@ -1024,7 +1024,7 @@ test('Barang Masuk reference form uses the two-column quantity and unit row with
  const js=contentsOfStockOpnameUi();
  assert.match(css, /\.so-receipt-quantity-unit-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0,0\.8fr\) minmax\(0,1\.2fr\)/);
  assert.match(css, /\.so-receipt-details-grid\s*\{[^}]*display:\s*contents/);
- assert.match(css, /\.so-receipt-details-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0,0\.82fr\) minmax\(0,0\.95fr\) minmax\(0,1\.35fr\) minmax\(0,1\.15fr\)/);
+ assert.match(css, /@media \(min-width: 900px\) \{[\s\S]*?\.so-receipt-details-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0,0\.82fr\) minmax\(0,0\.95fr\) minmax\(0,1\.35fr\) minmax\(0,1\.15fr\)/);
  assert.match(css, /\.so-receipt-unit-control > \.so-unit-picker \{ display: none; \}/);
  assert.match(css, /\.so-receipt-reference-field > input,[\s\S]*?background:\s*var\(--ui-surface\)/);
  assert.match(css, /body\.so-receipt-search-active::before\s*\{[^}]*backdrop-filter:\s*blur\(2px\)/);
