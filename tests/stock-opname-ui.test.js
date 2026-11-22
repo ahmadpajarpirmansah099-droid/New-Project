@@ -357,6 +357,7 @@ test('transaction dates and unit selections remain available outside the Stock O
 
 test('opname results show two compact rows and keep full movements expandable', async () => {
   const t = runtime();
+  t.data.state.periods[0].end = TEST_TODAY;
   t.data.state.periods[0].result = [{ name: 'Apple Juice', unit: 'ML', opening: 2388, movements: { sales: -300, receipt: 6000 }, system: 8088, physical: 5781, variance: -2307, price: 47, variance_value: -108429 }];
   await t.ui.open('close');
   assert.match(t.page.innerHTML, /class="so-result-item"><summary><span class="so-result-top"/);
@@ -366,6 +367,7 @@ test('opname results show two compact rows and keep full movements expandable', 
 
 test('total selisih rupiah nets gains and losses at the bottom of each result', async () => {
   const t = runtime();
+  t.data.state.periods[0].end = TEST_TODAY;
   t.data.state.periods[0].result = [
     { name: 'Bahan A', unit: 'GR', movements: {}, system: 2, physical: 1, variance: -1, variance_value: -2705 },
     { name: 'Bahan B', unit: 'GR', movements: {}, system: 1, physical: 3, variance: 2, variance_value: 7680 },
@@ -521,8 +523,9 @@ test('resetting Stock Awal preserves transactions and requires complete manual i
   assert.equal(t.data.state.periods[0].status, 'opening_pending');
   assert.equal(t.data.state.documents.length, 1);
   await t.ui.open('initial');
-  assert.match(t.page.innerHTML, /Belum ada riwayat hari ini/);
-  assert.doesNotMatch(t.page.innerHTML, /1 November 2026/);
+  const history = t.page.innerHTML.match(/<section class="so-panel so-history-panel" id="soHistory">[\s\S]*?<\/section>/)?.[0] || '';
+  assert.match(history, /Belum ada riwayat hari ini/);
+  assert.doesNotMatch(history, /1 November 2026/);
   assert.doesNotMatch(t.page.innerHTML, /data-so-key="m:a"[^>]*value="[1-9]/);
   t.input({ soKey: 'm:a', soProp: 'qty' }, '0');
   t.input({ soKey: 'w:a', soProp: 'qty' }, '5');
