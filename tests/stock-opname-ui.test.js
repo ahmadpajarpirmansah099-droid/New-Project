@@ -176,11 +176,14 @@ test('Stock Opname period card gives secondary status, clear month controls, and
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?so-transaction-actions \.so-actions > button \{ transition: none/);
 });
 
-test('Barang Masuk strips stray pipe characters from a restored transaction date', async () => {
+test('Barang Masuk cleans restored date values and defaults the received date to today', async () => {
   const t = runtime();
   t.seedDraft({ kind: 'receipt', end: '2026-11-19|', start: '2026-11-19|', counts: {}, receiptItems: [], note: '', touched: true });
   await t.ui.open('receipt');
-  assert.match(t.page.innerHTML, /19 November 2026/);
+  const expectedToday = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  const expectedLabel = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+  assert.equal(t.draft('receipt').end, expectedToday);
+  assert.match(t.page.innerHTML, new RegExp(expectedLabel));
   assert.equal(t.page.innerHTML.includes('2026|'), false);
 });
 
