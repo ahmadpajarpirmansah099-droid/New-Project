@@ -13280,3 +13280,13 @@ button, input, select, textarea { font-family: var(--ui-font); }
     margin-left: 0;
   }
 }
+
+
+/* GLOBAL FORM FIELDS — use clean surface backgrounds consistently across features. */
+html:not([data-desktop-theme="dark"]) :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,
+  textarea
+) {
+  background-color: var(--ui-surface, #fff);
+}
