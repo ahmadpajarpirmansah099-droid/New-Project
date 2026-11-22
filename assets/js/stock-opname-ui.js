@@ -742,7 +742,7 @@ ${transactionActions}
   if(dropdown){ev.preventDefault();dropdown.open=false;dropdown.querySelector('summary')?.focus();}
  });
  function updateReceiptSearchMask(){
-  const input=document.querySelector('[data-so-receipt-search]:focus');
+  const input=document.querySelector?.('[data-so-receipt-search]:focus');
   const surface=input?.closest('.so-receipt-search');
   const body=document.body;
   if(!surface||!body)return;
