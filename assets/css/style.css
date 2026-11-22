@@ -11931,7 +11931,8 @@ button, input, select, textarea { font-family: var(--ui-font); }
 #page-stock-opname :focus-visible { outline: 2px solid var(--ui-olive); outline-offset: 3px; }
 #page-stock-opname input:focus, #page-stock-opname select:focus { border-color: #858a94; box-shadow: none; }
 #page-stock-opname input:focus-visible, #page-stock-opname select:focus-visible { outline: 2px solid #858a94; outline-offset: 2px; }
-#page-stock-opname button.so-picker-trigger { display: flex; justify-content: space-between; gap: 8px; width: 100%; text-align: left; font-weight: 600; }
+#page-stock-opname button.so-picker-trigger { display: flex; justify-content: space-between; gap: 8px; width: 100%; text-align: left; font-weight: 600; cursor: pointer; user-select: none; -webkit-user-select: none; }
+#page-stock-opname button.so-picker-trigger > span { cursor: pointer; user-select: none; -webkit-user-select: none; }
 .so-picker-trigger span:first-child { min-width: 0; overflow-wrap: anywhere; }
 #page-stock-opname .so-picker-trigger:disabled { background: var(--ui-surface-soft); box-shadow: none; color: var(--so-muted); }
 .so-picker-chevron { width: 8px; height: 8px; flex: 0 0 auto; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); opacity: .7; }
