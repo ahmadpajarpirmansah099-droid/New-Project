@@ -4318,6 +4318,19 @@ textarea::-webkit-input-placeholder {
   box-shadow:0 4px 10px rgba(190,91,133,.14),inset 0 0 0 1px rgba(190,91,133,.08);
 }
 
+#sheet .smoking-seg.has-validation-error button {
+  border-color:#d45b65!important;
+}
+#sheet .field-validation-message {
+  margin:8px 0 0;
+  color:#bd3545;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.5;
+}
+#sheet .field-validation-message[hidden] { display:none; }
+
+
 /* Fill the spare guest-detail grid cell with the table-move action. */
 .detail-move-table {
   width:100%;
