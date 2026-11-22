@@ -5,14 +5,12 @@ const vm = require('node:vm');
 const fs = require('node:fs');
 
 const TEST_TODAY = '2026-11-23';
-const TEST_TODAY_LABEL = '23 November 2026';
 function dateOffset(days) {
   const date = new Date(TEST_TODAY + 'T12:00:00Z');
   date.setUTCDate(date.getUTCDate() - days);
   return date.toISOString().slice(0, 10);
 }
 const TEST_YESTERDAY = dateOffset(1);
-const TEST_YESTERDAY_LABEL = '22 November 2026';
 const fixedNow = Date.parse('2026-11-22T17:00:00.000Z');
 class FixedDate extends Date {
   constructor(...args) { super(...(args.length ? args : [fixedNow])); }
@@ -711,16 +709,16 @@ test('daily expense history groups materials by category without original transa
  ];
  await t.ui.open('expense');
  const html=t.page.innerHTML;
- assert.match(html,/8 November 2026/);
+ assert.match(html,/23 November 2026/);
  assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,3);
  assert.match(html,/Susu<\/span><strong>2 ML/);
  assert.match(html,/Susu<\/span><strong>3 ML/);
  assert.doesNotMatch(html,/Susu<\/span><strong>5 ML/);
- assert.match(html,/<h4>Kalibrasi<\/h4>/);
- assert.match(html,/<h4>Lainnya<\/h4>/);
+ assert.match(html,/<h4 class="so-history-category-chip">Kalibrasi<\/h4>/);
+ assert.match(html,/<h4 class="so-history-category-chip">Lainnya<\/h4>/);
  assert.match(html,/Gula<\/span><strong>100 GR/);
  assert.match(html,/data-so-action="void"/);
- assert.doesNotMatch(html,/<h4>QC<\/h4>/);
+ assert.doesNotMatch(html,/<h4 class="so-history-category-chip">QC<\/h4>/);
 });
 
 test('daily receipt history totals repeated materials without original records',async()=>{
@@ -731,7 +729,7 @@ test('daily receipt history totals repeated materials without original records',
  ];
  await t.ui.open('receipt');
  const html=t.page.innerHTML;
- assert.match(html,/8 November 2026/);
+ assert.match(html,/23 November 2026/);
  assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
  assert.match(html,/Susu<\/span><strong>150 ML/);
  assert.match(html,/Gula<\/span><strong>20 GR/);
@@ -769,8 +767,8 @@ test('expense material totals remain separated by category, including repeated m
  ];
  await t.ui.open('expense');
  const html=t.page.innerHTML;
- assert.match(html,/<h4>QC<\/h4>/);
- assert.match(html,/<h4>Waste<\/h4>/);
+ assert.match(html,/<h4 class="so-history-category-chip">QC<\/h4>/);
+ assert.match(html,/<h4 class="so-history-category-chip">Waste<\/h4>/);
  assert.match(html,/Susu<\/span><strong>6 ML/);
  assert.match(html,/Susu<\/span><strong>5 ML/);
  assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
