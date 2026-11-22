@@ -12129,6 +12129,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   #page-stock-opname button:hover:not(:disabled) { background: var(--ui-surface-soft); border-color: #c8d1ba; }
   #page-stock-opname button.so-primary:hover:not(:disabled),
   #page-stock-opname .so-history-tabs button.is-active:hover { background: var(--ui-lime-strong); }
+  #page-stock-opname .so-unit-options button:hover:not(:disabled) { background: var(--ui-lime-soft); }
   #page-stock-opname .so-receipt-reference-form .so-receipt-clear:hover:not(:disabled)::before {
     background: #fbe3df;
   }
@@ -13101,7 +13102,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 }
 #page-stock-opname .so-receipt-reference-form :is(
   input, textarea, .so-picker-trigger, .so-unit-dropdown > summary,
-  .so-receipt-clear, .so-receipt-search-results button,
+  .so-unit-options button, .so-receipt-clear, .so-receipt-search-results button,
   .so-receipt-extra-head button, .so-receipt-reference-footer button
 ):focus-visible {
   outline: 2px solid var(--ui-olive);
