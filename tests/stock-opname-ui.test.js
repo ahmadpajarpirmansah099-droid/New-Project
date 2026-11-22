@@ -1015,7 +1015,7 @@ test('Stock Opname transaction icons are aligned and sized consistently', () => 
 test('Barang Masuk reference form uses the two-column quantity and unit row without gray cards', () => {
  const css=contentsOfStockOpnameStyles();
  assert.match(css, /\.so-receipt-quantity-unit-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0,1fr\) minmax\(0,1fr\)/);
- assert.match(css, /\.so-receipt-reference-field > input,[\s\S]*?background:\s*#f4eedc/);
+ assert.match(css, /\.so-receipt-reference-field > input,[\s\S]*?background:\s*var\(--ui-surface\)/);
  assert.match(css, /\.so-receipt-reference-form\.is-receipt-searching::before\s*\{[^}]*backdrop-filter:\s*blur\(2px\)/);
  assert.match(css, /\.so-receipt-reference-footer \.so-actions\s*\{[^}]*grid-template-columns:\s*repeat\(2,minmax\(0,1fr\)\)/);
 });
