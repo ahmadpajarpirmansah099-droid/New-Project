@@ -543,8 +543,13 @@ test('Barang Masuk matches the compact reference form and keeps item quantity, u
  t.input({soReceiptSearch:''},'su');
  assert.match(t.searchResults.innerHTML,/Susu/);
  await t.click('receipt-add',{soItemKey:'m:a'});
- assert.match(t.page.innerHTML,/readonly/);
+ assert.match(t.page.innerHTML,/data-so-selected-key="m:a"/);
+ assert.doesNotMatch(t.page.innerHTML,/readonly/);
  assert.match(t.page.innerHTML,/value="Susu"/);
+ t.input({soReceiptSearch:'',soSelectedKey:'m:a'},'su');
+ assert.equal(t.draft('receipt').counts['m:a'],undefined);
+ assert.match(t.searchResults.innerHTML,/Susu/);
+ await t.click('receipt-add',{soItemKey:'m:a'});
  assert.match(t.page.innerHTML,/data-so-prop="qty" aria-label="Barang Masuk Susu"/);
  assert.match(t.page.innerHTML,/aria-label="Satuan dasar Susu"/);
  t.input({soKey:'m:a',soProp:'qty'},'3');
@@ -1014,8 +1019,9 @@ test('Stock Opname transaction icons are aligned and sized consistently', () => 
 
 test('Barang Masuk reference form uses the two-column quantity and unit row without gray cards', () => {
  const css=contentsOfStockOpnameStyles();
- assert.match(css, /\.so-receipt-quantity-unit-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0,1fr\) minmax\(0,1fr\)/);
+ assert.match(css, /\.so-receipt-quantity-unit-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0,0\.8fr\) minmax\(0,1\.2fr\)/);
+ assert.match(css, /\.so-receipt-unit-control > \.so-unit-picker \{ display: none; \}/);
  assert.match(css, /\.so-receipt-reference-field > input,[\s\S]*?background:\s*var\(--ui-surface\)/);
- assert.match(css, /\.so-receipt-reference-form\.is-receipt-searching::before\s*\{[^}]*backdrop-filter:\s*blur\(2px\)/);
+ assert.match(css, /body\.so-receipt-search-active::before\s*\{[^}]*backdrop-filter:\s*blur\(2px\)/);
  assert.match(css, /\.so-receipt-reference-footer \.so-actions\s*\{[^}]*grid-template-columns:\s*repeat\(2,minmax\(0,1fr\)\)/);
 });

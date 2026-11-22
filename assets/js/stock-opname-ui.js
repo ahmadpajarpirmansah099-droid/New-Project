@@ -285,7 +285,7 @@
   const unitOptions=units.map(u=>'<button type="button" data-so-action="unit-option" data-so-key="'+e(selected.key)+'" data-so-value="'+e(u.unit)+'" aria-pressed="'+(u.unit===(v.unit||selected.unit))+'">'+e(u.unit)+'</button>').join('');
   const unitControl=selected?'<div class="so-receipt-unit-control"><details class="so-unit-dropdown" data-so-unit-key="'+e(selected.key)+'"><summary aria-label="Satuan dasar '+e(selected.name)+'"><span>'+e(v.unit||selected.unit)+'</span><span class="so-picker-chevron" aria-hidden="true"></span></summary><div class="so-unit-options">'+unitOptions+'</div></details><span class="so-unit-picker">'+pickerButton(v.unit||selected.unit,'data-so-key="'+e(selected.key)+'" data-so-title="Pilih satuan" aria-label="Satuan dasar '+e(selected.name)+'"',units.map(u=>({value:u.unit,label:u.unit})))+'</span></div>':'<button type="button" class="so-receipt-unit-placeholder" disabled>Pilih satuan</button>';
   const searchValue=selected?selected.name:receiptQuery;
-  const receiptSearch='<div class="so-receipt-reference-field so-receipt-search"><label for="soReceiptSearch">Bahan baku</label><div class="so-receipt-search-input-wrap"><input id="soReceiptSearch" type="search" data-so-receipt-search placeholder="Cari nama barang..." aria-label="Cari nama barang" autocomplete="off" aria-controls="soReceiptResults" aria-autocomplete="list" value="'+e(searchValue)+'" '+(selected?'readonly':'')+'>'+(selected?'<button type="button" data-so-action="receipt-remove" data-so-item-key="'+e(selected.key)+'" aria-label="Ganti bahan baku" class="so-receipt-clear">×</button>':'')+'</div><div class="so-receipt-search-results" id="soReceiptResults" data-so-receipt-results role="listbox" aria-label="Hasil pencarian barang">'+receiptSuggestions(receiptQuery)+'</div></div>';
+  const receiptSearch='<div class="so-receipt-reference-field so-receipt-search"><label for="soReceiptSearch">Bahan baku</label><div class="so-receipt-search-input-wrap"><input id="soReceiptSearch" type="search" data-so-receipt-search placeholder="Cari nama barang..." aria-label="Cari nama barang" autocomplete="off" aria-controls="soReceiptResults" aria-autocomplete="list" value="'+e(searchValue)+'" '+(selected?'data-so-selected-key="'+e(selected.key)+'"':'')+'>'+(selected?'<button type="button" data-so-action="receipt-remove" data-so-item-key="'+e(selected.key)+'" aria-label="Ganti bahan baku" class="so-receipt-clear">×</button>':'')+'</div><div class="so-receipt-search-results" id="soReceiptResults" data-so-receipt-results role="listbox" aria-label="Hasil pencarian barang">'+receiptSuggestions(receiptQuery)+'</div></div>';
   const quantity='<label class="so-receipt-reference-field"><span>Jumlah</span><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(selected?.key||'')+'" data-so-prop="qty" aria-label="Barang Masuk '+e(selected?.name||'')+'" value="'+e(v.qty??'')+'" placeholder="" '+(!selected||selected.error?'disabled':'')+'></label>';
   const unit='<label class="so-receipt-reference-field"><span>Satuan</span>'+unitControl+'</label>';
   const invoice='<label class="so-receipt-reference-field so-receipt-invoice-field"><span>Harga invoice total (opsional)</span><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(selected?.key||'')+'" data-so-prop="invoice_total" aria-label="Harga invoice total" value="'+e(v.invoice_total??'')+'" placeholder="Kosongkan jika tidak ada harga" '+(!selected||selected.error?'disabled':'')+'></label>';
@@ -686,7 +686,7 @@ ${transactionActions}
    if(name==='receipt-add'&&form?.kind==='receipt'){
     const key=el.dataset.soItemKey,row=catalog().find(r=>r.key===key&&r.key.startsWith('m:')&&!r.error);
     if(row&&!receiptItems().includes(key)){
-     receiptItems().push(key);
+     receiptItems().unshift(key);
      form.counts[key]={...form.counts[key],unit:form.counts[key]?.unit||row.unit};
      form.touched=true;snapshot();receiptQuery='';
     }
@@ -695,7 +695,7 @@ ${transactionActions}
    if(name==='receipt-remove'&&form?.kind==='receipt'){
     const key=el.dataset.soItemKey;
     form.receiptItems=receiptItems().filter(item=>item!==key);
-    delete form.counts[key];form.touched=true;snapshot();return;
+    delete form.counts[key];receiptQuery='';form.touched=true;snapshot();return;
    }
    if(name==='open'){await open(el.dataset.soKind);return;}
    if(name==='cancel'){if(snapshot())form=null;return;}
@@ -742,10 +742,17 @@ ${transactionActions}
   if(dropdown){ev.preventDefault();dropdown.open=false;dropdown.querySelector('summary')?.focus();}
  });
  document.addEventListener('focusin',ev=>{
-  if(ev.target?.matches?.('[data-so-receipt-search]'))page()?.querySelector('.so-form')?.classList.add('is-receipt-searching');
+  if(ev.target?.matches?.('[data-so-receipt-search]')){
+   page()?.querySelector('.so-form')?.classList.add('is-receipt-searching');
+   document.body?.classList.add('so-receipt-search-active');
+   if(ev.target.dataset.soSelectedKey)ev.target.select?.();
+  }
  });
  document.addEventListener('focusout',ev=>{
-  if(ev.target?.matches?.('[data-so-receipt-search]'))page()?.querySelector('.so-form')?.classList.remove('is-receipt-searching');
+  if(ev.target?.matches?.('[data-so-receipt-search]')){
+   page()?.querySelector('.so-form')?.classList.remove('is-receipt-searching');
+   document.body?.classList.remove('so-receipt-search-active');
+  }
  });
  document.addEventListener('pointerdown',ev=>{
   if(ev.target?.closest?.('[data-so-action="receipt-add"]'))ev.preventDefault();
@@ -758,6 +765,13 @@ ${transactionActions}
    if(results)results.innerHTML=expenseSuggestions(expenseQuery);return;
   }
   if(el.dataset.soReceiptSearch!==undefined&&form.kind==='receipt'){
+   const selectedKey=el.dataset.soSelectedKey;
+   if(selectedKey){
+    form.receiptItems=receiptItems().filter(item=>item!==selectedKey);
+    delete form.counts[selectedKey];
+    delete el.dataset.soSelectedKey;
+    form.touched=true;snapshot();
+   }
    receiptQuery=el.value;
    const results=el.closest?.('.so-receipt-search')?.querySelector('[data-so-receipt-results]')||el.parentElement?.querySelector('[data-so-receipt-results]');
    if(results)results.innerHTML=receiptSuggestions(receiptQuery);
