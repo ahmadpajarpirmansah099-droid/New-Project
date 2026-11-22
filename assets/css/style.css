@@ -12313,7 +12313,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   #page-stock-opname .so-unit-options { position: absolute; top: calc(100% + 4px); left: 0; z-index: 21; width: max(100%, 130px); max-height: 220px; overflow-y: auto; padding: 5px; border: 1px solid var(--so-line); border-radius: 12px; background: var(--ui-surface); box-shadow: var(--ui-shadow-card); }
   #page-stock-opname .so-unit-options button { display: flex; justify-content: flex-start; width: 100%; min-height: 40px; padding: 8px 10px; border: 0; border-radius: 8px; box-shadow: none; text-align: left; }
   #page-stock-opname .so-unit-options button[aria-pressed="true"] { background: var(--ui-lime); }
-  
+
 }
 #page-stock-opname .so-excel-import {
   position: relative; display: inline-flex; align-items: center; justify-content: center;
