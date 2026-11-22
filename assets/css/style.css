@@ -13234,3 +13234,32 @@ button, input, select, textarea { font-family: var(--ui-font); }
     transform: translateY(-50%);
   }
 }
+
+
+/* STOCK OPNAME — action button hover matching the desktop sidebar interaction. */
+@media (min-width: 900px) and (hover: hover) and (pointer: fine) {
+  #page-stock-opname :is(.so-overview .so-actions, .so-transaction-actions .so-actions, .so-form-footer .so-actions) > button {
+    position: relative;
+    transform-origin: center;
+    transition: background-color .18s ease, color .18s ease, border-color .18s ease, transform .18s cubic-bezier(.2,.75,.25,1), box-shadow .18s ease, outline-color .18s ease;
+  }
+  #page-stock-opname :is(.so-overview .so-actions, .so-transaction-actions .so-actions, .so-form-footer .so-actions) > button:not(:disabled):not(.so-primary):hover {
+    background: var(--ui-lime-soft);
+    border-color: var(--ui-lime-strong);
+    color: var(--ui-ink);
+    transform: translateY(-2px) scale(1.06);
+    box-shadow: 0 8px 19px rgba(78,96,38,.22);
+    outline: 1px solid rgba(137,155,77,.45);
+  }
+  #page-stock-opname :is(.so-overview .so-actions, .so-transaction-actions .so-actions, .so-form-footer .so-actions) > button.so-primary:not(:disabled):hover {
+    background: var(--ui-lime-strong);
+    border-color: var(--ui-lime-strong);
+    color: var(--ui-ink);
+    transform: translateY(-2px) scale(1.06);
+    box-shadow: 0 8px 20px rgba(78,96,38,.24);
+    outline: 1px solid rgba(119,143,48,.55);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #page-stock-opname :is(.so-overview .so-actions, .so-transaction-actions .so-actions, .so-form-footer .so-actions) > button { transition: none !important; }
+}
