@@ -13435,3 +13435,23 @@ html:not([data-desktop-theme="dark"]) :is(
 html:not([data-desktop-theme="dark"]) {
   --ui-surface-soft: #fff;
 }
+
+
+/* Keep history actions attached to the material row they affect. */
+.so-history .so-date-material-row--actions {
+  grid-template-columns: minmax(0,1fr) auto auto;
+  align-items: center;
+}
+.so-history .so-date-material-row--actions .so-history-actions {
+  justify-content: flex-end;
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .so-history .so-date-material-row--actions {
+    grid-template-columns: minmax(0,1fr) auto;
+  }
+  .so-history .so-date-material-row--actions .so-history-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}
