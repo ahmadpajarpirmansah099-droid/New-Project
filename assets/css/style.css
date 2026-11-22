@@ -12104,8 +12104,50 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .so-opening-lines strong { font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
 .so-history .so-opening-lines strong.is-negative,
 .so-history .so-date-material-row strong.is-negative { color: var(--so-shortage); font-weight: 800; }
-.so-history-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0 8px; }
-#page-stock-opname .so-history-actions button { padding: 7px 10px; font-size: 11px; box-shadow: none; }
+.so-history-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 0; }
+#page-stock-opname .so-history-actions .so-history-link {
+  position: relative;
+  appearance: none;
+  min-height: 0;
+  margin: 0;
+  padding: 0 0 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ui-ink);
+  font: 600 13.5px/1.4 var(--ui-font);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+#page-stock-opname .so-history-link::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1.5px;
+  background: currentColor;
+  content: '';
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 260ms cubic-bezier(.16,1,.3,1);
+}
+#page-stock-opname .so-history-link:hover::after,
+#page-stock-opname .so-history-link:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+#page-stock-opname .so-history-link:focus-visible {
+  outline: 2px solid var(--ui-lime-strong);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+#page-stock-opname .so-history-link:disabled { opacity: .55; cursor: wait; }
+@media (prefers-reduced-motion: reduce) {
+  #page-stock-opname .so-history-link::after { transition: none; }
+}
 .so-history-more { padding-top: 14px; text-align: center; }
 .so-empty { padding: 24px 0 8px; color: var(--ui-muted); text-align: center; font-size: 13px; }
 .so-empty strong { font-weight: 700; }
