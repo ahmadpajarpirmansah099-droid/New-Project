@@ -411,7 +411,7 @@
  function materialHistoryByDate(dates,expense){
   return dates.map(([date,entries],index)=>{
    const materials=materialTotals(entries,expense);
-   const row=m=>`<div class="so-date-material-row"><span>${e(m.name)}${expense&&m.inbound?'<small>Masuk / penyesuaian</small>':''}</span><strong class="${expense&&!m.inbound?'is-negative':''}">${number(m.qty)} ${e(m.unit)}</strong></div>`;
+   const row=m=>`<div class="so-date-material-row"><span>${e(m.name)}${expense&&m.inbound?'<small>Masuk / penyesuaian</small>':''}</span><strong${expense&&!m.inbound?' class="is-negative"':''}>${number(m.qty)} ${e(m.unit)}</strong></div>`;
    let lines;
    if(expense){
     const categories=new Map();
