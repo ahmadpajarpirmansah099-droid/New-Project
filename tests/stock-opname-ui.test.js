@@ -21,6 +21,8 @@ function runtime() {
   const liveForm={querySelector(selector){return ({'[data-so-expense-toolbar]':parts.toolbar,'[data-so-expense-rows]':parts.rows,'[data-so-expense-search]':parts.input,'[data-so-expense-results]':parts.results})[selector]||null;}};
   const page = { get innerHTML(){return pageHtml;}, set innerHTML(value){pageHtml=value;pageRenders++;}, contains: () => true, querySelector: selector => selector==='.so-form'&&partsEnabled?liveForm:selector==='#soHistory' && pageHtml.includes('id="soHistory"') ? history : null };
   const searchResults = { innerHTML: '' };
+  const searchContainerClasses = new Set();
+  const searchContainer = { classList: { toggle(name, force) { if (force) searchContainerClasses.add(name); else searchContainerClasses.delete(name); }, contains(name) { return searchContainerClasses.has(name); } } };
   const drafts = {}, letHolder = { active: null };
   let allowConfirm = true, storageFails = false, writeFails = false;
   const data = {
@@ -90,7 +92,8 @@ function runtime() {
     confirm: value => allowConfirm = value,
     storageFails: value => storageFails = value,
     writeFails: value => writeFails = value,
-    input(dataset, value) { handlers.input({ target: { dataset, value, parentElement: { querySelector: () => searchResults }, closest: () => null } }); },
+    input(dataset, value) { handlers.input({ target: { dataset, value, parentElement: { querySelector: () => searchResults }, closest: selector => selector === '.so-receipt-search' ? searchContainer : null } }); },
+    expenseSearchVisible() { return searchContainer.classList.contains('has-results'); },
     async click(name, dataset = {}) {
       handlers.click({ target: { closest: () => ({ dataset: { soAction: name, ...dataset } }) }, preventDefault() {} });
       await new Promise(resolve => setImmediate(resolve));
@@ -767,6 +770,16 @@ test('feature history is isolated and switching forms preserves each local draft
   await t.click('history-more');
   assert.match(t.page.innerHTML,/Riwayat Produksi WIP/);
   assert.equal(t.writes.length,0);
+});
+
+test('Pengeluaran search results become visible while typing and redundant notices are omitted', async () => {
+ const t=runtime(); await t.ui.open('expense');
+ assert.doesNotMatch(t.page.innerHTML,/Belum ada barang dipilih|Draft lokal tersimpan di perangkat ini/);
+ t.input({soExpenseSearch:''},'su');
+ assert.equal(t.expenseSearchVisible(),true);
+ assert.match(t.searchResults.innerHTML,/data-so-item-key="m:a"/);
+ t.input({soExpenseSearch:''},'');
+ assert.equal(t.expenseSearchVisible(),false);
 });
 
 test('Pengeluaran searches and selects materials and WIP one by one', async () => {
