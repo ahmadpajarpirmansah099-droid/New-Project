@@ -132,9 +132,10 @@
   dialog.addEventListener('click',ev=>{if(ev.target===dialog)dialog.close();});
   return dialog;
  }
- function dateLabel(value){const d=new Date(value+'T12:00:00');return Number.isNaN(d.getTime())?value:new Intl.DateTimeFormat('id-ID',{day:'numeric',month:'long',year:'numeric'}).format(d);}
+ function cleanDateValue(value){return String(value??'').replace(/\|/g,'').trim();}
+ function dateLabel(value){const clean=cleanDateValue(value),d=new Date(clean+'T12:00:00');return Number.isNaN(d.getTime())?clean:new Intl.DateTimeFormat('id-ID',{day:'numeric',month:'long',year:'numeric'}).format(d);}
  function openDatePicker(field){
-  let selected=form[field],cursor=new Date((selected||today())+'T12:00:00');cursor.setDate(1);
+  let selected=cleanDateValue(form[field]);form[field]=selected;let cursor=new Date((selected||today())+'T12:00:00');cursor.setDate(1);
   const draw=dialog=>{
    const year=cursor.getFullYear(),month=cursor.getMonth(),first=(new Date(year,month,1).getDay()+6)%7,days=new Date(year,month+1,0).getDate();
    let cells='';for(let i=0;i<first;i++)cells+='<span class="so-calendar-empty"></span>';
@@ -614,6 +615,7 @@ ${transactionActions}
   const saved=snapshot();if(isPending()&&!['close','initial'].includes(k)){if(saved)notice='Transaksi tersimpan sebagai draft. Konfirmasi Stock Awal, lalu simpan draft ini.';return;}
   const isMove=k==='expense'&&form.category==='Move';
   if(isMove&&!form.target)throw Error('Pilih tujuan Move yang sudah aktif sebelum menyimpan.');
+  form.end=cleanDateValue(form.end);if(k==='sales')form.start=cleanDateValue(form.start);
   const input={id:form.id||undefined,type:k,start:k==='sales'?form.start:form.end,end:form.end,date:form.end,month:k==='close'?period()?.start:undefined,counts,lines,category:k==='expense'?form.category:null,target:isMove?form.target:null,mapping:isMove?Object.entries(form.mapping||{}).map(([source,target])=>({source,target})):[]};
   if(!['initial','close'].includes(k)&&!lines.length)throw Error('Isi minimal satu jumlah lebih dari 0.');
   if(!await confirmStock(k==='close'?'Hitung seluruh transaksi periode ini dan selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal pertama?':k==='receipt'?'Simpan barang masuk ini?':'Simpan transaksi ini?',k==='close'?'Selesaikan opname?':k==='initial'?'Konfirmasi Stock Awal?':k==='receipt'?'Simpan Barang Masuk?':'Simpan transaksi?',k==='close'?'Selesaikan':k==='receipt'?'Simpan Barang Masuk':'Simpan'))return;
