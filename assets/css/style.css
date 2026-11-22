@@ -13290,3 +13290,9 @@ html:not([data-desktop-theme="dark"]) :is(
 ) {
   background-color: var(--ui-surface, #fff);
 }
+
+
+/* GLOBAL LIGHT THEME — remove remaining soft-gray surfaces used by feature panels and table headers. */
+html:not([data-desktop-theme="dark"]) {
+  --ui-surface-soft: #fff;
+}
