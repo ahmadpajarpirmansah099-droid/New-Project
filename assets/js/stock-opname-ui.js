@@ -372,9 +372,13 @@
  function historyDocumentActions(doc,p){
   if(doc.void)return '';
   const id=`data-so-id="${e(doc.id)}"`;
-  const editable=doc.period_id===p?.id&&['active','reopened'].includes(p?.status)&&!['move_in','adjustment_in','adjustment'].includes(doc.type);
-  const actions=editable?button('Edit','edit',id)+button('Batalkan','void',id):'';
-  const adjust=doc.type==='expense'&&doc.category==='Move'?button('Penyesuaian Move','adjust',id):'';
+  const docMonth=String(doc.end||doc.start||'').slice(0,7);
+  const sameMonth=!!docMonth&&docMonth===monthOf(p);
+  const typeLabel=labels[doc.type]||doc.type;
+  const link=(label,action)=>`<button type="button" class="so-history-link" data-so-action="${action}" ${id}${busy?' disabled':''} aria-label="${e(label+' '+typeLabel)}">${e(label)}</button>`;
+  const editable=sameMonth&&['active','reopened'].includes(p?.status)&&!['move_in','adjustment_in','adjustment'].includes(doc.type);
+  const actions=editable?link('Edit','edit')+link('Batalkan','void'):'';
+  const adjust=sameMonth&&p?.status==='active'&&doc.type==='expense'&&doc.category==='Move'?link('Penyesuaian Move','adjust'):'';
   return actions||adjust?`<div class="so-history-actions">${actions}${adjust}</div>`:'';
  }
  function historyDocument(doc,p,original=false){

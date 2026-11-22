@@ -480,6 +480,10 @@ test('history card styling and transaction evidence panel use the requested clas
   assert.match(historyBlock, /\.so-history-date:has\(> details\[open\]\)/);
   assert.match(historyBlock, /\.so-history-category-chip/);
   assert.match(historyBlock, /\.so-history-transactions\s*\{[^}]*border-top:\s*1px solid var\(--ui-line\)/s);
+  assert.match(historyBlock, /#page-stock-opname \.so-history-actions \.so-history-link\s*\{[^}]*background:\s*transparent;/s);
+  assert.match(historyBlock, /#page-stock-opname \.so-history-actions \.so-history-link\s*\{[^}]*border:\s*0;/s);
+  assert.match(historyBlock, /#page-stock-opname \.so-history-link::after/);
+  assert.match(historyBlock, /#page-stock-opname \.so-history-link:hover::after/);
   assert.match(source, /class="so-history-transactions"/);
   assert.match(source, /class="so-history-transaction"/);
   assert.match(source, /class="so-history-transaction-copy"/);
@@ -775,6 +779,24 @@ test('grouped Barang Masuk history exposes per-transaction cancellation and upda
  await t.click('void',{soId:'receipt-1'});
  assert.equal(t.writes.at(-1).action,'void');
  assert.equal(t.writes.at(-1).input.id,'receipt-1');
+});
+
+test('editable history exposes text-only Edit and Batalkan actions on every active-month transaction',async()=>{
+ const t=runtime();
+ t.data.state.periods[0].legacy_period_ids=['legacy-november'];
+ t.data.state.documents=[
+  {id:'receipt-legacy',period_id:'legacy-november',type:'receipt',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:a',name:'Susu',qty:10,unit:'ML'}]},
+  {id:'receipt-current',period_id:'period',type:'receipt',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:b',name:'Gula',qty:20,unit:'GR'}]}
+ ];
+ await t.ui.open('receipt');
+ const html=t.page.innerHTML;
+ assert.equal((html.match(/class="so-history-link"/g)||[]).length,4);
+ assert.match(html,/class="so-history-link" data-so-action="edit" data-so-id="receipt-legacy"/);
+ assert.match(html,/class="so-history-link" data-so-action="void" data-so-id="receipt-legacy"/);
+ assert.match(html,/class="so-history-link" data-so-action="edit" data-so-id="receipt-current"/);
+ assert.match(html,/class="so-history-link" data-so-action="void" data-so-id="receipt-current"/);
+ await t.click('edit',{soId:'receipt-legacy'});
+ assert.equal(t.draft('receipt').id,'receipt-legacy');
 });
 
 test('daily expense history distinguishes inward adjustments from outward expenses',async()=>{
