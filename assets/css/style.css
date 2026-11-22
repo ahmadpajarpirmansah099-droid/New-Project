@@ -12134,6 +12134,8 @@ button, input, select, textarea { font-family: var(--ui-font); }
     background: #fbe3df;
   }
   #page-stock-opname .so-receipt-reference-form .so-receipt-clear:hover:not(:disabled) {
+    background: transparent;
+    border-color: transparent;
     color: var(--so-shortage);
   }
   #page-stock-opname .so-receipt-reference-form .so-receipt-search-results button:hover:not(:disabled),
@@ -12147,6 +12149,9 @@ button, input, select, textarea { font-family: var(--ui-font); }
   #page-stock-opname .so-receipt-reference-form .so-receipt-extra-head button:hover:not(:disabled) {
     background: #fbe3df;
     color: var(--so-shortage);
+  }
+  html[data-desktop-theme="dark"] #page-stock-opname .so-receipt-reference-form .so-receipt-extra-head button:hover:not(:disabled) {
+    background: var(--ui-surface-soft);
   }
   #page-stock-opname .so-receipt-reference-form .so-primary:hover:not(:disabled) {
     background: var(--ui-lime-strong);
@@ -13206,26 +13211,6 @@ button, input, select, textarea { font-family: var(--ui-font); }
     color: var(--ui-ink);
   }
 }
-#page-stock-opname .so-receipt-reference-form .so-unit-dropdown[open] > summary { border-color: var(--ui-olive); }
-#page-stock-opname .so-receipt-reference-form .so-receipt-unit-control > .so-unit-dropdown > summary {
-  background: var(--ui-surface);
-  border: 1px solid var(--ui-line);
-  border-radius: var(--ui-radius-control);
-  color: var(--ui-ink);
-  box-shadow: var(--ui-shadow-control);
-}
-#page-stock-opname .so-receipt-reference-form .so-receipt-unit-control > .so-unit-dropdown > summary:focus-visible {
-  outline: 2px solid var(--ui-olive);
-  outline-offset: 2px;
-  border-color: var(--ui-olive);
-}
-#page-stock-opname .so-receipt-reference-form .so-unit-options button[aria-pressed="true"] {
-  background: var(--ui-lime);
-  color: var(--ui-ink);
-}
-#page-stock-opname .so-receipt-reference-form .so-receipt-extra-item .so-unit-picker .so-picker-trigger {
-  min-height: 48px;
-}
 @media (max-width: 420px) {
   #page-stock-opname .so-receipt-reference-form { padding: 14px; }
   #page-stock-opname .so-receipt-quantity-unit-grid {
@@ -13237,7 +13222,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 }
 @media (prefers-reduced-motion: reduce) {
   #page-stock-opname .so-receipt-reference-form :is(
-    input, textarea, .so-picker-trigger, .so-unit-dropdown > summary,
+    input, textarea, .so-picker-trigger, .so-unit-dropdown > summary, .so-unit-options button,
     .so-receipt-clear, .so-receipt-search-results button,
     .so-receipt-extra-head button, .so-receipt-reference-footer button
   ) {
@@ -13245,6 +13230,9 @@ button, input, select, textarea { font-family: var(--ui-font); }
   }
   #page-stock-opname .so-receipt-reference-form button:active:not(:disabled):not(.so-receipt-clear) {
     transform: none;
+  }
+  #page-stock-opname .so-receipt-search-input-wrap .so-receipt-clear::before {
+    transition: none;
   }
   #page-stock-opname .so-receipt-search-input-wrap .so-receipt-clear:active:not(:disabled) {
     transform: translateY(-50%);
