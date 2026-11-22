@@ -13081,6 +13081,14 @@ button, input, select, textarea { font-family: var(--ui-font); }
   padding-right: 44px;
 }
 #page-stock-opname .so-receipt-search-input-wrap input[readonly] { cursor: default; }
+#page-stock-opname .so-receipt-search-input-wrap input[type="search"]::-webkit-search-cancel-button,
+#page-stock-opname .so-receipt-search-input-wrap input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+#page-stock-opname .so-receipt-search-input-wrap input[type="search"]::-ms-clear {
+  display: none;
+}
 #page-stock-opname .so-receipt-search-input-wrap .so-receipt-clear {
   position: absolute;
   right: 6px;
