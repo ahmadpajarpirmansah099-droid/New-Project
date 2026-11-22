@@ -64,11 +64,15 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Stage site files
+        run: |
+          mkdir -p _site
+          cp -R index.html manifest.webmanifest service-worker.js assets _site/
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
-          path: "."
+          path: "_site"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
