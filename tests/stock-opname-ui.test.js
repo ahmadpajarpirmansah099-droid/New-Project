@@ -28,7 +28,7 @@ function contentsOfStockOpnameStyles() {
 function runtime() {
   const handlers = {}, writes = [], confirmations = [];
   let pageHtml = '', pageRenders = 0;
-  const history = { set outerHTML(value) { const start=pageHtml.indexOf('<section class="so-history-panel"'); if(start>=0)pageHtml=pageHtml.slice(0,start)+value; } };
+  const history = { set outerHTML(value) { const start=pageHtml.indexOf('<section class="so-history-panel"'), close=pageHtml.indexOf('</section>',start), end=close<0?-1:close+'</section>'.length; if(start>=0&&end>start)pageHtml=pageHtml.slice(0,start)+value+pageHtml.slice(end); } };
   let partsEnabled=false;
   const parts={toolbar:{innerHTML:''},rows:{innerHTML:''},input:{value:''},results:{innerHTML:''}};
   const liveForm={querySelector(selector){return ({'[data-so-expense-toolbar]':parts.toolbar,'[data-so-expense-rows]':parts.rows,'[data-so-expense-search]':parts.input,'[data-so-expense-results]':parts.results})[selector]||null;}};
