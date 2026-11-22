@@ -247,7 +247,8 @@ test('switching blank forms does not ask to replace a draft', async () => {
   assert.equal(t.confirmations.length, 0);
   assert.equal(t.draft('production').kind, 'production');
   assert.equal(t.draft('receipt').kind, 'receipt');
-  assert.equal(t.draft('sales').kind, 'sales');});
+  assert.equal(t.draft('sales').kind, 'sales');
+});
 
 test('entered zero is still protected when changing forms', async () => {
   const t = runtime(); await t.ui.open('close');
@@ -496,7 +497,8 @@ test('history card styling and transaction evidence panel use the requested clas
 });
 
 test('history highlights expense outflows and consumed Sales ingredients in red', async () => {
-  const t = runtime();  t.data.state.documents = [
+  const t = runtime();
+  t.data.state.documents = [
     { id: 'expense-out', period_id: 'period', type: 'expense', category: 'Waste', start: TEST_TODAY, end: TEST_TODAY, postings: [{ key: 'm:a', name: 'Susu', qty: -2, unit: 'ML' }] },
     {
       id: 'sales-consumption', period_id: 'period', type: 'sales', start: TEST_TODAY, end: TEST_TODAY,
@@ -745,7 +747,8 @@ test('daily expense history groups materials by category without original transa
  assert.match(html,/23 November 2026/);
  assert.equal((html.match(/class="so-date-material-row(?: so-date-material-row--actions)?"/g)||[]).length,3);
  assert.match(html,/Susu<\/span><strong class="is-negative">2 ML/);
- assert.match(html,/Susu<\/span><strong class="is-negative">3 ML/); assert.doesNotMatch(html,/Susu<\/span><strong>5 ML/);
+ assert.match(html,/Susu<\/span><strong class="is-negative">3 ML/);
+ assert.doesNotMatch(html,/Susu<\/span><strong>5 ML/);
  assert.match(html,/<h4 class="so-history-category-chip">Kalibrasi<\/h4>/);
  assert.match(html,/<h4 class="so-history-category-chip">Lainnya<\/h4>/);
  assert.match(html,/Gula<\/span><strong class="is-negative">100 GR/);
@@ -994,7 +997,8 @@ test('expense category uses in-page options and selection preserves selected ite
  await t.click('submit'); assert.equal(t.writes[0].input.category,'Kalibrasi');
 });
 
-test('selecting Move via in-page category retains safeguards', async () => { const t=runtime(); await t.ui.open('expense');
+test('selecting Move via in-page category retains safeguards', async () => {
+ const t=runtime(); await t.ui.open('expense');
  await t.click('expense-add',{soItemKey:'m:a'}); t.input({soKey:'m:a',soProp:'qty'},'5');
  await t.click('expense-category',{soValue:'Move'});
  assert.match(t.page.innerHTML,/Belum ada outlet\/divisi tujuan yang aktif/);
