@@ -759,11 +759,15 @@ ${transactionActions}
   const body=document.body;if(!body)return;
   ['--so-receipt-hole-x','--so-receipt-hole-y','--so-receipt-hole-w','--so-receipt-hole-h'].forEach(name=>body.style.removeProperty(name));
  }
+ function scheduleReceiptSearchMask(){
+  if(typeof requestAnimationFrame==='function')scheduleReceiptSearchMask();
+  else updateReceiptSearchMask();
+ }
  document.addEventListener('focusin',ev=>{
   if(ev.target?.matches?.('[data-so-receipt-search]')){
    page()?.querySelector('.so-form')?.classList.add('is-receipt-searching');
    document.body?.classList.add('so-receipt-search-active');
-   requestAnimationFrame(updateReceiptSearchMask);
+   scheduleReceiptSearchMask();
    if(ev.target.dataset.soSelectedKey)ev.target.select?.();
   }
  });
@@ -798,7 +802,7 @@ ${transactionActions}
    const results=el.closest?.('.so-receipt-search')?.querySelector('[data-so-receipt-results]')||el.parentElement?.querySelector('[data-so-receipt-results]');
    if(results)results.innerHTML=receiptSuggestions(receiptQuery);
    el.closest('.so-receipt-search')?.classList.toggle('has-results',!!receiptQuery.trim());
-   requestAnimationFrame(updateReceiptSearchMask);
+   scheduleReceiptSearchMask();
    return;
   }
   if(el.dataset.soKey){const key=el.dataset.soKey;form.counts[key]={...form.counts[key],[el.dataset.soProp]:el.value};if(form.kind==='production'){const row=catalog().find(x=>x.key===key);const output=el.closest('tr')?.querySelector('[data-so-output]');if(row&&output)output.textContent='Hasil: '+number(Number(el.value||0)*Number(row.yield))+' '+row.unit+' · 1 batch = '+number(row.yield)+' '+row.unit;}}
