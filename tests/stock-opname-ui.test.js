@@ -735,12 +735,12 @@ test('daily expense history groups materials by category without original transa
  const html=t.page.innerHTML;
  assert.match(html,/23 November 2026/);
  assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,3);
- assert.match(html,/Susu<\/span><strong>2 ML/);
- assert.match(html,/Susu<\/span><strong>3 ML/);
+ assert.match(html,/Susu<\/span><strong class="is-negative">2 ML/);
+ assert.match(html,/Susu<\/span><strong class="is-negative">3 ML/);
  assert.doesNotMatch(html,/Susu<\/span><strong>5 ML/);
  assert.match(html,/<h4 class="so-history-category-chip">Kalibrasi<\/h4>/);
  assert.match(html,/<h4 class="so-history-category-chip">Lainnya<\/h4>/);
- assert.match(html,/Gula<\/span><strong>100 GR/);
+ assert.match(html,/Gula<\/span><strong class="is-negative">100 GR/);
  assert.match(html,/data-so-action="void"/);
  assert.doesNotMatch(html,/<h4 class="so-history-category-chip">QC<\/h4>/);
 });
@@ -777,7 +777,7 @@ test('daily expense history distinguishes inward adjustments from outward expens
  {id:'m1',period_id:'period',type:'move_in',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:a',name:'Susu',qty:3,unit:'ML'}]}
  ];
  await t.ui.open('expense');
- assert.match(t.page.innerHTML,/Susu<\/span><strong>5 ML/);
+ assert.match(t.page.innerHTML,/Susu<\/span><strong class="is-negative">5 ML/);
  assert.match(t.page.innerHTML,/Masuk \/ penyesuaian/);
  assert.match(t.page.innerHTML,/3 ML/);
 });
@@ -793,8 +793,8 @@ test('expense material totals remain separated by category, including repeated m
  const html=t.page.innerHTML;
  assert.match(html,/<h4 class="so-history-category-chip">QC<\/h4>/);
  assert.match(html,/<h4 class="so-history-category-chip">Waste<\/h4>/);
- assert.match(html,/Susu<\/span><strong>6 ML/);
- assert.match(html,/Susu<\/span><strong>5 ML/);
+ assert.match(html,/Susu<\/span><strong class="is-negative">6 ML/);
+ assert.match(html,/Susu<\/span><strong class="is-negative">5 ML/);
  assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
 });
 
