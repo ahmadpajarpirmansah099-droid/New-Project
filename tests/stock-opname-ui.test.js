@@ -487,6 +487,27 @@ test('history card styling and transaction evidence panel use the requested clas
   assert.match(source, /Tampilkan tanggal sebelumnya/);
 });
 
+test('history highlights expense outflows and consumed Sales ingredients in red', async () => {
+  const t = runtime();
+  t.data.state.documents = [
+    { id: 'expense-out', period_id: 'period', type: 'expense', category: 'Waste', start: TEST_TODAY, end: TEST_TODAY, postings: [{ key: 'm:a', name: 'Susu', qty: -2, unit: 'ML' }] },
+    {
+      id: 'sales-consumption', period_id: 'period', type: 'sales', start: TEST_TODAY, end: TEST_TODAY,
+      catalog_snapshot: {
+        menus: [{ id: 'cola', nama_menu: 'Cola' }],
+        menuRecipeLines: [{ menu_id: 'cola', component_type: 'material', item_id: 'a' }]
+      },
+      lines: [{ key: 's:cola', qty: 2 }],
+      postings: [{ key: 'm:a', name: 'Susu', qty: -250, unit: 'ML' }]
+    }
+  ];
+  await t.ui.open('expense');
+  assert.match(t.page.innerHTML, /<strong class="is-negative">2 ML<\/strong>/);
+  await t.ui.open('sales');
+  assert.match(t.page.innerHTML, /Bahan terpakai/);
+  assert.match(t.page.innerHTML, /<strong class="is-negative">250 ML<\/strong>/);
+});
+
 test('daily receipt history shows today first and loads older dates in order', async () => {
   const t = runtime();
   const receipt = (id, day, qty) => ({
