@@ -13263,3 +13263,20 @@ button, input, select, textarea { font-family: var(--ui-font); }
 @media (prefers-reduced-motion: reduce) {
   #page-stock-opname :is(.so-overview .so-actions, .so-transaction-actions .so-actions, .so-form-footer .so-actions) > button { transition: none !important; }
 }
+
+
+/* STOCK OPNAME — keep Barang Masuk cancel and submit actions side by side on mobile. */
+@media (max-width: 600px) {
+  #page-stock-opname .so-receipt-reference-footer .so-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+  #page-stock-opname .so-receipt-reference-footer .so-actions > button,
+  #page-stock-opname .so-receipt-reference-footer .so-actions > .so-primary {
+    grid-column: auto;
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+  }
+}
