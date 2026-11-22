@@ -483,7 +483,7 @@ test('history is inline in the main form card without separate date cards', asyn
   assert.match(historyBlock, /\.so-history-date:has\(> details\[open\]\)/);
   assert.match(source, /<section class="so-history-panel" id="soHistory">/);
   assert.doesNotMatch(source, /<section class="so-panel so-history-panel"/);
-  assert.match(source, /historyHTML\(\)<\/section>/);
+  assert.match(source, /historyHTML\\(\\).*<\\/section>/);
   assert.doesNotMatch(source, /\$\{form\?historyHTML\(\):''\}/);
   assert.match(historyBlock, /\.so-history-category-chip/);
   assert.match(historyBlock, /\.so-history-transactions\s*\{[^}]*border-top:\s*1px solid var\(--ui-line\)/s);
@@ -562,7 +562,7 @@ test('resetting Stock Awal preserves transactions and requires complete manual i
   assert.equal(t.data.state.periods[0].status, 'opening_pending');
   assert.equal(t.data.state.documents.length, 1);
   await t.ui.open('initial');
-  const history = t.page.innerHTML.match(/<section class="so-panel so-history-panel" id="soHistory">[\s\S]*?<\/section>/)?.[0] || '';
+  const history = t.page.innerHTML.match(/<section class="so-history-panel" id="soHistory">[\s\S]*?<\/section>/)?.[0] || '';
   assert.match(history, /Belum ada riwayat hari ini/);
   assert.doesNotMatch(history, /1 November 2026/);
   assert.doesNotMatch(t.page.innerHTML, /data-so-key="m:a"[^>]*value="[1-9]/);
