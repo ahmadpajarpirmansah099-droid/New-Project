@@ -8,7 +8,7 @@
  const labels={initial:'Stock Awal',receipt:'Barang Masuk',expense:'Pengeluaran',production:'Produksi WIP',sales:'Sales',close:'Stock Opname',move_in:'Move Masuk',adjustment:'Penyesuaian Move',adjustment_in:'Penyesuaian Move Masuk'};
  const expenseCategories=['Kalibrasi','RnD','QC','Suplies','Move','Waste','Lainnya'];
  const periodStatus={active:'Berjalan',reopened:'Koreksi opname',opening_pending:'Stock Awal perlu diisi ulang',closed:'Menunggu konfirmasi Stock Awal',held:'Ditahan'};
- let form=null,busy=false,notice='',targetRows=[],receiptQuery='',expenseQuery='',viewGeneration=0,draftSaved=false,activeConfirm=null,historyKind='close',historyLimit=10,selectedMonth=null;
+ let form=null,busy=false,notice='',targetRows=[],receiptQuery='',expenseQuery='',viewGeneration=0,draftSaved=false,activeConfirm=null,historyKind='close',historyLimit=1,selectedMonth=null;
  const page=()=>document.getElementById('page-stock-opname');
  const get=()=>service.current();
  const periods=()=>get()?.state?.periods||[];
@@ -59,8 +59,8 @@
   const n=document.getElementById('soDraftStatus');if(n)n.textContent=draftStatus();
   return draftSaved;
  }
- function reset(){root.StockDashboardUI?.reset();activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];receiptQuery='';expenseQuery='';busy=false;draftSaved=false;historyKind='close';historyLimit=10;service.reset();}
- async function initialize(client,context){activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];receiptQuery='';expenseQuery='';draftSaved=false;historyKind='close';historyLimit=10;await service.initialize(client,context);navigation();}
+ function reset(){root.StockDashboardUI?.reset();activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];receiptQuery='';expenseQuery='';busy=false;draftSaved=false;historyKind='close';historyLimit=1;service.reset();}
+ async function initialize(client,context){activeConfirm?.(false);viewGeneration++;form=null;notice='';targetRows=[];receiptQuery='';expenseQuery='';draftSaved=false;historyKind='close';historyLimit=1;await service.initialize(client,context);navigation();}
  function navigation(){const n=document.querySelector('[data-page="stock-opname"]');if(n)n.style.display=service.available()?'':'none';}
  function button(label,action,extra='',primary=false){return '<button type="button" data-so-action="'+action+'" '+extra+' class="'+(primary?'so-primary':'')+'" '+(busy?'disabled':'')+'>'+e(label)+'</button>';}
  function transactionButton(label,kind){
@@ -178,7 +178,7 @@
    if(kind==='receipt'&&!existing)form.end=today();
    if(recovered||kind==='receipt'&&!existing)snapshot();
    if(form.target)targetRows=await service.targetCatalog(form.target);
-   historyKind=kind;historyLimit=10;render();return true;
+   historyKind=kind;historyLimit=1;render();return true;
   }
   const d=existing?(get().state.documents||[]).find(x=>x.id===existing):null;
   form={kind,request:crypto.randomUUID(),id:d?.id||null,start:d?.start||today(),end:d?.end||today(),counts:{},category:d?.category||'Waste',target:d?.target||'',mapping:{},note:d?.lines?.find(line=>line.note)?.note||'',basePeriod:period()?.id||null,touched:false};
@@ -188,13 +188,13 @@
    form.end=period().end;form.start=period().start;
    form.counts=correctionCounts();
   }
-  notice='';snapshot();historyKind=kind;historyLimit=10;render();return true;
+  notice='';snapshot();historyKind=kind;historyLimit=1;render();return true;
  }
  async function restore(){const draft=service.loadDraft();if(!draft){notice='Belum ada draft di perangkat ini.';render();return;}
   if(staleOpeningDraft(draft)){service.clearDraft('initial');notice='Draft Stock Awal lama diabaikan setelah reset. Isi ulang manual.';render();return;}
   if(staleCorrectionDraft(draft)){service.clearDraft('close');notice='Koreksi opname sudah dibatalkan. Draft koreksi lama tidak digunakan lagi.';render();return;}
   if(draft.basePeriod && draft.basePeriod!==period()?.id && ['initial','close'].includes(draft.kind)){notice='Draft berasal dari periode berbeda. Periksa melalui riwayat; draft tidak dipindahkan otomatis.';render();return;}
-  form=draft;draftSaved=true;const recovered=restoreCorrectionCounts(form);notice=recovered?'Draft Stock Opname dipulihkan; kolom yang kosong diisi dari stok fisik opname tersimpan. Periksa sebelum menyelesaikan.':'Draft perangkat '+labels[form.kind]+' dipulihkan. Periksa tanggal dan jumlah sebelum menyimpan.';if(recovered)snapshot();if(form.target)targetRows=await service.targetCatalog(form.target);historyKind=form.kind;historyLimit=10;render();
+  form=draft;draftSaved=true;const recovered=restoreCorrectionCounts(form);notice=recovered?'Draft Stock Opname dipulihkan; kolom yang kosong diisi dari stok fisik opname tersimpan. Periksa sebelum menyelesaikan.':'Draft perangkat '+labels[form.kind]+' dipulihkan. Periksa tanggal dan jumlah sebelum menyimpan.';if(recovered)snapshot();if(form.target)targetRows=await service.targetCatalog(form.target);historyKind=form.kind;historyLimit=1;render();
  }
  function receiptItems(){
   if(form?.kind!=='receipt')return [];
@@ -317,10 +317,15 @@
   const groups=new Map();
   for(const item of items){
    const date=String(dateOf(item)||'').slice(0,10);
+   if(!date)continue;
    if(!groups.has(date))groups.set(date,[]);
    groups.get(date).push(item);
   }
   return [...groups.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
+ }
+ function visibleHistoryDates(items,dateOf){
+  const currentDay=today();
+  return historyDates(items,dateOf).filter(([date])=>date<=currentDay);
  }
  function historyDate(date,entries,content,unit='transaksi',expanded=false){
   return `<li class="so-history-date"><details${expanded?' open':''}>
@@ -328,15 +333,16 @@
    ${content}
   </details></li>`;
  }
- function groupedHistory(items,dateOf,renderEntry,unit){
-  return historyDates(items,dateOf).map(([date,entries])=>
-   historyDate(date,entries,`<ul class="so-history so-history-nested">${entries.map(renderEntry).join('')}</ul>`,unit)
+ function groupedHistory(groups,renderEntry,unit){
+  return groups.map(([date,entries])=>
+   historyDate(date,entries,`<ul class="so-history so-history-nested">${entries.map(renderEntry).join('')}</ul>`,unit,date===today())
   ).join('');
  }
  function quantityLines(rows,displayQty=row=>row.qty){
-  return `<div class="so-opening-lines">${rows.map(row=>
-   `<div><span>${e(row.name||row.key)}</span><strong>${number(displayQty(row))} ${e(row.unit||'')}</strong></div>`
-  ).join('')}</div>`;
+  return `<div class="so-opening-lines">${rows.map(row=>{
+   const qty=displayQty(row),negative=Number(row.qty)<0||Number(qty)<0;
+   return `<div><span>${e(row.name||row.key)}</span><strong class="${negative?'is-negative':''}">${number(qty)} ${e(row.unit||'')}</strong></div>`;
+  }).join('')}</div>`;
  }
  function salesHistoryRows(doc){
   const saved=doc.catalog_snapshot||{},postings=Array.isArray(doc.postings)?doc.postings:[];
@@ -405,7 +411,7 @@
  function materialHistoryByDate(dates,expense){
   return dates.map(([date,entries],index)=>{
    const materials=materialTotals(entries,expense);
-   const row=m=>`<div class="so-date-material-row"><span>${e(m.name)}${expense&&m.inbound?'<small>Masuk / penyesuaian</small>':''}</span><strong>${number(m.qty)} ${e(m.unit)}</strong></div>`;
+   const row=m=>`<div class="so-date-material-row"><span>${e(m.name)}${expense&&m.inbound?'<small>Masuk / penyesuaian</small>':''}</span><strong${expense&&!m.inbound?' class="is-negative"':''}>${number(m.qty)} ${e(m.unit)}</strong></div>`;
    let lines;
    if(expense){
     const categories=new Map();
@@ -414,7 +420,7 @@
      categories.get(material.category).push(material);
     }
     lines=[...categories.entries()].sort((a,b)=>a[0].localeCompare(b[0],'id')).map(([category,items])=>
-     `<section class="so-date-material-category"><h4>${e(category)}</h4>${items.map(row).join('')}</section>`
+     `<section class="so-date-material-category"><h4 class="so-history-category-chip">${e(category)}</h4>${items.map(row).join('')}</section>`
     ).join('');
    }else lines=materials.map(row).join('');
    const documents=entries.map(doc=>{
@@ -424,8 +430,8 @@
    }).join('');
    return historyDate(date,entries,`
     <div class="so-date-materials">${lines||'<p class="so-sales-unavailable">Tidak ada transaksi aktif pada tanggal ini.</p>'}</div>
-    <details class="so-history-originals"><summary>Transaksi per bukti</summary>${documents}</details>
-   `,'transaksi');
+    <details class="so-history-originals"><summary>Transaksi per bukti</summary><div class="so-history-original-list">${documents}</div></details>
+   `,'transaksi',date===today());
   }).join('');
  }
  function productionHistoryByDate(dates){
@@ -450,7 +456,7 @@
    }).join('');
    return historyDate(date,entries,`
     <div class="so-date-materials">${rows||'<p class="so-sales-unavailable">Tidak ada hasil produksi aktif yang tersedia pada tanggal ini.</p>'}</div>
-   `,'transaksi');
+   `,'transaksi',date===today());
   }).join('');
  }
  function openingHistoryEntry(entry,periods){
@@ -494,21 +500,35 @@
    if(['receipt','expense','production','sales'].includes(kind))entries[kind].push(doc);
   }
   const current=entries[historyKind]||[],recent=[...current].reverse();
-  let list='',total=current.length;
-  if(historyKind==='initial')list=groupedHistory(recent.slice(0,historyLimit),x=>x.start,x=>openingHistoryEntry(x,periods),'catatan');
-  else if(historyKind==='close')list=groupedHistory(recent.slice(0,historyLimit),x=>x.end,closeHistoryEntry,'opname');
-  else if(historyKind==='expense'||historyKind==='receipt'){
-   const dates=historyDates(recent,doc=>doc.start);total=dates.length;
-   list=materialHistoryByDate(dates.slice(0,historyLimit),historyKind==='expense');
+  let dateGroups=[],renderGroups=()=>'',unit='transaksi';
+  if(historyKind==='initial'){
+   dateGroups=visibleHistoryDates(recent,x=>x.start);unit='catatan';
+   renderGroups=groups=>groupedHistory(groups,x=>openingHistoryEntry(x,periods),unit);
+  }else if(historyKind==='close'){
+   dateGroups=visibleHistoryDates(recent,x=>x.end);unit='opname';
+   renderGroups=groups=>groupedHistory(groups,closeHistoryEntry,unit);
+  }else if(historyKind==='expense'||historyKind==='receipt'){
+   dateGroups=visibleHistoryDates(recent,doc=>doc.start);
+   renderGroups=groups=>materialHistoryByDate(groups,historyKind==='expense');
   }else if(historyKind==='production'){
-   const dates=historyDates(recent,doc=>doc.start);total=dates.length;
-   list=productionHistoryByDate(dates.slice(0,historyLimit));
-  }else if(historyKind==='sales')list=groupedHistory(recent.slice(0,historyLimit),doc=>doc.start,doc=>historyDocument(doc,p));
-  const empty=`<div class="so-empty"><strong>Belum ada riwayat ${e(labels[historyKind])}</strong></div>`;
+   dateGroups=visibleHistoryDates(recent,doc=>doc.start);
+   renderGroups=groups=>productionHistoryByDate(groups);
+  }else if(historyKind==='sales'){
+   dateGroups=visibleHistoryDates(recent,doc=>doc.start);
+   renderGroups=groups=>groupedHistory(groups,doc=>historyDocument(doc,p),'transaksi');
+  }
+  const currentDay=today();
+  const todayGroups=dateGroups.filter(([date])=>date===currentDay);
+  const previousGroups=dateGroups.filter(([date])=>date<currentDay);
+  const visiblePrevious=previousGroups.slice(0,Math.max(0,historyLimit-1));
+  const todayList=todayGroups.length?`<ul class="so-history">${renderGroups(todayGroups)}</ul>`:
+   '<div class="so-empty"><strong>Belum ada riwayat hari ini</strong></div>';
+  const previousList=visiblePrevious.length?`<ul class="so-history">${renderGroups(visiblePrevious)}</ul>`:'';
+  const more=previousGroups.length>visiblePrevious.length?
+   `<div class="so-history-more">${button('Tampilkan tanggal sebelumnya','history-more')}</div>`:'';
   return `<section class="so-panel so-history-panel" id="soHistory">
    <header class="so-history-head"><h2>Riwayat ${e(labels[historyKind])}</h2></header>
-   ${current.length?`<ul class="so-history">${list}</ul>`:empty}
-   ${total>historyLimit?`<div class="so-history-more">${button('Tampilkan lebih banyak','history-more')}</div>`:''}
+   ${todayList}${previousList}${more}
   </section>`;
  }
  function render(){
