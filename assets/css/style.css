@@ -13008,6 +13008,8 @@ button, input, select, textarea { font-family: var(--ui-font); }
 #page-stock-opname .so-receipt-search-results button span { min-width: 0; overflow-wrap: anywhere; }
 #page-stock-opname .so-receipt-search-results button small,
 #page-stock-opname .so-receipt-search-results button [data-so-subtext] { color: var(--ui-muted); }
+/* Keep the existing mobile field flow; desktop promotes all four controls into one row. */
+#page-stock-opname .so-receipt-details-grid { display: contents; }
 #page-stock-opname .so-receipt-quantity-unit-grid {
   display: grid;
   grid-template-columns: minmax(0,0.8fr) minmax(0,1.2fr);
@@ -13163,6 +13165,15 @@ body.so-receipt-search-active::before {
   mask-composite: exclude;
 }
 @media (min-width: 900px) {
+  #page-stock-opname .so-receipt-details-grid {
+    display: grid;
+    grid-template-columns: minmax(0,0.82fr) minmax(0,0.95fr) minmax(0,1.35fr) minmax(0,1.15fr);
+    align-items: end;
+    gap: 12px;
+    min-width: 0;
+  }
+  #page-stock-opname .so-receipt-details-grid > .so-receipt-quantity-unit-grid { display: contents; }
+  #page-stock-opname .so-receipt-details-grid > .so-receipt-reference-field { min-width: 0; }
   #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown { display: block; position: relative; }
   #page-stock-opname .so-receipt-unit-control > .so-unit-picker { display: none; }
   #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown[open] { z-index: 30; }
