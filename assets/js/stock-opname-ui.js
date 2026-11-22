@@ -760,7 +760,7 @@ ${transactionActions}
   ['--so-receipt-hole-x','--so-receipt-hole-y','--so-receipt-hole-w','--so-receipt-hole-h'].forEach(name=>body.style.removeProperty(name));
  }
  function scheduleReceiptSearchMask(){
-  if(typeof requestAnimationFrame==='function')scheduleReceiptSearchMask();
+  if(typeof requestAnimationFrame==='function')requestAnimationFrame(updateReceiptSearchMask);
   else updateReceiptSearchMask();
  }
  document.addEventListener('focusin',ev=>{
