@@ -12071,7 +12071,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .so-history-entry { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; min-width: 0; }
 .so-history-entry > div { min-width: 0; }
 .so-history-entry strong { font-size: 13px; line-height: 1.45; }
-.so-history-entry small { display: block; margin-top: 3px; color: var(--ui-muted); font-size: 12px; line-height: 1.5; }
+.so-history-entry small { display: block; margin-top: 3px; color: var(--ui-muted); font-size: 11px; line-height: 1.5; }
 .so-history-tag {
   flex: 0 0 auto;
   padding: 4px 8px;
@@ -12085,7 +12085,8 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .so-history-tag.is-void { background: var(--ui-surface-soft); color: var(--ui-muted); }
 .so-history details { font-size: 13px; line-height: 1.6; }
 .so-history-compact-details > summary { padding-inline: 4px; }
-.so-history-compact-name { flex: 1 1 auto; min-width: 0; font-weight: 700; }
+.so-history-compact-name { flex: 1 1 auto; min-width: 0; font-weight: 700;   font-size: 13px;
+}
 .so-history-compact-meta, .so-history-compact-cue { color: var(--ui-muted); font-size: 11px; }
 .so-history-compact-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .so-history-compact-meta:empty { display: none; }
@@ -12102,11 +12103,11 @@ button, input, select, textarea { font-family: var(--ui-font); }
 }
 .so-opening-lines > div:last-child { border-bottom: 0; }
 .so-opening-lines span { min-width: 0; overflow-wrap: anywhere; }
-.so-opening-lines strong { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
+.so-opening-lines strong { font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
 .so-history .so-opening-lines strong.is-negative,
 .so-history .so-date-material-row strong.is-negative { color: var(--so-shortage); font-weight: 800; }
 .so-history-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0 8px; }
-#page-stock-opname .so-history-actions button { padding: 7px 10px; font-size: 12px; box-shadow: none; }
+#page-stock-opname .so-history-actions button { padding: 7px 10px; font-size: 11px; box-shadow: none; }
 .so-history-more { padding-top: 14px; text-align: center; }
 .so-empty { padding: 24px 0 8px; color: var(--ui-muted); text-align: center; font-size: 13px; }
 .so-empty strong { font-weight: 700; }
@@ -12121,9 +12122,9 @@ button, input, select, textarea { font-family: var(--ui-font); }
   border-bottom: 1px solid var(--ui-line);
 }
 .so-history .so-date-material-row:last-child { border-bottom: 0; }
-.so-history .so-date-material-row span { min-width: 0; overflow-wrap: anywhere; font-size: 15px; font-weight: 600; }
-.so-history .so-date-material-row small { display: block; margin-top: 2px; color: var(--ui-muted); font-size: 12px; font-weight: 400; }
-.so-history .so-date-material-row strong { min-width: 0; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
+.so-history .so-date-material-row span { min-width: 0; overflow-wrap: anywhere; font-size: 13px; font-weight: 600; }
+.so-history .so-date-material-row small { display: block; margin-top: 2px; color: var(--ui-muted); font-size: 11px; font-weight: 400; }
+.so-history .so-date-material-row strong { min-width: 0; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
 .so-history .so-date-material-category + .so-date-material-category {
   margin-top: 12px;
   padding-top: 11px;
