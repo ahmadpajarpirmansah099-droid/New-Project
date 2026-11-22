@@ -12160,6 +12160,9 @@ button, input, select, textarea { font-family: var(--ui-font); }
   html[data-desktop-theme="dark"] #page-stock-opname .so-receipt-reference-form .so-receipt-clear:hover:not(:disabled)::before {
     background: var(--ui-surface-soft);
   }
+  #page-stock-opname .so-receipt-reference-form :is(input, textarea, .so-picker-trigger, .so-unit-dropdown > summary):hover:not(:disabled) {
+    border-color: #c8d1ba;
+  }
 }
 @media (max-width: 600px) {
   .so-head { gap: 10px; margin-bottom: 12px; }
@@ -12937,7 +12940,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   flex: 1 1 auto;
   min-width: 0;
   width: 1%;
-  padding-right: 44px;
+  padding-right: 52px;
 }
 #page-stock-opname .so-receipt-search-input-wrap input[readonly] { cursor: default; }
 #page-stock-opname .so-receipt-search-input-wrap .so-receipt-clear {
@@ -13213,10 +13216,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 }
 @media (max-width: 420px) {
   #page-stock-opname .so-receipt-reference-form { padding: 14px; }
-  #page-stock-opname .so-receipt-quantity-unit-grid {
-    grid-template-columns: minmax(0,1fr);
-    gap: 8px;
-  }
+  #page-stock-opname .so-receipt-quantity-unit-grid { gap: 8px; }
   #page-stock-opname .so-receipt-reference-fields { gap: 11px; }
   #page-stock-opname .so-receipt-extra-items { grid-template-columns: minmax(0,1fr); }
 }
