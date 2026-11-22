@@ -13484,15 +13484,17 @@ html:not([data-desktop-theme="dark"]) {
   }
 }
 
-/* DESKTOP — cap active queue height to the summary area; extra guests scroll inside it. */
+/* DESKTOP — align the active queue bottom with the summary cards. */
 @media (min-width: 1150px) {
   #page-dashboard > #dashboardList {
-    height: 324px;
+    grid-row: 2 / 4;
+    align-self: stretch;
     min-height: 0;
-    max-height: 324px;
+    height: calc(100% + 15px);
+    max-height: none;
     box-sizing: border-box;
     overflow-y: auto;
     overflow-x: hidden;
-    margin-bottom: 0;
+    margin-bottom: -15px;
   }
 }
