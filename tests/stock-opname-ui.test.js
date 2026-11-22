@@ -181,7 +181,7 @@ test('Barang Masuk strips stray pipe characters from a restored transaction date
   t.seedDraft({ kind: 'receipt', end: '2026-11-19|', start: '2026-11-19|', counts: {}, receiptItems: [], note: '', touched: true });
   await t.ui.open('receipt');
   assert.match(t.page.innerHTML, /19 November 2026/);
-  assert.doesNotMatch(t.page.innerHTML, /2026\\|/);
+  assert.equal(t.page.innerHTML.includes('2026|'), false);
 });
 
 test('receipt, expense, production, and sales forms render with visible in-app date controls', async () => {
