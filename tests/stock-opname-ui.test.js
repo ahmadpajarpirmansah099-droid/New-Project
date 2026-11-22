@@ -4,6 +4,21 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 
+const TEST_TODAY = '2026-11-23';
+const TEST_TODAY_LABEL = '23 November 2026';
+function dateOffset(days) {
+  const date = new Date(TEST_TODAY + 'T12:00:00Z');
+  date.setUTCDate(date.getUTCDate() - days);
+  return date.toISOString().slice(0, 10);
+}
+const TEST_YESTERDAY = dateOffset(1);
+const TEST_YESTERDAY_LABEL = '22 November 2026';
+const fixedNow = Date.parse('2026-11-22T17:00:00.000Z');
+class FixedDate extends Date {
+  constructor(...args) { super(...(args.length ? args : [fixedNow])); }
+  static now() { return fixedNow; }
+}
+
 function contentsOfStockOpnameUi() {
   return fs.readFileSync('assets/js/stock-opname-ui.js', 'utf8');
 }
@@ -35,7 +50,7 @@ function runtime() {
   };
   const copy = value => JSON.parse(JSON.stringify(value));
   const w = {
-    Intl, Date, Number, crypto: { randomUUID: () => 'request' },
+    Intl, Date: FixedDate, Number, crypto: { randomUUID: () => 'request' },
     confirm: () => { throw Error('Stock Opname must not use a browser confirmation'); },
     addEventListener() {},
     document: {
@@ -274,19 +289,19 @@ test('correction draft keeps edited counts and fills blank items from saved opna
   assert.equal(t.draft('close').counts['m:b'].qty, '15');
 });
 
-test('refresh restores physical counts in an already open correction form and fixes a later date', async () => {
+test('refresh restores physical counts in an already open correction form and keeps today visible in history', async () => {
   const t = runtime(), p = t.data.state.periods[0];
-  p.status = 'reopened'; p.end = '2026-11-11';
+  p.status = 'reopened'; p.end = TEST_TODAY;
   await t.ui.open('close');
   t.input({ soKey: 'm:a', soProp: 'qty' }, '42');
   t.input({ soKey: 'w:a', soProp: 'qty' }, '');
-  p.end = '2026-11-08';
+  p.end = TEST_TODAY;
   p.result = [{ key: 'm:a', unit: 'ML', physical: 5781 }, { key: 'w:a', unit: 'ML', physical: 200 }];
   await t.click('refresh');
   assert.equal(t.draft('close').counts['m:a'].qty, '42');
   assert.equal(t.draft('close').counts['w:a'].qty, '200');
-  assert.equal(t.draft('close').end, '2026-11-08');
-  assert.match(t.page.innerHTML, /8 November 2026/);
+  assert.equal(t.draft('close').end, TEST_TODAY);
+  assert.match(t.page.innerHTML, /23 November 2026/);
   assert.match(t.page.innerHTML, /value="200"/);
 });
 
@@ -367,10 +382,11 @@ test('main page hides global history and each active form shows only its own his
   const t = runtime(), p = t.data.state.periods[0];
   p.opening = { 'm:a': 100 };
   p.opening_catalog = [{ key: 'm:a', name: 'Susu', unit: 'ML' }];
+  p.end = TEST_TODAY;
   p.result = [{ key: 'm:a', name: 'Susu', unit: 'ML', movements: {}, system: 90, physical: 88, variance: -2, variance_value: -20 }];
   t.data.state.documents = [
-    { id: 'r', period_id: 'period', type: 'receipt', start: '2026-11-02', end: '2026-11-02', postings: [{ key: 'm:a', name: 'Susu', qty: 10, unit: 'ML' }] },
-    { id: 's', period_id: 'period', type: 'sales', start: '2026-11-08', end: '2026-11-08', postings: [{ key: 's:a', name: 'Menu', qty: 20, unit: 'PCS' }] }
+    { id: 'r', period_id: 'period', type: 'receipt', start: TEST_TODAY, end: TEST_TODAY, postings: [{ key: 'm:a', name: 'Susu', qty: 10, unit: 'ML' }] },
+    { id: 's', period_id: 'period', type: 'sales', start: TEST_YESTERDAY, end: TEST_YESTERDAY, postings: [{ key: 's:a', name: 'Menu', qty: 20, unit: 'PCS' }] }
   ];
   t.ui.render();
   assert.doesNotMatch(t.page.innerHTML, /Riwayat /);
@@ -383,49 +399,120 @@ test('main page hides global history and each active form shows only its own his
   await t.click('receipt-add',{soItemKey:'m:a'});
   t.input({ soKey: 'm:a', soProp: 'qty' }, '2');
   assert.match(t.page.innerHTML, /Riwayat Barang Masuk/);
-  assert.match(t.page.innerHTML, /2 November 2026/);
-  assert.doesNotMatch(t.page.innerHTML, /Riwayat Sales|8 November 2026/);
+  assert.match(t.page.innerHTML, /23 November 2026/);
+  assert.doesNotMatch(t.page.innerHTML, /Riwayat Sales|22 November 2026/);
   assert.equal(t.draft('receipt').counts['m:a'].qty, '2');
   await t.ui.open('sales');
   assert.match(t.page.innerHTML, /Riwayat Sales/);
-  assert.match(t.page.innerHTML, /8 November 2026/);
-  assert.doesNotMatch(t.page.innerHTML, /Riwayat Barang Masuk|(?:^|[^0-9])2 November 2026/);
+  assert.match(t.page.innerHTML, /Belum ada riwayat hari ini/);
+  assert.doesNotMatch(t.page.innerHTML, /Riwayat Barang Masuk|22 November 2026/);
+  await t.click('history-more');
+  assert.match(t.page.innerHTML, /22 November 2026/);
   await t.ui.open('receipt');
   assert.match(t.page.innerHTML, /Riwayat Barang Masuk/);
-  assert.doesNotMatch(t.page.innerHTML, /Riwayat Sales|8 November 2026/);
+  assert.doesNotMatch(t.page.innerHTML, /Riwayat Sales|22 November 2026/);
   assert.equal(t.draft('receipt').counts['m:a'].qty, '2');
 });
 
 
-test('Stock Opname history date groups are collapsed by default', () => {
+test('Stock Opname history date groups open only for today by default', () => {
   const source = contentsOfStockOpnameUi();
   assert.match(source, /function historyDate\(date,entries,content,unit='transaksi',expanded=false\)/);
+  assert.match(source, /date===today\(\)/);
   assert.doesNotMatch(source, /,'transaksi',index===0\)/);
 });
 
-test('daily receipt history paginates complete dates without original transaction controls', async () => {
+
+test('Stock Opname histories for all six types default to today and keep older dates hidden', async () => {
+  const t = runtime(), p = t.data.state.periods[0];
+  p.start = TEST_TODAY;
+  p.end = TEST_TODAY;
+  p.opening = { 'm:a': 100 };
+  p.opening_catalog = [{ key: 'm:a', name: 'Susu', unit: 'ML' }];
+  p.result = [{ key: 'm:a', name: 'Susu', unit: 'ML', movements: {}, system: 100, physical: 99, variance: -1, variance_value: -10 }];
+  t.data.state.periods.unshift({
+    id: 'previous-period', start: TEST_YESTERDAY, end: TEST_YESTERDAY, status: 'closed',
+    opening: { 'm:a': 20 },
+    opening_catalog: [{ key: 'm:a', name: 'Susu', unit: 'ML' }],
+    result: [{ key: 'm:a', name: 'Susu', unit: 'ML', movements: {}, system: 20, physical: 18, variance: -2, variance_value: -20 }]
+  });
+  t.data.state.documents = [
+    ...['receipt','expense','production','sales'].flatMap(kind => [
+      { id: kind+'-today', period_id: 'period', type: kind, category: 'Waste', start: TEST_TODAY, end: TEST_TODAY, postings: [{ key: kind==='sales'?'s:a':kind==='production'?'w:a':'m:a', name: kind==='sales'?'Menu':kind==='production'?'WIP':'Susu', qty: kind==='expense'?-2:2, unit: 'ML' }] },
+      { id: kind+'-older', period_id: 'period', type: kind, category: 'Waste', start: TEST_YESTERDAY, end: TEST_YESTERDAY, postings: [{ key: kind==='sales'?'s:a':kind==='production'?'w:a':'m:a', name: kind==='sales'?'Menu':kind==='production'?'WIP':'Susu', qty: kind==='expense'?-3:3, unit: 'ML' }] }
+    ])
+  ];
+  for (const kind of ['receipt','expense','production','sales','initial','close']) {
+    await t.ui.open(kind);
+    assert.match(t.page.innerHTML, /23 November 2026/);
+    assert.match(t.page.innerHTML, /class="so-history-date"><details open>/, kind+' today date should be open');
+    assert.doesNotMatch(t.page.innerHTML, /22 November 2026/, kind+' older date should stay hidden');
+  }
+});
+
+test('history shows an empty today state and reveals previous dates only after clicking', async () => {
+  const t = runtime();
+  t.data.state.documents = [{
+    id: 'yesterday-receipt', period_id: 'period', type: 'receipt',
+    start: TEST_YESTERDAY, end: TEST_YESTERDAY,
+    postings: [{ key: 'm:a', name: 'Susu', qty: 5, unit: 'ML' }]
+  }];
+  await t.ui.open('receipt');
+  assert.match(t.page.innerHTML, /Belum ada riwayat hari ini/);
+  assert.doesNotMatch(t.page.innerHTML, /so-history-date/);
+  assert.match(t.page.innerHTML, /Tampilkan tanggal sebelumnya/);
+  await t.click('history-more');
+  assert.match(t.page.innerHTML, /Belum ada riwayat hari ini/);
+  assert.match(t.page.innerHTML, /<span>22 November 2026<\/span>/);
+  assert.match(t.page.innerHTML, /class="so-history-date"><details>/);
+  assert.doesNotMatch(t.page.innerHTML, /class="so-history-date"><details open>/);
+});
+
+test('history card styling and transaction evidence panel use the requested class structure', async () => {
+  const source = contentsOfStockOpnameUi();
+  const css = contentsOfStockOpnameStyles();
+  const historyStart = css.indexOf('.so-history-head {');
+  const historyEnd = css.indexOf('\n.so-result {', historyStart);
+  assert.ok(historyStart >= 0 && historyEnd > historyStart);
+  const historyBlock = css.slice(historyStart, historyEnd);
+  assert.doesNotMatch(historyBlock, /!important/);
+  assert.match(historyBlock, /\.so-history-date\s*\{[^}]*background:\s*var\(--ui-surface\)/s);
+  assert.match(historyBlock, /\.so-history-date:has\(> details\[open\]\)/);
+  assert.match(historyBlock, /\.so-history-category-chip/);
+  assert.match(historyBlock, /\.so-history-originals\s*\{[^}]*border:\s*1px dashed var\(--ui-line\)/s);
+  assert.match(source, /class="so-history-originals"/);
+  assert.match(source, /class="so-history-original-list"/);
+  assert.match(source, /class="so-history-original"/);
+  assert.match(source, /class="so-history-category-chip"/);
+  assert.match(source, /Tampilkan tanggal sebelumnya/);
+});
+
+test('daily receipt history shows today first and loads older dates in order', async () => {
   const t = runtime();
   const receipt = (id, day, qty) => ({
     id, period_id: 'period', type: 'receipt', start: day, end: day,
     postings: [{ key: 'm:a', name: 'Susu', qty, unit: 'ML' }]
   });
   t.data.state.documents = [
-    ...Array.from({ length: 12 }, (_, i) => receipt('recent-' + i, '2026-11-11', i + 1)),
-    ...Array.from({ length: 10 }, (_, i) => receipt('older-' + i, '2026-11-' + String(i + 1).padStart(2, '0'), 1))
+    ...Array.from({ length: 12 }, (_, i) => receipt('today-' + i, TEST_TODAY, i + 1)),
+    ...Array.from({ length: 10 }, (_, i) => receipt('older-' + i, dateOffset(i + 1), 1))
   ];
   await t.ui.open('receipt');
   const html = t.page.innerHTML;
-  assert.equal((html.match(/class="so-history-date"/g) || []).length, 10);
-  assert.equal((html.match(/class="so-history-date"><details>/g) || []).length, 10);
-  assert.doesNotMatch(html, /class="so-history-date"><details open>/);
+  assert.equal((html.match(/class="so-history-date"/g) || []).length, 1);
+  assert.match(html, /class="so-history-date"><details open>/);
+  assert.match(html, /<span>23 November 2026<\/span>/);
   assert.match(html, /Susu<\/span><strong>78 ML/);
   assert.match(html, /so-history-originals/);
   assert.match(html, /data-so-action="void"/);
-  assert.doesNotMatch(html, /<span>1 November 2026<\/span>/);
+  assert.doesNotMatch(html, /<span>22 November 2026<\/span>/);
+  assert.match(html, /Tampilkan tanggal sebelumnya/);
   assert.match(html, /data-so-action="history-more"/);
   await t.click('history-more');
   assert.equal((t.page.innerHTML.match(/class="so-history-date"/g) || []).length, 11);
-  assert.match(t.page.innerHTML, /<span>1 November 2026<\/span>/);
+  assert.equal((t.page.innerHTML.match(/class="so-history-date"><details open>/g) || []).length, 1);
+  assert.match(t.page.innerHTML, /<span>22 November 2026<\/span>/);
+  assert.match(t.page.innerHTML, /<span>13 November 2026<\/span>/);
   assert.doesNotMatch(t.page.innerHTML, /data-so-action="history-more"/);
 });
 
@@ -436,7 +523,8 @@ test('resetting Stock Awal preserves transactions and requires complete manual i
   assert.equal(t.data.state.periods[0].status, 'opening_pending');
   assert.equal(t.data.state.documents.length, 1);
   await t.ui.open('initial');
-  assert.match(t.page.innerHTML, /1 November 2026/);
+  assert.match(t.page.innerHTML, /Belum ada riwayat hari ini/);
+  assert.doesNotMatch(t.page.innerHTML, /1 November 2026/);
   assert.doesNotMatch(t.page.innerHTML, /data-so-key="m:a"[^>]*value="[1-9]/);
   t.input({ soKey: 'm:a', soProp: 'qty' }, '0');
   t.input({ soKey: 'w:a', soProp: 'qty' }, '5');
@@ -617,9 +705,9 @@ test('Barang Masuk removes an item from its local draft and avoids sending it',a
 test('daily expense history groups materials by category without original transaction controls',async()=>{
  const t=runtime();
  t.data.state.documents=[
-  {id:'e1',period_id:'period',type:'expense',category:'Kalibrasi',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-2,unit:'ML'}]},
-  {id:'e2',period_id:'period',type:'expense',category:'Lainnya',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-3,unit:'ML'},{key:'m:b',name:'Gula',qty:-100,unit:'GR'}]},
-  {id:'e3',period_id:'period',type:'expense',category:'QC',void:true,start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-99,unit:'ML'}]}
+  {id:'e1',period_id:'period',type:'expense',category:'Kalibrasi',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:a',name:'Susu',qty:-2,unit:'ML'}]},
+  {id:'e2',period_id:'period',type:'expense',category:'Lainnya',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:a',name:'Susu',qty:-3,unit:'ML'},{key:'m:b',name:'Gula',qty:-100,unit:'GR'}]},
+  {id:'e3',period_id:'period',type:'expense',category:'QC',void:true,start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:a',name:'Susu',qty:-99,unit:'ML'}]}
  ];
  await t.ui.open('expense');
  const html=t.page.innerHTML;
@@ -638,8 +726,8 @@ test('daily expense history groups materials by category without original transa
 test('daily receipt history totals repeated materials without original records',async()=>{
  const t=runtime();
  t.data.state.documents=[
-  {id:'r1',period_id:'period',type:'receipt',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:100,unit:'ML'}]},
-  {id:'r2',period_id:'period',type:'receipt',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:50,unit:'ML'},{key:'m:b',name:'Gula',qty:20,unit:'GR'}]}
+  {id:'r1',period_id:'period',type:'receipt',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:a',name:'Susu',qty:100,unit:'ML'}]},
+  {id:'r2',period_id:'period',type:'receipt',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:a',name:'Susu',qty:50,unit:'ML'},{key:'m:b',name:'Gula',qty:20,unit:'GR'}]}
  ];
  await t.ui.open('receipt');
  const html=t.page.innerHTML;
@@ -652,7 +740,7 @@ test('daily receipt history totals repeated materials without original records',
 
 test('grouped Barang Masuk history exposes per-transaction cancellation and updates stock',async()=>{
  const t=runtime();
- t.data.state.documents=[{id:'receipt-1',period_id:'period',type:'receipt',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:10,unit:'ML'}]}];
+ t.data.state.documents=[{id:'receipt-1',period_id:'period',type:'receipt',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:a',name:'Susu',qty:10,unit:'ML'}]}];
  await t.ui.open('receipt');
  assert.match(t.page.innerHTML,/data-so-action="void" data-so-id="receipt-1"/);
  await t.click('void',{soId:'receipt-1'});
@@ -663,8 +751,8 @@ test('grouped Barang Masuk history exposes per-transaction cancellation and upda
 test('daily expense history distinguishes inward adjustments from outward expenses',async()=>{
  const t=runtime();
  t.data.state.documents=[
- {id:'e1',period_id:'period',type:'expense',category:'Waste',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-5,unit:'ML'}]},
- {id:'m1',period_id:'period',type:'move_in',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:3,unit:'ML'}]}
+ {id:'e1',period_id:'period',type:'expense',category:'Waste',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:a',name:'Susu',qty:-5,unit:'ML'}]},
+ {id:'m1',period_id:'period',type:'move_in',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:a',name:'Susu',qty:3,unit:'ML'}]}
  ];
  await t.ui.open('expense');
  assert.match(t.page.innerHTML,/Susu<\/span><strong>5 ML/);
@@ -675,9 +763,9 @@ test('daily expense history distinguishes inward adjustments from outward expens
 test('expense material totals remain separated by category, including repeated material',async()=>{
  const t=runtime();
  t.data.state.documents=[
- {id:'a',period_id:'period',type:'expense',category:'Waste',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-2,unit:'ML'}]},
- {id:'b',period_id:'period',type:'expense',category:'Waste',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-4,unit:'ML'}]},
- {id:'c',period_id:'period',type:'expense',category:'QC',start:'2026-11-08',end:'2026-11-08',postings:[{key:'m:a',name:'Susu',qty:-5,unit:'ML'}]}
+ {id:'a',period_id:'period',type:'expense',category:'Waste',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:a',name:'Susu',qty:-2,unit:'ML'}]},
+ {id:'b',period_id:'period',type:'expense',category:'Waste',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:a',name:'Susu',qty:-4,unit:'ML'}]},
+ {id:'c',period_id:'period',type:'expense',category:'QC',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'m:a',name:'Susu',qty:-5,unit:'ML'}]}
  ];
  await t.ui.open('expense');
  const html=t.page.innerHTML;
@@ -752,9 +840,9 @@ test('sales template leaves quantities blank even when the draft is filled', asy
 test('feature history is isolated and switching forms preserves each local draft', async () => {
   const t=runtime();
   t.data.state.documents=[
-    {id:'expense-history',period_id:'period',type:'expense',category:'Waste',start:'2026-11-06',end:'2026-11-06',postings:[{key:'m:a',name:'Susu',qty:-4,unit:'ML'}]},
-    {id:'production-history',period_id:'period',type:'production',start:'2026-11-07',end:'2026-11-07',postings:[{key:'w:a',name:'WIP',qty:5,unit:'ML'}]},
-    {id:'sales-history',period_id:'period',type:'sales',start:'2026-11-08',end:'2026-11-08',postings:[{key:'s:a',name:'Menu',qty:3,unit:'PCS'}]}
+    {id:'expense-history',period_id:'period',type:'expense',category:'Waste',start:dateOffset(3),end:dateOffset(3),postings:[{key:'m:a',name:'Susu',qty:-4,unit:'ML'}]},
+    {id:'production-history',period_id:'period',type:'production',start:dateOffset(2),end:dateOffset(2),postings:[{key:'w:a',name:'WIP',qty:5,unit:'ML'}]},
+    {id:'sales-history',period_id:'period',type:'sales',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'s:a',name:'Menu',qty:3,unit:'PCS'}]}
   ];
   await t.ui.open('sales');
   t.input({soKey:'s:a',soProp:'qty'},'12');
