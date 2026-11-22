@@ -35,7 +35,7 @@ test('Stock Opname overview and transaction forms are not hidden by legacy table
 
 test('wide desktop dashboard queue aligns with the summary cards and scrolls internally', () => {
   const css = read('assets/css/style.css');
-  const rule = css.slice(css.lastIndexOf('/* DESKTOP — cap active queue height'));
+  const rule = css.slice(css.lastIndexOf('/* DESKTOP — align the active queue bottom'));
   assert.match(rule, /@media \(min-width: 1150px\)/);
   assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*grid-row: 2 \/ 4/s);
   assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*height: calc\(100% \+ 15px\)/s);
