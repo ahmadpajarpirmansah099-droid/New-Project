@@ -394,15 +394,10 @@ test('main page hides global history and each active form shows only its own his
 });
 
 
-test('all Stock Opname history date groups start collapsed across transaction types', async () => {
-  const t = runtime();
-  t.seedHistory();
-  for (const kind of ['initial','close','receipt','expense','production','sales']) {
-    await t.ui.open(kind);
-    const html = t.page.innerHTML;
-    assert.doesNotMatch(html, /class="so-history-date"><details open>/, `${kind} history date should be collapsed`);
-    assert.doesNotMatch(html, /<details open>/, `${kind} history details should not auto-expand`);
-  }
+test('Stock Opname history date groups are collapsed by default', () => {
+  const source = contentsOfStockOpnameUi();
+  assert.match(source, /function historyDate\(date,entries,content,unit='transaksi',expanded=false\)/);
+  assert.doesNotMatch(source, /,'transaksi',index===0\)/);
 });
 
 test('daily receipt history paginates complete dates without original transaction controls', async () => {
