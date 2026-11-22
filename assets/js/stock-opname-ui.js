@@ -280,7 +280,7 @@
   const toolbar=k==='close'?'':receipt?receiptGrid:'<div class="so-toolbar">'+dates+extra+'</div>'+(noTarget?'<p class="so-notice">Belum ada outlet/divisi tujuan yang aktif.</p>':'');
   const receiptLedger=rows.length?'<div class="so-receipt-items-grid" aria-label="Daftar barang masuk">'+receiptCardsHTML+'</div>':'<p class="so-notice">Belum ada barang dipilih. Cari dan pilih barang di atas.</p>';
   const ledger=k==='close'?'<p class="so-notice">Isi jumlah fisik pada kolom STOK FISIK di tabel bawah, lalu tekan Konfirmasi.</p>':(rows.some(r=>r.error)?masterLinks():'')+(receipt?receiptLedger:(rows.length?'<table class="so-ledger'+(isCount?' so-count-ledger':'')+'" aria-label="'+e(labels[k])+'"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>':(expense?'':'<p class="so-notice">Data belum tersedia.</p>')))+(!rows.length&&(!(receipt||expense)||!catalog().some(r=>receipt?r.key.startsWith('m:'):/^[mw]:/.test(r.key)))?masterLinks():'');
-  return '<section class="so-panel so-form"'+(receipt?' data-so-receipt-form="true"':'')+'><header class="so-form-head"><h2>'+e(labels[k])+'</h2></header>'+(expense?'<div data-so-expense-toolbar>'+toolbar+'</div>':toolbar)+(expense?expenseSearch:'')+excelActions+(isPending()&&k!=='close'?'<p class="so-notice">Stock Awal berikutnya belum dikonfirmasi. Isian ini disimpan sebagai draft.</p>':'')+(expense?'<div data-so-expense-rows>'+ledger+'</div>':ledger)+'<footer class="so-form-footer">'+(expense?'':'<p id="soDraftStatus" class="so-status" role="status">'+e(draftStatus())+'</p>')+'<div class="so-actions">'+button('Simpan Draft','draft')+button('Tutup Form','cancel')+button(isCount?'Konfirmasi':'Simpan Transaksi','submit','',true)+'</div></footer></section>';
+  return '<section class="so-panel so-form"'+(receipt?' data-so-receipt-form="true"':'')+'><header class="so-form-head"><h2>'+e(labels[k])+'</h2></header>'+(expense?'<div data-so-expense-toolbar>'+toolbar+'</div>':toolbar)+(expense?expenseSearch:'')+excelActions+(isPending()&&k!=='close'?'<p class="so-notice">Stock Awal berikutnya belum dikonfirmasi. Isian ini disimpan sebagai draft.</p>':'')+(expense?'<div data-so-expense-rows>'+ledger+'</div>':ledger)+'<footer class="so-form-footer">'+(expense?'':'<p id="soDraftStatus" class="so-status" role="status">'+e(draftStatus())+'</p>')+'<div class="so-actions">'+button('Simpan Draft','draft')+button('Tutup Form','cancel')+button(isCount?'Konfirmasi':'Simpan Transaksi','submit','',true)+'</div></footer>'+historyHTML()+'</section>';
  }
  function receiptFormHTML(rows,dateButton){
   const selected=rows[0]||null,v=selected?(form.counts[selected.key]||{}):{},units=selected?.units||[];
@@ -300,7 +300,7 @@
    return '<article class="so-receipt-extra-item"><div class="so-receipt-extra-head"><strong>'+e(r.name)+'</strong><button type="button" data-so-action="receipt-remove" data-so-item-key="'+e(r.key)+'" aria-label="Hapus '+e(r.name)+'">Hapus</button></div><div class="so-receipt-quantity-unit-grid"><label class="so-receipt-reference-field"><span>Jumlah</span><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="qty" value="'+e(value.qty??'')+'" aria-label="Barang Masuk '+e(r.name)+'"></label><label class="so-receipt-reference-field"><span>Satuan</span><div class="so-receipt-unit-control">'+desktop+mobile+'</div></label></div><label class="so-receipt-reference-field"><span>Harga invoice total (opsional)</span><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(r.key)+'" data-so-prop="invoice_total" value="'+e(value.invoice_total??'')+'" aria-label="Harga invoice total '+e(r.name)+'" placeholder="Kosongkan jika tidak ada harga"></label></article>';
   }).join('');
   const icon='<span class="so-receipt-heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.3 7.6 7.7 4.3 7.7-4.3M12 12v9"/><path d="M8.5 5 16 9.2v5.3"/></svg></span>';
-  return '<section class="so-panel so-form so-receipt-reference-form" data-so-receipt-form="true"><header class="so-form-head so-receipt-reference-head">'+icon+'<h2>Catat Barang Masuk</h2></header><div class="so-receipt-reference-fields">'+receiptSearch+'<div class="so-receipt-details-grid"><div class="so-receipt-quantity-unit-grid">'+quantity+unit+'</div>'+invoice+date+'</div>'+note+'</div>'+(extraRows?'<div class="so-receipt-extra-items">'+extraRows+'</div>':'')+'<footer class="so-form-footer so-receipt-reference-footer"><div class="so-actions"><button type="button" data-so-action="cancel" class="so-receipt-cancel">Batal</button>'+button('Simpan Barang Masuk','submit','',true)+'</div></footer></section>';
+  return '<section class="so-panel so-form so-receipt-reference-form" data-so-receipt-form="true"><header class="so-form-head so-receipt-reference-head">'+icon+'<h2>Catat Barang Masuk</h2></header><div class="so-receipt-reference-fields">'+receiptSearch+'<div class="so-receipt-details-grid"><div class="so-receipt-quantity-unit-grid">'+quantity+unit+'</div>'+invoice+date+'</div>'+note+'</div>'+(extraRows?'<div class="so-receipt-extra-items">'+extraRows+'</div>':'')+'<footer class="so-form-footer so-receipt-reference-footer"><div class="so-actions"><button type="button" data-so-action="cancel" class="so-receipt-cancel">Batal</button>'+button('Simpan Barang Masuk','submit','',true)+'</div></footer>'+historyHTML()+'</section>';
  }
  function updateExpenseParts(part){
   const current=page()?.querySelector?.('.so-form');
@@ -529,7 +529,7 @@
   const previousList=visiblePrevious.length?`<ul class="so-history">${renderGroups(visiblePrevious)}</ul>`:'';
   const more=previousGroups.length>visiblePrevious.length?
    `<div class="so-history-more">${button('Tampilkan tanggal sebelumnya','history-more')}</div>`:'';
-  return `<section class="so-panel so-history-panel" id="soHistory">
+  return `<section class="so-history-panel" id="soHistory">
    <header class="so-history-head"><h2>Riwayat ${e(labels[historyKind])}</h2></header>
    ${todayList}${previousList}${more}
   </section>`;
@@ -576,7 +576,7 @@ ${transactionActions}
   </div>
   ${notice?`<p class="so-notice" role="alert">${e(notice)}</p>`:''}
   ${negative&&p?.status!=='opening_pending'?'<p class="so-notice so-warning">Ada stok sistem minus. Periksa transaksi dan cocokkan saat opname.</p>':''}
-  ${formHTML()}${form?historyHTML():''}`;
+  ${formHTML()}`;
   page().innerHTML+=itemTableHTML();
  }
  function latestPeriodLabel(){
