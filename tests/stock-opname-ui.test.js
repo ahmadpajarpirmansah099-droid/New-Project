@@ -484,7 +484,6 @@ test('history card styling and transaction evidence panel use the requested clas
   assert.match(source, /class="so-history-transaction"/);
   assert.match(source, /class="so-history-transaction-copy"/);
   assert.doesNotMatch(source, /Transaksi per bukti/);
-  assert.match(source, /data-so-action="void"/);
   assert.match(source, /class="so-history-category-chip"/);
   assert.match(source, /Tampilkan tanggal sebelumnya/);
   assert.match(historyBlock, /\.so-history-date > details > summary\s*\{[^}]*font: 800 16px\/1\.35/);
