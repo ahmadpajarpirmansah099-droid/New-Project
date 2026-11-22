@@ -13137,7 +13137,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 #page-stock-opname .so-receipt-search-input-wrap .so-receipt-clear:active:not(:disabled) {
   transform: translateY(calc(-50% + 1px));
 }
-/* Blur the page behind the picker, not the receipt form's entire surface. */
+/* Blur the screen while cutting a live transparent window around the search and results. */
 #page-stock-opname .so-receipt-reference-form.is-receipt-searching {
   position: static;
   z-index: auto;
@@ -13151,11 +13151,16 @@ body.so-receipt-search-active::before {
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
   pointer-events: none;
-}
-/* Keep only the active search control and its choices above the soft backdrop. */
-#page-stock-opname .so-receipt-reference-form.is-receipt-searching .so-receipt-search {
-  position: relative;
-  z-index: 120;
+  -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  -webkit-mask-size: 100% 100%, var(--so-receipt-hole-w, 0px) var(--so-receipt-hole-h, 0px);
+  -webkit-mask-position: 0 0, var(--so-receipt-hole-x, 0px) var(--so-receipt-hole-y, 0px);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-composite: xor;
+  mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  mask-size: 100% 100%, var(--so-receipt-hole-w, 0px) var(--so-receipt-hole-h, 0px);
+  mask-position: 0 0, var(--so-receipt-hole-x, 0px) var(--so-receipt-hole-y, 0px);
+  mask-repeat: no-repeat;
+  mask-composite: exclude;
 }
 @media (min-width: 900px) {
   #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown { display: block; position: relative; }

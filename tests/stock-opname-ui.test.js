@@ -1019,11 +1019,15 @@ test('Stock Opname transaction icons are aligned and sized consistently', () => 
 
 test('Barang Masuk reference form uses the two-column quantity and unit row without gray cards', () => {
  const css=contentsOfStockOpnameStyles();
+ const js=contentsOfStockOpnameUi();
  assert.match(css, /\.so-receipt-quantity-unit-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0,0\.8fr\) minmax\(0,1\.2fr\)/);
  assert.match(css, /\.so-receipt-unit-control > \.so-unit-picker \{ display: none; \}/);
  assert.match(css, /\.so-receipt-reference-field > input,[\s\S]*?background:\s*var\(--ui-surface\)/);
  assert.match(css, /body\.so-receipt-search-active::before\s*\{[^}]*backdrop-filter:\s*blur\(2px\)/);
- assert.match(css, /\.so-receipt-reference-form\.is-receipt-searching\s*\{[^}]*position:\s*static[^}]*z-index:\s*auto/);
- assert.match(css, /\.so-receipt-reference-form\.is-receipt-searching \.so-receipt-search\s*\{[^}]*position:\s*relative[^}]*z-index:\s*120/);
+ assert.match(css, /mask-composite:\s*exclude/);
+ assert.match(css, /mask-size:\s*100% 100%, var\(--so-receipt-hole-w/);
+ assert.match(css, /-webkit-mask-composite:\s*xor/);
+ assert.match(js, /function updateReceiptSearchMask\(/);
+ assert.match(js, /requestAnimationFrame\(updateReceiptSearchMask\)/);
  assert.match(css, /\.so-receipt-reference-footer \.so-actions\s*\{[^}]*grid-template-columns:\s*repeat\(2,minmax\(0,1fr\)\)/);
 });

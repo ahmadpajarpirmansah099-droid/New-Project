@@ -741,10 +741,33 @@ ${transactionActions}
   const dropdown=ev.target.closest('.so-unit-dropdown[open], .so-category-dropdown[open]');
   if(dropdown){ev.preventDefault();dropdown.open=false;dropdown.querySelector('summary')?.focus();}
  });
+ function updateReceiptSearchMask(){
+  const input=document.querySelector?.('[data-so-receipt-search]:focus');
+  const surface=input?.closest('.so-receipt-search');
+  const body=document.body;
+  if(!surface||!body)return;
+  const rect=surface.getBoundingClientRect();
+  const results=surface.querySelector('[data-so-receipt-results]');
+  const bottom=results?.getBoundingClientRect().bottom||rect.bottom;
+  const pad=5;
+  body.style.setProperty('--so-receipt-hole-x',(rect.left-pad)+'px');
+  body.style.setProperty('--so-receipt-hole-y',(rect.top-pad)+'px');
+  body.style.setProperty('--so-receipt-hole-w',(rect.width+pad*2)+'px');
+  body.style.setProperty('--so-receipt-hole-h',(Math.max(rect.height,bottom-rect.top)+pad*2)+'px');
+ }
+ function clearReceiptSearchMask(){
+  const body=document.body;if(!body)return;
+  ['--so-receipt-hole-x','--so-receipt-hole-y','--so-receipt-hole-w','--so-receipt-hole-h'].forEach(name=>body.style.removeProperty(name));
+ }
+ function scheduleReceiptSearchMask(){
+  if(typeof requestAnimationFrame==='function')requestAnimationFrame(updateReceiptSearchMask);
+  else updateReceiptSearchMask();
+ }
  document.addEventListener('focusin',ev=>{
   if(ev.target?.matches?.('[data-so-receipt-search]')){
    page()?.querySelector('.so-form')?.classList.add('is-receipt-searching');
    document.body?.classList.add('so-receipt-search-active');
+   scheduleReceiptSearchMask();
    if(ev.target.dataset.soSelectedKey)ev.target.select?.();
   }
  });
@@ -752,8 +775,11 @@ ${transactionActions}
   if(ev.target?.matches?.('[data-so-receipt-search]')){
    page()?.querySelector('.so-form')?.classList.remove('is-receipt-searching');
    document.body?.classList.remove('so-receipt-search-active');
+   clearReceiptSearchMask();
   }
  });
+ window.addEventListener('resize',()=>{if(document.body?.classList.contains('so-receipt-search-active'))updateReceiptSearchMask();},{passive:true});
+ window.addEventListener('scroll',()=>{if(document.body?.classList.contains('so-receipt-search-active'))updateReceiptSearchMask();},{passive:true,capture:true});
  document.addEventListener('pointerdown',ev=>{
   if(ev.target?.closest?.('[data-so-action="receipt-add"]'))ev.preventDefault();
  });
@@ -776,6 +802,7 @@ ${transactionActions}
    const results=el.closest?.('.so-receipt-search')?.querySelector('[data-so-receipt-results]')||el.parentElement?.querySelector('[data-so-receipt-results]');
    if(results)results.innerHTML=receiptSuggestions(receiptQuery);
    el.closest('.so-receipt-search')?.classList.toggle('has-results',!!receiptQuery.trim());
+   scheduleReceiptSearchMask();
    return;
   }
   if(el.dataset.soKey){const key=el.dataset.soKey;form.counts[key]={...form.counts[key],[el.dataset.soProp]:el.value};if(form.kind==='production'){const row=catalog().find(x=>x.key===key);const output=el.closest('tr')?.querySelector('[data-so-output]');if(row&&output)output.textContent='Hasil: '+number(Number(el.value||0)*Number(row.yield))+' '+row.unit+' · 1 batch = '+number(row.yield)+' '+row.unit;}}
