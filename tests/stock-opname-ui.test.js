@@ -393,6 +393,18 @@ test('main page hides global history and each active form shows only its own his
   assert.equal(t.draft('receipt').counts['m:a'].qty, '2');
 });
 
+
+test('all Stock Opname history date groups start collapsed across transaction types', async () => {
+  const t = runtime();
+  t.seedHistory();
+  for (const kind of ['initial','close','receipt','expense','production','sales']) {
+    await t.ui.open(kind);
+    const html = t.page.innerHTML;
+    assert.doesNotMatch(html, /class="so-history-date"><details open>/, `${kind} history date should be collapsed`);
+    assert.doesNotMatch(html, /<details open>/, `${kind} history details should not auto-expand`);
+  }
+});
+
 test('daily receipt history paginates complete dates without original transaction controls', async () => {
   const t = runtime();
   const receipt = (id, day, qty) => ({
@@ -406,7 +418,8 @@ test('daily receipt history paginates complete dates without original transactio
   await t.ui.open('receipt');
   const html = t.page.innerHTML;
   assert.equal((html.match(/class="so-history-date"/g) || []).length, 10);
-  assert.match(html, /class="so-history-date"><details open>/);
+  assert.equal((html.match(/class="so-history-date"><details>/g) || []).length, 10);
+  assert.doesNotMatch(html, /class="so-history-date"><details open>/);
   assert.match(html, /Susu<\/span><strong>78 ML/);
   assert.match(html, /so-history-originals/);
   assert.match(html, /data-so-action="void"/);
