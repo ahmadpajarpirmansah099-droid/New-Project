@@ -13137,9 +13137,10 @@ button, input, select, textarea { font-family: var(--ui-font); }
 #page-stock-opname .so-receipt-search-input-wrap .so-receipt-clear:active:not(:disabled) {
   transform: translateY(calc(-50% + 1px));
 }
+/* Blur the page behind the picker, not the receipt form's entire surface. */
 #page-stock-opname .so-receipt-reference-form.is-receipt-searching {
-  position: relative;
-  z-index: 120;
+  position: static;
+  z-index: auto;
 }
 body.so-receipt-search-active::before {
   content: "";
@@ -13151,9 +13152,10 @@ body.so-receipt-search-active::before {
   backdrop-filter: blur(2px);
   pointer-events: none;
 }
+/* Keep only the active search control and its choices above the soft backdrop. */
 #page-stock-opname .so-receipt-reference-form.is-receipt-searching .so-receipt-search {
   position: relative;
-  z-index: 2;
+  z-index: 120;
 }
 @media (min-width: 900px) {
   #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown { display: block; position: relative; }
