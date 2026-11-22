@@ -33,7 +33,7 @@ test('Stock Opname overview and transaction forms are not hidden by legacy table
   assert.doesNotMatch(css, /so-table-only/);
 });
 
-test('wide desktop dashboard queue is capped and scrolls internally', () => {
+test('wide desktop dashboard queue aligns with the summary cards and scrolls internally', () => {
   const css = read('assets/css/style.css');
   const rule = css.slice(css.lastIndexOf('/* DESKTOP — cap active queue height'));
   assert.match(rule, /@media \(min-width: 1150px\)/);
