@@ -768,7 +768,26 @@ test('daily receipt history totals repeated materials without original records',
  assert.equal((html.match(/class="so-date-material-row"/g)||[]).length,2);
  assert.match(html,/Susu<\/span><strong>150 ML/);
  assert.match(html,/Gula<\/span><strong>20 GR/);
+ assert.equal((html.match(/class="so-date-material-row so-date-material-row--actions"/g)||[]).length,2);
  assert.match(html,/data-so-action="void"/);
+ assert.doesNotMatch(html,/so-history-transactions/);
+});
+
+
+
+test('multi-item receipt shows its transaction actions beside each related material row',async()=>{
+ const t=runtime();
+ t.data.state.documents=[{id:'receipt-multi',period_id:'period',type:'receipt',start:TEST_TODAY,end:TEST_TODAY,postings:[
+  {key:'m:a',name:'Susu',qty:10,unit:'ML'},
+  {key:'m:b',name:'Gula',qty:20,unit:'GR'}
+ ]}];
+ await t.ui.open('receipt');
+ const html=t.page.innerHTML;
+ assert.equal((html.match(/class="so-date-material-row so-date-material-row--actions"/g)||[]).length,2);
+ assert.equal((html.match(/data-so-action="void" data-so-id="receipt-multi"/g)||[]).length,2);
+ await t.click('void',{soId:'receipt-multi'});
+ assert.equal(t.writes.at(-1).action,'void');
+ assert.equal(t.writes.at(-1).input.id,'receipt-multi');
 });
 
 test('grouped Barang Masuk history exposes per-transaction cancellation and updates stock',async()=>{
