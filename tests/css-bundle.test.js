@@ -52,3 +52,9 @@ test('floating labels use the requested motion and static field state', () => {
   assert.match(css, /\.flt:has\(> input:not\(:placeholder-shown\)\) > \.flt-label/);
   assert.match(css, /\.flt\.flt--static > \.flt-label/);
 });
+
+test('browser autofill keeps form fields on the app surface', () => {
+  const css = read('assets/css/style.css');
+  assert.match(css, /:-webkit-autofill\s*\{[^}]*-webkit-text-fill-color/);
+  assert.match(css, /:-webkit-autofill\s*\{[^}]*-webkit-box-shadow:\s*inset 0 0 0 1000px var\(--ui-surface/);
+});

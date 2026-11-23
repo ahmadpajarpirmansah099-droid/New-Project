@@ -13506,6 +13506,14 @@ html:not([data-desktop-theme="dark"]) :is(
   background-color: var(--ui-surface, #fff);
 }
 
+/* Chrome autofill mengecat latar biru; pertahankan warna permukaan aplikasi. */
+:-webkit-autofill {
+  -webkit-text-fill-color: var(--ui-ink, #17172a);
+  caret-color: var(--ui-ink, #17172a);
+  -webkit-box-shadow: inset 0 0 0 1000px var(--ui-surface, #fff) !important;
+  box-shadow: inset 0 0 0 1000px var(--ui-surface, #fff) !important;
+}
+
 
 /* GLOBAL LIGHT THEME — remove remaining soft-gray surfaces used by feature panels and table headers. */
 html:not([data-desktop-theme="dark"]) {
