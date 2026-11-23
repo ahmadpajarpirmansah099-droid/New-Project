@@ -62,8 +62,8 @@
     const unit = row && row.unit ? row.unit : '';
     const factor = row && row.factor != null ? row.factor : '';
     return '<div class="md-conversion-row" data-md-conversion-row>' +
-      '<label class="md-field"><span>Satuan</span><input data-md-unit type="text" maxlength="20" placeholder="Contoh: KG" value="' + escapeHtml(unit) + '"></label>' +
-      '<label class="md-field"><span>Faktor ke satuan dasar</span><input data-md-factor type="number" min="0.000001" step="any" inputmode="decimal" placeholder="1000" value="' + escapeHtml(factor) + '"></label>' +
+      '<label class="md-field flt"><span class="flt-label">Satuan</span><input data-md-unit aria-label="Satuan" type="text" maxlength="20" placeholder=" " value="' + escapeHtml(unit) + '"></label>' +
+      '<label class="md-field flt"><span class="flt-label">Faktor ke satuan dasar</span><input data-md-factor aria-label="Faktor ke satuan dasar" type="number" min="0.000001" step="any" inputmode="decimal" placeholder=" " value="' + escapeHtml(factor) + '"></label>' +
       '<button class="md-remove-unit" type="button" data-md-action="remove-unit" aria-label="Hapus satuan">×</button>' +
       '</div>';
   }
@@ -153,11 +153,11 @@
       '<button type="button" class="md-close" data-md-action="close-sheet" aria-label="Tutup">×</button></div>' +
       '<form id="mdItemForm" novalidate>' +
         '<input id="mdItemId" type="hidden" name="mdItemId" value="' + escapeHtml(existing ? existing.id : '') + '">' +
-        '<label class="md-field"><span>Nama barang <i>*</i></span><input id="mdItemName" name="mdItemName" type="text" maxlength="120" required placeholder="Contoh: Freshmilk" value="' + escapeHtml(existing ? existing.nama_barang : '') + '"></label>' +
-        '<label class="md-field"><span>Satuan dasar <i>*</i></span><input id="mdBaseUnit" name="mdBaseUnit" type="text" maxlength="20" required placeholder="Contoh: ML, GR, PCS" value="' + escapeHtml(existing ? existing.satuan_dasar : '') + '"></label>' +
-        '<label class="md-field"><span>Status</span><select id="mdStatus" name="mdStatus"><option value="active" ' + (!existing || existing.status === 'active' ? 'selected' : '') + '>Aktif</option><option value="inactive" ' + (existing && existing.status === 'inactive' ? 'selected' : '') + '>Nonaktif</option></select></label>' +
-        '<label class="md-field"><span>Harga referensi <i>*</i></span><input id="mdReferencePrice" name="mdReferencePrice" type="number" min="0" step="any" inputmode="decimal" required placeholder="Contoh: 295000" value="' + escapeHtml(existing ? existing.harga_referensi : '') + '"></label>' +
-        '<label class="md-field"><span>Satuan harga <i>*</i></span><select name="mdPriceUnit" id="mdPriceUnit"></select></label>' +
+        '<label class="md-field flt"><span class="flt-label">Nama barang *</span><input id="mdItemName" name="mdItemName" aria-label="Nama barang" type="text" maxlength="120" required placeholder=" " value="' + escapeHtml(existing ? existing.nama_barang : '') + '"></label>' +
+        '<label class="md-field flt"><span class="flt-label">Satuan dasar *</span><input id="mdBaseUnit" name="mdBaseUnit" aria-label="Satuan dasar" type="text" maxlength="20" required placeholder=" " value="' + escapeHtml(existing ? existing.satuan_dasar : '') + '"></label>' +
+        '<label class="md-field flt flt--static"><span class="flt-label">Status</span><select id="mdStatus" name="mdStatus"><option value="active" ' + (!existing || existing.status === 'active' ? 'selected' : '') + '>Aktif</option><option value="inactive" ' + (existing && existing.status === 'inactive' ? 'selected' : '') + '>Nonaktif</option></select></label>' +
+        '<label class="md-field flt"><span class="flt-label">Harga referensi *</span><input id="mdReferencePrice" name="mdReferencePrice" aria-label="Harga referensi" type="number" min="0" step="any" inputmode="decimal" required placeholder=" " value="' + escapeHtml(existing ? existing.harga_referensi : '') + '"></label>' +
+        '<label class="md-field flt flt--static"><span class="flt-label">Satuan harga *</span><select name="mdPriceUnit" id="mdPriceUnit"></select></label>' +
         '<label class="md-supply-toggle"><input id="mdIsSupply" name="mdIsSupply" type="checkbox" ' + (existing && existing.is_supply ? 'checked' : '') + '><span><b>Barang supply</b><small>Centang jika barang termasuk kategori supply.</small></span></label>' +
         '<details class="md-advanced" ' + (showAdvanced ? 'open' : '') + '><summary><span><b>Konversi satuan</b><small>Opsional · untuk satuan pembelian atau resep berbeda</small></span><span class="md-advanced-mark" aria-hidden="true">+</span></summary>' +
           '<div class="md-advanced-content"><div class="md-base-unit-row"><span>Satuan dasar</span><b id="mdBaseUnitPreview">' + escapeHtml(existing ? existing.satuan_dasar : '—') + '</b><strong>1</strong></div>' +
