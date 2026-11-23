@@ -33,12 +33,15 @@ test('Stock Opname overview and transaction forms are not hidden by legacy table
   assert.doesNotMatch(css, /so-table-only/);
 });
 
-test('wide desktop dashboard queue aligns with the summary cards and scrolls internally', () => {
+test('desktop dashboard queue is contained within the summary rows and scrolls internally', () => {
   const css = read('assets/css/style.css');
-  const rule = css.slice(css.lastIndexOf('/* DESKTOP — align the active queue bottom'));
-  assert.match(rule, /@media \(min-width: 1150px\)/);
+  const rule = css.slice(css.lastIndexOf('/* DESKTOP — contain queue content within the two summary rows.'));
+  assert.match(rule, /@media \(min-width: 900px\)/);
   assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*grid-row: 2 \/ 4/s);
-  assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*height: calc\(100% \+ 15px\)/s);
-  assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*margin-bottom: -15px/s);
-  assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*overflow-y: auto/s);
+  assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*height: auto/s);
+  assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*margin-bottom: 0/s);
+  assert.match(rule, /#page-dashboard > #dashboardList\s*\{[^}]*contain: size/s);
+  assert.doesNotMatch(css, /height: calc\(100% \+ 15px\)|margin-bottom: -15px/);
+  assert.match(css, /#page-dashboard > #dashboardList\s*\{[^}]*overflow-y: auto/s);
+  assert.match(css, /@media \(max-width: 899px\)[\s\S]*#page-dashboard > #dashboardList \{ grid-area: queue-list; \}/);
 });
