@@ -1224,7 +1224,7 @@ test('Barang Masuk uses floating labels for search, quantity, invoice and note f
  assert.match(html,/class="so-receipt-search-input-wrap flt"[\s\S]*?<label class="flt-label" for="soReceiptSearch">Cari nama barang\.\.\./);
  assert.match(html,/class="so-receipt-reference-field flt"[^>]*>[\s\S]*?<span class="flt-label">Jumlah<\/span>[\s\S]*?data-so-prop="qty"[^>]*placeholder=" "/);
  assert.match(html,/class="so-receipt-reference-field so-receipt-invoice-field flt"[^>]*>[\s\S]*?<span class="flt-label">Kosongkan jika tidak ada harga<\/span>[\s\S]*?data-so-prop="invoice_total"[^>]*placeholder=" "/);
- assert.match(html,/class="so-receipt-note-field flt"[^>]*>[\s\S]*?<span class="flt-label">Catatan \/ nomor invoice<\/span>[\s\S]*?placeholder=" "/);
+ assert.match(html,/class="so-receipt-reference-field so-receipt-note-field flt"[^>]*>[\s\S]*?<span class="flt-label">Catatan \/ nomor invoice<\/span>[\s\S]*?placeholder=" "/);
  assert.match(html,/class="so-receipt-reference-field flt flt--static"[^>]*>[\s\S]*?<span class="flt-label">Satuan<\/span>/);
  assert.match(html,/class="so-receipt-reference-field flt flt--static"[^>]*>[\s\S]*?<span class="flt-label">Tanggal diterima<\/span>/);
 });
