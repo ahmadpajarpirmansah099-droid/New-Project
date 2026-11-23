@@ -8941,15 +8941,16 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
 }
 
 
-/* DESKTOP — align the queue frame bottom with the lower edge of the summary cards. */
+/* DESKTOP — contain queue content within the two summary rows. */
 @media (min-width: 900px) {
   #page-dashboard > #dashboardList {
     grid-row: 2 / 4;
     align-self: stretch;
-    height: calc(100% + 15px);
     min-height: 0;
+    height: auto;
     max-height: none;
-    margin-bottom: -15px;
+    margin-bottom: 0;
+    contain: size;
   }
 }
 
@@ -13484,17 +13485,4 @@ html:not([data-desktop-theme="dark"]) {
   }
 }
 
-/* DESKTOP — align the active queue bottom with the summary cards. */
-@media (min-width: 1150px) {
-  #page-dashboard > #dashboardList {
-    grid-row: 2 / 4;
-    align-self: stretch;
-    min-height: 0;
-    height: calc(100% + 15px);
-    max-height: none;
-    box-sizing: border-box;
-    overflow-y: auto;
-    overflow-x: hidden;
-    margin-bottom: -15px;
-  }
-}
+
