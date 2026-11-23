@@ -234,14 +234,14 @@ function openReservationForm(id) {
  const date=r?.date||(reservationDate<todayKey()?todayKey():reservationDate),time=r?.time||'19:00',smoking=r?.smoking||'Non Smoking',v=x=>esc(x==null?'':x);
  openSheet('<div class="sheet-head"><h2>'+(r?'Edit reservasi':'Reservasi baru')+'</h2><button class="close" data-app-action="closeSheet">✕</button></div>'+
  '<form data-app-submit="saveReservation"><input id="rEditId" type="hidden" value="'+v(r?.id||'')+'">'+
- '<div class="field"><label>Nama tamu *</label><input id="rName" required maxlength="120" value="'+v(r?.name||'')+'"></div>'+
- '<div class="field"><label>Jumlah pack *</label><input id="rPack" type="number" min="1" max="500" value="'+v(r?.pack||2)+'" required></div>'+
- '<div class="field"><label>Tanggal reservasi *</label><input id="rDate" type="hidden" value="'+date+'"><button class="reservation-picker-trigger" id="rDateTrigger" type="button" data-app-action="openReservationDatePicker"><span id="rDateLabel">'+historyDateLabel(date)+'</span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></button></div>'+
- '<div class="field"><label>Jam reservasi *</label><input id="rTime" type="hidden" value="'+time+'"><button class="reservation-picker-trigger" id="rTimeTrigger" type="button" data-app-action="openReservationTimePicker"><span id="rTimeLabel">'+time.replace(':','.')+' WIB</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button></div>'+
- '<div class="field"><label>WhatsApp (opsional)</label><input id="rPhone" inputmode="tel" maxlength="24" value="'+v(r?.phone||'')+'"></div>'+
- '<div class="field"><label>Preferensi smoking</label><input id="rSmoking" type="hidden" value="'+v(smoking)+'"><div class="reservation-select"><button class="reservation-select-trigger" id="rSmokingTrigger" type="button" data-app-action="toggleReservationSmokingOptions" aria-expanded="false" aria-controls="rSmokingOptions"><span id="rSmokingLabel">'+v(smoking)+'</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="reservation-select-options" id="rSmokingOptions" hidden>'+
+ '<div class="field flt"><label class="flt-label" for="rName">Nama tamu *</label><input id="rName" aria-label="Nama tamu" placeholder=" " required maxlength="120" value="'+v(r?.name||'')+'"></div>'+
+ '<div class="field flt"><label class="flt-label" for="rPack">Jumlah pack *</label><input id="rPack" aria-label="Jumlah pack" placeholder=" " type="number" min="1" max="500" value="'+v(r?.pack||2)+'" required></div>'+
+ '<div class="field flt flt--static"><label class="flt-label" for="rDateTrigger">Tanggal reservasi *</label><input id="rDate" type="hidden" value="'+date+'"><button class="reservation-picker-trigger" id="rDateTrigger" type="button" data-app-action="openReservationDatePicker"><span id="rDateLabel">'+historyDateLabel(date)+'</span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></button></div>'+
+ '<div class="field flt flt--static"><label class="flt-label" for="rTimeTrigger">Jam reservasi *</label><input id="rTime" type="hidden" value="'+time+'"><button class="reservation-picker-trigger" id="rTimeTrigger" type="button" data-app-action="openReservationTimePicker"><span id="rTimeLabel">'+time.replace(':','.')+' WIB</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button></div>'+
+ '<div class="field flt"><label class="flt-label" for="rPhone">WhatsApp (opsional)</label><input id="rPhone" aria-label="WhatsApp (opsional)" placeholder=" " inputmode="tel" maxlength="24" value="'+v(r?.phone||'')+'"></div>'+
+ '<div class="field flt flt--static"><label class="flt-label" for="rSmokingTrigger">Preferensi smoking</label><input id="rSmoking" type="hidden" value="'+v(smoking)+'"><div class="reservation-select"><button class="reservation-select-trigger" id="rSmokingTrigger" type="button" data-app-action="toggleReservationSmokingOptions" aria-expanded="false" aria-controls="rSmokingOptions"><span id="rSmokingLabel">'+v(smoking)+'</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="reservation-select-options" id="rSmokingOptions" hidden>'+
  ['Non Smoking','Smoking'].map(x=>'<button class="reservation-select-option'+(x===smoking?' selected':'')+'" type="button" data-app-action="selectReservationSmoking" data-app-value="'+x+'"><span>'+x+'</span></button>').join('')+
- '</div></div></div><div class="field"><label>Catatan (opsional)</label><textarea id="rNote" rows="2" maxlength="1000">'+v(r?.note||'')+'</textarea></div>'+
+ '</div></div></div><div class="field flt"><label class="flt-label" for="rNote">Catatan (opsional)</label><textarea id="rNote" aria-label="Catatan (opsional)" placeholder=" " rows="2" maxlength="1000">'+v(r?.note||'')+'</textarea></div>'+
  '<div class="sheet-actions"><button type="button" class="secondary" data-app-action="closeSheet">Batal</button><button class="primary" type="submit">'+(r?'Simpan perubahan':'Simpan reservasi')+'</button></div></form>');
 }
 
@@ -538,7 +538,7 @@ function seatReservation(id) {
     '<div class="sheet-head"><h2>Dudukkan tamu</h2><button class="close" data-app-action="closeSheet">✕</button></div>' +
     '<p class="page-sub">' + esc(reservation.code) + ' · ' + esc(reservation.name) + '</p>' +
     '<form data-app-submit="confirmSeatReservation" data-app-id="' + esc(id) + '">' +
-      '<div class="field"><label>Nomor / nama meja *</label><input id="rTable" required maxlength="80" placeholder="Contoh: Meja 05, VIP 2"></div>' +
+      '<div class="field flt"><label class="flt-label" for="rTable">Nomor / nama meja *</label><input id="rTable" aria-label="Nomor / nama meja" required maxlength="80" placeholder=" "></div>' +
       '<div class="sheet-actions"><button type="button" class="secondary" data-app-action="closeSheet">Batal</button><button type="submit" class="primary">Konfirmasi duduk</button></div>' +
     '</form>'
   );
