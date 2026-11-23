@@ -180,8 +180,8 @@ async function moveGuestTable(id) {
     '<section class="guest-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="guestMoveTableTitle">' +
       '<h2 id="guestMoveTableTitle">Pindah Meja</h2>' +
       '<p>Meja saat ini: ' + esc(guest.tableLabel || 'Belum ditentukan') + '</p>' +
-      '<div class="guest-confirm-field"><label for="guestNewTableLabel">Nomor meja baru *</label>' +
-      '<input id="guestNewTableLabel" type="text" maxlength="30" autocomplete="off" placeholder="Masukkan nomor meja baru" required></div>' +
+      '<div class="guest-confirm-field flt"><label class="flt-label" for="guestNewTableLabel">Masukkan nomor meja baru</label>' +
+      '<input id="guestNewTableLabel" type="text" aria-label="Nomor meja baru" maxlength="30" autocomplete="off" placeholder=" " required></div>' +
       '<div class="guest-confirm-actions"><button type="button" class="guest-confirm-cancel">Kembali</button>' +
       '<button type="button" class="guest-confirm-accept" disabled>Simpan pindah meja</button></div>' +
     '</section>';
@@ -252,7 +252,7 @@ function editGuest(id) {
   if (!guest) return;
 
   sheetGuest = id;
-  openSheet(`<div class="sheet-head"><h2>Koreksi data tamu</h2><button class="close" data-app-action="openDetail" data-app-id="${id}">✕</button></div><form data-app-submit="saveEdit" data-app-id="${id}"><div class="field"><label>Nama tamu *</label><input id="editName" required value="${esc(guest.name)}"></div><div class="field"><label>Jumlah pack *</label><input id="editPack" type="number" min="1" max="30" required value="${guest.pack}"></div><div class="field"><label>WhatsApp</label><input id="editPhone" value="${esc(guest.phone)}"></div><div class="field"><label>Alasan koreksi *</label><textarea id="editReason" maxlength="500" required placeholder="Tuliskan alasan perubahan data..."></textarea></div><div class="sheet-actions"><button type="button" class="secondary" data-app-action="openDetail" data-app-id="${id}">Kembali</button><button class="primary">Simpan koreksi</button></div></form>`);
+  openSheet(`<div class="sheet-head"><h2>Koreksi data tamu</h2><button class="close" data-app-action="openDetail" data-app-id="${id}">✕</button></div><form data-app-submit="saveEdit" data-app-id="${id}"><div class="field flt"><label class="flt-label" for="editName">Nama tamu *</label><input id="editName" aria-label="Nama tamu" placeholder=" " required value="${esc(guest.name)}"></div><div class="field flt"><label class="flt-label" for="editPack">Jumlah pack *</label><input id="editPack" aria-label="Jumlah pack" placeholder=" " type="number" min="1" max="30" required value="${guest.pack}"></div><div class="field flt"><label class="flt-label" for="editPhone">WhatsApp</label><input id="editPhone" aria-label="WhatsApp" placeholder=" " value="${esc(guest.phone)}"></div><div class="field flt"><label class="flt-label" for="editReason">Tuliskan alasan perubahan data...</label><textarea id="editReason" aria-label="Alasan koreksi" placeholder=" " maxlength="500" required></textarea></div><div class="sheet-actions"><button type="button" class="secondary" data-app-action="openDetail" data-app-id="${id}">Kembali</button><button class="primary">Simpan koreksi</button></div></form>`);
 }
 
 async function saveEdit(event, id) {
@@ -368,7 +368,7 @@ function confirmGuestStatus(id, status) {
     '<section class="guest-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="guestConfirmTitle" aria-describedby="guestConfirmMessage">' +
       '<h2 id="guestConfirmTitle"></h2>' +
       '<p id="guestConfirmMessage"></p>' +
-      (isSeated ? '<div class="guest-confirm-field"><label for="guestTableLabel">Nomor meja *</label><input id="guestTableLabel" type="text" maxlength="30" autocomplete="off" placeholder="Masukkan nomor meja" required></div>' : '') +
+      (isSeated ? '<div class="guest-confirm-field flt"><label class="flt-label" for="guestTableLabel">Masukkan nomor meja</label><input id="guestTableLabel" type="text" aria-label="Nomor meja" maxlength="30" autocomplete="off" placeholder=" " required></div>' : '') +
       '<div class="guest-confirm-actions">' +
         '<button type="button" class="guest-confirm-cancel">Kembali</button>' +
         '<button type="button" class="guest-confirm-accept"></button>' +
