@@ -679,7 +679,7 @@ test('Barang Masuk matches the compact reference form and keeps item quantity, u
  const t=runtime();
  await t.ui.open('receipt');
  assert.match(t.page.innerHTML,/Catat Barang Masuk/);
- assert.match(t.page.innerHTML,/Bahan baku/);
+ assert.match(t.page.innerHTML,/<label class="flt-label" for="soReceiptSearch">Cari nama barang\.\.\.<\/label>/);
  assert.match(t.page.innerHTML,/Cari nama barang/);
  assert.match(t.page.innerHTML,/Jumlah/);
  assert.match(t.page.innerHTML,/Satuan/);
@@ -702,7 +702,7 @@ test('Barang Masuk matches the compact reference form and keeps item quantity, u
  assert.equal(t.draft('receipt').counts['m:a'],undefined);
  assert.match(t.searchResults.innerHTML,/Susu/);
  await t.click('receipt-add',{soItemKey:'m:a'});
- assert.match(t.page.innerHTML,/data-so-prop="qty" aria-label="Barang Masuk Susu"/);
+ assert.match(t.page.innerHTML,/data-so-prop="qty" aria-label="Jumlah Barang Masuk Susu"/);
  assert.match(t.page.innerHTML,/aria-label="Satuan dasar Susu"/);
  t.input({soKey:'m:a',soProp:'qty'},'3');
  t.input({soKey:'m:a',soProp:'invoice_total'},'25000');
