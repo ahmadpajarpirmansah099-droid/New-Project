@@ -111,8 +111,8 @@ function findComponent(type, id) {
     const html = '<div class="menu-sheet"><div class="menu-sheet-heading"><div><span class="menu-eyebrow">COGS MENU</span><h2>' +
       (existing ? 'Edit menu' : 'Tambah menu') + '</h2></div><button type="button" class="menu-close" data-menu-action="close" aria-label="Tutup">×</button></div>' +
       '<form id="menuForm" novalidate><input type="hidden" name="menuId" value="' + escapeHtml(existing ? existing.id : '') + '">' +
-      '<label class="menu-field"><span>Nama menu <i>*</i></span><input name="menuName" type="text" maxlength="120" required placeholder="Contoh: Iced Latte" value="' + escapeHtml(existing ? existing.nama_menu : '') + '"></label>' +
-      '<label class="menu-field"><span>Harga jual per porsi <i>*</i></span><input name="menuSellingPrice" type="number" min="0" step="any" inputmode="decimal" required placeholder="28000" value="' + escapeHtml(existing ? existing.harga_jual : '') + '"></label>' +
+      '<label class="menu-field flt"><span class="flt-label">Nama menu *</span><input name="menuName" aria-label="Nama menu" type="text" maxlength="120" required placeholder=" " value="' + escapeHtml(existing ? existing.nama_menu : '') + '"></label>' +
+      '<label class="menu-field flt"><span class="flt-label">Harga jual per porsi *</span><input name="menuSellingPrice" aria-label="Harga jual per porsi" type="number" min="0" step="any" inputmode="decimal" required placeholder=" " value="' + escapeHtml(existing ? existing.harga_jual : '') + '"></label>' +
       '<section class="menu-recipe-section"><div class="menu-recipe-heading"><div><b>Komposisi per porsi</b><small>Isi jenis item, nama item, jumlah, dan satuannya.</small></div></div>' +
       '<div class="menu-recipe-labels"><span>JENIS ITEM</span><span>ITEM</span><span>JUMLAH</span><span>SATUAN</span><span></span></div>' +
       '<div id="menuRecipeRows">' + initialRecipeRows(lines) + '</div>' +
