@@ -13050,8 +13050,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   font-size: 13px;
   font-weight: 700;
 }
-#page-stock-opname .so-receipt-reference-field > span,
-#page-stock-opname .so-receipt-search > label {
+#page-stock-opname .so-receipt-reference-field > span:not(.flt-label) {
   display: block;
   margin: 0;
   color: var(--ui-ink);
@@ -13449,6 +13448,54 @@ button, input, select, textarea { font-family: var(--ui-font); }
   }
 }
 
+
+/* Floating label (#031): petunjuk duduk di field sampai fokus atau terisi. */
+.flt { position: relative; display: block; min-width: 0; }
+.flt > input,
+.flt > textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font: 500 14px/1.3 var(--ui-font);
+}
+.flt > .flt-label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  padding: 0 5px;
+  background: var(--ui-surface);
+  color: var(--ui-muted);
+  font: 500 13px/1.2 var(--ui-font);
+  white-space: nowrap;
+  pointer-events: none;
+  transition: top 220ms cubic-bezier(.16,1,.3,1), font-size 220ms ease, color 180ms ease;
+}
+.flt:focus-within > .flt-label,
+.flt:has(> input:not(:placeholder-shown)) > .flt-label,
+.flt:has(> textarea:not(:placeholder-shown)) > .flt-label,
+.flt.flt--static > .flt-label {
+  top: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ui-ink);
+}
+.flt:focus-within > input,
+.flt:focus-within > textarea { border-color: var(--ui-olive); }
+.flt > input:disabled,
+.flt > textarea:disabled { background: var(--ui-surface-soft); color: var(--ui-muted); }
+.flt:has(> input:disabled) > .flt-label { color: var(--ui-muted); }
+.flt.so-receipt-search-input-wrap { display: flex; }
+@media (prefers-reduced-motion: reduce) {
+  .flt > .flt-label { transition: none; }
+}
 
 /* GLOBAL FORM FIELDS — use clean surface backgrounds consistently across features. */
 html:not([data-desktop-theme="dark"]) :is(

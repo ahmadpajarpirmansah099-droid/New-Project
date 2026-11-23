@@ -45,3 +45,10 @@ test('desktop dashboard queue is contained within the summary rows and scrolls i
   assert.match(css, /#page-dashboard > #dashboardList\s*\{[^}]*overflow-y: auto/s);
   assert.match(css, /@media \(max-width: 899px\)[\s\S]*#page-dashboard > #dashboardList \{ grid-area: queue-list; \}/);
 });
+
+test('floating labels use the requested motion and static field state', () => {
+  const css = read('assets/css/style.css');
+  assert.match(css, /\.flt > \.flt-label\s*\{[^}]*transition: top 220ms cubic-bezier\(\.16,1,\.3,1\)/s);
+  assert.match(css, /\.flt:has\(> input:not\(:placeholder-shown\)\) > \.flt-label/);
+  assert.match(css, /\.flt\.flt--static > \.flt-label/);
+});

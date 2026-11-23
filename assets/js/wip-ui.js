@@ -126,9 +126,9 @@
       '<button type="button" class="wip-close" data-wip-action="close" aria-label="Tutup">×</button></div>' +
       '<form id="wipForm" novalidate>' +
       '<input type="hidden" name="wipId" value="' + escapeHtml(existing ? existing.id : '') + '">' +
-      '<label class="wip-field"><span>Nama WIP <i>*</i></span><input name="wipName" type="text" maxlength="120" required placeholder="Contoh: Simple Syrup" value="' + escapeHtml(existing ? existing.nama_wip : '') + '"></label>' +
-      '<div class="wip-form-grid"><label class="wip-field"><span>Hasil per batch <i>*</i></span><input name="wipYield" type="number" min="0.000001" step="any" inputmode="decimal" required placeholder="1000" value="' + escapeHtml(existing ? existing.hasil_per_batch : '') + '"></label>' +
-      '<label class="wip-field"><span>Satuan hasil <i>*</i></span><input name="wipYieldUnit" type="text" maxlength="20" required placeholder="ML / GR / PCS" value="' + escapeHtml(existing ? existing.satuan_hasil : '') + '"></label></div>' +
+      '<label class="wip-field flt"><span class="flt-label">Nama WIP *</span><input name="wipName" aria-label="Nama WIP" type="text" maxlength="120" required placeholder=" " value="' + escapeHtml(existing ? existing.nama_wip : '') + '"></label>' +
+      '<div class="wip-form-grid"><label class="wip-field flt"><span class="flt-label">Hasil per batch *</span><input name="wipYield" aria-label="Hasil per batch" type="number" min="0.000001" step="any" inputmode="decimal" required placeholder=" " value="' + escapeHtml(existing ? existing.hasil_per_batch : '') + '"></label>' +
+      '<label class="wip-field flt"><span class="flt-label">Satuan hasil *</span><input name="wipYieldUnit" aria-label="Satuan hasil" type="text" maxlength="20" required placeholder=" " value="' + escapeHtml(existing ? existing.satuan_hasil : '') + '"></label></div>' +
       '<section class="wip-recipe-section"><div class="wip-recipe-heading"><div><b>Komposisi resep</b><small>Isi jenis item, nama item, jumlah, dan satuannya.</small></div></div>' +
       '<div class="wip-recipe-labels"><span>JENIS ITEM</span><span>ITEM</span><span>JUMLAH</span><span>SATUAN</span><span></span></div>' +
       '<div id="wipRecipeRows">' + initialRecipeRows(lines, id) + '</div>' +
