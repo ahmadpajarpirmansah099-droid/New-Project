@@ -55,6 +55,6 @@ test('floating labels use the requested motion and static field state', () => {
 
 test('browser autofill keeps form fields on the app surface', () => {
   const css = read('assets/css/style.css');
-  assert.match(css, /:-webkit-autofill\\s*\\{[^}]*-webkit-text-fill-color/);
-  assert.match(css, /:-webkit-autofill\\s*\\{[^}]*-webkit-box-shadow:\\s*inset 0 0 0 1000px var\\(--ui-surface/);
+  assert.match(css, /:-webkit-autofill\s*\{[^}]*-webkit-text-fill-color/);
+  assert.match(css, /:-webkit-autofill\s*\{[^}]*-webkit-box-shadow:\s*inset 0 0 0 1000px var\(--ui-surface/);
 });
