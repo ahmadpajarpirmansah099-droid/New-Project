@@ -1216,6 +1216,19 @@ test('Stock Opname transaction icons are aligned and sized consistently', () => 
 
 
 
+test('Barang Masuk uses floating labels for search, quantity, invoice and note fields', async () => {
+ const t=runtime();
+ await t.ui.open('receipt');
+ await t.click('receipt-add',{soItemKey:'m:a'});
+ const html=t.page.innerHTML;
+ assert.match(html,/class="so-receipt-search-input-wrap flt"[\s\S]*?<label class="flt-label" for="soReceiptSearch">Cari nama barang\.\.\./);
+ assert.match(html,/class="so-receipt-reference-field flt"[^>]*>[\s\S]*?<span class="flt-label">Jumlah<\/span>[\s\S]*?data-so-prop="qty"[^>]*placeholder=" "/);
+ assert.match(html,/class="so-receipt-invoice-field flt"[^>]*>[\s\S]*?<span class="flt-label">Kosongkan jika tidak ada harga<\/span>[\s\S]*?data-so-prop="invoice_total"[^>]*placeholder=" "/);
+ assert.match(html,/class="so-receipt-note-field flt"[^>]*>[\s\S]*?<span class="flt-label">Catatan \/ nomor invoice<\/span>[\s\S]*?placeholder=" "/);
+ assert.match(html,/class="so-receipt-reference-field flt flt--static"[^>]*>[\s\S]*?<span class="flt-label">Satuan<\/span>/);
+ assert.match(html,/class="so-receipt-reference-field flt flt--static"[^>]*>[\s\S]*?<span class="flt-label">Tanggal diterima<\/span>/);
+});
+
 test('Barang Masuk reference form keeps search free of backdrop blur', () => {
  const css=contentsOfStockOpnameStyles();
  const js=contentsOfStockOpnameUi();
