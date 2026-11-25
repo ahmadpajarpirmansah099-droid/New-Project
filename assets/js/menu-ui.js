@@ -147,6 +147,20 @@ function findComponent(type, id) {
       }).join('') + '</div>';
   }
 
+  function openMenuBreakdown(menu) {
+    const hpp = root.MenuService.calculateHpp(menu.id);
+    const details = hpp.valid
+      ? '<div class="recipe-breakdown-head"><b>Rincian bahan per porsi</b><span>Biaya tiap komponen</span></div>' +
+        renderHppDetails(hpp.details, 1, 0, root.MenuService.getLines(menu.id)) +
+        '<div class="recipe-breakdown-summary"><span>Total HPP per porsi</span><b>' + money(hpp.hpp_per_serving) + '</b></div>' +
+        '<div class="recipe-breakdown-summary"><span>Harga jual</span><b>' + money(hpp.selling_price) + '</b></div>' +
+        '<div class="recipe-breakdown-summary is-margin"><span>Margin kotor · ' + number(hpp.margin_pct) + '%</span><b>' + money(hpp.margin_amount) + '</b></div>'
+      : '<p class="menu-breakdown-empty">' + escapeHtml(hpp.reason) + '</p>';
+    root.openSheet('<div class="menu-sheet menu-breakdown-sheet"><div class="menu-sheet-heading"><div><span class="menu-eyebrow">RINCIAN HPP</span><h2>' +
+      escapeHtml(menu.nama_menu) + '</h2></div><button type="button" class="menu-close" data-menu-action="close" aria-label="Tutup">×</button></div>' +
+      '<div class="menu-breakdown">' + details + '</div></div>');
+  }
+
   function cardHtml(menu) {
     const hpp = root.MenuService.calculateHpp(menu.id);
     const status = menu.status === 'active' ? 'Aktif' : 'Nonaktif';
@@ -156,7 +170,6 @@ function findComponent(type, id) {
     const marginText = hpp.valid
       ? number(hpp.margin_pct) + '% · ' + money(hpp.margin_amount)
       : '—';
-    const breakdownId = 'menu-breakdown-' + String(menu.id).replace(/[^a-zA-Z0-9_-]/g, '');
     return '<article class="menu-card">' +
       '<div class="menu-card-heading">' +
         '<div class="menu-card-copy">' +
@@ -171,21 +184,13 @@ function findComponent(type, id) {
       '</div>' +
       '<div class="menu-margin"><span>Margin</span><b>' + marginText + '</b></div>' +
       (hpp.valid ? '' : '<p class="menu-invalid-reason">' + escapeHtml(hpp.reason) + '</p>') +
-      '<div class="menu-card-footer"><button type="button" class="menu-breakdown-toggle" data-menu-action="toggle-breakdown" aria-controls="' + breakdownId + '" aria-expanded="false">Lihat rincian HPP</button>' +
+      '<div class="menu-card-footer"><button type="button" class="menu-breakdown-toggle" data-menu-action="show-breakdown" data-menu-id="' + escapeHtml(menu.id) + '">Lihat rincian HPP</button>' +
       '<div class="menu-card-actions">' +
         '<button type="button" class="menu-edit" data-menu-action="edit" data-menu-id="' + escapeHtml(menu.id) + '">Edit</button>' +
         '<button type="button" class="menu-status-action" data-menu-action="toggle-status" data-menu-id="' + escapeHtml(menu.id) + '">' +
         (menu.status === 'active' ? 'Nonaktifkan' : 'Aktifkan') + '</button>' +
       '</div></div>' +
-      '<div class="menu-breakdown" id="' + breakdownId + '" hidden>' +
-        (hpp.valid
-          ? '<div class="recipe-breakdown-head"><b>Rincian bahan per porsi</b><span>Biaya tiap komponen</span></div>' +
-            renderHppDetails(hpp.details, 1, 0, root.MenuService.getLines(menu.id)) +
-            '<div class="recipe-breakdown-summary"><span>Total HPP per porsi</span><b>' + money(hpp.hpp_per_serving) + '</b></div>' +
-            '<div class="recipe-breakdown-summary"><span>Harga jual</span><b>' + money(hpp.selling_price) + '</b></div>' +
-            '<div class="recipe-breakdown-summary is-margin"><span>Margin kotor · ' + number(hpp.margin_pct) + '%</span><b>' + money(hpp.margin_amount) + '</b></div>'
-          : '<p class="menu-breakdown-empty">' + escapeHtml(hpp.reason) + '</p>') +
-      '</div></article>';
+      '</article>';
   }
 
   function renderPage(page) {
@@ -266,14 +271,9 @@ function findComponent(type, id) {
     if (!button) return;
     const action = button.dataset.menuAction;
     const id = button.dataset.menuId;
-    if (action === 'toggle-breakdown') {
-      const panel = root.document.getElementById(button.getAttribute('aria-controls'));
-      if (panel) {
-        const expanded = button.getAttribute('aria-expanded') === 'true';
-        button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-        panel.hidden = expanded;
-        button.textContent = expanded ? 'Lihat rincian HPP' : 'Tutup rincian HPP';
-      }
+    if (action === 'show-breakdown') {
+      const menu = root.MenuService.findMenu(id);
+      if (menu) openMenuBreakdown(menu);
       return;
     }
     if (action === 'add') openMenuForm(null);
