@@ -278,8 +278,16 @@ function findComponent(type, id) {
       const item = button.closest('.recipe-breakdown-item');
       const nested = item && item.querySelector(':scope > .recipe-breakdown-nested');
       if (nested) {
-        nested.hidden = !nested.hidden;
-        button.setAttribute('aria-expanded', String(!nested.hidden));
+        const opening = nested.hidden || nested.classList.contains('is-closing');
+        nested.classList.remove('is-opening', 'is-closing');
+        if (opening) {
+          nested.hidden = false;
+          nested.classList.add('is-opening');
+          button.setAttribute('aria-expanded', 'true');
+        } else {
+          nested.classList.add('is-closing');
+          button.setAttribute('aria-expanded', 'false');
+        }
       }
       return;
     }
@@ -363,6 +371,16 @@ function findComponent(type, id) {
 
   function init() {
     root.document.addEventListener('click', handleClick);
+    root.document.addEventListener('animationend', function (event) {
+      const nested = event.target.closest('.recipe-breakdown-nested');
+      if (!nested) return;
+      if (event.animationName === 'recipe-wip-collapse') {
+        nested.hidden = true;
+        nested.classList.remove('is-closing');
+      } else if (event.animationName === 'recipe-wip-expand') {
+        nested.classList.remove('is-opening');
+      }
+    });
     root.document.addEventListener('keydown', function (event) {
       const row = event.target.closest('[data-menu-action="toggle-wip-details"]');
       if (!row || (event.key !== 'Enter' && event.key !== ' ')) return;

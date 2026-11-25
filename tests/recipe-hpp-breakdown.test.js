@@ -28,7 +28,12 @@ test('WIP cards expose open ingredient detail popups and HPP per yield', () => {
 test('menu popup lets the whole WIP row expand and collapse nested ingredients', () => {
   assert.match(menuUi, /data-menu-action="toggle-wip-details" role="button"/);
   assert.match(menuUi, /class="recipe-breakdown-nested" hidden/);
-  assert.match(menuUi, /nested\.hidden = !nested\.hidden/);
+  assert.match(menuUi, /nested\.classList\.add\('is-opening'\)/);
+  assert.match(menuUi, /nested\.classList\.add\('is-closing'\)/);
+  assert.match(menuUi, /recipe-wip-collapse/);
+  assert.match(css, /@keyframes recipe-wip-expand/);
+  assert.match(css, /recipe-breakdown-item::before/);
+  assert.match(css, /recipe-breakdown-item::after/);
   assert.match(menuUi, /aria-expanded/);
   assert.doesNotMatch(menuUi, /Lihat bahan WIP|Tutup bahan WIP/);
   assert.match(css, /recipe-breakdown-line\[data-menu-action="toggle-wip-details"\]/);
