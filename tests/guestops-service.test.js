@@ -249,6 +249,53 @@ test('Guest Operations writes only records that changed after the first save', a
   assert.equal(calls.filter(call => call.table === 'workspace_settings' && call.operation === 'upsert').length, 1);
 });
 
+test('A queued save writes the status the user acted on, not a later refresh', async () => {
+  const { runtime, client, rows } = createRuntime();
+  await runtime.GuestOpsService.initialize(client, 'workspace-1');
+
+  const state = {
+    guests: [{
+      id: 'guest-1', ticket: 'WL-001', day: '2026-11-03', name: 'Tamu Uji',
+      pack: 2, status: 'waiting', created: 1793700000000
+    }],
+    reservations: [],
+    settings: { seatingDurationMinutes: 90 }
+  };
+  await runtime.GuestOpsService.persist(state);
+
+  state.guests[0].status = 'seated';
+  const saving = runtime.GuestOpsService.persist(state);
+  // A 30 s refresh replaces the live state before the queued write actually runs.
+  state.guests[0].status = 'waiting';
+  await saving;
+
+  const lastGuest = rows.guests[rows.guests.length - 1];
+  assert.equal(lastGuest.status, 'seated');
+});
+
+test('Guest Operations reports a write in progress until it settles', async () => {
+  const { runtime, client, failOnce } = createRuntime();
+  await runtime.GuestOpsService.initialize(client, 'workspace-1');
+  const state = {
+    guests: [],
+    reservations: [{
+      id: 'reservation-1', code: 'RSV-001', date: '2026-11-04', time: '19:00',
+      name: 'Tamu', pack: 2, status: 'pending', created: 1793700000000
+    }],
+    settings: { seatingDurationMinutes: 90 }
+  };
+
+  const saving = runtime.GuestOpsService.persist(state);
+  assert.equal(runtime.GuestOpsService.isWriting(), true);
+  await saving;
+  assert.equal(runtime.GuestOpsService.isWriting(), false);
+
+  failOnce();
+  state.reservations[0].status = 'cancelled';
+  await assert.rejects(runtime.GuestOpsService.persist(state), /temporary database failure/);
+  assert.equal(runtime.GuestOpsService.isWriting(), false);
+});
+
 test('Guest correction sends the reason through the database RPC', async () => {
   const { runtime, client, calls } = createRuntime();
   await runtime.GuestOpsService.initialize(client, 'workspace-1');
