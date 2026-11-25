@@ -11,7 +11,7 @@
 <script src="assets/js/desktop-theme.js?v=3"></script>
 <title>Guest Operations — Admin</title>
 <link rel="stylesheet" href="assets/css/visual-tokens.css?v=20261120-css-bundle-p1">
-<link rel="stylesheet" href="assets/css/style.css?v=20261125-recipe-hpp-breakdown">
+<link rel="stylesheet" href="assets/css/style.css?v=20261125-dead-code-cleanup">
 </head>
 <body class="auth-locked desktop-sidebar-collapsed">
 <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;overflow:hidden;pointer-events:none"><defs><filter id="mascot-remove-white" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 -4 4 0"/></filter></defs></svg>
@@ -292,29 +292,6 @@
 </nav>
 <div class="sheet-backdrop" id="backdrop" data-action="closeSheet"></div>
 <div class="sheet" id="sheet"><div class="sheet-handle-row"><button class="handle" id="sheetHandle" type="button" aria-label="Tarik ke bawah untuk menutup"></button></div><div id="sheetContent"></div></div>
-<div class="calendar-backdrop" id="calendarBackdrop" data-action="closeHistoryDatePicker"></div>
-<section class="calendar-dialog" id="historyCalendarDialog" role="dialog" aria-modal="true" aria-labelledby="calendarTitle">
-  <div class="calendar-dialog-head">
-    <div><span class="calendar-eyebrow">FILTER OPERASIONAL</span><h2 id="calendarTitle">Pilih tanggal operasional</h2></div>
-    <button class="calendar-close" type="button" data-action="closeHistoryDatePicker" aria-label="Tutup kalender">×</button>
-  </div>
-  <div class="calendar-selected">
-    <small>Tanggal dipilih</small>
-    <strong id="calendarSelectedLabel">1 November 2026</strong>
-  </div>
-  <div class="calendar-monthbar">
-    <button type="button" data-action="changeHistoryCalendarMonth" data-action-args='[-1]' aria-label="Bulan sebelumnya"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
-    <strong id="calendarMonthLabel">November 2026</strong>
-    <button type="button" data-action="changeHistoryCalendarMonth" data-action-args='[1]' aria-label="Bulan berikutnya"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
-  </div>
-  <div class="calendar-weekdays"><span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span></div>
-  <div class="calendar-days" id="historyCalendarDays"></div>
-  <div class="calendar-dialog-actions">
-    <button class="calendar-today" type="button" data-action="selectTodayInHistoryCalendar">Hari ini</button>
-    <button class="calendar-apply" type="button" data-action="applyHistoryCalendarDate">Terapkan tanggal</button>
-  </div>
-</section>
-
 <div class="calendar-backdrop" id="reservationDateBackdrop" data-action="closeReservationDatePicker"></div>
 <section class="calendar-dialog reservation-date-dialog" id="reservationDateDialog" role="dialog" aria-modal="true" aria-labelledby="reservationDatePickerTitle">
   <div class="calendar-dialog-head">
@@ -414,7 +391,7 @@
 <script src="assets/js/app.js?v=20261114-guide-dark-v1" defer></script>
 <script src="assets/js/guestops-queue.js?v=20261123-floating-labels" defer></script>
 <script src="assets/js/guestops-operational.js?v=20261112-dashboard-date-range-v1" defer></script>
-<script src="assets/js/guestops-history.js?v=20261112-operational-range-picker-v1" defer></script>
+<script src="assets/js/guestops-history.js?v=20261125-dead-code-cleanup" defer></script>
 <script src="assets/js/guestops-reservations.js?v=20261123-floating-labels" defer></script>
 <script src="assets/js/guestops-detail.js?v=20261123-floating-labels" defer></script>
 <script src="assets/js/user-monitoring.js?v=20261106-user-monitoring-p1" defer></script>
