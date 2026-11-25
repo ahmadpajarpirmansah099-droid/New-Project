@@ -165,6 +165,20 @@
       }).join('') + '</div>';
   }
 
+  function openWipBreakdown(wip) {
+    const hpp = root.WipService.calculateHpp(wip.id);
+    const details = hpp.valid
+      ? '<div class="recipe-breakdown-head"><b>Rincian bahan per batch</b><span>Biaya tiap komponen</span></div>' +
+        renderHppDetails(hpp.details, 1, 0, root.WipService.getLines(wip.id)) +
+        '<div class="recipe-breakdown-summary"><span>Total biaya batch</span><b>' + money(hpp.batch_cost) + '</b></div>' +
+        '<div class="recipe-breakdown-summary"><span>Hasil batch</span><b>' + number(hpp.yield_quantity) + ' ' + escapeHtml(hpp.yield_unit) + '</b></div>' +
+        '<div class="recipe-breakdown-summary is-margin"><span>HPP per ' + escapeHtml(hpp.yield_unit) + '</span><b>' + money(hpp.hpp_per_yield) + '</b></div>'
+      : '<p class="wip-breakdown-empty">' + escapeHtml(hpp.reason) + '</p>';
+    root.openSheet('<div class="wip-sheet wip-breakdown-sheet"><div class="wip-sheet-heading"><div><span class="wip-eyebrow">RINCIAN HPP</span><h2>' +
+      escapeHtml(wip.nama_wip) + '</h2></div><button type="button" class="wip-close" data-wip-action="close" aria-label="Tutup">×</button></div>' +
+      '<div class="wip-breakdown">' + details + '</div></div>');
+  }
+
   function cardHtml(wip) {
     const hpp = root.WipService.calculateHpp(wip.id);
     const statusLabel = wip.status === 'active' ? 'Aktif' : 'Nonaktif';
@@ -174,7 +188,6 @@
     const batchCost = hpp.valid ? money(hpp.batch_cost) : '—';
     const hppReason = hpp.valid ? '' : '<p class="wip-invalid-reason">' + escapeHtml(hpp.reason) + '</p>';
 
-    const breakdownId = 'wip-breakdown-' + String(wip.id).replace(/[^a-zA-Z0-9_-]/g, '');
     return '<article class="wip-card">' +
       '<div class="wip-card-heading">' +
         '<div class="wip-card-copy">' +
@@ -187,21 +200,13 @@
           '<div><small>Biaya batch</small><b>' + batchCost + '</b></div>' +
         '</div>' +
       '</div>' + hppReason +
-      '<div class="wip-card-footer"><button type="button" class="wip-breakdown-toggle" data-wip-action="toggle-breakdown" aria-controls="' + breakdownId + '" aria-expanded="false">Lihat rincian HPP</button>' +
+      '<div class="wip-card-footer"><button type="button" class="wip-breakdown-toggle" data-wip-action="show-breakdown" data-wip-id="' + escapeHtml(wip.id) + '">Lihat rincian HPP</button>' +
       '<div class="wip-card-actions">' +
         '<button type="button" class="wip-edit" data-wip-action="edit" data-wip-id="' + escapeHtml(wip.id) + '">Edit</button>' +
         '<button type="button" class="wip-status-action" data-wip-action="toggle-status" data-wip-id="' + escapeHtml(wip.id) + '">' +
         (wip.status === 'active' ? 'Nonaktifkan' : 'Aktifkan') + '</button>' +
       '</div></div>' +
-      '<div class="wip-breakdown" id="' + breakdownId + '" hidden>' +
-        (hpp.valid
-          ? '<div class="recipe-breakdown-head"><b>Rincian bahan per batch</b><span>Biaya tiap komponen</span></div>' +
-            renderHppDetails(hpp.details, 1, 0, root.WipService.getLines(wip.id)) +
-            '<div class="recipe-breakdown-summary"><span>Total biaya batch</span><b>' + money(hpp.batch_cost) + '</b></div>' +
-            '<div class="recipe-breakdown-summary"><span>Hasil batch</span><b>' + number(hpp.yield_quantity) + ' ' + escapeHtml(hpp.yield_unit) + '</b></div>' +
-            '<div class="recipe-breakdown-summary is-margin"><span>HPP per ' + escapeHtml(hpp.yield_unit) + '</span><b>' + money(hpp.hpp_per_yield) + '</b></div>'
-          : '<p class="wip-breakdown-empty">' + escapeHtml(hpp.reason) + '</p>') +
-      '</div></article>';
+      '</article>';
   }
 
   function renderPage(page) {
@@ -285,14 +290,9 @@
     const action = button.dataset.wipAction;
     const id = button.dataset.wipId;
 
-    if (action === 'toggle-breakdown') {
-      const panel = root.document.getElementById(button.getAttribute('aria-controls'));
-      if (panel) {
-        const expanded = button.getAttribute('aria-expanded') === 'true';
-        button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-        panel.hidden = expanded;
-        button.textContent = expanded ? 'Lihat rincian HPP' : 'Tutup rincian HPP';
-      }
+    if (action === 'show-breakdown') {
+      const wip = root.WipService.findWip(id);
+      if (wip) openWipBreakdown(wip);
       return;
     }
     if (action === 'add') openWipForm(null);
