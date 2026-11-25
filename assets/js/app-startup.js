@@ -55,9 +55,10 @@ function resolveWorkspaceLandingPage(requestedPage, authContext, hasGuestOpsAcce
 }
 
 async function refreshGuestOperationalData() {
+  // shortcut: a write that never settles also pauses refresh until it does; add a timeout if writes can hang.
   if (!appDataReady || guestRefreshBusy || document.visibilityState !== 'visible' ||
       !isGuestOperationalPageActive() || !canAccessGuestOperations() ||
-      !window.GuestOpsService?.isReady()) return;
+      !window.GuestOpsService?.isReady() || window.GuestOpsService.isWriting?.()) return;
 
   guestRefreshBusy = true;
   const refreshToken = ++guestRefreshToken;
@@ -67,7 +68,8 @@ async function refreshGuestOperationalData() {
     const refreshed = await window.GuestOpsService.load();
     if (refreshToken !== guestRefreshToken || sessionGeneration !== appSessionGeneration ||
         !appDataReady || document.visibilityState !== 'visible' ||
-        !isGuestOperationalPageActive() || !canAccessGuestOperations()) return;
+        !isGuestOperationalPageActive() || !canAccessGuestOperations() ||
+        window.GuestOpsService.isWriting?.()) return;
 
     const currentSnapshot = JSON.stringify({
       guests: state.guests || [],

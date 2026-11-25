@@ -5,6 +5,7 @@
   let workspaceId = null;
   let ready = false;
   let writeQueue = Promise.resolve();
+  let pendingWrites = 0;
   let serviceGeneration = 0;
   let persistedGuestRows = new Map();
   let persistedReservationRows = new Map();
@@ -246,13 +247,27 @@
     return data;
   }
 
+  function enqueue(run) {
+    pendingWrites += 1;
+    const operation = writeQueue.catch(() => undefined).then(run).finally(() => {
+      pendingWrites = Math.max(0, pendingWrites - 1);
+    });
+    writeQueue = operation;
+    return operation;
+  }
+
   function persist(state) {
     requireReady();
     const requestedGeneration = serviceGeneration;
+    // Snapshot now: a background refresh can replace the live state while the
+    // session checks run, and the queued write must keep what the user acted on.
+    const reservations = (state.reservations || []).map(reservationRecord);
+    const guests = (state.guests || []).map(guestRecord);
+    const settingValue = {
+      seatingDurationMinutes: Number(state.settings?.seatingDurationMinutes) || 90
+    };
     const run = async () => {
       const guard = await assertWorkspaceSession(requestedGeneration);
-      const reservations = (state.reservations || []).map(reservationRecord);
-      const guests = (state.guests || []).map(guestRecord);
       const changedReservations = reservations.filter(record =>
         persistedReservationRows.get(record.id) !== recordFingerprint(record)
       );
@@ -275,9 +290,6 @@
       }
       await assertWorkspaceSession(guard.generation);
       if (root.AppAuth?.getContext()?.role !== 'service') {
-        const settingValue = {
-          seatingDurationMinutes: Number(state.settings?.seatingDurationMinutes) || 90
-        };
         const settingFingerprint = JSON.stringify(settingValue);
         if (settingFingerprint !== persistedSettingsFingerprint) {
           const setting = await client.from('workspace_settings').upsert({
@@ -292,9 +304,7 @@
       }
     };
 
-    const operation = writeQueue.catch(() => undefined).then(run);
-    writeQueue = operation;
-    return operation;
+    return enqueue(run);
   }
 
   async function seatReservation(reservationId, tableLabel) {
@@ -339,9 +349,7 @@
       };
     };
 
-    const operation = writeQueue.catch(() => undefined).then(run);
-    writeQueue = operation;
-    return operation;
+    return enqueue(run);
   }
 
   async function loadReservationAudit(reservationId) {
@@ -389,6 +397,7 @@
     workspaceId = null;
     ready = false;
     writeQueue = Promise.resolve();
+    pendingWrites = 0;
     persistedGuestRows = new Map();
     persistedReservationRows = new Map();
     persistedSettingsFingerprint = null;
@@ -406,6 +415,7 @@
     nextReservationCode,
     seatReservation,
     isReady: () => ready,
+    isWriting: () => pendingWrites > 0,
     workspaceId: () => workspaceId
   };
 })(window);
