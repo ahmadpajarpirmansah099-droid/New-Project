@@ -25,7 +25,7 @@ test('WIP cards expose open ingredient detail popups and HPP per yield', () => {
   assert.match(wipUi, /HPP per /);
 });
 
-test('menu popup keeps nested WIP ingredients collapsed by default and allows toggling', () => {
+test('menu popup keeps nested WIP ingredients collapsed until opened once', () => {
   assert.match(menuUi, /data-menu-action="toggle-wip-details"/);
   assert.match(menuUi, /class="recipe-breakdown-nested" hidden/);
   assert.match(menuUi, /nested\.hidden = !nested\.hidden/);
