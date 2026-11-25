@@ -136,13 +136,15 @@ function findComponent(type, id) {
         const childScale = child && childHpp && childHpp.valid && Number(child.hasil_per_batch) > 0
           ? quantity / Number(child.hasil_per_batch) : 0;
         return '<div class="recipe-breakdown-item' + (isWip ? ' is-wip' : '') + '">' +
-          '<div class="recipe-breakdown-line"><div class="recipe-breakdown-name">' +
+          '<div class="recipe-breakdown-line"' +
+            (isWip && child && childHpp && childHpp.valid
+              ? ' data-menu-action="toggle-wip-details" role="button" tabindex="0" aria-expanded="false"'
+              : '') + '><div class="recipe-breakdown-name">' +
             '<span>' + (isWip ? 'WIP' : 'Bahan') + '</span><b>' + escapeHtml(line.component_name) + '</b></div>' +
             '<span class="recipe-breakdown-qty">' + number(quantity) + ' ' + escapeHtml(line.unit_base) + '</span>' +
             '<b class="recipe-breakdown-cost">' + money(cost) + '</b></div>' +
           (isWip && child && childHpp && childHpp.valid
-            ? '<button type="button" class="recipe-breakdown-toggle" data-menu-action="toggle-wip-details">Lihat bahan WIP</button>' +
-              '<div class="recipe-breakdown-nested" hidden>' + renderHppDetails(childHpp.details, childScale, depth + 1, root.WipService.getLines(child.id)) + '</div>'
+            ? '<div class="recipe-breakdown-nested" hidden>' + renderHppDetails(childHpp.details, childScale, depth + 1, root.WipService.getLines(child.id)) + '</div>'
             : '') +
         '</div>';
       }).join('') + '</div>';
@@ -276,8 +278,8 @@ function findComponent(type, id) {
       const item = button.closest('.recipe-breakdown-item');
       const nested = item && item.querySelector(':scope > .recipe-breakdown-nested');
       if (nested) {
-        nested.hidden = false;
-        button.remove();
+        nested.hidden = !nested.hidden;
+        button.setAttribute('aria-expanded', String(!nested.hidden));
       }
       return;
     }
@@ -361,6 +363,12 @@ function findComponent(type, id) {
 
   function init() {
     root.document.addEventListener('click', handleClick);
+    root.document.addEventListener('keydown', function (event) {
+      const row = event.target.closest('[data-menu-action="toggle-wip-details"]');
+      if (!row || (event.key !== 'Enter' && event.key !== ' ')) return;
+      event.preventDefault();
+      row.click();
+    });
     root.document.addEventListener('submit', handleSubmit);
     root.document.addEventListener('input', handleInput);
     root.document.addEventListener('change', handleChange);
