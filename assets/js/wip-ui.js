@@ -141,14 +141,15 @@
     root.openSheet(html);
   }
 
-  function renderHppDetails(details, scale, depth) {
+  function renderHppDetails(details, scale, depth, sourceLines) {
     if (!Array.isArray(details) || !details.length) return '<p class="wip-breakdown-empty">Tidak ada rincian komponen.</p>';
     return '<div class="recipe-breakdown-level" style="--recipe-depth:' + depth + '">' +
       details.map(function (line) {
         const quantity = Number(line.qty_base) * scale;
         const cost = Number(line.cost) * scale;
         const isWip = line.component_type === 'wip';
-        const child = isWip ? root.WipService.findWip(line.component_wip_id || '') : null;
+        const sourceLine = (sourceLines || []).find(function (entry) { return String(entry.id) === String(line.line_id); });
+        const child = isWip && sourceLine ? root.WipService.findWip(sourceLine.component_wip_id) : null;
         const childHpp = child ? root.WipService.calculateHpp(child.id) : null;
         const childScale = child && childHpp && childHpp.valid && Number(child.hasil_per_batch) > 0
           ? quantity / Number(child.hasil_per_batch) : 0;
@@ -158,7 +159,7 @@
             '<span class="recipe-breakdown-qty">' + number(quantity) + ' ' + escapeHtml(line.unit_base) + '</span>' +
             '<b class="recipe-breakdown-cost">' + money(cost) + '</b></div>' +
           (isWip && child && childHpp && childHpp.valid
-            ? '<div class="recipe-breakdown-nested">' + renderHppDetails(childHpp.details, childScale, depth + 1) + '</div>'
+            ? '<div class="recipe-breakdown-nested">' + renderHppDetails(childHpp.details, childScale, depth + 1, root.WipService.getLines(child.id)) + '</div>'
             : '') +
         '</div>';
       }).join('') + '</div>';
@@ -195,7 +196,7 @@
       '<div class="wip-breakdown" id="' + breakdownId + '" hidden>' +
         (hpp.valid
           ? '<div class="recipe-breakdown-head"><b>Rincian bahan per batch</b><span>Biaya tiap komponen</span></div>' +
-            renderHppDetails(hpp.details, 1, 0) +
+            renderHppDetails(hpp.details, 1, 0, root.WipService.getLines(wip.id)) +
             '<div class="recipe-breakdown-summary"><span>Total biaya batch</span><b>' + money(hpp.batch_cost) + '</b></div>' +
             '<div class="recipe-breakdown-summary"><span>Hasil batch</span><b>' + number(hpp.yield_quantity) + ' ' + escapeHtml(hpp.yield_unit) + '</b></div>' +
             '<div class="recipe-breakdown-summary is-margin"><span>HPP per ' + escapeHtml(hpp.yield_unit) + '</span><b>' + money(hpp.hpp_per_yield) + '</b></div>'
