@@ -49,6 +49,13 @@ function createRuntime(flush) {
   return { listeners, form, submitButton, messages, host, closed: () => closed };
 }
 
+test('Master Barang form uses stacked labels instead of floating labels', () => {
+  const source = fs.readFileSync(path.join(__dirname, '../assets/js/masterdata-ui.js'), 'utf8');
+  assert.doesNotMatch(source, /class="md-field flt(?: flt--static)?"/);
+  assert.match(source, /class="md-field"><span class="flt-label">Status<\\/span>/);
+  assert.match(source, /class="md-field"><span class="flt-label">Harga referensi \\*<\\/span>/);
+});
+
 test('Master Barang waits for database acknowledgement before showing saved', async () => {
   let resolveFlush;
   const state = createRuntime(() => new Promise(resolve => { resolveFlush = resolve; }));
