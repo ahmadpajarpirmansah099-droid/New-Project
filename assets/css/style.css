@@ -7529,7 +7529,37 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
 .recipe-breakdown-qty { color:var(--ui-muted); font-size:10px; white-space:nowrap; }
 .recipe-breakdown-cost { color:var(--ui-ink); font-size:11px; text-align:right; white-space:nowrap; }
 .recipe-breakdown-item.is-wip > .recipe-breakdown-line { border-color:var(--ui-olive); background:var(--ui-surface-soft); }
-.recipe-breakdown-nested { margin:7px 0 0 12px; padding-left:10px; border-left:2px solid var(--ui-line); }
+.recipe-breakdown-nested {
+  position: relative;
+  margin: 7px 0 0 16px;
+  padding: 2px 0 2px 17px;
+  border-left: 2px solid var(--ui-olive);
+  transform-origin: top;
+}
+.recipe-breakdown-nested.is-opening { animation: recipe-wip-expand .22s ease-out both; }
+.recipe-breakdown-nested.is-closing { animation: recipe-wip-collapse .18s ease-in both; }
+.recipe-breakdown-nested > .recipe-breakdown-level > .recipe-breakdown-item {
+  position: relative;
+}
+.recipe-breakdown-nested > .recipe-breakdown-level > .recipe-breakdown-item::before {
+  content: "";
+  position: absolute;
+  top: 21px;
+  left: -17px;
+  width: 12px;
+  border-top: 1.5px solid var(--ui-olive);
+}
+.recipe-breakdown-nested > .recipe-breakdown-level > .recipe-breakdown-item::after {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: -7px;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid var(--ui-olive);
+  border-radius: 50%;
+  background: var(--ui-card, #fff);
+}
 .recipe-breakdown-line[data-menu-action="toggle-wip-details"] {
   cursor: pointer;
   transition: background-color .16s ease, border-color .16s ease;
@@ -7541,6 +7571,18 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
 .recipe-breakdown-line[data-menu-action="toggle-wip-details"]:focus-visible {
   outline: 2px solid var(--ui-olive);
   outline-offset: 2px;
+}
+@keyframes recipe-wip-expand {
+  from { opacity: 0; transform: translateY(-7px) scaleY(.97); }
+  to { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+@keyframes recipe-wip-collapse {
+  from { opacity: 1; transform: translateY(0) scaleY(1); }
+  to { opacity: 0; transform: translateY(-5px) scaleY(.97); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .recipe-breakdown-nested.is-opening,
+  .recipe-breakdown-nested.is-closing { animation-duration: .01ms; }
 }
 .recipe-breakdown-nested[hidden] { display: none; }
 .recipe-breakdown-summary { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:7px; padding:9px 10px; border-radius:9px; background:var(--ui-surface-soft); color:var(--ui-muted); font-size:11px; }
