@@ -141,7 +141,8 @@ function findComponent(type, id) {
             '<span class="recipe-breakdown-qty">' + number(quantity) + ' ' + escapeHtml(line.unit_base) + '</span>' +
             '<b class="recipe-breakdown-cost">' + money(cost) + '</b></div>' +
           (isWip && child && childHpp && childHpp.valid
-            ? '<div class="recipe-breakdown-nested">' + renderHppDetails(childHpp.details, childScale, depth + 1, root.WipService.getLines(child.id)) + '</div>'
+            ? '<button type="button" class="recipe-breakdown-toggle" data-menu-action="toggle-wip-details">Lihat bahan WIP</button>' +
+              '<div class="recipe-breakdown-nested" hidden>' + renderHppDetails(childHpp.details, childScale, depth + 1, root.WipService.getLines(child.id)) + '</div>'
             : '') +
         '</div>';
       }).join('') + '</div>';
@@ -271,6 +272,16 @@ function findComponent(type, id) {
     if (!button) return;
     const action = button.dataset.menuAction;
     const id = button.dataset.menuId;
+    if (action === 'toggle-wip-details') {
+      const item = button.closest('.recipe-breakdown-item');
+      const nested = item && item.querySelector(':scope > .recipe-breakdown-nested');
+      if (nested) {
+        nested.hidden = !nested.hidden;
+        button.textContent = nested.hidden ? 'Lihat bahan WIP' : 'Tutup bahan WIP';
+        button.setAttribute('aria-expanded', String(!nested.hidden));
+      }
+      return;
+    }
     if (action === 'show-breakdown') {
       const menu = root.MenuService.findMenu(id);
       if (menu) openMenuBreakdown(menu);
