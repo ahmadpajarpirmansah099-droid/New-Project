@@ -196,8 +196,9 @@ test('Barang Masuk cleans restored date values and defaults the received date to
   const t = runtime();
   t.seedDraft({ kind: 'receipt', end: '2026-11-19|', start: '2026-11-19|', counts: {}, receiptItems: [], note: '', touched: true });
   await t.ui.open('receipt');
-  const expectedToday = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-  const expectedLabel = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+  const simulatedToday = new Date(fixedNow);
+  const expectedToday = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' }).format(simulatedToday);
+  const expectedLabel = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric' }).format(simulatedToday);
   assert.equal(t.draft('receipt').end, expectedToday);
   assert.match(t.page.innerHTML, new RegExp(expectedLabel));
   assert.equal(t.page.innerHTML.includes('2026|'), false);
