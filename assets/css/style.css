@@ -7502,6 +7502,46 @@ body:has(#workspaceScopeSwitcher:not([hidden])) .drawer-scope-item { display: fl
 .menu-card-footer { display:flex; align-items:center; justify-content:space-between; gap:9px; margin-top:12px; padding-top:10px; border-top:1px solid var(--line); }
 .menu-card-footer span { color:var(--muted); font-size:9px; }
 .menu-card-footer button { padding:3px 0; border:0; background:transparent; color:#6e659d; font-size:9px; font-weight:800; }
+
+/* Rincian HPP resep: rincian bertingkat untuk komponen WIP. */
+.menu-breakdown-toggle, .wip-breakdown-toggle {
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui-olive, #526f2d);
+  font: 700 11px/1.4 var(--ui-font);
+}
+.menu-breakdown-toggle[aria-expanded="true"], .wip-breakdown-toggle[aria-expanded="true"] { color: var(--ui-ink); }
+.menu-breakdown, .wip-breakdown {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ui-line);
+}
+.recipe-breakdown-head { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:8px; }
+.recipe-breakdown-head b { color:var(--ui-ink); font-size:12px; }
+.recipe-breakdown-head span { color:var(--ui-muted); font-size:10px; }
+.recipe-breakdown-level { display:grid; gap:7px; min-width:0; }
+.recipe-breakdown-item { min-width:0; }
+.recipe-breakdown-line { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:9px; padding:8px 9px; border:1px solid var(--ui-line); border-radius:10px; background:var(--ui-surface); }
+.recipe-breakdown-name { display:grid; min-width:0; gap:2px; }
+.recipe-breakdown-name span { color:var(--ui-muted); font-size:9px; }
+.recipe-breakdown-name b { color:var(--ui-ink); font-size:11px; overflow-wrap:anywhere; }
+.recipe-breakdown-qty { color:var(--ui-muted); font-size:10px; white-space:nowrap; }
+.recipe-breakdown-cost { color:var(--ui-ink); font-size:11px; text-align:right; white-space:nowrap; }
+.recipe-breakdown-item.is-wip > .recipe-breakdown-line { border-color:var(--ui-olive); background:var(--ui-surface-soft); }
+.recipe-breakdown-nested { margin:7px 0 0 12px; padding-left:10px; border-left:2px solid var(--ui-line); }
+.recipe-breakdown-summary { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:7px; padding:9px 10px; border-radius:9px; background:var(--ui-surface-soft); color:var(--ui-muted); font-size:11px; }
+.recipe-breakdown-summary b { color:var(--ui-ink); font-size:12px; }
+.recipe-breakdown-summary.is-margin { background:var(--ui-lime-soft, var(--ui-surface-soft)); color:var(--ui-ink); }
+.recipe-breakdown-empty, .menu-breakdown-empty, .wip-breakdown-empty { margin:0; color:var(--ui-muted); font-size:11px; }
+.menu-breakdown[hidden], .wip-breakdown[hidden] { display:none; }
+@media(max-width:520px) {
+  .recipe-breakdown-line { grid-template-columns:minmax(0,1fr) auto; gap:5px 8px; }
+  .recipe-breakdown-qty { grid-column:1; grid-row:2; }
+  .recipe-breakdown-cost { grid-column:2; grid-row:1 / span 2; }
+  .recipe-breakdown-nested { margin-left:7px; padding-left:7px; }
+}
+
 .menu-empty {
   padding:22px 14px;
   border:1px dashed #dcdce5;
