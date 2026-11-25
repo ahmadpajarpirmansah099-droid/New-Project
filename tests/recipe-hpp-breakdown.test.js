@@ -10,16 +10,16 @@ const menuUi = fs.readFileSync(path.join(rootDir, 'assets/js/menu-ui.js'), 'utf8
 const wipUi = fs.readFileSync(path.join(rootDir, 'assets/js/wip-ui.js'), 'utf8');
 const css = fs.readFileSync(path.join(rootDir, 'assets/css/style.css'), 'utf8');
 
-test('Menu cards expose expandable HPP details with selling price and margin', () => {
-  assert.match(menuUi, /data-menu-action="toggle-breakdown"/);
+test('Menu cards expose open HPP detail popups with selling price and margin', () => {
+  assert.match(menuUi, /data-menu-action="show-breakdown"/);
   assert.match(menuUi, /renderHppDetails\(hpp\.details, 1, 0, root\.MenuService\.getLines\(menu\.id\)\)/);
   assert.match(menuUi, /Total HPP per porsi/);
   assert.match(menuUi, /Harga jual/);
   assert.match(menuUi, /Margin kotor/);
 });
 
-test('WIP cards expose expandable ingredient costs and HPP per yield', () => {
-  assert.match(wipUi, /data-wip-action="toggle-breakdown"/);
+test('WIP cards expose open ingredient detail popups and HPP per yield', () => {
+  assert.match(wipUi, /data-wip-action="show-breakdown"/);
   assert.match(wipUi, /renderHppDetails\(hpp\.details, 1, 0, root\.WipService\.getLines\(wip\.id\)\)/);
   assert.match(wipUi, /Total biaya batch/);
   assert.match(wipUi, /HPP per /);
