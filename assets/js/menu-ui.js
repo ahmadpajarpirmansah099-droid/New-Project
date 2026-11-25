@@ -123,6 +123,29 @@ function findComponent(type, id) {
     root.openSheet(html);
   }
 
+  function renderHppDetails(details, scale, depth) {
+    if (!Array.isArray(details) || !details.length) return '<p class="menu-breakdown-empty">Tidak ada rincian komponen.</p>';
+    return '<div class="recipe-breakdown-level" style="--recipe-depth:' + depth + '">' +
+      details.map(function (line) {
+        const quantity = Number(line.qty_base) * scale;
+        const cost = Number(line.cost) * scale;
+        const isWip = line.component_type === 'wip';
+        const child = isWip ? root.WipService.findWip(line.component_wip_id || '') : null;
+        const childHpp = child ? root.WipService.calculateHpp(child.id) : null;
+        const childScale = child && childHpp && childHpp.valid && Number(child.hasil_per_batch) > 0
+          ? quantity / Number(child.hasil_per_batch) : 0;
+        return '<div class="recipe-breakdown-item' + (isWip ? ' is-wip' : '') + '">' +
+          '<div class="recipe-breakdown-line"><div class="recipe-breakdown-name">' +
+            '<span>' + (isWip ? 'WIP' : 'Bahan') + '</span><b>' + escapeHtml(line.component_name) + '</b></div>' +
+            '<span class="recipe-breakdown-qty">' + number(quantity) + ' ' + escapeHtml(line.unit_base) + '</span>' +
+            '<b class="recipe-breakdown-cost">' + money(cost) + '</b></div>' +
+          (isWip && child && childHpp && childHpp.valid
+            ? '<div class="recipe-breakdown-nested">' + renderHppDetails(childHpp.details, childScale, depth + 1) + '</div>'
+            : '') +
+        '</div>';
+      }).join('') + '</div>';
+  }
+
   function cardHtml(menu) {
     const hpp = root.MenuService.calculateHpp(menu.id);
     const status = menu.status === 'active' ? 'Aktif' : 'Nonaktif';
@@ -132,6 +155,7 @@ function findComponent(type, id) {
     const marginText = hpp.valid
       ? number(hpp.margin_pct) + '% · ' + money(hpp.margin_amount)
       : '—';
+    const breakdownId = 'menu-breakdown-' + String(menu.id).replace(/[^a-zA-Z0-9_-]/g, '');
     return '<article class="menu-card">' +
       '<div class="menu-card-heading">' +
         '<div class="menu-card-copy">' +
@@ -146,12 +170,21 @@ function findComponent(type, id) {
       '</div>' +
       '<div class="menu-margin"><span>Margin</span><b>' + marginText + '</b></div>' +
       (hpp.valid ? '' : '<p class="menu-invalid-reason">' + escapeHtml(hpp.reason) + '</p>') +
-      '<div class="menu-card-footer"><span>' + (hpp.valid ? (hpp.is_estimated ? 'Perhitungan menggunakan harga referensi' : 'Perhitungan valid') : 'Periksa harga dan komposisi') + '</span>' +
+      '<div class="menu-card-footer"><button type="button" class="menu-breakdown-toggle" data-menu-action="toggle-breakdown" aria-controls="' + breakdownId + '" aria-expanded="false">Lihat rincian HPP</button>' +
       '<div class="menu-card-actions">' +
         '<button type="button" class="menu-edit" data-menu-action="edit" data-menu-id="' + escapeHtml(menu.id) + '">Edit</button>' +
         '<button type="button" class="menu-status-action" data-menu-action="toggle-status" data-menu-id="' + escapeHtml(menu.id) + '">' +
         (menu.status === 'active' ? 'Nonaktifkan' : 'Aktifkan') + '</button>' +
-      '</div></div></article>';
+      '</div></div>' +
+      '<div class="menu-breakdown" id="' + breakdownId + '" hidden>' +
+        (hpp.valid
+          ? '<div class="recipe-breakdown-head"><b>Rincian bahan per porsi</b><span>Biaya tiap komponen</span></div>' +
+            renderHppDetails(hpp.details, 1, 0) +
+            '<div class="recipe-breakdown-summary"><span>Total HPP per porsi</span><b>' + money(hpp.hpp_per_serving) + '</b></div>' +
+            '<div class="recipe-breakdown-summary"><span>Harga jual</span><b>' + money(hpp.selling_price) + '</b></div>' +
+            '<div class="recipe-breakdown-summary is-margin"><span>Margin kotor · ' + number(hpp.margin_pct) + '%</span><b>' + money(hpp.margin_amount) + '</b></div>'
+          : '<p class="menu-breakdown-empty">' + escapeHtml(hpp.reason) + '</p>') +
+      '</div></article>';
   }
 
   function renderPage(page) {
@@ -232,6 +265,16 @@ function findComponent(type, id) {
     if (!button) return;
     const action = button.dataset.menuAction;
     const id = button.dataset.menuId;
+    if (action === 'toggle-breakdown') {
+      const panel = root.document.getElementById(button.getAttribute('aria-controls'));
+      if (panel) {
+        const expanded = button.getAttribute('aria-expanded') === 'true';
+        button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        panel.hidden = expanded;
+        button.textContent = expanded ? 'Lihat rincian HPP' : 'Tutup rincian HPP';
+      }
+      return;
+    }
     if (action === 'add') openMenuForm(null);
     if (action === 'edit') openMenuForm(id);
     if (action === 'close' && typeof root.closeSheet === 'function') root.closeSheet();
