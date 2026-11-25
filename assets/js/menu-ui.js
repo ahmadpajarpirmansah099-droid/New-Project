@@ -276,9 +276,8 @@ function findComponent(type, id) {
       const item = button.closest('.recipe-breakdown-item');
       const nested = item && item.querySelector(':scope > .recipe-breakdown-nested');
       if (nested) {
-        nested.hidden = !nested.hidden;
-        button.textContent = nested.hidden ? 'Lihat bahan WIP' : 'Tutup bahan WIP';
-        button.setAttribute('aria-expanded', String(!nested.hidden));
+        nested.hidden = false;
+        button.remove();
       }
       return;
     }
