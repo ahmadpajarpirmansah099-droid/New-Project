@@ -13176,32 +13176,82 @@ html:not([data-desktop-theme="dark"]) {
 .so-receipt-reference-form .so-history-head { margin-bottom: 6px; }
 .so-receipt-reference-form .so-history-panel .so-empty { padding: 0 0 8px; text-align: left; font-size: 11px; }
 .so-receipt-reference-form .so-empty strong { font-weight: 500; }
-.so-receipt-reference-form .so-history-date { padding: 3px 0; }
-.so-receipt-reference-form .so-history-date > details > summary { font: 600 13px/1.4 var(--ui-font); }
-.so-receipt-reference-form .so-history-date > details > summary small { font-size: 11px; }
+.so-receipt-reference-form .so-history-date,
+.so-receipt-reference-form .so-history > .so-history-date:last-child {
+  padding: 0;
+  margin-block: 8px;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  background: var(--ui-surface);
+}
+.so-receipt-reference-form .so-history-date > details > summary {
+  padding: 0 12px;
+  border-radius: 9px;
+  font: 600 13px/1.4 var(--ui-font);
+}
+.so-receipt-reference-form .so-history-date > details > summary small { font-weight: 500; }
+.so-receipt-reference-form .so-history-date > details[open] > summary {
+  border-radius: 9px 9px 0 0;
+  background: var(--ui-lime-soft);
+}
+.so-receipt-reference-form .so-history-date > details > summary::after {
+  border-color: var(--ui-olive);
+  transform: rotate(45deg);
+}
+.so-receipt-reference-form .so-history-date > details[open] > summary::after { transform: rotate(225deg); }
+.so-receipt-reference-form .so-history .so-date-materials { display: grid; gap: 8px; padding: 8px; }
 .so-receipt-reference-form .so-history .so-date-material-row {
   grid-template-columns: minmax(0,1fr) auto;
-  gap: 4px 12px;
-  padding: 12px 0;
-}
-.so-receipt-reference-form .so-date-material-row > :is(span,strong) { font-size: 12px; }
-.so-receipt-reference-form .so-history .so-history-actions {
-  display: grid;
-  grid-column: 1 / -1;
-  justify-content: stretch;
-  gap: 4px;
-}
-.so-receipt-reference-form .so-history-actions:empty { display: none; }
-.so-receipt-reference-form .so-history-actions > div {
-  display: grid;
-  grid-template-columns: minmax(0,1fr) auto auto;
   align-items: center;
-  gap: 8px;
+  gap: 2px 8px;
+  padding: 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
 }
-.so-receipt-reference-form .so-history .so-history-actions span { color: var(--ui-muted); font-size: 10px; }
-#page-stock-opname .so-receipt-reference-form .so-history-link { min-height: 44px; padding-inline: 4px; font-size: 12px; }
-
-
+.so-receipt-reference-form .so-date-material-row > span { font-weight: 650; }
+.so-receipt-reference-form .so-date-material-row > strong {
+  padding: 3px 7px;
+  border-radius: 6px;
+  color: var(--ui-olive);
+  background: var(--ui-lime-soft);
+  font-size: 12px;
+}
+.so-receipt-reference-form .so-date-material-row > strong::before { content: '+'; }
+.so-receipt-history-detail { grid-column: 1 / -1; min-width: 0; overflow-wrap: anywhere; }
+.so-receipt-history-detail + .so-receipt-history-detail { padding-top: 6px; border-top: 1px solid var(--ui-line); }
+.so-receipt-history-detail dl {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  gap: 4px 12px;
+  font-size: 12px;
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--ui-line);
+}
+.so-receipt-history-detail dt { color: var(--ui-muted); }
+.so-receipt-history-detail dd { margin: 0; }
+.so-receipt-reference-form .so-receipt-history-detail .so-history-actions {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 0;
+  margin-top: 8px;
+  border-top: 1px solid var(--ui-line);
+}
+#page-stock-opname .so-receipt-reference-form .so-history-link {
+  min-height: 44px;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 4px;
+  color: var(--ui-olive);
+  font-size: 12px;
+}
+.so-receipt-history-detail .so-history-link + .so-history-link::before {
+  position: absolute;
+  left: 0;
+  height: 14px;
+  border-left: 1px solid var(--ui-line);
+  content: '';
+}
 
 #page-stock-opname .so-receipt-reference-form .so-history-more button { font-size: 11px; }
 #page-stock-opname .so-receipt-reference-form .flt > .flt-label { font-size: 11px; }

@@ -374,13 +374,18 @@
    : '';
   return `<div class="so-sales-menu-list">${rows.join('')}${fallback}</div>`;
  }
+ function receiptActionIcon(action){
+  const pencil=action==='edit';
+  const paths=pencil?'<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>':'<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/>';
+  return `<svg data-lucide="${pencil?'pencil':'circle-x'}" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+ }
  function historyDocumentActions(doc,p,inline=false){
   if(doc.void)return '';
   const id=`data-so-id="${e(doc.id)}"`;
   const docMonth=String(doc.end||doc.start||'').slice(0,7);
   const sameMonth=!!docMonth&&docMonth===monthOf(p);
   const typeLabel=labels[doc.type]||doc.type;
-  const link=(label,action)=>`<button type="button" class="so-history-link" data-so-action="${action}" ${id}${busy?' disabled':''} aria-label="${e(label+' '+typeLabel)}">${e(label)}</button>`;
+  const link=(label,action)=>`<button type="button" class="so-history-link" data-so-action="${action}" ${id}${busy?' disabled':''} aria-label="${e(label+' '+typeLabel)}">${doc.type==='receipt'&&inline?receiptActionIcon(action):''}${e(label)}</button>`;
   const editable=sameMonth&&['active','reopened'].includes(p?.status)&&!['move_in','adjustment_in','adjustment'].includes(doc.type);
   const actions=editable?link('Edit','edit')+link('Batalkan','void'):'';
   const adjust=sameMonth&&p?.status==='active'&&doc.type==='expense'&&doc.category==='Move'?link('Penyesuaian Move','adjust'):'';
@@ -425,12 +430,29 @@
   }
   return [...totals.values()].sort((a,b)=>a.name.localeCompare(b.name,'id'));
  }
+ function receiptHistoryDetail(doc,material){
+  const actions=historyDocumentActions(doc,period(),true);
+  if(!actions)return '';
+  const line=doc.lines?.find(row=>row.key===material.key);
+  const time=new Date(doc.created_at||'');
+  const clock=Number.isFinite(time.getTime())?time.toLocaleTimeString('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit'}):'';
+  const meta=['No. '+String(doc.id).slice(-8),clock];
+  if(material.documents.length>1){
+   for(const row of doc.postings||[])if(row.key===material.key&&row.unit===material.unit)meta.push(number(row.qty)+' '+row.unit);
+  }
+  const note=line?.note||doc.lines?.find(row=>row.note)?.note;
+  const invoice=line?.invoice_total;
+  const details=(note?`<dt>Catatan</dt><dd>${e(note)}</dd>`:'')+
+   (invoice!=null&&String(invoice).trim()&&Number.isFinite(Number(invoice))?`<dt>Total invoice</dt><dd>${money(invoice)}</dd>`:'');
+  return `<div class="so-receipt-history-detail"><small>${e(meta.filter(Boolean).join(' · '))}</small>${details?`<dl>${details}</dl>`:''}<div class="so-history-actions">${actions}</div></div>`;
+ }
  function materialHistoryByDate(dates,expense){
   return dates.map(([date,entries])=>{
    const materials=materialTotals(entries,expense);
    const row=m=>{
+    if(!expense)return `<div class="so-date-material-row so-date-material-row--actions"><span>${e(m.name)}</span><strong>${number(m.qty)} ${e(m.unit)}</strong>${m.documents.map(doc=>receiptHistoryDetail(doc,m)).join('')}</div>`;
     const actions=m.documents.map(doc=>identifiedActions(doc,m.key)).join('');
-    return `<div class="so-date-material-row so-date-material-row--actions"><span>${e(m.name)}${expense&&m.inbound?'<small>Masuk / penyesuaian</small>':''}</span><strong${expense&&!m.inbound?' class="is-negative"':''}>${number(m.qty)} ${e(m.unit)}</strong><div class="so-history-actions" aria-label="Aksi transaksi ${e(m.name)}">${actions}</div></div>`;
+    return `<div class="so-date-material-row so-date-material-row--actions"><span>${e(m.name)}${m.inbound?'<small>Masuk / penyesuaian</small>':''}</span><strong${!m.inbound?' class="is-negative"':''}>${number(m.qty)} ${e(m.unit)}</strong><div class="so-history-actions" aria-label="Aksi transaksi ${e(m.name)}">${actions}</div></div>`;
    };
    let lines;
    if(expense){
