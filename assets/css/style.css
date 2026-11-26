@@ -12643,8 +12643,9 @@ button, input, select, textarea { font-family: var(--ui-font); }
 }
 
 
-/* Barang Masuk reference form: shared application tokens, unchanged geometry. */
+/* Barang Masuk uses the same type scale in entry and history. */
 #page-stock-opname .so-receipt-reference-form {
+  font: 500 14px/1.5 var(--ui-font);
   padding: 18px;
   border: 1px solid var(--ui-line);
   border-radius: var(--ui-radius-card);
@@ -12672,10 +12673,10 @@ button, input, select, textarea { font-family: var(--ui-font); }
   color: var(--ui-olive);
 }
 #page-stock-opname .so-receipt-heading-icon svg { width: 23px; height: 23px; }
-#page-stock-opname .so-receipt-reference-head h2 {
-  margin: 0 0 6px;
+#page-stock-opname .so-receipt-reference-form h2 {
+  margin: 0;
   color: var(--ui-ink);
-  font: 800 20px/1.25 var(--ui-heading-font);
+  font: 700 20px/1.3 var(--ui-font);
 }
 #page-stock-opname .so-receipt-reference-fields {
   display: grid;
@@ -12725,7 +12726,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   background: var(--ui-surface);
   color: var(--ui-ink);
   box-shadow: var(--ui-shadow-control);
-  font: 500 14px/1.3 var(--ui-font);
+  font: 500 16px/1.4 var(--ui-font);
   transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
 }
 #page-stock-opname .so-receipt-reference-field > input::placeholder,
@@ -12823,8 +12824,11 @@ button, input, select, textarea { font-family: var(--ui-font); }
 #page-stock-opname .so-receipt-search-results button span { min-width: 0; overflow-wrap: anywhere; }
 #page-stock-opname .so-receipt-search-results button small,
 #page-stock-opname .so-receipt-search-results button [data-so-subtext] { color: var(--ui-muted); }
-/* Keep the existing mobile field flow; desktop promotes all four controls into one row. */
-#page-stock-opname .so-receipt-details-grid { display: contents; }
+#page-stock-opname .so-receipt-meta,
+#page-stock-opname .so-receipt-details-grid { display: grid; gap: 12px; min-width: 0; }
+@media (min-width: 640px) {
+  #page-stock-opname .so-receipt-meta { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+}
 #page-stock-opname .so-receipt-quantity-unit-grid {
   display: grid;
   grid-template-columns: minmax(0,0.8fr) minmax(0,1.2fr);
@@ -12847,19 +12851,13 @@ button, input, select, textarea { font-family: var(--ui-font); }
   background: var(--ui-surface);
   color: var(--ui-ink);
   box-shadow: var(--ui-shadow-control);
-  font: 600 14px/1.3 var(--ui-font);
+  font: 500 16px/1.4 var(--ui-font);
   transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
 }
 #page-stock-opname .so-receipt-unit-placeholder:disabled {
   background: var(--ui-surface-soft);
   color: var(--ui-muted);
   cursor: not-allowed;
-}
-#page-stock-opname .so-receipt-extra-items {
-  display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
-  gap: 10px;
-  margin-top: 12px;
 }
 #page-stock-opname .so-receipt-extra-item {
   min-width: 0;
@@ -12890,8 +12888,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   font: 800 13px/1.3 var(--ui-font);
   transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
 }
-#page-stock-opname .so-receipt-extra-item .so-receipt-quantity-unit-grid { margin-bottom: 8px; }
-#page-stock-opname .so-receipt-extra-item .so-receipt-reference-field { margin-top: 7px; }
+#page-stock-opname .so-receipt-extra-head strong { min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
 #page-stock-opname .so-receipt-extra-item .so-receipt-reference-field > input { min-height: 48px; }
 #page-stock-opname .so-receipt-extra-item .so-unit-picker { display: block; }
 #page-stock-opname .so-receipt-extra-item .so-unit-picker .so-picker-trigger { padding: 8px; }
@@ -12957,7 +12954,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 @media (min-width: 900px) {
   #page-stock-opname .so-receipt-details-grid {
     display: grid;
-    grid-template-columns: minmax(0,0.82fr) minmax(0,0.95fr) minmax(0,1.35fr) minmax(0,1.15fr);
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1.5fr);
     align-items: end;
     gap: 12px;
     min-width: 0;
@@ -12978,7 +12975,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
     background: var(--ui-surface);
     color: var(--ui-ink);
     box-shadow: var(--ui-shadow-control);
-    font: 600 14px/1.3 var(--ui-font);
+    font: 500 16px/1.4 var(--ui-font);
     list-style: none;
     cursor: pointer;
     transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
@@ -13023,12 +13020,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 }
 @media (max-width: 420px) {
   #page-stock-opname .so-receipt-reference-form { padding: 14px; }
-  #page-stock-opname .so-receipt-quantity-unit-grid {
-    grid-template-columns: minmax(0,1fr);
-    gap: 8px;
-  }
   #page-stock-opname .so-receipt-reference-fields { gap: 11px; }
-  #page-stock-opname .so-receipt-extra-items { grid-template-columns: minmax(0,1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
   #page-stock-opname .so-receipt-reference-form :is(
@@ -13186,5 +13178,29 @@ html:not([data-desktop-theme="dark"]) {
     justify-content: flex-end;
   }
 }
+
+.so-receipt-reference-form .so-history-panel { margin-top: 24px; padding-top: 20px; }
+.so-receipt-reference-form .so-history-date > details > summary { font-family: var(--ui-font); }
+.so-receipt-reference-form .so-history .so-date-material-row {
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 4px 12px;
+  padding: 12px 0;
+}
+.so-receipt-reference-form .so-date-material-row > :is(span,strong) { font-size: 14px; }
+.so-receipt-reference-form .so-history .so-history-actions {
+  display: grid;
+  grid-column: 1 / -1;
+  justify-content: stretch;
+  gap: 4px;
+}
+.so-receipt-reference-form .so-history-actions:empty { display: none; }
+.so-receipt-reference-form .so-history-actions > div {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+}
+.so-receipt-reference-form .so-history .so-history-actions span { color: var(--ui-muted); font-size: 12px; }
+#page-stock-opname .so-receipt-reference-form .so-history-link { min-height: 44px; padding-inline: 4px; font-size: 14px; }
 
 
