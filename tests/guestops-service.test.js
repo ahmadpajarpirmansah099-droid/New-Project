@@ -8,6 +8,20 @@ const vm = require('node:vm');
 
 const servicePath = path.join(__dirname, '..', 'assets/js/guestops-service.js');
 
+function dayKey(date) {
+  return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' +
+    String(date.getDate()).padStart(2, '0');
+}
+
+function guestRow(id, day) {
+  return {
+    id, ticket: 'WL-001', service_date: day, guest_name: 'Tamu Uji', pack: 2,
+    phone: null, smoking: null, status: 'waiting',
+    created_at: day + 'T01:00:00+00:00', resolved_at: null, seated_at: null,
+    table_label: null, reservation_id: null, updated_at: day + 'T01:00:00+00:00'
+  };
+}
+
 function createRuntime() {
   const calls = [];
   const rows = { guests: [], reservations: [], workspace_settings: [] };
@@ -15,9 +29,12 @@ function createRuntime() {
   let reservationSeatResponse = null;
 
   class Query {
-    constructor(table) { this.table = table; this.operation = 'select'; this.values = null; }
+    constructor(table) { this.table = table; this.operation = 'select'; this.values = null; this.filters = []; }
     select(columns) { this.operation = 'select'; calls.push({ table: this.table, operation: this.operation, columns }); return this; }
     eq() { return this; }
+    in(column, values) { this.filters.push({ column, values }); return this; }
+    gte(column, value) { this.filters.push({ column, gte: value }); return this; }
+    lte(column, value) { this.filters.push({ column, lte: value }); return this; }
     order() { return this; }
     maybeSingle() {
       const data = this.table === 'workspace_memberships' ? { workspace_id: 'workspace-1' } : null;
@@ -42,7 +59,13 @@ function createRuntime() {
       return Promise.resolve({ error: null });
     }
     then(resolve, reject) {
-      const data = rows[this.table] || [];
+      const data = (rows[this.table] || []).filter(row => this.filters.every(filter => {
+        if (filter.values) return filter.values.includes(row[filter.column]);
+        const value = row[filter.column];
+        if (filter.gte !== undefined && !(value >= filter.gte)) return false;
+        if (filter.lte !== undefined && !(value <= filter.lte)) return false;
+        return true;
+      }));
       return Promise.resolve({ data, error: null }).then(resolve, reject);
     }
   }
@@ -320,6 +343,70 @@ test('Guest correction sends the reason through the database RPC', async () => {
     p_reason: 'Nama sebelumnya salah input'
   });
   assert.equal(calls.some(call => call.table === 'guest_status_history' && call.operation === 'insert'), false);
+});
+
+test('A device holding an old copy cannot overwrite a guest changed elsewhere', async () => {
+  const { runtime, client, rows, calls } = createRuntime();
+  rows.guests.push(guestRow('guest-1', dayKey(new Date())));
+
+  const state = await runtime.GuestOpsService.initialize(client, 'workspace-1');
+  state.guests[0].status = 'seated';
+  state.guests[0].tableLabel = 'A1';
+
+  // Another device saved the same guest after this tab loaded it.
+  rows.guests[0].guest_name = 'Nama Baru';
+  rows.guests[0].updated_at = new Date(Date.now() + 1000).toISOString();
+
+  await assert.rejects(
+    runtime.GuestOpsService.persist(state),
+    error => error.code === 'stale_write'
+  );
+  assert.equal(calls.some(call => call.table === 'guests' && call.operation === 'upsert'), false);
+});
+
+test('A normal save records its own version so the next save is not blocked', async () => {
+  const { runtime, client, rows } = createRuntime();
+  rows.guests.push(guestRow('guest-1', dayKey(new Date())));
+
+  const state = await runtime.GuestOpsService.initialize(client, 'workspace-1');
+  state.guests[0].status = 'seated';
+  state.guests[0].tableLabel = 'A1';
+  await runtime.GuestOpsService.persist(state);
+
+  state.guests[0].status = 'done';
+  await runtime.GuestOpsService.persist(state);
+
+  const saved = rows.guests.filter(row => row.id === 'guest-1').pop();
+  assert.equal(saved.status, 'done');
+});
+
+test('Only recent guests load by default and older history stays tracked once fetched', async () => {
+  const { runtime, client, rows, calls } = createRuntime();
+  const today = new Date();
+  const oldDate = new Date();
+  oldDate.setDate(oldDate.getDate() - 100);
+  const oldDay = dayKey(oldDate);
+
+  rows.guests.push(guestRow('guest-today', dayKey(today)), guestRow('guest-old', oldDay));
+
+  const state = await runtime.GuestOpsService.initialize(client, 'workspace-1');
+  assert.deepEqual(state.guests.map(guest => guest.id), ['guest-today']);
+  assert.equal(runtime.GuestOpsService.covers(dayKey(today), dayKey(today)), true);
+  assert.equal(runtime.GuestOpsService.covers(oldDay, oldDay), false);
+
+  const older = await runtime.GuestOpsService.loadRange(oldDay, oldDay);
+  assert.deepEqual(older.map(guest => guest.id), ['guest-old']);
+  assert.equal(runtime.GuestOpsService.covers(oldDay, oldDay), true);
+
+  // The 30 s refresh only re-reads the window; fetched history must survive it.
+  await runtime.GuestOpsService.load({ merge: true });
+  assert.equal(runtime.GuestOpsService.covers(oldDay, oldDay), true);
+  older[0].name = 'Nama Lama Diubah';
+  state.guests.push(older[0]);
+  await runtime.GuestOpsService.persist(state);
+
+  const guestUpserts = calls.filter(call => call.table === 'guests' && call.operation === 'upsert');
+  assert.deepEqual(guestUpserts.at(-1).values.map(row => row.id), ['guest-old']);
 });
 
 test('Guest Operations blocks initialization when auth context points to another workspace', async () => {

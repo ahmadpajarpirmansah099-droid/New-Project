@@ -9,10 +9,34 @@
   let serviceGeneration = 0;
   let persistedGuestRows = new Map();
   let persistedReservationRows = new Map();
+  let guestVersions = new Map();
+  let reservationVersions = new Map();
   let persistedSettingsFingerprint = null;
 
   const toIso = value => new Date(Number(value) || Date.now()).toISOString();
   const toMs = value => value ? new Date(value).getTime() : null;
+
+  // The screens only read a recent window; older days are fetched when the
+  // date-range picker asks for them.
+  const LOAD_WINDOW_DAYS = 60;
+  let loadedRanges = [];
+  function dayString(date) {
+    return date.getFullYear() + '-' +
+      String(date.getMonth() + 1).padStart(2, '0') + '-' +
+      String(date.getDate()).padStart(2, '0');
+  }
+  function loadWindowStart() {
+    const date = new Date();
+    date.setDate(date.getDate() - LOAD_WINDOW_DAYS);
+    return dayString(date);
+  }
+  function markLoadedRange(start, end) {
+    if (loadedRanges.some(range => range.start <= start && range.end >= end)) return;
+    loadedRanges.push({ start, end });
+  }
+  function covers(start, end) {
+    return loadedRanges.some(range => range.start <= start && range.end >= end);
+  }
 
   function requireReady() {
     if (!ready || !client || !workspaceId) {
@@ -131,16 +155,20 @@
     return load();
   }
 
-  async function load() {
+  async function load(options) {
     requireReady();
     const guard = await assertWorkspaceSession();
+    const windowStart = loadWindowStart();
     const [guestResult, reservationResult, settingResult] = await Promise.all([
       client.from('guests')
-        .select('id,ticket,service_date,guest_name,pack,phone,smoking,status,created_at,resolved_at,seated_at,table_label,reservation_id')
+        .select('id,ticket,service_date,guest_name,pack,phone,smoking,status,created_at,resolved_at,seated_at,table_label,reservation_id,updated_at')
         .eq('workspace_id', workspaceId)
+        .gte('service_date', windowStart)
         .order('created_at', { ascending: true }),
+      // The reservation calendar can open any past month, so this table stays
+      // unbounded. shortcut: revisit when it passes ~10k rows.
       client.from('reservations')
-        .select('id,code,reservation_date,reservation_time,guest_name,pack,phone,smoking,note,table_label,status,created_at')
+        .select('id,code,reservation_date,reservation_time,guest_name,pack,phone,smoking,note,table_label,status,created_at,updated_at')
         .eq('workspace_id', workspaceId)
         .order('reservation_date', { ascending: true })
         .order('reservation_time', { ascending: true }),
@@ -156,6 +184,24 @@
     if (settingResult.error) throw settingResult.error;
     await assertWorkspaceSession(guard.generation);
 
+    const windowEnd = dayString(new Date());
+    if (options?.merge) {
+      markLoadedRange(windowStart, windowEnd);
+    } else {
+      loadedRanges = [{ start: windowStart, end: windowEnd }];
+    }
+
+    const versionsFrom = rows => new Map((rows || [])
+      .filter(row => row.updated_at)
+      .map(row => [row.id, Date.parse(row.updated_at)]));
+    if (options?.merge) {
+      versionsFrom(guestResult.data).forEach((value, id) => guestVersions.set(id, value));
+      versionsFrom(reservationResult.data).forEach((value, id) => reservationVersions.set(id, value));
+    } else {
+      guestVersions = versionsFrom(guestResult.data);
+      reservationVersions = versionsFrom(reservationResult.data);
+    }
+
     const guests = (guestResult.data || []).map(mapGuest);
     const reservations = (reservationResult.data || []).map(mapReservation);
     const reservationsById = new Map(reservations.map(reservation => [reservation.id, reservation]));
@@ -169,14 +215,21 @@
       reservation.guestId = guest.id;
     });
 
-    persistedGuestRows = new Map(guests.map(guest => {
+    const freshGuestRows = new Map(guests.map(guest => {
       const record = guestRecord(guest);
       return [guest.id, recordFingerprint(record)];
     }));
-    persistedReservationRows = new Map(reservations.map(reservation => {
+    const freshReservationRows = new Map(reservations.map(reservation => {
       const record = reservationRecord(reservation);
       return [reservation.id, recordFingerprint(record)];
     }));
+    if (options?.merge) {
+      freshGuestRows.forEach((value, id) => persistedGuestRows.set(id, value));
+      freshReservationRows.forEach((value, id) => persistedReservationRows.set(id, value));
+    } else {
+      persistedGuestRows = freshGuestRows;
+      persistedReservationRows = freshReservationRows;
+    }
     const loadedSettings = settingResult.data?.setting_value;
     persistedSettingsFingerprint = settingResult.data
       ? JSON.stringify({ seatingDurationMinutes: Number(loadedSettings?.seatingDurationMinutes) || 90 })
@@ -203,6 +256,55 @@
         seatingDurationMinutes: Number(settings.seatingDurationMinutes) || 90
       }
     };
+  }
+
+  // Loads one older date range on demand so the 60-day window covers the
+  // screens without throwing away history the user asked to see.
+  async function loadRange(start, end) {
+    requireReady();
+    const guard = await assertWorkspaceSession();
+    const [guestResult, reservationResult] = await Promise.all([
+      client.from('guests')
+        .select('id,ticket,service_date,guest_name,pack,phone,smoking,status,created_at,resolved_at,seated_at,table_label,reservation_id,updated_at')
+        .eq('workspace_id', workspaceId)
+        .gte('service_date', start)
+        .lte('service_date', end)
+        .order('created_at', { ascending: true }),
+      client.from('reservations')
+        .select('id,code,reservation_date,reservation_time,guest_name,pack,phone,smoking,note,table_label,status,created_at,updated_at')
+        .eq('workspace_id', workspaceId)
+        .gte('reservation_date', start)
+        .lte('reservation_date', end)
+    ]);
+    if (guestResult.error) throw guestResult.error;
+    if (reservationResult.error) throw reservationResult.error;
+    await assertWorkspaceSession(guard.generation);
+    markLoadedRange(start, end);
+
+    const guests = (guestResult.data || []).map(mapGuest);
+    const reservations = (reservationResult.data || []).map(mapReservation);
+    const reservationsById = new Map(reservations.map(reservation => [reservation.id, reservation]));
+    guests.forEach(guest => {
+      const reservation = reservationsById.get(guest.reservationId);
+      if (!reservation) return;
+      guest.reservationCode = reservation.code;
+      guest.reservationTable = reservation.table;
+      reservation.guestId = guest.id;
+    });
+
+    (guestResult.data || []).forEach(row => {
+      if (row.updated_at) guestVersions.set(row.id, Date.parse(row.updated_at));
+    });
+    (reservationResult.data || []).forEach(row => {
+      if (row.updated_at) reservationVersions.set(row.id, Date.parse(row.updated_at));
+    });
+    guests.forEach(guest => {
+      persistedGuestRows.set(guest.id, recordFingerprint(guestRecord(guest)));
+    });
+    reservations.forEach(reservation => {
+      persistedReservationRows.set(reservation.id, recordFingerprint(reservationRecord(reservation)));
+    });
+    return guests;
   }
 
   async function loadGuestAudit(guestId) {
@@ -256,6 +358,21 @@
     return operation;
   }
 
+  // One extra read per changed table; the write itself stays a single upsert.
+  async function staleRowIds(table, records, versions) {
+    const ids = records.map(record => record.id).filter(id => versions.has(id));
+    if (!ids.length) return [];
+    const { data, error } = await client.from(table)
+      .select('id,updated_at')
+      .eq('workspace_id', workspaceId)
+      .in('id', ids);
+    if (error) throw error;
+    const current = new Map((data || []).map(row => [row.id, Date.parse(row.updated_at)]));
+    // shortcut: the check and the write are two requests, so a save landing in
+    // that gap is not detected; move the guard into the database if that matters.
+    return ids.filter(id => current.get(id) !== versions.get(id));
+  }
+
   function persist(state) {
     requireReady();
     const requestedGeneration = serviceGeneration;
@@ -276,17 +393,34 @@
       );
 
       await assertWorkspaceSession(guard.generation);
+      const stale =
+        (await staleRowIds('reservations', changedReservations, reservationVersions)).length +
+        (await staleRowIds('guests', changedGuests, guestVersions)).length;
+      if (stale) {
+        const conflict = new Error('Data sudah diubah di perangkat lain.');
+        conflict.code = 'stale_write';
+        throw conflict;
+      }
       if (changedReservations.length) {
-        const result = await client.from('reservations').upsert(changedReservations, { onConflict: 'id' });
+        const stamp = new Date().toISOString();
+        const rows = changedReservations.map(record => ({ ...record, updated_at: stamp }));
+        const result = await client.from('reservations').upsert(rows, { onConflict: 'id' });
         if (result.error) throw result.error;
-        changedReservations.forEach(record => persistedReservationRows.set(record.id, recordFingerprint(record)));
+        changedReservations.forEach(record => {
+          persistedReservationRows.set(record.id, recordFingerprint(record));
+          reservationVersions.set(record.id, Date.parse(stamp));
+        });
       }
       await assertWorkspaceSession(guard.generation);
       if (changedGuests.length) {
-        const rows = changedGuests.map(record => ({ ...record, updated_at: new Date().toISOString() }));
+        const stamp = new Date().toISOString();
+        const rows = changedGuests.map(record => ({ ...record, updated_at: stamp }));
         const result = await client.from('guests').upsert(rows, { onConflict: 'id' });
         if (result.error) throw result.error;
-        changedGuests.forEach(record => persistedGuestRows.set(record.id, recordFingerprint(record)));
+        changedGuests.forEach(record => {
+          persistedGuestRows.set(record.id, recordFingerprint(record));
+          guestVersions.set(record.id, Date.parse(stamp));
+        });
       }
       await assertWorkspaceSession(guard.generation);
       if (root.AppAuth?.getContext()?.role !== 'service') {
@@ -400,6 +534,9 @@
     pendingWrites = 0;
     persistedGuestRows = new Map();
     persistedReservationRows = new Map();
+    guestVersions = new Map();
+    reservationVersions = new Map();
+    loadedRanges = [];
     persistedSettingsFingerprint = null;
   }
 
@@ -407,6 +544,8 @@
     initialize,
     reset,
     load,
+    loadRange,
+    covers,
     loadGuestAudit,
     loadReservationAudit,
     persist,
