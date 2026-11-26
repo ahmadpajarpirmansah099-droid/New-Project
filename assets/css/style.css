@@ -2922,6 +2922,14 @@ button.history-date {
   padding:14px 2px 0;
 }
 
+.operational-chart-hours {
+  grid-template-columns:none;
+  grid-auto-flow:column;
+  grid-auto-columns:44px;
+  overflow-x:auto;
+  padding-bottom:6px;
+}
+
 .operational-bar-column {
   height:100%;
   display:grid;
