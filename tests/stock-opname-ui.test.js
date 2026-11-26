@@ -808,6 +808,23 @@ test('grouped Barang Masuk history exposes per-transaction cancellation and upda
  assert.equal(t.writes.at(-1).input.id,'receipt-1');
 });
 
+test('closed Barang Masuk history keeps receipt details without edit or cancel actions',async()=>{
+ const t=runtime();
+ t.data.state.periods[0].status='closed';
+ t.data.state.documents=[{
+  id:'receipt-12345678',period_id:'period',type:'receipt',start:TEST_TODAY,end:TEST_TODAY,
+  created_at:'2026-11-23T03:30:00Z',
+  lines:[{key:'m:a',qty:'100',unit:'ML',invoice_total:'25000',note:'INV-123'}],
+  postings:[{key:'m:a',name:'Susu',qty:100,unit:'ML'}]
+ }];
+ await t.ui.open('receipt');
+ const history=t.page.innerHTML.match(/<section class="so-history-panel"[\s\S]*?<\/section>/)?.[0]||'';
+ assert.match(history,/INV-123/);
+ assert.match(history,/Rp25\.000/);
+ assert.match(history,/No\. 12345678/);
+ assert.doesNotMatch(history,/data-so-action="(?:edit|void)"/);
+});
+
 test('editable history exposes text-only Edit and Batalkan actions on every active-month transaction',async()=>{
  const t=runtime();
  t.data.state.periods[0].legacy_period_ids=['legacy-november'];

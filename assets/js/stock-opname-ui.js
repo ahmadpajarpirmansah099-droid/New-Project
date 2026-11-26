@@ -432,7 +432,6 @@
  }
  function receiptHistoryDetail(doc,material){
   const actions=historyDocumentActions(doc,period(),true);
-  if(!actions)return '';
   const line=doc.lines?.find(row=>row.key===material.key);
   const time=new Date(doc.created_at||'');
   const clock=Number.isFinite(time.getTime())?time.toLocaleTimeString('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit'}):'';
@@ -444,7 +443,7 @@
   const invoice=line?.invoice_total;
   const details=(note?`<dt>Catatan</dt><dd>${e(note)}</dd>`:'')+
    (invoice!=null&&String(invoice).trim()&&Number.isFinite(Number(invoice))?`<dt>Total invoice</dt><dd>${money(invoice)}</dd>`:'');
-  return `<div class="so-receipt-history-detail"><small>${e(meta.filter(Boolean).join(' · '))}</small>${details?`<dl>${details}</dl>`:''}<div class="so-history-actions">${actions}</div></div>`;
+  return `<div class="so-receipt-history-detail"><small>${e(meta.filter(Boolean).join(' · '))}</small>${details?`<dl>${details}</dl>`:''}${actions?`<div class="so-history-actions">${actions}</div>`:''}</div>`;
  }
  function materialHistoryByDate(dates,expense){
   return dates.map(([date,entries])=>{
