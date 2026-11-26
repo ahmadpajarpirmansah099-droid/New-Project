@@ -348,7 +348,7 @@ test('transaction dates and unit selections remain available outside the Stock O
   await t.ui.open('receipt');
   await t.click('receipt-add', { soItemKey: 'm:a' });
   assert.match(t.page.innerHTML, /data-so-action="pick-date"/);
-  assert.match(t.page.innerHTML, /data-so-action="pick-choice"/);
+  assert.doesNotMatch(t.page.innerHTML, /data-so-action="pick-choice"/);
   assert.doesNotMatch(t.page.innerHTML, /type="date"/);
   assert.match(t.page.innerHTML, /<details class="so-unit-dropdown"/);
   await t.ui.open('expense');
@@ -459,11 +459,11 @@ test('history shows an empty today state and reveals previous dates only after c
     postings: [{ key: 'm:a', name: 'Susu', qty: 5, unit: 'ML' }]
   }];
   await t.ui.open('receipt');
-  assert.match(t.page.innerHTML, /Belum ada riwayat hari ini/);
+  assert.match(t.page.innerHTML, /Belum ada transaksi hari ini/);
   assert.doesNotMatch(t.page.innerHTML, /so-history-date/);
   assert.match(t.page.innerHTML, /Tampilkan tanggal sebelumnya/);
   await t.click('history-more');
-  assert.match(t.page.innerHTML, /Belum ada riwayat hari ini/);
+  assert.match(t.page.innerHTML, /Belum ada transaksi hari ini/);
   assert.match(t.page.innerHTML, /<span>22 November 2026<\/span>/);
   assert.match(t.page.innerHTML, /class="so-history-date"><details>/);
   assert.doesNotMatch(t.page.innerHTML, /class="so-history-date"><details open>/);
@@ -855,16 +855,19 @@ test('expense material totals remain separated by category, including repeated m
 });
 
 
-test('desktop unit selection preserves quantity and submits selected unit', async () => {
+test('Barang Masuk dropdown preserves quantity and submits selected unit', async () => {
   const t = runtime();
   t.data.catalog[0].units = [{unit:'ML',factor:1},{unit:'LITER',factor:1000}];
   await t.ui.open('receipt');
   await t.click('receipt-add',{soItemKey:'m:a'});
-  assert.match(t.page.innerHTML, /data-so-value="LITER"/);
+  assert.match(t.page.innerHTML, /<details class="so-unit-dropdown" data-so-unit-key="m:a">/);
+  assert.doesNotMatch(t.page.innerHTML, /data-so-title="Pilih satuan"/);
+  assert.match(t.page.innerHTML, /data-so-value="ML" aria-pressed="true"/);
   t.input({soKey:'m:a',soProp:'qty'},'2');
   await t.click('unit-option',{soKey:'m:a',soValue:'LITER'});
   assert.equal(t.draft('receipt').counts['m:a'].qty,'2');
   assert.equal(t.draft('receipt').counts['m:a'].unit,'LITER');
+  assert.match(t.page.innerHTML, /data-so-value="LITER" aria-pressed="true"/);
   await t.click('submit');
   assert.equal(t.writes.at(-1).input.lines[0].unit,'LITER');
 });

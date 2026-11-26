@@ -12676,7 +12676,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 #page-stock-opname .so-receipt-reference-form h2 {
   margin: 0;
   color: var(--ui-ink);
-  font: 700 20px/1.3 var(--ui-font);
+  font: 600 20px/1.3 var(--ui-font);
 }
 #page-stock-opname .so-receipt-reference-fields {
   display: grid;
@@ -12725,7 +12725,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   border-radius: var(--ui-radius-control);
   background: var(--ui-surface);
   color: var(--ui-ink);
-  box-shadow: var(--ui-shadow-control);
+  box-shadow: none;
   font: 500 16px/1.4 var(--ui-font);
   transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
 }
@@ -12836,25 +12836,9 @@ button, input, select, textarea { font-family: var(--ui-font); }
   min-width: 0;
 }
 #page-stock-opname .so-receipt-unit-control { min-width: 0; }
-#page-stock-opname .so-receipt-unit-control > .so-unit-dropdown { display: none; }
-#page-stock-opname .so-receipt-unit-control > .so-unit-picker { display: block; min-width: 0; }
-#page-stock-opname .so-receipt-unit-control > .so-unit-picker .so-picker-trigger,
-#page-stock-opname .so-receipt-unit-placeholder,
-#page-stock-opname .so-receipt-extra-item .so-unit-picker .so-picker-trigger {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 48px;
-  justify-content: space-between;
-  padding: 10px 11px;
-  border: 1px solid var(--ui-line);
-  border-radius: var(--ui-radius-control);
-  background: var(--ui-surface);
-  color: var(--ui-ink);
-  box-shadow: var(--ui-shadow-control);
-  font: 500 16px/1.4 var(--ui-font);
-  transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
-}
 #page-stock-opname .so-receipt-unit-placeholder:disabled {
+  justify-content: center;
+  width: 100%;
   background: var(--ui-surface-soft);
   color: var(--ui-muted);
   cursor: not-allowed;
@@ -12879,19 +12863,16 @@ button, input, select, textarea { font-family: var(--ui-font); }
 }
 #page-stock-opname .so-receipt-extra-head button {
   min-height: 44px;
-  padding: 8px 10px;
-  border: 1px solid var(--ui-line);
+  padding: 8px;
+  border: 0;
   border-radius: var(--ui-radius-control);
-  background: var(--ui-surface);
+  background: transparent;
   color: var(--so-shortage);
-  box-shadow: var(--ui-shadow-control);
-  font: 800 13px/1.3 var(--ui-font);
-  transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
+  box-shadow: none;
+  font: 600 13px/1.3 var(--ui-font);
 }
-#page-stock-opname .so-receipt-extra-head strong { min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
+#page-stock-opname .so-receipt-extra-head strong { min-width: 0; overflow-wrap: anywhere; font-size: 16px; }
 #page-stock-opname .so-receipt-extra-item .so-receipt-reference-field > input { min-height: 48px; }
-#page-stock-opname .so-receipt-extra-item .so-unit-picker { display: block; }
-#page-stock-opname .so-receipt-extra-item .so-unit-picker .so-picker-trigger { padding: 8px; }
 #page-stock-opname .so-receipt-reference-footer { margin-top: 18px; padding-top: 0; border-top: 0; }
 #page-stock-opname .so-receipt-reference-footer .so-actions {
   display: grid;
@@ -12961,61 +12942,69 @@ button, input, select, textarea { font-family: var(--ui-font); }
   }
   #page-stock-opname .so-receipt-details-grid > .so-receipt-quantity-unit-grid { display: contents; }
   #page-stock-opname .so-receipt-details-grid > .so-receipt-reference-field { min-width: 0; }
-  #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown { display: block; position: relative; }
-  #page-stock-opname .so-receipt-unit-control > .so-unit-picker { display: none; }
-  #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown[open] { z-index: 30; }
-  #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown > summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 48px;
-    padding: 10px 11px;
-    border: 1px solid var(--ui-line);
-    border-radius: var(--ui-radius-control);
-    background: var(--ui-surface);
-    color: var(--ui-ink);
-    box-shadow: var(--ui-shadow-control);
-    font: 500 16px/1.4 var(--ui-font);
-    list-style: none;
-    cursor: pointer;
-    transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
-  }
-  #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown[open] > summary {
-    border-color: var(--ui-olive);
-  }
-  #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown > summary::-webkit-details-marker { display: none; }
+}
+#page-stock-opname .so-receipt-unit-control > .so-unit-dropdown { display: block; position: relative; }
+#page-stock-opname .so-receipt-unit-control > .so-unit-dropdown[open] { z-index: 30; }
+#page-stock-opname .so-receipt-unit-placeholder,
+#page-stock-opname .so-receipt-unit-control > .so-unit-dropdown > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 10px 11px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  box-shadow: none;
+  font: 500 16px/1.4 var(--ui-font);
+  list-style: none;
+  cursor: pointer;
+  transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
+}
+#page-stock-opname .so-receipt-unit-control > .so-unit-dropdown[open] > summary {
+  border-color: var(--ui-olive);
+}
+#page-stock-opname .so-receipt-unit-control > .so-unit-dropdown > summary::-webkit-details-marker { display: none; }
+#page-stock-opname .so-receipt-unit-control > .so-unit-dropdown .so-unit-options {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 31;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-control);
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  box-shadow: var(--ui-shadow-card);
+}
+#page-stock-opname .so-receipt-unit-control > .so-unit-dropdown .so-unit-options button {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 44px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ui-ink);
+  box-shadow: none;
+  text-align: left;
+  transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
+}
+#page-stock-opname .so-receipt-unit-control > .so-unit-dropdown .so-unit-options button[aria-pressed="true"] {
+  background: var(--ui-lime);
+  color: var(--ui-ink);
+}
+@media (max-width: 899px) {
+  #page-stock-opname:has(.so-receipt-reference-form) { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  #page-stock-opname .so-receipt-quantity-unit-grid { align-items: start; }
   #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown .so-unit-options {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    right: 0;
-    z-index: 31;
-    max-height: 220px;
-    overflow-y: auto;
-    padding: 5px;
-    border: 1px solid var(--ui-line);
-    border-radius: var(--ui-radius-control);
-    background: var(--ui-surface);
-    color: var(--ui-ink);
-    box-shadow: var(--ui-shadow-card);
-  }
-  #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown .so-unit-options button {
-    display: flex;
-    justify-content: flex-start;
-    width: 100%;
-    min-height: 44px;
-    padding: 7px 9px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--ui-ink);
-    box-shadow: none;
-    text-align: left;
-    transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
-  }
-  #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown .so-unit-options button[aria-pressed="true"] {
-    background: var(--ui-lime);
-    color: var(--ui-ink);
+    position: static;
+    margin-top: 4px;
   }
 }
 @media (max-width: 420px) {
@@ -13180,7 +13169,12 @@ html:not([data-desktop-theme="dark"]) {
 }
 
 .so-receipt-reference-form .so-history-panel { margin-top: 24px; padding-top: 20px; }
-.so-receipt-reference-form .so-history-date > details > summary { font-family: var(--ui-font); }
+.so-receipt-reference-form .so-history-head { margin-bottom: 6px; }
+.so-receipt-reference-form .so-history-panel .so-empty { padding: 0 0 8px; text-align: left; }
+.so-receipt-reference-form .so-empty strong { font-weight: 500; }
+.so-receipt-reference-form .so-history-date { padding: 3px 0; }
+.so-receipt-reference-form .so-history-date > details > summary { font: 600 15px/1.4 var(--ui-font); }
+.so-receipt-reference-form .so-history-date > details > summary small { font-size: 13px; }
 .so-receipt-reference-form .so-history .so-date-material-row {
   grid-template-columns: minmax(0,1fr) auto;
   gap: 4px 12px;

@@ -293,10 +293,10 @@
  function receiptItemHTML(selected){
   const v=selected?(form.counts[selected.key]||{}):{},units=selected?.units||[];
   const unitOptions=units.map(u=>'<button type="button" data-so-action="unit-option" data-so-key="'+e(selected.key)+'" data-so-value="'+e(u.unit)+'" aria-pressed="'+(u.unit===(v.unit||selected.unit))+'">'+e(u.unit)+'</button>').join('');
-  const unitControl=selected?'<div class="so-receipt-unit-control"><details class="so-unit-dropdown" data-so-unit-key="'+e(selected.key)+'"><summary aria-label="Satuan dasar '+e(selected.name)+'"><span>'+e(v.unit||selected.unit)+'</span><span class="so-picker-chevron" aria-hidden="true"></span></summary><div class="so-unit-options">'+unitOptions+'</div></details><span class="so-unit-picker">'+pickerButton(v.unit||selected.unit,'data-so-key="'+e(selected.key)+'" data-so-title="Pilih satuan" aria-label="Satuan dasar '+e(selected.name)+'"',units.map(u=>({value:u.unit,label:u.unit})))+'</span></div>':'<button type="button" class="so-receipt-unit-placeholder" disabled>Pilih satuan</button>';
+  const unitControl=selected?'<div class="so-receipt-unit-control"><details class="so-unit-dropdown" data-so-unit-key="'+e(selected.key)+'"><summary aria-label="Satuan dasar '+e(selected.name)+'"><span>'+e(v.unit||selected.unit)+'</span><span class="so-picker-chevron" aria-hidden="true"></span></summary><div class="so-unit-options">'+unitOptions+'</div></details></div>':'<button type="button" class="so-receipt-unit-placeholder" disabled>Pilih satuan</button>';
   const selectedHead=selected?'<div class="so-receipt-extra-head"><strong>'+e(selected.name)+'</strong>'+button('Hapus','receipt-remove','data-so-item-key="'+e(selected.key)+'" aria-label="Hapus '+e(selected.name)+'"')+'</div>':'';
   const quantity='<label class="so-receipt-reference-field flt"><span class="flt-label">Jumlah</span><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(selected?.key||'')+'" data-so-prop="qty" aria-label="Jumlah Barang Masuk '+e(selected?.name||'')+'" value="'+e(v.qty??'')+'" placeholder=" " '+(!selected||selected.error?'disabled':'')+'></label>';
-  const unit='<label class="so-receipt-reference-field flt flt--static"><span class="flt-label">Satuan</span>'+unitControl+'</label>';
+  const unit='<div class="so-receipt-reference-field flt flt--static"><span class="flt-label">Satuan</span>'+unitControl+'</div>';
   const invoice='<label class="so-receipt-reference-field so-receipt-invoice-field flt"><span class="flt-label">Total invoice (opsional)</span><input type="number" inputmode="decimal" min="0" step="any" data-so-key="'+e(selected?.key||'')+'" data-so-prop="invoice_total" aria-label="Harga invoice total (opsional) '+e(selected?.name||'')+'" value="'+e(v.invoice_total??'')+'" placeholder=" " '+(!selected||selected.error?'disabled':'')+'></label>';
   return '<article class="so-receipt-extra-item">'+selectedHead+'<div class="so-receipt-details-grid"><div class="so-receipt-quantity-unit-grid">'+quantity+unit+'</div>'+invoice+'</div></article>';
  }
@@ -537,7 +537,7 @@
   const previousGroups=dateGroups.filter(([date])=>date<currentDay);
   const visiblePrevious=previousGroups.slice(0,Math.max(0,historyLimit-1));
   const todayList=todayGroups.length?`<ul class="so-history">${renderGroups(todayGroups)}</ul>`:
-   '<div class="so-empty"><strong>Belum ada riwayat hari ini</strong></div>';
+   '<div class="so-empty"><strong>'+(form?.kind==='receipt'&&historyKind==='receipt'?'Belum ada transaksi hari ini':'Belum ada riwayat hari ini')+'</strong></div>';
   const previousList=visiblePrevious.length?`<ul class="so-history">${renderGroups(visiblePrevious)}</ul>`:'';
   const more=previousGroups.length>visiblePrevious.length?
    `<div class="so-history-more">${button('Tampilkan tanggal sebelumnya','history-more')}</div>`:'';
