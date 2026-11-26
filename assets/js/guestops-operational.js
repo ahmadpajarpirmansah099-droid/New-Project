@@ -46,7 +46,7 @@ function renderOperationalDetail() {
     '<div class="operational-head"><div><h2>Detail Operasional</h2><p>' + esc(dateLabel) + '</p></div><button class="close operational-close" type="button" data-app-action="closeSheet" aria-label="Tutup detail">×</button></div>',
     '<section class="operational-summary"><div class="operational-summary-main"><span>Total tamu</span><strong>' + total + '</strong><small class="' + (difference >= 0 ? 'trend-up' : 'trend-down') + '">' + (difference > 0 ? '↑ ' : difference < 0 ? '↓ ' : '') + esc(trend) + '<span>' + esc(trendCopy) + '</span></small></div>',
     '<div class="operational-summary-meta"><div><span class="summary-icon">♧</span><span>Total pack</span><b>' + packTotal + '</b></div><div><span class="summary-icon">◷</span><span>Rata-rata tunggu</span><b>' + esc(averageWait) + '</b></div><div><span class="summary-icon">✓</span><span>Tamu sudah duduk</span><b>' + seatedTotal + '</b></div></div></section>',
-    '<section class="operational-chart-card"><div class="operational-section-head"><h3>Tren kunjungan</h3><div class="chart-toggle" role="group" aria-label="Mode grafik"><button type="button" class="' + (operationalChartMode === 'hour' ? 'active' : '') + '" data-app-action="setOperationalChartMode" data-app-value="hour">Jam</button><button type="button" class="' + (operationalChartMode === 'pack' ? 'active' : '') + '" data-app-action="setOperationalChartMode" data-app-value="pack">Pack</button></div></div><div id="operationalChart" class="operational-chart"></div></section>',
+    '<section class="operational-chart-card"><div class="operational-section-head"><h3>Tren kunjungan</h3><div class="chart-toggle" role="group" aria-label="Mode grafik"><button type="button" class="' + (operationalChartMode === 'hour' ? 'active' : '') + '" data-app-action="setOperationalChartMode" data-app-value="hour">Jam</button><button type="button" class="' + (operationalChartMode === 'pack' ? 'active' : '') + '" data-app-action="setOperationalChartMode" data-app-value="pack">Pack</button></div></div><div id="operationalChart" class="operational-chart" tabindex="0" role="group" aria-label="Grafik tren kunjungan"></div></section>',
     '<section class="operational-guests"><div class="operational-section-head operational-list-head"><div><h3>Daftar tamu</h3><small>' + total + ' tamu terdaftar</small></div><span class="operational-list-total">' + total + '</span></div>',
     '<div class="operational-list-tools"><label class="operational-search"><span>⌕</span><input id="operationalSearch" type="search" placeholder="Cari nama atau nomor antrean..." data-app-input-action="renderOperationalGuestList"></label><div class="operational-filter-wrap"><button type="button" id="operationalFilterTrigger" class="operational-filter-trigger" aria-haspopup="listbox" aria-expanded="false" data-app-action="toggleOperationalFilterMenu"><span id="operationalFilterLabel">Duduk</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div id="operationalFilterMenu" class="operational-filter-menu" role="listbox" aria-label="Filter status tamu" hidden><button type="button" role="option" aria-selected="false" data-filter="all" data-app-action="setOperationalStatusFilter" data-app-value="all">Semua</button><button type="button" role="option" aria-selected="false" data-filter="waiting" data-app-action="setOperationalStatusFilter" data-app-value="waiting">Menunggu</button><button type="button" role="option" aria-selected="false" data-filter="called" data-app-action="setOperationalStatusFilter" data-app-value="called">Dipanggil</button><button type="button" role="option" data-filter="seated" aria-selected="true" data-app-action="setOperationalStatusFilter" data-app-value="seated">Duduk</button><button type="button" role="option" aria-selected="false" data-filter="done" data-app-action="setOperationalStatusFilter" data-app-value="done">Selesai</button><button type="button" role="option" aria-selected="false" data-filter="cancelled" data-app-action="setOperationalStatusFilter" data-app-value="cancelled">Batal</button></div></div></div>',
     '<div id="operationalGuestList" class="operational-guest-list"></div></section>',
@@ -65,18 +65,28 @@ function setOperationalChartMode(mode) {
 function renderOperationalChart(guests) {
   const chart = $('operationalChart');
   if (!chart) return;
-  const latestHour = guests.length ? new Date(Math.max(...guests.map(guest => guest.created))).getHours() : Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jakarta', hour: '2-digit', hourCycle: 'h23' }).format(new Date()));
-  const firstHour = Math.max(0, latestHour - 5);
-  const slots = Array.from({ length: 6 }, (_, index) => {
+  const hourly = operationalChartMode === 'hour';
+  const jakartaHour = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jakarta', hour: '2-digit', hourCycle: 'h23' });
+  let firstHour = 6;
+  if (!hourly) {
+    const latestHour = guests.length ? new Date(Math.max(...guests.map(guest => guest.created))).getHours() : Number(jakartaHour.format(new Date()));
+    firstHour = Math.max(0, latestHour - 5);
+  }
+  const guestHours = guests.map(guest => hourly ? Number(jakartaHour.format(new Date(guest.created))) : new Date(guest.created).getHours());
+  const slots = Array.from({ length: hourly ? 18 : 6 }, (_, index) => {
     const hour = firstHour + index;
-    const inSlot = guests.filter(guest => new Date(guest.created).getHours() === hour);
+    const inSlot = guests.filter((guest, index) => guestHours[index] === hour);
     return { hour, value: operationalChartMode === 'pack' ? inSlot.reduce((sum, guest) => sum + Number(guest.pack || 0), 0) : inSlot.length };
   });
   const max = Math.max(1, ...slots.map(slot => slot.value));
+  chart.classList.toggle('operational-chart-hours', hourly);
   chart.innerHTML = slots.map(slot => {
     const height = slot.value ? Math.max(9, Math.round((slot.value / max) * 100)) : 3;
-    return '<div class="operational-bar-column"><b>' + slot.value + '</b><div class="operational-bar-track"><i data-bar-height="' + height + '"></i></div><small>' + String(slot.hour).padStart(2, '0') + '.00</small></div>';
-  }).join('');
+    return '<div class="operational-bar-column"><b>' + slot.value + '</b><div class="operational-bar-track"><i data-bar-height="' + height + '"></i></div><small>' + String(slot.hour).padStart(2, '0') + (hourly ? ':00' : '.00') + '</small></div>';
+  }).join('') + (hourly
+    // Midnight is the end boundary, not the 00:00–00:59 bucket at the start of the selected day.
+    ? '<div class="operational-bar-column" aria-label="00:00, akhir hari"><b></b><div class="operational-bar-track"></div><small>00:00</small></div>'
+    : '');
   chart.querySelectorAll('[data-bar-height]').forEach(bar => {
     bar.style.height = Number(bar.dataset.barHeight) + '%';
   });
