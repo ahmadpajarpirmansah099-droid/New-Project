@@ -694,23 +694,19 @@ test('Barang Masuk matches the compact reference form and keeps item quantity, u
  assert.match(t.page.innerHTML,/class="so-receipt-details-grid"/);
  assert.match(t.page.innerHTML,/class="so-receipt-quantity-unit-grid"/);
  assert.match(t.page.innerHTML,/Catatan \/ nomor invoice/);
- assert.match(t.page.innerHTML,/Batal/);
+ assert.match(t.page.innerHTML,/Tutup Form/);
  assert.match(t.page.innerHTML,/Simpan Barang Masuk/);
  assert.doesNotMatch(t.page.innerHTML,/Simpan Draft/);
  t.input({soReceiptSearch:''},'su');
  assert.match(t.searchResults.innerHTML,/Susu/);
  await t.click('receipt-add',{soItemKey:'m:a'});
- assert.match(t.page.innerHTML,/data-so-selected-key="m:a"/);
- assert.doesNotMatch(t.page.innerHTML,/readonly/);
- assert.match(t.page.innerHTML,/value="Susu"/);
- t.input({soReceiptSearch:'',soSelectedKey:'m:a'},'su');
- assert.equal(t.draft('receipt').counts['m:a'],undefined);
- assert.match(t.searchResults.innerHTML,/Susu/);
- await t.click('receipt-add',{soItemKey:'m:a'});
+ assert.match(t.page.innerHTML,/<strong>Susu<\/strong>/);
  assert.match(t.page.innerHTML,/data-so-prop="qty" aria-label="Jumlah Barang Masuk Susu"/);
  assert.match(t.page.innerHTML,/aria-label="Satuan dasar Susu"/);
  t.input({soKey:'m:a',soProp:'qty'},'3');
  t.input({soKey:'m:a',soProp:'invoice_total'},'25000');
+ t.input({soReceiptSearch:''},'gu');
+ assert.equal(t.draft('receipt').counts['m:a'].invoice_total,'25000');
  t.input({soField:'note'},'INV-2026-001');
  assert.equal(t.draft('receipt').counts['m:a'].qty,'3');
  assert.equal(t.draft('receipt').note,'INV-2026-001');
@@ -944,7 +940,8 @@ test('feature history is isolated and switching forms preserves each local draft
 
 test('Pengeluaran search results become visible while typing and redundant notices are omitted', async () => {
  const t=runtime(); await t.ui.open('expense');
- assert.doesNotMatch(t.page.innerHTML,/Belum ada barang dipilih|Draft lokal tersimpan di perangkat ini/);
+ assert.doesNotMatch(t.page.innerHTML,/Belum ada barang dipilih/);
+ assert.match(t.page.innerHTML,/id="soDraftStatus"/);
  t.input({soExpenseSearch:''},'su');
  assert.equal(t.expenseSearchVisible(),true);
  assert.match(t.searchResults.innerHTML,/data-so-item-key="m:a"/);
@@ -993,7 +990,8 @@ test('Move keeps selected item, destination and mapping when submitting', async 
  await t.ui.open('expense'); await t.click('submit');
  assert.equal(t.writes[0].input.target,'destination');
  assert.equal(t.writes[0].input.mapping[0].target,'m:destination');
- assert.equal(t.writes[0].input.lines[0].qty,'5');
+  assert.equal(t.writes[0].input.lines[0].qty,'5');
+  assert.ok(t.confirmations.some(msg=>msg.includes('ke Outlet')&&msg.includes('Susu: 5 ML')));
 });
 
 test('expense category uses in-page options and selection preserves selected items', async () => {
@@ -1054,7 +1052,7 @@ test('new Stock Opname table shows active master items and all requested columns
     assert.match(t.page.innerHTML, new RegExp(label));
   }
   assert.match(t.page.innerHTML, /Susu/);
-  assert.match(t.page.innerHTML, /Cup tak\.\. Dingin/);
+  assert.match(t.page.innerHTML, />Cup takeaway Dingin<\/span>/);
   assert.match(t.page.innerHTML, /data-label="STOK AWAL"><span>0 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>0 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>0 ML<\/span>/);
@@ -1151,6 +1149,33 @@ test('movement table shows only the selected calendar month and starts the next 
   assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>2 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="TERPAKAI OPERASIONAL"><span>11 ML<\/span>/);
   assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span class="so-table-negative">-7 ML<\/span>/);
+});
+
+test('adding a second receipt item never discards or silently skips invoice lines',async()=>{
+ const t=runtime();
+ t.data.catalog.push({key:'m:b',name:'Gula',unit:'GR',units:[{unit:'GR',factor:1}]});
+ await t.ui.open('receipt');await t.click('receipt-add',{soItemKey:'m:a'});
+ t.input({soKey:'m:a',soProp:'qty'},'3');t.input({soKey:'m:a',soProp:'invoice_total'},'5000');
+ t.input({soReceiptSearch:''},'gula');await t.click('receipt-add',{soItemKey:'m:b'});
+ await t.click('submit');assert.equal(t.writes.length,0);assert.match(t.page.innerHTML,/Isi jumlah Gula/);
+ t.input({soKey:'m:b',soProp:'qty'},'7');await t.click('submit');
+ assert.deepEqual(t.writes[0].input.lines.map(l=>[l.key,l.qty,l.invoice_total]),[['m:b','7',''],['m:a','3','5000']]);
+});
+
+test('production history identifies cancellations and keeps closed records read-only',async()=>{
+ const t=runtime();
+ t.data.state.documents=[{id:'production-a',period_id:'period',type:'production',start:TEST_TODAY,end:TEST_TODAY,postings:[{key:'w:a',name:'Sirup',qty:100,unit:'ML'}]}];
+ await t.ui.open('production');assert.match(t.page.innerHTML,/data-so-action="edit" data-so-id="production-a"/);
+ t.confirm(false);await t.click('void',{soId:'production-a'});
+ assert.match(t.confirmations.at(-1),/seluruh transaksi [^\n]+[\s\S]+Sirup: 100 ML/);assert.equal(t.writes.length,0);
+ t.data.state.periods[0].status='closed';t.ui.render();assert.doesNotMatch(t.page.innerHTML,/data-so-action="(?:edit|void)"/);
+});
+
+test('physical entry shows the unit actually imported and submitted',async()=>{
+ const t=runtime();t.data.catalog[0].units.push({unit:'BOTOL',factor:1000});await t.ui.open('close');
+ t.setExcel({readFile:async()=>({'m:a':{qty:'2',unit:'BOTOL'},'w:a':{qty:'0',unit:'ML'}})});
+ await t.importFile({});assert.match(t.page.innerHTML,/aria-label="Stok fisik Susu \(BOTOL\)"[^>]+><small>BOTOL<\/small>/);
+ await t.click('submit');assert.deepEqual(t.writes[0].input.counts['m:a'],{qty:'2',unit:'BOTOL'});
 });
 
 test('movement table includes Move receipts and reversals for materials and WIP', () => {
