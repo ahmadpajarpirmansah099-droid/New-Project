@@ -54,6 +54,32 @@ function resolveWorkspaceLandingPage(requestedPage, authContext, hasGuestOpsAcce
   return hasGuestOpsAccess ? 'dashboard' : 'master-items';
 }
 
+function mergeGuestRows(current, fresh) {
+  const merged = new Map();
+  (fresh || []).forEach(guest => merged.set(guest.id, guest));
+  (current || []).forEach(guest => {
+    if (!merged.has(guest.id)) merged.set(guest.id, guest);
+  });
+  return Array.from(merged.values()).sort((a, b) => (a.created || 0) - (b.created || 0));
+}
+
+// The overview screens only hold a recent window; fetch an older range the
+// first time the date picker asks for one.
+async function ensureGuestHistoryRange(start, end) {
+  if (!start || !end || !window.GuestOpsService?.isReady()) return;
+  if (window.GuestOpsService.covers(start, end)) return;
+  try {
+    // One extra month so the "vs previous period" comparison has data too.
+    const older = await window.GuestOpsService.loadRange(shiftDateKey(start, -31), end);
+    const seen = new Set((state.guests || []).map(guest => guest.id));
+    older.forEach(guest => { if (!seen.has(guest.id)) state.guests.push(guest); });
+    state.guests.sort((a, b) => (a.created || 0) - (b.created || 0));
+  } catch (error) {
+    console.error('Guest history range load failed:', error);
+    toast('Riwayat tanggal lama gagal dimuat. Periksa koneksi lalu coba lagi.');
+  }
+}
+
 async function refreshGuestOperationalData() {
   // shortcut: a write that never settles also pauses refresh until it does; add a timeout if writes can hang.
   if (!appDataReady || guestRefreshBusy || document.visibilityState !== 'visible' ||
@@ -65,24 +91,25 @@ async function refreshGuestOperationalData() {
   const sessionGeneration = appSessionGeneration;
 
   try {
-    const refreshed = await window.GuestOpsService.load();
+    const refreshed = await window.GuestOpsService.load({ merge: true });
     if (refreshToken !== guestRefreshToken || sessionGeneration !== appSessionGeneration ||
         !appDataReady || document.visibilityState !== 'visible' ||
         !isGuestOperationalPageActive() || !canAccessGuestOperations() ||
         window.GuestOpsService.isWriting?.()) return;
 
+    const mergedGuests = mergeGuestRows(state.guests, refreshed.guests);
     const currentSnapshot = JSON.stringify({
       guests: state.guests || [],
       reservations: state.reservations || [],
       settings: state.settings || {}
     });
     const refreshedSnapshot = JSON.stringify({
-      guests: refreshed.guests || [],
+      guests: mergedGuests,
       reservations: refreshed.reservations || [],
       settings: refreshed.settings || {}
     });
 
-    state.guests = refreshed.guests;
+    state.guests = mergedGuests;
     state.reservations = refreshed.reservations;
     state.counters = refreshed.counters;
     state.reservationCounters = refreshed.reservationCounters;

@@ -310,7 +310,7 @@ function openDashboardRangePicker(trigger) {
     note.textContent = 'Pilih tanggal awal, lalu tanggal akhir. Maksimal 1 bulan.';
     draw();
   });
-  dialog.querySelector('.dashboard-range-apply').addEventListener('click', () => {
+  dialog.querySelector('.dashboard-range-apply').addEventListener('click', async () => {
     if (!start || !end) return;
     if (operational) {
       selectedOperationalStartDate = start;
@@ -321,8 +321,9 @@ function openDashboardRangePicker(trigger) {
       selectedDashboardEndDate = end;
       renderDashboardDateControls();
     }
-    renderAll();
     dialog.close();
+    await ensureGuestHistoryRange(start, end);
+    renderAll();
   });
   dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
   dialog.addEventListener('close', () => { dialog.remove(); trigger.focus(); }, { once: true });
