@@ -9,6 +9,8 @@
   let serviceGeneration = 0;
   let persistedGuestRows = new Map();
   let persistedReservationRows = new Map();
+  let guestVersions = new Map();
+  let reservationVersions = new Map();
   let persistedSettingsFingerprint = null;
 
   const toIso = value => new Date(Number(value) || Date.now()).toISOString();
@@ -136,11 +138,11 @@
     const guard = await assertWorkspaceSession();
     const [guestResult, reservationResult, settingResult] = await Promise.all([
       client.from('guests')
-        .select('id,ticket,service_date,guest_name,pack,phone,smoking,status,created_at,resolved_at,seated_at,table_label,reservation_id')
+        .select('id,ticket,service_date,guest_name,pack,phone,smoking,status,created_at,resolved_at,seated_at,table_label,reservation_id,updated_at')
         .eq('workspace_id', workspaceId)
         .order('created_at', { ascending: true }),
       client.from('reservations')
-        .select('id,code,reservation_date,reservation_time,guest_name,pack,phone,smoking,note,table_label,status,created_at')
+        .select('id,code,reservation_date,reservation_time,guest_name,pack,phone,smoking,note,table_label,status,created_at,updated_at')
         .eq('workspace_id', workspaceId)
         .order('reservation_date', { ascending: true })
         .order('reservation_time', { ascending: true }),
@@ -155,6 +157,12 @@
     if (reservationResult.error) throw reservationResult.error;
     if (settingResult.error) throw settingResult.error;
     await assertWorkspaceSession(guard.generation);
+
+    const versionsFrom = rows => new Map((rows || [])
+      .filter(row => row.updated_at)
+      .map(row => [row.id, Date.parse(row.updated_at)]));
+    guestVersions = versionsFrom(guestResult.data);
+    reservationVersions = versionsFrom(reservationResult.data);
 
     const guests = (guestResult.data || []).map(mapGuest);
     const reservations = (reservationResult.data || []).map(mapReservation);
@@ -256,6 +264,21 @@
     return operation;
   }
 
+  // One extra read per changed table; the write itself stays a single upsert.
+  async function staleRowIds(table, records, versions) {
+    const ids = records.map(record => record.id).filter(id => versions.has(id));
+    if (!ids.length) return [];
+    const { data, error } = await client.from(table)
+      .select('id,updated_at')
+      .eq('workspace_id', workspaceId)
+      .in('id', ids);
+    if (error) throw error;
+    const current = new Map((data || []).map(row => [row.id, Date.parse(row.updated_at)]));
+    // shortcut: the check and the write are two requests, so a save landing in
+    // that gap is not detected; move the guard into the database if that matters.
+    return ids.filter(id => current.get(id) !== versions.get(id));
+  }
+
   function persist(state) {
     requireReady();
     const requestedGeneration = serviceGeneration;
@@ -276,17 +299,34 @@
       );
 
       await assertWorkspaceSession(guard.generation);
+      const stale =
+        (await staleRowIds('reservations', changedReservations, reservationVersions)).length +
+        (await staleRowIds('guests', changedGuests, guestVersions)).length;
+      if (stale) {
+        const conflict = new Error('Data sudah diubah di perangkat lain.');
+        conflict.code = 'stale_write';
+        throw conflict;
+      }
       if (changedReservations.length) {
-        const result = await client.from('reservations').upsert(changedReservations, { onConflict: 'id' });
+        const stamp = new Date().toISOString();
+        const rows = changedReservations.map(record => ({ ...record, updated_at: stamp }));
+        const result = await client.from('reservations').upsert(rows, { onConflict: 'id' });
         if (result.error) throw result.error;
-        changedReservations.forEach(record => persistedReservationRows.set(record.id, recordFingerprint(record)));
+        changedReservations.forEach(record => {
+          persistedReservationRows.set(record.id, recordFingerprint(record));
+          reservationVersions.set(record.id, Date.parse(stamp));
+        });
       }
       await assertWorkspaceSession(guard.generation);
       if (changedGuests.length) {
-        const rows = changedGuests.map(record => ({ ...record, updated_at: new Date().toISOString() }));
+        const stamp = new Date().toISOString();
+        const rows = changedGuests.map(record => ({ ...record, updated_at: stamp }));
         const result = await client.from('guests').upsert(rows, { onConflict: 'id' });
         if (result.error) throw result.error;
-        changedGuests.forEach(record => persistedGuestRows.set(record.id, recordFingerprint(record)));
+        changedGuests.forEach(record => {
+          persistedGuestRows.set(record.id, recordFingerprint(record));
+          guestVersions.set(record.id, Date.parse(stamp));
+        });
       }
       await assertWorkspaceSession(guard.generation);
       if (root.AppAuth?.getContext()?.role !== 'service') {
@@ -400,6 +440,8 @@
     pendingWrites = 0;
     persistedGuestRows = new Map();
     persistedReservationRows = new Map();
+    guestVersions = new Map();
+    reservationVersions = new Map();
     persistedSettingsFingerprint = null;
   }
 

@@ -40,7 +40,11 @@ function save() {
     })
     .catch(error => {
       console.error('Guest Operations database save failed:', error);
-      toast('Data belum tersimpan ke database. Periksa koneksi lalu coba lagi.');
+      if (error?.code === 'stale_write') {
+        toast('Data sudah diubah di perangkat lain. Perubahan ini tidak disimpan — muat ulang halaman lalu ulangi.');
+      } else {
+        toast('Data belum tersimpan ke database. Periksa koneksi lalu coba lagi.');
+      }
       return false;
     });
   return remoteSaveQueue;
