@@ -12858,6 +12858,13 @@ button, input, select, textarea { font-family: var(--ui-font); }
   color: var(--ui-ink);
   box-shadow: var(--ui-shadow-card);
 }
+#page-stock-opname .so-receipt-reveal { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .22s ease, opacity .16s ease; }
+#page-stock-opname .so-receipt-reveal.is-visible { grid-template-rows: 1fr; opacity: 1; }
+#page-stock-opname .so-receipt-reveal > div { min-height: 0; overflow: hidden; }
+#page-stock-opname .so-receipt-reveal.is-settled > div { overflow: visible; }
+@media (prefers-reduced-motion: reduce) {
+  #page-stock-opname .so-receipt-reveal { transition: none; }
+}
 #page-stock-opname .so-receipt-extra-head {
   display: flex;
   justify-content: space-between;

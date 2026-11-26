@@ -32,7 +32,8 @@ function runtime() {
   let partsEnabled=false;
   const parts={toolbar:{innerHTML:''},rows:{innerHTML:''},input:{value:''},results:{innerHTML:''}};
   const liveForm={querySelector(selector){return ({'[data-so-expense-toolbar]':parts.toolbar,'[data-so-expense-rows]':parts.rows,'[data-so-expense-search]':parts.input,'[data-so-expense-results]':parts.results})[selector]||null;}};
-  const page = { get innerHTML(){return pageHtml;}, set innerHTML(value){pageHtml=value;pageRenders++;}, contains: () => true, querySelector: selector => selector==='.so-form'&&partsEnabled?liveForm:selector==='#soHistory' && pageHtml.includes('id="soHistory"') ? history : null };
+   let receiptParts;
+   const page = { get innerHTML(){return pageHtml;}, set innerHTML(value){pageHtml=value;pageRenders++;}, contains: () => true, querySelector: selector => selector==='.so-receipt-reference-fields' ? receiptParts?.fields : selector==='.so-form'&&partsEnabled?liveForm:selector==='#soHistory' && pageHtml.includes('id="soHistory"') ? history : null };
   const searchResults = { innerHTML: '' };
   const searchContainerClasses = new Set();
   const searchContainer = { classList: { toggle(name, force) { if (force) searchContainerClasses.add(name); else searchContainerClasses.delete(name); }, contains(name) { return searchContainerClasses.has(name); } }, querySelector: () => searchResults };
@@ -96,7 +97,13 @@ function runtime() {
   return {
     ui: w.StockOpnameUI, data, writes, confirmations, page,
     pageRenders: () => pageRenders,
-    enableExpenseParts() { partsEnabled=true; }, parts,
+     enableExpenseParts() { partsEnabled=true; }, parts,
+     enableReceiptParts() {
+       const search = { value: '', results: { innerHTML: '' }, nextElementSibling: {classList: {add() {}}, getBoundingClientRect() {}}, classList: { remove(name) { this.removed=name; } }, querySelector(selector) {return selector==='[data-so-receipt-search]'?this:selector==='[data-so-receipt-results]'?this.results:null;}, insertAdjacentHTML(position,html) { receiptParts.inserted.push({position,html}); } };
+       const placeholder = { removed: false, remove() { this.removed=true; } };
+       receiptParts = { search, placeholder, inserted: [], fields: { querySelector(selector) { return selector==='.so-receipt-search'?search:selector==='.so-receipt-extra-item'?placeholder:null; } } };
+       return receiptParts;
+     },
     searchResults,
     draft: kind => { const value = drafts[kind || letHolder.active]; return value && copy(value); },
     seedDraft(value) { drafts[value.kind]=copy(value); letHolder.active=value.kind; },
@@ -806,6 +813,29 @@ test('grouped Barang Masuk history exposes per-transaction cancellation and upda
  await t.click('void',{soId:'receipt-1'});
  assert.equal(t.writes.at(-1).action,'void');
  assert.equal(t.writes.at(-1).input.id,'receipt-1');
+});
+
+test('selecting a receipt item expands only its card without replacing the form or prior amounts', async () => {
+ const t=runtime();
+ t.data.catalog.push({key:'m:b',name:'Gula',unit:'GR',units:[{unit:'GR',factor:1}]});
+ await t.ui.open('receipt');
+ const parts=t.enableReceiptParts(),renders=t.pageRenders();
+ await t.click('receipt-add',{soItemKey:'m:a'});
+ assert.equal(t.pageRenders(),renders);
+ assert.equal(parts.placeholder.removed,true);
+ assert.match(parts.inserted[0].html,/class="so-receipt-reveal"/);
+ assert.match(parts.inserted[0].html,/<strong>Susu<\/strong>/);
+ t.input({soKey:'m:a',soProp:'qty'},'3');
+ t.input({soKey:'m:a',soProp:'invoice_total'},'25000');
+ await t.click('receipt-add',{soItemKey:'m:b'});
+ assert.equal(t.pageRenders(),renders);
+ assert.match(parts.inserted[1].html,/<strong>Gula<\/strong>/);
+ assert.equal(t.draft('receipt').counts['m:a'].invoice_total,'25000');
+ assert.deepEqual(t.draft('receipt').receiptItems,['m:b','m:a']);
+ const css=contentsOfStockOpnameStyles();
+ assert.match(css,/\.so-receipt-reveal \{[^}]*grid-template-rows: 0fr;[^}]*transition: grid-template-rows \.22s/);
+ assert.match(css,/\.so-receipt-reveal\.is-visible \{[^}]*grid-template-rows: 1fr/);
+ assert.match(css,/@media \(prefers-reduced-motion: reduce\) \{\s*#page-stock-opname \.so-receipt-reveal \{ transition: none; \}/);
 });
 
 test('closed Barang Masuk history keeps receipt details without edit or cancel actions',async()=>{
