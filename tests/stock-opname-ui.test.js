@@ -650,6 +650,10 @@ test('Stock Opname close exposes a single physical count surface in the month ta
   const table = html.match(/<section class="so-layout-table"[\s\S]*?<\/section>/)?.[0] || '';
   assert.ok(panel, 'Stock Opname form should be present');
   assert.ok(table, 'month table should be present');
+  assert.match(panel, /href="#soCountTable"/);
+  assert.match(table, /id="soCountTable" tabindex="-1"/);
+  assert.match(table, /href="#soCountConfirm"/);
+  assert.match(panel, /<button\b[^>]*id="soCountConfirm"[^>]*>Konfirmasi<\/button>/);
   assert.doesNotMatch(panel, /<table\b|data-so-prop="qty"|data-so-key=/);
   assert.match(table, /class="so-physical-input"[^>]*data-so-key="m:a"/);
   assert.match(table, /class="so-physical-input"[^>]*data-so-key="w:a"/);

@@ -12181,6 +12181,8 @@ button, input, select, textarea { font-family: var(--ui-font); }
   box-shadow: var(--ui-shadow-card);
 }
 .so-layout-table-scroll { width: 100%; }
+.so-count-link { display: inline-flex; align-items: center; min-height: 44px; color: inherit; font-weight: 700; text-decoration: underline; }
+#soCountTable, #soCountConfirm { scroll-margin-top: 5rem; }
 .so-layout-ledger { width: 100%; border-collapse: separate; border-spacing: 0; color: var(--so-ink); }
 .so-layout-ledger th, .so-layout-ledger td { padding: 13px 10px; border-bottom: 1px solid var(--so-line); text-align: right; font-size: 12px; }
 .so-layout-ledger thead th { color: var(--so-muted); font-size: 10px; font-weight: 800; letter-spacing: .035em; line-height: 1.35; white-space: normal; }
