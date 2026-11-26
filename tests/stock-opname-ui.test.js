@@ -1405,6 +1405,14 @@ test('Barang Masuk uses floating labels for search, quantity, invoice and note f
  assert.match(html,/class="so-receipt-reference-field flt flt--static"[^>]*>[\s\S]*?<span class="flt-label">Tanggal diterima<\/span>/);
 });
 
+test('Stock Opname date picker omits the redundant header but keeps cancel, apply and dialog label', () => {
+ const js=contentsOfStockOpnameUi();
+ assert.match(js,/dialog\.setAttribute\('aria-label',title\)/);
+ assert.match(js,/showHeader\?'<header><h2>'/);
+ assert.match(js,/data-picker-cancel>Batal[\s\S]*?data-picker-apply>Gunakan tanggal[\s\S]*?',false\)/);
+ assert.match(js,/const d=pickerDialog\(el\.dataset\.soTitle\|\|'Pilih '/);
+});
+
 test('Barang Masuk reference form keeps search free of backdrop blur', () => {
  const css=contentsOfStockOpnameStyles();
  const js=contentsOfStockOpnameUi();

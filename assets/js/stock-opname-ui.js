@@ -129,13 +129,13 @@
    dialog.querySelector('[data-so-decline]').focus();
   });
  }
- function pickerDialog(title,content,actions=''){
+ function pickerDialog(title,content,actions='',showHeader=true){
   const dialog=document.createElement('dialog');dialog.className='so-picker-dialog';
   dialog.setAttribute('aria-label',title);
-  dialog.innerHTML='<header><h2>'+e(title)+'</h2><button type="button" data-picker-close>Tutup</button></header><div class="so-picker-content">'+content+'</div>'+actions;
+  dialog.innerHTML=(showHeader?'<header><h2>'+e(title)+'</h2><button type="button" data-picker-close>Tutup</button></header>':'')+'<div class="so-picker-content">'+content+'</div>'+actions;
   document.body.appendChild(dialog);dialog.showModal();
   dialog.addEventListener('close',()=>dialog.remove(),{once:true});
-  dialog.querySelector('[data-picker-close]').addEventListener('click',()=>dialog.close());
+  dialog.querySelector('[data-picker-close]')?.addEventListener('click',()=>dialog.close());
   dialog.addEventListener('click',ev=>{if(ev.target===dialog)dialog.close();});
   return dialog;
  }
@@ -150,7 +150,7 @@
    dialog.querySelector('.so-calendar-title').textContent=new Intl.DateTimeFormat('id-ID',{month:'long',year:'numeric'}).format(cursor);
    dialog.querySelector('.so-calendar-grid').innerHTML='<span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span>'+cells;
   };
-  const d=pickerDialog('Pilih '+(field==='start'?'tanggal awal':'tanggal'),'<div class="so-calendar-nav"><button type="button" data-month="-1" aria-label="Bulan sebelumnya">‹</button><strong class="so-calendar-title"></strong><button type="button" data-month="1" aria-label="Bulan berikutnya">›</button></div><div class="so-calendar-grid"></div><p class="so-calendar-selected"></p>','<footer><button type="button" data-picker-cancel>Batal</button><button type="button" class="so-primary" data-picker-apply>Gunakan tanggal</button></footer>');
+  const d=pickerDialog('Pilih '+(field==='start'?'tanggal awal':'tanggal'),'<div class="so-calendar-nav"><button type="button" data-month="-1" aria-label="Bulan sebelumnya">‹</button><strong class="so-calendar-title"></strong><button type="button" data-month="1" aria-label="Bulan berikutnya">›</button></div><div class="so-calendar-grid"></div><p class="so-calendar-selected"></p>','<footer><button type="button" data-picker-cancel>Batal</button><button type="button" class="so-primary" data-picker-apply>Gunakan tanggal</button></footer>',false);
   draw(d);d.querySelector('.so-calendar-selected').textContent=dateLabel(selected);
   d.querySelectorAll('[data-month]').forEach(btn=>btn.addEventListener('click',()=>{cursor.setMonth(cursor.getMonth()+Number(btn.dataset.month));draw(d);}));
   d.querySelector('.so-calendar-grid').addEventListener('click',ev=>{const btn=ev.target.closest('[data-date-value]');if(!btn)return;selected=btn.dataset.dateValue;draw(d);d.querySelector('.so-calendar-selected').textContent=dateLabel(selected);});
