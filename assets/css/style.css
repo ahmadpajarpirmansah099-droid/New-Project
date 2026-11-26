@@ -12676,7 +12676,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 #page-stock-opname .so-receipt-reference-form h2 {
   margin: 0;
   color: var(--ui-ink);
-  font: 600 20px/1.3 var(--ui-font);
+  font: 600 18px/1.3 var(--ui-font);
 }
 #page-stock-opname .so-receipt-reference-fields {
   display: grid;
@@ -12726,8 +12726,13 @@ button, input, select, textarea { font-family: var(--ui-font); }
   background: var(--ui-surface);
   color: var(--ui-ink);
   box-shadow: none;
-  font: 500 16px/1.4 var(--ui-font);
+  font: 500 14px/1.4 var(--ui-font);
   transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
+}
+#page-stock-opname .so-receipt-reference-field > button.so-picker-trigger {
+  display: flex;
+  align-items: center;
+  caret-color: transparent;
 }
 #page-stock-opname .so-receipt-reference-field > input::placeholder,
 #page-stock-opname .so-receipt-reference-field > textarea::placeholder,
@@ -12806,6 +12811,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 #page-stock-opname .so-receipt-search.has-results .so-receipt-search-results,
 #page-stock-opname .so-receipt-reference-form.is-receipt-searching .so-receipt-search-results { display: grid; }
 #page-stock-opname .so-receipt-search-results button {
+  font-size: 11px;
   display: flex;
   justify-content: space-between;
   gap: 10px;
@@ -12869,9 +12875,9 @@ button, input, select, textarea { font-family: var(--ui-font); }
   background: transparent;
   color: var(--so-shortage);
   box-shadow: none;
-  font: 600 13px/1.3 var(--ui-font);
+  font: 600 11px/1.3 var(--ui-font);
 }
-#page-stock-opname .so-receipt-extra-head strong { min-width: 0; overflow-wrap: anywhere; font-size: 16px; }
+#page-stock-opname .so-receipt-extra-head strong { min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
 #page-stock-opname .so-receipt-extra-item .so-receipt-reference-field > input { min-height: 48px; }
 #page-stock-opname .so-receipt-reference-footer { margin-top: 18px; padding-top: 0; border-top: 0; }
 #page-stock-opname .so-receipt-reference-footer .so-actions {
@@ -12887,7 +12893,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   padding: 10px 14px;
   border: 1px solid var(--ui-line);
   border-radius: var(--ui-radius-control);
-  font: 800 14px/1.3 var(--ui-font);
+  font: 800 12px/1.3 var(--ui-font);
   box-shadow: var(--ui-shadow-control);
   transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
 }
@@ -12945,6 +12951,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 }
 #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown { display: block; position: relative; }
 #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown[open] { z-index: 30; }
+#page-stock-opname .so-receipt-reference-field:has(> .so-receipt-unit-control) > .flt-label { z-index: 31; }
 #page-stock-opname .so-receipt-unit-placeholder,
 #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown > summary {
   display: flex;
@@ -12957,7 +12964,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   background: var(--ui-surface);
   color: var(--ui-ink);
   box-shadow: none;
-  font: 500 16px/1.4 var(--ui-font);
+  font: 500 14px/1.4 var(--ui-font);
   list-style: none;
   cursor: pointer;
   transition: background 140ms var(--ui-ease), border-color 140ms var(--ui-ease), box-shadow 140ms var(--ui-ease), transform 140ms var(--ui-ease);
@@ -12982,6 +12989,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   box-shadow: var(--ui-shadow-card);
 }
 #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown .so-unit-options button {
+  font-size: 11px;
   display: flex;
   justify-content: flex-start;
   width: 100%;
@@ -13002,10 +13010,6 @@ button, input, select, textarea { font-family: var(--ui-font); }
 @media (max-width: 899px) {
   #page-stock-opname:has(.so-receipt-reference-form) { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
   #page-stock-opname .so-receipt-quantity-unit-grid { align-items: start; }
-  #page-stock-opname .so-receipt-unit-control > .so-unit-dropdown .so-unit-options {
-    position: static;
-    margin-top: 4px;
-  }
 }
 @media (max-width: 420px) {
   #page-stock-opname .so-receipt-reference-form { padding: 14px; }
@@ -13170,17 +13174,17 @@ html:not([data-desktop-theme="dark"]) {
 
 .so-receipt-reference-form .so-history-panel { margin-top: 24px; padding-top: 20px; }
 .so-receipt-reference-form .so-history-head { margin-bottom: 6px; }
-.so-receipt-reference-form .so-history-panel .so-empty { padding: 0 0 8px; text-align: left; }
+.so-receipt-reference-form .so-history-panel .so-empty { padding: 0 0 8px; text-align: left; font-size: 11px; }
 .so-receipt-reference-form .so-empty strong { font-weight: 500; }
 .so-receipt-reference-form .so-history-date { padding: 3px 0; }
-.so-receipt-reference-form .so-history-date > details > summary { font: 600 15px/1.4 var(--ui-font); }
-.so-receipt-reference-form .so-history-date > details > summary small { font-size: 13px; }
+.so-receipt-reference-form .so-history-date > details > summary { font: 600 13px/1.4 var(--ui-font); }
+.so-receipt-reference-form .so-history-date > details > summary small { font-size: 11px; }
 .so-receipt-reference-form .so-history .so-date-material-row {
   grid-template-columns: minmax(0,1fr) auto;
   gap: 4px 12px;
   padding: 12px 0;
 }
-.so-receipt-reference-form .so-date-material-row > :is(span,strong) { font-size: 14px; }
+.so-receipt-reference-form .so-date-material-row > :is(span,strong) { font-size: 12px; }
 .so-receipt-reference-form .so-history .so-history-actions {
   display: grid;
   grid-column: 1 / -1;
@@ -13194,7 +13198,13 @@ html:not([data-desktop-theme="dark"]) {
   align-items: center;
   gap: 8px;
 }
-.so-receipt-reference-form .so-history .so-history-actions span { color: var(--ui-muted); font-size: 12px; }
-#page-stock-opname .so-receipt-reference-form .so-history-link { min-height: 44px; padding-inline: 4px; font-size: 14px; }
+.so-receipt-reference-form .so-history .so-history-actions span { color: var(--ui-muted); font-size: 10px; }
+#page-stock-opname .so-receipt-reference-form .so-history-link { min-height: 44px; padding-inline: 4px; font-size: 12px; }
 
 
+
+#page-stock-opname .so-receipt-reference-form .so-history-more button { font-size: 11px; }
+#page-stock-opname .so-receipt-reference-form .flt > .flt-label { font-size: 11px; }
+#page-stock-opname .so-receipt-reference-form .flt:is(
+  :focus-within, .flt--static, :has(> input:not(:placeholder-shown))
+) > .flt-label { font-size: 9px; }
