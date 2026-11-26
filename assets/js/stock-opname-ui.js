@@ -20,7 +20,7 @@
  function staleOpeningDraft(draft){return draft?.kind==='initial'&&period()?.status==='opening_pending'&&draft.resetMarker!==period().opening_reset_at;}
  function staleCorrectionDraft(draft){return draft?.kind==='close'&&draft.basePeriod&&draft.basePeriod!==period()?.id;}
  function balances(){const s=get()?.state||{},p=period(),ids=new Set([p?.id,...(p?.legacy_period_ids||[])].filter(Boolean));const b={...p?.opening};for(const d of s.documents||[])if(ids.has(d.period_id)&&!d.void)for(const l of d.postings||[])b[l.key]=(Number(b[l.key])||0)+Number(l.qty);return b;}
- function catalog(){const all=[...(get()?.catalog||[])];for(const r of period()?.opening_catalog||[])if(!all.some(x=>x.key===r.key))all.push(r);for(const d of get()?.state?.documents||[])if(d.period_id===period()?.id&&!d.void)for(const r of d.postings||[])if(!all.some(x=>x.key===r.key))all.push(r);return all;}
+ function catalog(){const all=[...(get()?.catalog||[])],p=period(),ids=new Set([p?.id,...(p?.legacy_period_ids||[])].filter(Boolean));for(const r of p?.opening_catalog||[])if(!all.some(x=>x.key===r.key))all.push(r);for(const d of get()?.state?.documents||[])if(ids.has(d.period_id)&&!d.void)for(const r of d.postings||[])if(!all.some(x=>x.key===r.key))all.push(r);return all;}
  
  function tableMovementTotals(){
   const state=get()?.state||{},documents=Array.isArray(state.documents)?state.documents:[];
@@ -32,12 +32,15 @@
   const totals={incoming:Object.create(null),outgoing:Object.create(null),operational:Object.create(null)};
   const add=(bucket,key,qty)=>{bucket[key]=(bucket[key]||0)+qty;};
   for(const doc of scopedDocuments){
-   if(doc?.void===true||String(doc?.void)==='true'||!['receipt','expense','production','sales'].includes(doc?.type))continue;
+   if(doc?.void===true||String(doc?.void)==='true'||!['receipt','expense','production','sales','move_in','adjustment','adjustment_in'].includes(doc?.type))continue;
    for(const posting of Array.isArray(doc.postings)?doc.postings:[]){
     const key=String(posting?.key||''),qty=Number(posting?.qty);
     if((!key.startsWith('m:')&&!key.startsWith('w:'))||!Number.isFinite(qty))continue;
     const material=key.startsWith('m:'),amount=Math.abs(qty);
-    if(doc.type==='receipt'){
+    if(['move_in','adjustment','adjustment_in'].includes(doc.type)){
+     if(qty>0)add(totals.incoming,key,qty);
+     else if(qty<0)add(totals.outgoing,key,amount);
+    }else if(doc.type==='receipt'){
      if(material&&qty>0)add(totals.incoming,key,qty);
     }else if(doc.type==='expense'){
      if(qty<0)add(totals.outgoing,key,amount);
@@ -79,20 +82,23 @@
  function correctionCounts(){
   const p=period(),counts={};
   if(p?.status!=='reopened')return counts;
-  for(const row of p.result||[])counts[row.key]={qty:String(row.physical),unit:row.unit};
-  if(!p.result&&p.physical)for(const row of catalog().filter(x=>!x.key.startsWith('s:')))if(p.physical[row.key]!=null)counts[row.key]={qty:String(p.physical[row.key]),unit:row.unit};
+  // Month-end result quantities may be normalized; restore the actual physical count.
+  for(const row of p.result||[])counts[row.key]={qty:String(p.physical?.[row.key]??row.physical),unit:row.unit};
+  if(p.physical)for(const row of catalog().filter(x=>!x.key.startsWith('s:')))if(p.physical[row.key]!=null&&!counts[row.key])counts[row.key]={qty:String(p.physical[row.key]),unit:row.unit};
   return counts;
  }
  function restoreCorrectionCounts(draft){
   if(draft.kind!=='close'||period()?.status!=='reopened'||draft.basePeriod&&draft.basePeriod!==period().id)return false;
   const baseline=correctionCounts();let recovered=false;
   const counts={...draft.counts};
+  // shortcut: nonblank legacy drafts are kept; verify them against the original physical count before confirming.
   for(const key of Object.keys(baseline)){
    if(counts[key]?.qty==null||String(counts[key].qty).trim()===''){counts[key]={...baseline[key]};recovered=true;}
    else counts[key]={...baseline[key],...counts[key]};
   }
   draft.counts=counts;
-  if(draft.end>period().end){draft.end=period().end;recovered=true;}
+  const countDate=period().counted_at||period().end;
+  if(draft.end!==countDate){draft.end=countDate;recovered=true;}
   return recovered;
  }
  function confirmStock(message,title='Konfirmasi Stock Opname',acceptLabel='Lanjutkan'){
@@ -185,7 +191,7 @@
   if(kind==='initial'&&period()?.status==='opening_pending'){form.start=form.end=period().start;form.resetMarker=period().opening_reset_at;}
   if(d)for(const l of d.lines||[])form.counts[l.key]={qty:String(l.qty),unit:l.unit||'',invoice_total:l.invoice_total??''};
   if(kind==='close'&&period()?.status==='reopened'){
-   form.end=period().end;form.start=period().start;
+   form.end=period().counted_at||period().end;form.start=period().start;
    form.counts=correctionCounts();
   }
   notice='';snapshot();historyKind=kind;historyLimit=1;render();return true;

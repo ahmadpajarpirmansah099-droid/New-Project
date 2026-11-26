@@ -1149,6 +1149,102 @@ test('movement table shows only the selected calendar month and starts the next 
   assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span class="so-table-negative">-7 ML<\/span>/);
 });
 
+test('movement table includes Move receipts and reversals for materials and WIP', () => {
+  for (const [type, qty] of [['move_in', 20], ['adjustment', 20], ['adjustment_in', -20]]) {
+    const t = runtime();
+    t.data.state.periods[0].opening = { 'm:a': 100, 'w:a': 100 };
+    t.data.state.documents = [{
+      id: 'transfer', period_id: 'period', type,
+      postings: [{ key: 'm:a', qty }, { key: 'w:a', qty }]
+    }];
+    t.ui.render();
+    const rows = [...t.page.innerHTML.matchAll(/<tr><th scope="row"[\s\S]*?<\/tr>/g)];
+    assert.equal(rows.length, 2);
+    for (const [row] of rows) {
+      assert.match(row, new RegExp('data-label="BARANG MASUK"><span>' + Math.max(0, qty) + ' ML</span>'), type);
+      assert.match(row, new RegExp('data-label="BARANG KELUAR"><span>' + Math.max(0, -qty) + ' ML</span>'), type);
+      assert.match(row, new RegExp('data-label="STOK SISTEM"><span>' + (100 + qty) + ' ML</span>'), type);
+    }
+  }
+});
+
+test('Move totals include linked legacy periods but exclude voids and other months', () => {
+  const t = runtime();
+  t.data.state.periods[0].opening['m:a'] = 100;
+  t.data.state.periods[0].legacy_period_ids = ['legacy'];
+  t.data.state.documents = [
+    { id: 'in', period_id: 'legacy', type: 'move_in', postings: [{ key: 'm:a', qty: 20 }] },
+    { id: 'out', period_id: 'period', type: 'expense', category: 'Move', postings: [{ key: 'm:a', qty: -7 }] },
+    { id: 'void', period_id: 'period', type: 'adjustment', void: true, postings: [{ key: 'm:a', qty: 500 }] },
+    { id: 'other', period_id: 'other-month', type: 'move_in', postings: [{ key: 'm:a', qty: 900 }] }
+  ];
+  t.ui.render();
+  assert.match(t.page.innerHTML, /data-label="BARANG MASUK"><span>20 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="BARANG KELUAR"><span>7 ML<\/span>/);
+  assert.match(t.page.innerHTML, /data-label="STOK SISTEM"><span>113 ML<\/span>/);
+});
+
+test('legacy Move postings keep their item visible when it is absent from the current catalog', () => {
+  const t = runtime();
+  t.data.state.periods[0].legacy_period_ids = ['legacy'];
+  t.data.state.documents = [{
+    id: 'in', period_id: 'legacy', type: 'move_in',
+    postings: [{ key: 'm:old', name: 'Barang lama', unit: 'ML', qty: 20 }]
+  }];
+  t.ui.render();
+  const row = [...t.page.innerHTML.matchAll(/<tr><th scope="row"[\s\S]*?<\/tr>/g)]
+    .find(([html]) => html.includes('title="Barang lama"'));
+  assert.ok(row);
+  assert.match(row[0], /data-label="STOK SISTEM"><span>20 ML<\/span>/);
+});
+
+test('reopened calendar counts submit the original physical quantities and count date', async () => {
+  for (const [start, end, countedAt] of [
+    ['2026-11-01', '2026-11-30', '2026-11-20'],
+    ['2026-10-01', '2026-10-31', '2026-11-03']
+  ]) {
+    const t = runtime(), p = t.data.state.periods[0];
+    Object.assign(p, {
+      start, end, counted_at: countedAt, status: 'reopened',
+      physical: { 'm:a': 10, 'w:a': 0 },
+      result: [{ key: 'm:a', unit: 'ML', physical: 7 }, { key: 'w:a', unit: 'ML', physical: 5 }]
+    });
+    await t.ui.open('close');
+    assert.equal(t.draft('close').end, countedAt);
+    assert.equal(t.draft('close').counts['m:a'].qty, '10');
+    assert.equal(t.draft('close').counts['w:a'].qty, '0');
+    await t.click('submit');
+    assert.equal(t.writes.length, 1);
+    assert.equal(t.writes[0].input.month, start);
+    assert.equal(t.writes[0].input.date, countedAt);
+    assert.deepEqual(t.writes[0].input.counts, { 'm:a': { qty: '10', unit: 'ML' }, 'w:a': { qty: '0', unit: 'ML' } });
+  }
+});
+
+test('correction draft recovery fixes its date without discarding entered counts', async () => {
+  const t = runtime(), p = t.data.state.periods[0];
+  Object.assign(p, {
+    end: '2026-11-30', counted_at: '2026-11-20', status: 'reopened',
+    physical: { 'm:a': 10, 'w:a': 0 },
+    result: [{ key: 'm:a', unit: 'ML', physical: 7 }, { key: 'w:a', unit: 'ML', physical: 5 }]
+  });
+  const draft = { kind: 'close', request: 'correction', basePeriod: p.id, end: p.end, counts: { 'm:a': { qty: '42', unit: 'ML' }, 'w:a': { qty: '', unit: 'ML' } } };
+  t.seedDraft(draft);
+  await t.ui.open('close');
+  assert.equal(t.draft('close').end, p.counted_at);
+  assert.equal(t.draft('close').counts['m:a'].qty, '42');
+  assert.equal(t.draft('close').counts['w:a'].qty, '0');
+  p.counted_at = '2026-11-21';
+  await t.click('refresh');
+  assert.equal(t.draft('close').end, p.counted_at);
+  assert.equal(t.draft('close').counts['m:a'].qty, '42');
+  t.seedDraft(draft);
+  await t.click('restore');
+  assert.equal(t.draft('close').end, p.counted_at);
+  assert.equal(t.draft('close').counts['m:a'].qty, '42');
+  assert.equal(t.draft('close').counts['w:a'].qty, '0');
+});
+
 
 test('Stock Opname close targets the month selected in the navigator', async () => {
   const t = runtime();
