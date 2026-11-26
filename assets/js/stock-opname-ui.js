@@ -744,14 +744,35 @@ ${transactionActions}
     const key=el.dataset.soItemKey;form.expenseItems=expenseItems().filter(item=>item!==key);
     delete form.counts[key];delete form.mapping[key];form.touched=true;snapshot();expensePart='expense-remove';return;
    }
-   if(name==='receipt-add'&&form?.kind==='receipt'){
-    const key=el.dataset.soItemKey,row=catalog().find(r=>r.key===key&&r.key.startsWith('m:')&&!r.error);
-    if(row&&!receiptItems().includes(key)){
-     receiptItems().unshift(key);
-     form.counts[key]={...form.counts[key],unit:form.counts[key]?.unit||row.unit};
-     form.touched=true;snapshot();receiptQuery='';
-    }
-    return;
+    if(name==='receipt-add'&&form?.kind==='receipt'){
+     const key=el.dataset.soItemKey,row=catalog().find(r=>r.key===key&&r.key.startsWith('m:')&&!r.error);
+     if(row&&!receiptItems().includes(key)){
+      const first=!receiptItems().length;
+      receiptItems().unshift(key);
+      form.counts[key]={...form.counts[key],unit:form.counts[key]?.unit||row.unit};
+      form.touched=true;snapshot();receiptQuery='';
+      const fields=page()?.querySelector('.so-receipt-reference-fields'),search=fields?.querySelector('.so-receipt-search');
+      if(draftSaved&&search){
+       if(first)fields.querySelector('.so-receipt-extra-item')?.remove();
+       search.insertAdjacentHTML('afterend','<div class="so-receipt-reveal"><div>'+receiptItemHTML(row)+'</div></div>');
+       const reveal=search.nextElementSibling;
+       const searchInput=search.querySelector('[data-so-receipt-search]'),restoreFocus=document.activeElement===el;
+       searchInput.value='';
+       search.querySelector('[data-so-receipt-results]').innerHTML='';
+       search.classList.remove('has-results');
+       if(restoreFocus)searchInput.focus({preventScroll:true});
+       if(root.matchMedia?.('(prefers-reduced-motion: reduce)').matches)reveal.classList.add('is-visible','is-settled');
+       else if(root.requestAnimationFrame){
+        reveal.getBoundingClientRect();
+        root.requestAnimationFrame(()=>{
+         reveal.classList.add('is-visible');
+         root.setTimeout(()=>reveal.classList.add('is-settled'),240);
+        });
+       }else reveal.classList.add('is-visible','is-settled');
+       skipRender=true;
+      }
+     }
+     return;
    }
    if(name==='receipt-remove'&&form?.kind==='receipt'){
     const key=el.dataset.soItemKey;
