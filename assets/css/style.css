@@ -12741,6 +12741,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   opacity: 1;
 }
 #page-stock-opname .so-receipt-search { position: relative; }
+#page-stock-opname .so-receipt-search.has-results { z-index: 32; }
 #page-stock-opname .so-receipt-search-input-wrap {
   position: relative;
   display: flex;
