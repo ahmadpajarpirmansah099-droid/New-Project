@@ -11592,7 +11592,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   max-width: 640px;
   margin: 16px 0;
   padding: 12px;
-  background: var(--ui-surface-soft);
+  background: var(--ui-surface);
   border-radius: var(--ui-radius-control);
 }
 .so-toolbar label { display: grid; gap: 6px; min-width: 0; color: var(--so-muted); font-size: 12px; font-weight: 700; }
@@ -11615,14 +11615,14 @@ button, input, select, textarea { font-family: var(--ui-font); }
 }
 #page-stock-opname input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
 #page-stock-opname input::-webkit-inner-spin-button, #page-stock-opname input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-#page-stock-opname input:disabled, #page-stock-opname select:disabled { background: var(--ui-surface-soft); box-shadow: none; color: var(--so-muted); }
+#page-stock-opname input:disabled, #page-stock-opname select:disabled { background: var(--ui-surface); box-shadow: none; color: var(--so-muted); }
 #page-stock-opname :focus-visible { outline: 2px solid var(--ui-olive); outline-offset: 3px; }
 #page-stock-opname input:focus, #page-stock-opname select:focus { border-color: #858a94; box-shadow: none; }
 #page-stock-opname input:focus-visible, #page-stock-opname select:focus-visible { outline: 2px solid #858a94; outline-offset: 2px; }
 #page-stock-opname button.so-picker-trigger { display: flex; justify-content: space-between; gap: 8px; width: 100%; text-align: left; font-weight: 600; cursor: pointer; user-select: none; -webkit-user-select: none; }
 #page-stock-opname button.so-picker-trigger > span { cursor: pointer; user-select: none; -webkit-user-select: none; }
 .so-picker-trigger span:first-child { min-width: 0; overflow-wrap: anywhere; }
-#page-stock-opname .so-picker-trigger:disabled { background: var(--ui-surface-soft); box-shadow: none; color: var(--so-muted); }
+#page-stock-opname .so-picker-trigger:disabled { background: var(--ui-surface); box-shadow: none; color: var(--so-muted); }
 .so-picker-chevron { width: 8px; height: 8px; flex: 0 0 auto; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); opacity: .7; }
 .so-picker-dialog { position: fixed; width: min(440px,calc(100vw - 32px)); max-width: none; max-height: min(720px,calc(100dvh - 32px)); margin: auto; padding: 0; overflow: hidden; border: 1px solid var(--ui-line); border-radius: var(--ui-radius-dialog); background: var(--ui-surface); color: var(--ui-ink); box-shadow: var(--ui-shadow-overlay); font-family: var(--ui-font); box-sizing: border-box; }
 .so-picker-dialog::backdrop { background: rgba(17,18,37,.48); backdrop-filter: blur(4px); }
@@ -11648,7 +11648,8 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .so-ledger { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .so-ledger th {
   padding: 10px 6px;
-  background: var(--ui-surface-soft);
+  background: var(--ui-surface);
+  border-bottom: 1px solid var(--so-line);
   color: var(--so-muted);
   font-size: 12px;
   font-weight: 700;
@@ -12097,7 +12098,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .so-receipt-search:not(.so-receipt-reference-field) {
   margin: 16px 0;
   padding: 12px;
-  background: var(--ui-surface-soft);
+  background: var(--ui-surface);
   border: 1px solid var(--so-line);
   border-radius: var(--ui-radius-control);
 }
@@ -12846,7 +12847,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 #page-stock-opname .so-receipt-unit-placeholder:disabled {
   justify-content: center;
   width: 100%;
-  background: var(--ui-surface-soft);
+  background: var(--ui-surface);
   color: var(--ui-muted);
   cursor: not-allowed;
 }
@@ -12935,7 +12936,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   input:disabled, textarea:disabled, button:disabled,
   .so-picker-trigger:disabled, .so-unit-dropdown > summary:disabled
 ) {
-  background: var(--ui-surface-soft);
+  background: var(--ui-surface);
   color: var(--ui-muted);
   cursor: not-allowed;
   box-shadow: none;
@@ -13130,7 +13131,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .flt:focus-within > input,
 .flt:focus-within > textarea { border-color: var(--ui-olive); }
 .flt > input:disabled,
-.flt > textarea:disabled { background: var(--ui-surface-soft); color: var(--ui-muted); }
+.flt > textarea:disabled { background: var(--ui-surface); color: var(--ui-muted); }
 .flt:has(> input:disabled) > .flt-label { color: var(--ui-muted); }
 .flt.so-receipt-search-input-wrap { display: flex; }
 @media (prefers-reduced-motion: reduce) {
