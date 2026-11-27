@@ -211,6 +211,19 @@ test('Barang Masuk cleans restored date values and defaults the received date to
   assert.equal(t.page.innerHTML.includes('2026|'), false);
 });
 
+test('resuming a Barang Masuk edit draft keeps the original receipt date', async () => {
+  const t = runtime();
+  t.seedDraft({ id: 'receipt-old', kind: 'receipt', basePeriod: 'period', request: 'req', start: '2026-11-22', end: '2026-11-22', counts: { 'm:a': { qty: '2', unit: 'ML' } }, receiptItems: ['m:a'], mapping: {}, note: '', touched: true });
+  await t.ui.open('receipt');
+  assert.equal(t.draft('receipt').end, '2026-11-22');
+  assert.equal(t.draft('receipt').start, '2026-11-22');
+  await t.click('submit');
+  assert.equal(t.writes.length, 1);
+  assert.equal(t.writes[0].input.id, 'receipt-old');
+  assert.equal(t.writes[0].input.end, '2026-11-22');
+  assert.equal(t.writes[0].input.start, '2026-11-22');
+});
+
 test('receipt, expense, production, and sales forms render with visible in-app date controls', async () => {
   const t = runtime();
   for (const kind of ['receipt', 'expense', 'production', 'sales']) {
