@@ -212,4 +212,48 @@ begin
  end if;
 end $$;
 
+-- A late Move must refresh the destination opening inside periods[target_idx].
+select private.so_mutate('55555555-5555-5555-5555-555555555555',
+ (public.stock_opname_read('55555555-5555-5555-5555-555555555555')->>'revision')::bigint,
+ 'ccccccc1-0000-0000-0000-000000000010','save',
+ jsonb_build_object('type','expense','category','Move','start','2026-11-02','end','2026-11-02',
+  'target','66666666-6666-6666-6666-666666666666',
+  'lines',jsonb_build_array(jsonb_build_object('key','m:a','qty','1','unit','GR')),
+  'mapping',jsonb_build_array(jsonb_build_object('source','m:a','target','m:a'))));
+
+do $$ declare t jsonb; v jsonb;
+begin
+ select payload into t from public.stock_opname_state where division_id='66666666-6666-6666-6666-666666666666';
+ if (t->'periods'->1->'opening'->>'m:a')::numeric is distinct from 19 then
+  raise exception 'Late Move must refresh the target opening in its period: %',t->'periods'->1;
+ end if;
+ if t ? '1' or t ? '0' then
+  raise exception 'Target opening must not be written to a top-level key: %',t;
+ end if;
+ v:=public.stock_opname_read('66666666-6666-6666-6666-666666666666');
+ if (v->'balance'->>'m:a')::numeric is distinct from 22 then
+  raise exception 'Late Move must not double-count the physical count: %',v->'balance';
+ end if;
+end $$;
+
+select private.so_mutate('55555555-5555-5555-5555-555555555555',
+ (public.stock_opname_read('55555555-5555-5555-5555-555555555555')->>'revision')::bigint,
+ 'ccccccc1-0000-0000-0000-000000000011','void',
+ jsonb_build_object('id','ccccccc1-0000-0000-0000-000000000010'));
+
+do $$ declare t jsonb; v jsonb;
+begin
+ select payload into t from public.stock_opname_state where division_id='66666666-6666-6666-6666-666666666666';
+ if (t->'periods'->1->'opening'->>'m:a')::numeric is distinct from 20 then
+  raise exception 'Voiding the late Move must restore the target opening: %',t->'periods'->1;
+ end if;
+ if t ? '1' or t ? '0' then
+  raise exception 'Voiding the late Move left a top-level period key: %',t;
+ end if;
+ v:=public.stock_opname_read('66666666-6666-6666-6666-666666666666');
+ if (v->'balance'->>'m:a')::numeric is distinct from 22 then
+  raise exception 'Voiding the late Move must restore the target balance: %',v->'balance';
+ end if;
+end $$;
+
 rollback;
