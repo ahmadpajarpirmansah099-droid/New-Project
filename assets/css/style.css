@@ -13267,3 +13267,19 @@ html:not([data-desktop-theme="dark"]) {
 #page-stock-opname .so-receipt-reference-form .flt:is(
   :focus-within, .flt--static, :has(> input:not(:placeholder-shown))
 ) > .flt-label { font-size: 9px; }
+/* One-time entrance after the Guest Operational workspace is revealed. */
+@keyframes dashboard-card-entrance {
+  from { opacity: 0; transform: scale(.88); }
+  to { opacity: 1; transform: scale(1); }
+}
+body.dashboard-entrance #page-dashboard > .hero,
+body.dashboard-entrance #page-dashboard > .metrics > .metric {
+  animation: dashboard-card-entrance 480ms cubic-bezier(.34, 1.56, .64, 1) both;
+}
+body.dashboard-entrance #page-dashboard > .metrics > .metric:nth-child(1) { animation-delay: 80ms; }
+body.dashboard-entrance #page-dashboard > .metrics > .metric:nth-child(2) { animation-delay: 150ms; }
+body.dashboard-entrance #page-dashboard > .metrics > .metric:nth-child(3) { animation-delay: 220ms; }
+@media (prefers-reduced-motion: reduce) {
+  body.dashboard-entrance #page-dashboard > .hero,
+  body.dashboard-entrance #page-dashboard > .metrics > .metric { animation: none; }
+}
