@@ -190,14 +190,28 @@ async function initializeWorkspace(event, switchingContext) {
         ':scope > .dashboard-reservations .dashboard-reservation-details, :scope > .dashboard-trend-card'
       )).filter(card => card.getClientRects().length);
       if (cards.length) {
-        const lastCard = cards[cards.length - 1];
+        const railItems = window.matchMedia('(min-width: 900px)').matches &&
+          document.body.classList.contains('desktop-sidebar-collapsed')
+          ? Array.from(document.querySelectorAll('.drawer-nav > .drawer-item, .drawer-nav > .sidebar-mascot'))
+            .filter(item => item.getClientRects().length)
+            .sort((a, b) => Number(getComputedStyle(a).order) - Number(getComputedStyle(b).order))
+          : [];
+        const lastCardDelay = Math.min(cards.length > 1 ? (cards.length - 1) * 70 + 10 : 0, 700);
+        const lastRailDelay = (railItems.length - 1) * 70;
+        const lastItem = lastRailDelay > lastCardDelay ? railItems[railItems.length - 1] : cards[cards.length - 1];
+        const lastAnimation = lastItem === cards[cards.length - 1]
+          ? 'dashboard-card-entrance' : 'dashboard-rail-entrance';
         const finishDashboardEntrance = event => {
-          if (event && (event.target !== lastCard || event.animationName !== 'dashboard-card-entrance')) return;
-          lastCard.removeEventListener('animationend', finishDashboardEntrance);
-          lastCard.removeEventListener('animationcancel', finishDashboardEntrance);
+          if (event && (event.target !== lastItem || event.animationName !== lastAnimation)) return;
+          lastItem.removeEventListener('animationend', finishDashboardEntrance);
+          lastItem.removeEventListener('animationcancel', finishDashboardEntrance);
           cards.forEach(card => {
             card.classList.remove('dashboard-entrance-card');
             card.style.removeProperty('--dashboard-entrance-delay');
+          });
+          railItems.forEach(item => {
+            item.classList.remove('dashboard-entrance-rail-item');
+            item.style.removeProperty('--dashboard-entrance-delay');
           });
           dashboardEntranceCleanup = null;
           document.body.classList.remove('dashboard-entrance');
@@ -207,8 +221,12 @@ async function initializeWorkspace(event, switchingContext) {
           card.style.setProperty('--dashboard-entrance-delay', Math.min(index ? index * 70 + 10 : 0, 700) + 'ms');
           card.classList.add('dashboard-entrance-card');
         });
-        lastCard.addEventListener('animationend', finishDashboardEntrance);
-        lastCard.addEventListener('animationcancel', finishDashboardEntrance);
+        railItems.forEach((item, index) => {
+          item.style.setProperty('--dashboard-entrance-delay', index * 70 + 'ms');
+          item.classList.add('dashboard-entrance-rail-item');
+        });
+        lastItem.addEventListener('animationend', finishDashboardEntrance);
+        lastItem.addEventListener('animationcancel', finishDashboardEntrance);
         document.body.classList.add('dashboard-entrance');
       }
     }
