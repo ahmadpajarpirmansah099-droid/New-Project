@@ -2422,9 +2422,9 @@ button.history-date {
 
 /* SUBTLE DEPTH FOR ADD-GUEST SHEET */
 
-#sheet .field input,
+#sheet .field input:not(:focus),
 #sheet .field select,
-#sheet .field textarea,
+#sheet .field textarea:not(:focus),
 #sheet .pack-control {
   box-shadow:0 2px 5px rgba(17,18,37,.045),0 1px 2px rgba(17,18,37,.035);
 }
@@ -4093,8 +4093,6 @@ body.auth-ready .auth-screen{display:none}
 .auth-input-wrap:focus-within{transform:translateY(-1px)}
 .auth-input-wrap>svg{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:#9998a1;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .auth-input-wrap input{width:100%;min-width:0;padding:0;border:0;outline:0;background:transparent;color:#17172a;font:500 13px 'DM Sans',sans-serif;box-shadow:none}
-.auth-input-wrap input:focus{outline:0;border:0;box-shadow:none}
-.auth-input-wrap:has(input:focus-visible){outline:2px solid var(--ui-olive,#777b61)}
 .auth-input-wrap input:-webkit-autofill,
 .auth-input-wrap input:-webkit-autofill:hover,
 .auth-input-wrap input:-webkit-autofill:focus,
@@ -10792,6 +10790,17 @@ button, input, select, textarea { font-family: var(--ui-font); }
   outline-offset: 3px;
 }
 
+/* Keep one focus stroke on the visible field edge. */
+:is(input, textarea):read-write:focus,
+:is(.auth-input-wrap, .operational-search, .md-search, .wip-search, .menu-search):has(> input:focus) {
+  outline: 2px solid var(--ui-olive);
+  outline-offset: -2px;
+  box-shadow: none;
+}
+:is(.auth-input-wrap, .operational-search, .md-search, .wip-search, .menu-search) > input:focus {
+  outline: none;
+}
+
 /* Login: same entrance motion, readable labels and a stronger grounded surface. */
 .auth-panel {
   border-color: var(--line);
@@ -10804,10 +10813,6 @@ button, input, select, textarea { font-family: var(--ui-font); }
 .auth-form { gap: 12px; }
 .auth-form label { font-size: 13px; }
 .auth-input-wrap { border-color: var(--line); border-radius: var(--ui-radius-control); }
-.auth-input-wrap:focus-within {
-  border-color: var(--ui-olive);
-  box-shadow: 0 0 0 3px rgba(83,104,44,.12);
-}
 .auth-input-wrap input::placeholder { color: #777985; }
 .auth-submit { font-size: 14px; border-radius: var(--ui-radius-control); }
 .auth-message { font-size: 12px; line-height: 1.5; }
@@ -10838,10 +10843,6 @@ button, input, select, textarea { font-family: var(--ui-font); }
   box-shadow: var(--ui-shadow-control);
 }
 .md-search input, .wip-search input, .menu-search input { font-size: 14px; }
-.md-search:focus-within, .wip-search:focus-within, .menu-search:focus-within {
-  border-color: var(--ui-olive);
-  box-shadow: 0 0 0 3px rgba(83,104,44,.12);
-}
 .app-select-option.is-selected, .scope-dropdown-option.is-selected {
   background: var(--lime-soft); color: var(--ink);
 }
@@ -10905,9 +10906,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   background: var(--surface);
   color: var(--ink);
 }
-#sheet .field input:focus, #sheet .field select:focus, #sheet .field textarea:focus,
-.md-field input:focus, .md-field select:focus, .wip-field input:focus,
-.wip-field select:focus, .menu-field input:focus, .menu-field select:focus {
+#sheet .field select:focus, .md-field select:focus, .wip-field select:focus, .menu-field select:focus {
   border-color: var(--ui-olive);
   box-shadow: 0 0 0 3px rgba(83,104,44,.12);
 }
@@ -11616,9 +11615,9 @@ button, input, select, textarea { font-family: var(--ui-font); }
 #page-stock-opname input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
 #page-stock-opname input::-webkit-inner-spin-button, #page-stock-opname input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 #page-stock-opname input:disabled, #page-stock-opname select:disabled { background: var(--ui-surface); box-shadow: none; color: var(--so-muted); }
-#page-stock-opname :focus-visible { outline: 2px solid var(--ui-olive); outline-offset: 3px; }
+#page-stock-opname :focus-visible:not(:where(input:read-write, textarea:read-write)) { outline: 2px solid var(--ui-olive); outline-offset: 3px; }
 #page-stock-opname input:focus, #page-stock-opname select:focus { border-color: #858a94; box-shadow: none; }
-#page-stock-opname input:focus-visible, #page-stock-opname select:focus-visible { outline: 2px solid #858a94; outline-offset: 2px; }
+#page-stock-opname select:focus-visible { outline: 2px solid #858a94; outline-offset: 2px; }
 #page-stock-opname button.so-picker-trigger { display: flex; justify-content: space-between; gap: 8px; width: 100%; text-align: left; font-weight: 600; cursor: pointer; user-select: none; -webkit-user-select: none; }
 #page-stock-opname button.so-picker-trigger > span { cursor: pointer; user-select: none; -webkit-user-select: none; }
 .so-picker-trigger span:first-child { min-width: 0; overflow-wrap: anywhere; }
@@ -12245,10 +12244,6 @@ button, input, select, textarea { font-family: var(--ui-font); }
   font: 700 12px/1.2 var(--ui-font);
   text-align: right;
   font-variant-numeric: tabular-nums;
-}
-.so-layout-ledger .so-physical-input:focus {
-  outline: 2px solid var(--ui-lime-strong, #9bbd48);
-  outline-offset: 1px;
 }
 @media (max-width: 700px) {
   .so-layout-ledger thead th { padding: 5px 2px; }
@@ -12917,7 +12912,7 @@ button, input, select, textarea { font-family: var(--ui-font); }
   color: var(--ui-ink);
 }
 #page-stock-opname .so-receipt-reference-form :is(
-  input, textarea, .so-picker-trigger, .so-unit-dropdown > summary,
+  .so-picker-trigger, .so-unit-dropdown > summary,
   .so-unit-options button, .so-receipt-clear, .so-receipt-search-results button,
   .so-receipt-extra-head button, .so-receipt-reference-footer button
 ):focus-visible {
@@ -12925,8 +12920,6 @@ button, input, select, textarea { font-family: var(--ui-font); }
   outline-offset: 2px;
   box-shadow: none;
 }
-#page-stock-opname .so-receipt-reference-form input:focus:not(:focus-visible),
-#page-stock-opname .so-receipt-reference-form textarea:focus:not(:focus-visible),
 #page-stock-opname .so-receipt-reference-form .so-picker-trigger:focus:not(:focus-visible),
 #page-stock-opname .so-receipt-reference-form .so-unit-dropdown > summary:focus:not(:focus-visible) {
   border-color: var(--ui-olive);
