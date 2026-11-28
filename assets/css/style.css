@@ -13275,6 +13275,16 @@ html:not([data-desktop-theme="dark"]) {
 body.dashboard-entrance #page-dashboard .dashboard-entrance-card {
   animation: dashboard-card-entrance 480ms cubic-bezier(.34, 1.56, .64, 1) var(--dashboard-entrance-delay, 0ms) both;
 }
+@keyframes dashboard-rail-entrance {
+  from { opacity: 0; transform: translateY(10px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (min-width: 900px) {
+  body.dashboard-entrance.desktop-sidebar-collapsed .drawer-nav > .dashboard-entrance-rail-item {
+    animation: dashboard-rail-entrance 480ms cubic-bezier(.34, 1.56, .64, 1) var(--dashboard-entrance-delay, 0ms) both;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  body.dashboard-entrance #page-dashboard .dashboard-entrance-card { animation: none; }
+  body.dashboard-entrance #page-dashboard .dashboard-entrance-card,
+  body.dashboard-entrance.desktop-sidebar-collapsed .drawer-nav > .dashboard-entrance-rail-item { animation: none; }
 }
