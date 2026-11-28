@@ -196,37 +196,36 @@ async function initializeWorkspace(event, switchingContext) {
             .filter(item => item.getClientRects().length)
             .sort((a, b) => Number(getComputedStyle(a).order) - Number(getComputedStyle(b).order))
           : [];
-        const lastCardDelay = Math.min(cards.length > 1 ? (cards.length - 1) * 70 + 10 : 0, 700);
-        const lastRailDelay = (railItems.length - 1) * 70;
-        const lastItem = lastRailDelay > lastCardDelay ? railItems[railItems.length - 1] : cards[cards.length - 1];
-        const lastAnimation = lastItem === cards[cards.length - 1]
+        const entranceItems = [
+          ...cards.map((element, index) => ({
+            element, className: 'dashboard-entrance-card',
+            delay: Math.min(index ? index * 70 + 10 : 0, 700)
+          })),
+          ...railItems.map((element, index) => ({
+            element, className: 'dashboard-entrance-rail-item', delay: index * 70
+          }))
+        ];
+        const last = entranceItems.reduce((latest, item) => item.delay > latest.delay ? item : latest);
+        const lastAnimation = last.className === 'dashboard-entrance-card'
           ? 'dashboard-card-entrance' : 'dashboard-rail-entrance';
         const finishDashboardEntrance = event => {
-          if (event && (event.target !== lastItem || event.animationName !== lastAnimation)) return;
-          lastItem.removeEventListener('animationend', finishDashboardEntrance);
-          lastItem.removeEventListener('animationcancel', finishDashboardEntrance);
-          cards.forEach(card => {
-            card.classList.remove('dashboard-entrance-card');
-            card.style.removeProperty('--dashboard-entrance-delay');
-          });
-          railItems.forEach(item => {
-            item.classList.remove('dashboard-entrance-rail-item');
-            item.style.removeProperty('--dashboard-entrance-delay');
+          if (event && (event.target !== last.element || event.animationName !== lastAnimation)) return;
+          last.element.removeEventListener('animationend', finishDashboardEntrance);
+          last.element.removeEventListener('animationcancel', finishDashboardEntrance);
+          entranceItems.forEach(({ element, className }) => {
+            element.classList.remove(className);
+            element.style.removeProperty('--dashboard-entrance-delay');
           });
           dashboardEntranceCleanup = null;
           document.body.classList.remove('dashboard-entrance');
         };
         dashboardEntranceCleanup = finishDashboardEntrance;
-        cards.forEach((card, index) => {
-          card.style.setProperty('--dashboard-entrance-delay', Math.min(index ? index * 70 + 10 : 0, 700) + 'ms');
-          card.classList.add('dashboard-entrance-card');
+        entranceItems.forEach(({ element, className, delay }) => {
+          element.style.setProperty('--dashboard-entrance-delay', delay + 'ms');
+          element.classList.add(className);
         });
-        railItems.forEach((item, index) => {
-          item.style.setProperty('--dashboard-entrance-delay', index * 70 + 'ms');
-          item.classList.add('dashboard-entrance-rail-item');
-        });
-        lastItem.addEventListener('animationend', finishDashboardEntrance);
-        lastItem.addEventListener('animationcancel', finishDashboardEntrance);
+        last.element.addEventListener('animationend', finishDashboardEntrance);
+        last.element.addEventListener('animationcancel', finishDashboardEntrance);
         document.body.classList.add('dashboard-entrance');
       }
     }
