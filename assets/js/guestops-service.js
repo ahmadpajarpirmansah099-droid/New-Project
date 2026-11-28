@@ -155,16 +155,32 @@
     return load();
   }
 
+  async function loadGuestRows(start, end, generation) {
+    const pageSize = 1000;
+    const rows = [];
+    for (let offset = 0; ; offset += pageSize) {
+      let query = client.from('guests')
+        .select('id,ticket,service_date,guest_name,pack,phone,smoking,status,created_at,resolved_at,seated_at,table_label,reservation_id,updated_at')
+        .eq('workspace_id', workspaceId)
+        .gte('service_date', start);
+      if (end) query = query.lte('service_date', end);
+      const { data, error } = await query
+        .order('created_at', { ascending: true })
+        .order('id', { ascending: true })
+        .range(offset, offset + pageSize - 1);
+      if (error) throw error;
+      await assertWorkspaceSession(generation);
+      rows.push(...(data || []));
+      if (!data || data.length < pageSize) return rows;
+    }
+  }
+
   async function load(options) {
     requireReady();
     const guard = await assertWorkspaceSession();
     const windowStart = loadWindowStart();
-    const [guestResult, reservationResult, settingResult] = await Promise.all([
-      client.from('guests')
-        .select('id,ticket,service_date,guest_name,pack,phone,smoking,status,created_at,resolved_at,seated_at,table_label,reservation_id,updated_at')
-        .eq('workspace_id', workspaceId)
-        .gte('service_date', windowStart)
-        .order('created_at', { ascending: true }),
+    const [guestRows, reservationResult, settingResult] = await Promise.all([
+      loadGuestRows(windowStart, null, guard.generation),
       // The reservation calendar can open any past month, so this table stays
       // unbounded. shortcut: revisit when it passes ~10k rows.
       client.from('reservations')
@@ -179,7 +195,6 @@
         .maybeSingle()
     ]);
 
-    if (guestResult.error) throw guestResult.error;
     if (reservationResult.error) throw reservationResult.error;
     if (settingResult.error) throw settingResult.error;
     await assertWorkspaceSession(guard.generation);
@@ -195,14 +210,14 @@
       .filter(row => row.updated_at)
       .map(row => [row.id, Date.parse(row.updated_at)]));
     if (options?.merge) {
-      versionsFrom(guestResult.data).forEach((value, id) => guestVersions.set(id, value));
+      versionsFrom(guestRows).forEach((value, id) => guestVersions.set(id, value));
       versionsFrom(reservationResult.data).forEach((value, id) => reservationVersions.set(id, value));
     } else {
-      guestVersions = versionsFrom(guestResult.data);
+      guestVersions = versionsFrom(guestRows);
       reservationVersions = versionsFrom(reservationResult.data);
     }
 
-    const guests = (guestResult.data || []).map(mapGuest);
+    const guests = guestRows.map(mapGuest);
     const reservations = (reservationResult.data || []).map(mapReservation);
     const reservationsById = new Map(reservations.map(reservation => [reservation.id, reservation]));
 
@@ -263,25 +278,19 @@
   async function loadRange(start, end) {
     requireReady();
     const guard = await assertWorkspaceSession();
-    const [guestResult, reservationResult] = await Promise.all([
-      client.from('guests')
-        .select('id,ticket,service_date,guest_name,pack,phone,smoking,status,created_at,resolved_at,seated_at,table_label,reservation_id,updated_at')
-        .eq('workspace_id', workspaceId)
-        .gte('service_date', start)
-        .lte('service_date', end)
-        .order('created_at', { ascending: true }),
+    const [guestRows, reservationResult] = await Promise.all([
+      loadGuestRows(start, end, guard.generation),
       client.from('reservations')
         .select('id,code,reservation_date,reservation_time,guest_name,pack,phone,smoking,note,table_label,status,created_at,updated_at')
         .eq('workspace_id', workspaceId)
         .gte('reservation_date', start)
         .lte('reservation_date', end)
     ]);
-    if (guestResult.error) throw guestResult.error;
     if (reservationResult.error) throw reservationResult.error;
     await assertWorkspaceSession(guard.generation);
     markLoadedRange(start, end);
 
-    const guests = (guestResult.data || []).map(mapGuest);
+    const guests = guestRows.map(mapGuest);
     const reservations = (reservationResult.data || []).map(mapReservation);
     const reservationsById = new Map(reservations.map(reservation => [reservation.id, reservation]));
     guests.forEach(guest => {
@@ -292,7 +301,7 @@
       reservation.guestId = guest.id;
     });
 
-    (guestResult.data || []).forEach(row => {
+    guestRows.forEach(row => {
       if (row.updated_at) guestVersions.set(row.id, Date.parse(row.updated_at));
     });
     (reservationResult.data || []).forEach(row => {
