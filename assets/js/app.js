@@ -266,6 +266,9 @@ function go(page) {
   closeQuickMenu();
   document.querySelectorAll('.page').forEach(element => element.classList.remove('active'));
   $('page-' + page).classList.add('active');
+  if (location.hash === '#soCountTable' || location.hash === '#soCountConfirm') {
+    history.replaceState(history.state, '', location.pathname + location.search);
+  }
 
   document.querySelectorAll('.drawer-item').forEach(item => {
     item.classList.toggle('active', item.dataset.page === page);
