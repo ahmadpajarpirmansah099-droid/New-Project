@@ -36,6 +36,12 @@ function createRuntime() {
     gte(column, value) { this.filters.push({ column, gte: value }); return this; }
     lte(column, value) { this.filters.push({ column, lte: value }); return this; }
     order() { return this; }
+    range(start, end) {
+      this.rangeStart = start;
+      this.rangeEnd = end;
+      calls.push({ table: this.table, operation: 'range', start, end });
+      return this;
+    }
     maybeSingle() {
       const data = this.table === 'workspace_memberships' ? { workspace_id: 'workspace-1' } : null;
       return Promise.resolve({ data, error: null });
@@ -59,13 +65,15 @@ function createRuntime() {
       return Promise.resolve({ error: null });
     }
     then(resolve, reject) {
-      const data = (rows[this.table] || []).filter(row => this.filters.every(filter => {
+      let data = (rows[this.table] || []).filter(row => this.filters.every(filter => {
         if (filter.values) return filter.values.includes(row[filter.column]);
         const value = row[filter.column];
         if (filter.gte !== undefined && !(value >= filter.gte)) return false;
         if (filter.lte !== undefined && !(value <= filter.lte)) return false;
         return true;
       }));
+      // Match the database API's 1,000-row response limit for guest reads.
+      if (this.table === 'guests') data = data.slice(this.rangeStart || 0, Math.min((this.rangeEnd ?? 999) + 1, (this.rangeStart || 0) + 1000));
       return Promise.resolve({ data, error: null }).then(resolve, reject);
     }
   }
@@ -390,12 +398,12 @@ test('Only recent guests load by default and older history stays tracked once fe
   rows.guests.push(guestRow('guest-today', dayKey(today)), guestRow('guest-old', oldDay));
 
   const state = await runtime.GuestOpsService.initialize(client, 'workspace-1');
-  assert.deepEqual(state.guests.map(guest => guest.id), ['guest-today']);
+  assert.deepEqual(Array.from(state.guests, guest => guest.id), ['guest-today']);
   assert.equal(runtime.GuestOpsService.covers(dayKey(today), dayKey(today)), true);
   assert.equal(runtime.GuestOpsService.covers(oldDay, oldDay), false);
 
   const older = await runtime.GuestOpsService.loadRange(oldDay, oldDay);
-  assert.deepEqual(older.map(guest => guest.id), ['guest-old']);
+  assert.deepEqual(Array.from(older, guest => guest.id), ['guest-old']);
   assert.equal(runtime.GuestOpsService.covers(oldDay, oldDay), true);
 
   // The 30 s refresh only re-reads the window; fetched history must survive it.
@@ -406,7 +414,35 @@ test('Only recent guests load by default and older history stays tracked once fe
   await runtime.GuestOpsService.persist(state);
 
   const guestUpserts = calls.filter(call => call.table === 'guests' && call.operation === 'upsert');
-  assert.deepEqual(guestUpserts.at(-1).values.map(row => row.id), ['guest-old']);
+  assert.deepEqual(Array.from(guestUpserts.at(-1).values, row => row.id), ['guest-old']);
+});
+
+test('Guest list and date range keep waiting guests past the 1,000-row API limit', async () => {
+  const { runtime, client, rows, calls } = createRuntime();
+  const today = dayKey(new Date());
+  const oldDate = new Date();
+  oldDate.setDate(oldDate.getDate() - 100);
+  const oldDay = dayKey(oldDate);
+  for (let i = 1; i <= 1020; i++) {
+    const row = guestRow('guest-' + String(i).padStart(4, '0'), today);
+    row.ticket = 'WL-' + String(i).padStart(3, '0');
+    rows.guests.push(row);
+  }
+  rows.guests.at(-1).ticket = 'WL-058';
+  rows.guests.push(...Array.from({ length: 1001 }, (_, i) => guestRow('older-' + i, oldDay)));
+
+  const state = await runtime.GuestOpsService.initialize(client, 'workspace-1');
+  assert.equal(state.guests.length, 1020);
+  assert.equal(state.guests.at(-1).ticket, 'WL-058');
+  assert.deepEqual(calls.filter(call => call.table === 'guests' && call.operation === 'range').map(call => call.start), [0, 1000]);
+
+  const older = await runtime.GuestOpsService.loadRange(oldDay, oldDay);
+  assert.equal(older.length, 1001);
+  assert.deepEqual(calls.filter(call => call.table === 'guests' && call.operation === 'range').map(call => call.start), [0, 1000, 0, 1000]);
+
+  const refreshed = await runtime.GuestOpsService.load({ merge: true });
+  assert.equal(refreshed.guests.length, 1020);
+  assert.equal(refreshed.guests.at(-1).ticket, 'WL-058');
 });
 
 test('Guest Operations blocks initialization when auth context points to another workspace', async () => {
