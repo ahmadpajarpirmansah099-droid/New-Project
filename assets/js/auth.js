@@ -13,6 +13,24 @@
   // Keep activation errors visible even if a delayed SIGNED_OUT event arrives.
   let persistentLoginMessage = '';
 
+  const developerOutletKey = (userId) => 'guestops_dev_outlet:' + userId;
+  function savedDeveloperOutlet(userId, workspaces) {
+    try {
+      const savedId = window.sessionStorage.getItem(developerOutletKey(userId));
+      return workspaces.some((workspace) => workspace.id === savedId) ? savedId : null;
+    } catch { return null; }
+  }
+  function rememberDeveloperOutlet(context) {
+    if (!context?.isGlobalDeveloper) return;
+    try { window.sessionStorage.setItem(developerOutletKey(context.userId), context.workspaceId); }
+    catch { /* The current outlet still works when browser storage is unavailable. */ }
+  }
+  function forgetDeveloperOutlet(userId) {
+    if (!userId) return;
+    try { window.sessionStorage.removeItem(developerOutletKey(userId)); }
+    catch { /* Signing out must still work when browser storage is unavailable. */ }
+  }
+
   function setMessage(message, type) {
     const element = $('authMessage');
     if (!element) return;
@@ -215,7 +233,9 @@
       if(workspaceError||!data){await supabaseClient.auth.signOut({ scope: 'local' });showLogin('Outlet akun belum dapat dimuat. Hubungi Developer.');return;}
       workspaces=[data];
     }
-    const selectedWorkspaceId=memberships?.[0]?.workspace_id||workspaces[0].id;
+    const defaultWorkspaceId=memberships?.[0]?.workspace_id||workspaces[0].id;
+    const selectedWorkspaceId=profile.role==='developer'
+      ? savedDeveloperOutlet(userId,workspaces)||defaultWorkspaceId : defaultWorkspaceId;
     let nextContext;
     try{nextContext=await buildWorkspaceContext(userId,session.user.email||'',profile,workspaces,selectedWorkspaceId,null,isCurrent);}
     catch(contextError){await supabaseClient.auth.signOut({ scope: 'local' });showLogin(contextError.message||'Workspace akun belum dapat dimuat.');return;}
@@ -251,6 +271,7 @@
         activeUserId !== expectedUserId || authContext?.workspaceId !== expectedWorkspaceId) return false;
     document.body.classList.remove('auth-locked', 'workspace-switching');
     document.body.classList.add('auth-ready');
+    rememberDeveloperOutlet(authContext);
     setLoading(false);
     setMessage('');
     return true;
@@ -397,6 +418,7 @@
     if (logoutInProgress || !(await confirmLogout())) return;
     logoutInProgress = true;
     setLogoutLoading(true);
+    forgetDeveloperOutlet(activeUserId);
     try {
       try {
         await supabaseClient.rpc('end_user_monitoring_session');
