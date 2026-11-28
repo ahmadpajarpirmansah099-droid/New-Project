@@ -181,20 +181,36 @@ async function initializeWorkspace(event, switchingContext) {
     const revealed=await window.AppAuth.markReady(authContext.userId,authContext.workspaceId);
     if(!isCurrent()) return;
     if(!revealed) throw new Error('Sesi akun berubah sebelum workspace selesai dimuat.');
-    const lastDashboardCard = $('page-dashboard')?.querySelector('.metrics > .metric:last-child');
-    if ($('page-dashboard')?.classList.contains('active') && lastDashboardCard &&
+    if ($('page-dashboard')?.classList.contains('active') &&
         !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      const finishDashboardEntrance = event => {
-        if (event && (event.target !== lastDashboardCard || event.animationName !== 'dashboard-card-entrance')) return;
-        lastDashboardCard.removeEventListener('animationend', finishDashboardEntrance);
-        lastDashboardCard.removeEventListener('animationcancel', finishDashboardEntrance);
-        dashboardEntranceCleanup = null;
-        document.body.classList.remove('dashboard-entrance');
-      };
-      dashboardEntranceCleanup = finishDashboardEntrance;
-      lastDashboardCard.addEventListener('animationend', finishDashboardEntrance);
-      lastDashboardCard.addEventListener('animationcancel', finishDashboardEntrance);
-      document.body.classList.add('dashboard-entrance');
+      const cards = Array.from($('page-dashboard').querySelectorAll(
+        ':scope > .hero, :scope > .metrics > .metric, :scope > #pendingWrap .pending, ' +
+        ':scope > #dashboardList > .guest, :scope > #dashboardList > .empty, ' +
+        ':scope > .dashboard-reservations .dashboard-reservation-calendar-panel, ' +
+        ':scope > .dashboard-reservations .dashboard-reservation-details, :scope > .dashboard-trend-card'
+      )).filter(card => card.getClientRects().length);
+      if (cards.length) {
+        const lastCard = cards[cards.length - 1];
+        const finishDashboardEntrance = event => {
+          if (event && (event.target !== lastCard || event.animationName !== 'dashboard-card-entrance')) return;
+          lastCard.removeEventListener('animationend', finishDashboardEntrance);
+          lastCard.removeEventListener('animationcancel', finishDashboardEntrance);
+          cards.forEach(card => {
+            card.classList.remove('dashboard-entrance-card');
+            card.style.removeProperty('--dashboard-entrance-delay');
+          });
+          dashboardEntranceCleanup = null;
+          document.body.classList.remove('dashboard-entrance');
+        };
+        dashboardEntranceCleanup = finishDashboardEntrance;
+        cards.forEach((card, index) => {
+          card.style.setProperty('--dashboard-entrance-delay', Math.min(index ? index * 70 + 10 : 0, 700) + 'ms');
+          card.classList.add('dashboard-entrance-card');
+        });
+        lastCard.addEventListener('animationend', finishDashboardEntrance);
+        lastCard.addEventListener('animationcancel', finishDashboardEntrance);
+        document.body.classList.add('dashboard-entrance');
+      }
     }
     appDataReady=true; appInitializing=false;
   } catch(error) {
