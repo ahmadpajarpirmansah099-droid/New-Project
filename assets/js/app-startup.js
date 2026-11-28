@@ -29,6 +29,7 @@ function clearSessionIntervals() {
 }
 
 function resetWorkspaceRuntime() {
+  document.body.classList.remove('dashboard-entrance');
   state = loadState();
   remoteSaveQueue = Promise.resolve();
   window.GuestOpsService?.reset();
@@ -178,6 +179,10 @@ async function initializeWorkspace(event, switchingContext) {
     const revealed=await window.AppAuth.markReady(authContext.userId,authContext.workspaceId);
     if(!isCurrent()) return;
     if(!revealed) throw new Error('Sesi akun berubah sebelum workspace selesai dimuat.');
+    if ($('page-dashboard')?.classList.contains('active') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.body.classList.add('dashboard-entrance');
+      window.setTimeout(() => document.body.classList.remove('dashboard-entrance'), 900);
+    }
     appDataReady=true; appInitializing=false;
   } catch(error) {
     if(!isCurrent()) return;
