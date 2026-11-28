@@ -14,6 +14,7 @@ let seatingCountdownInterval = null;
 let guestRefreshBusy = false;
 let guestRefreshToken = 0;
 let workspaceReturnPage = null;
+let dashboardEntranceCleanup = null;
 
 function clearSessionIntervals() {
   if (guestRefreshInterval !== null) {
@@ -29,6 +30,7 @@ function clearSessionIntervals() {
 }
 
 function resetWorkspaceRuntime() {
+  dashboardEntranceCleanup?.();
   document.body.classList.remove('dashboard-entrance');
   state = loadState();
   remoteSaveQueue = Promise.resolve();
@@ -179,9 +181,20 @@ async function initializeWorkspace(event, switchingContext) {
     const revealed=await window.AppAuth.markReady(authContext.userId,authContext.workspaceId);
     if(!isCurrent()) return;
     if(!revealed) throw new Error('Sesi akun berubah sebelum workspace selesai dimuat.');
-    if ($('page-dashboard')?.classList.contains('active') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const lastDashboardCard = $('page-dashboard')?.querySelector('.metrics > .metric:last-child');
+    if ($('page-dashboard')?.classList.contains('active') && lastDashboardCard &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const finishDashboardEntrance = event => {
+        if (event && (event.target !== lastDashboardCard || event.animationName !== 'dashboard-card-entrance')) return;
+        lastDashboardCard.removeEventListener('animationend', finishDashboardEntrance);
+        lastDashboardCard.removeEventListener('animationcancel', finishDashboardEntrance);
+        dashboardEntranceCleanup = null;
+        document.body.classList.remove('dashboard-entrance');
+      };
+      dashboardEntranceCleanup = finishDashboardEntrance;
+      lastDashboardCard.addEventListener('animationend', finishDashboardEntrance);
+      lastDashboardCard.addEventListener('animationcancel', finishDashboardEntrance);
       document.body.classList.add('dashboard-entrance');
-      window.setTimeout(() => document.body.classList.remove('dashboard-entrance'), 900);
     }
     appDataReady=true; appInitializing=false;
   } catch(error) {
