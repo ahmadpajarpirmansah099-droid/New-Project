@@ -70,3 +70,10 @@ tests/                     Tes regresi frontend dan SQL
 - Kredensial istimewa harus disimpan sebagai environment secret dan hanya dibaca oleh kode server, misalnya Supabase Edge Functions melalui `Deno.env.get(...)`.
 - Tes `tests/frontend-security.test.js` memeriksa pola kredensial istimewa umum pada HTML utama dan modul JavaScript frontend. Pemeriksaan ini merupakan pagar regresi, bukan pengganti audit keamanan menyeluruh.
 - Jangan memasukkan token, kata sandi, kredensial, URL yang memuat kredensial, atau data pengguna ke README, log, maupun commit publik.
+
+## SOP sebelum publikasi
+
+1. **Siapkan bahan aman:** gunakan data contoh sintetis untuk dokumentasi, pengujian, dan tangkapan layar. Jangan masukkan identitas atau aktivitas pelanggan/karyawan, angka operasional nyata, kata sandi, token, atau kunci privat ke repo, termasuk README, `docs/`, gambar, dan HTML tersemat.
+2. **Simpan rahasia di sisi server:** gunakan secret lingkungan pada layanan server; jangan taruh nilainya di frontend, konfigurasi yang di-commit, log, atau pesan review. Kunci publik untuk browser tetap harus dibatasi oleh autentikasi dan izin database.
+3. **Periksa sebelum commit dan deploy:** tinjau seluruh perubahan teks dan aset biner, terutama gambar serta data yang disematkan dalam HTML. Pastikan hanya berkas yang memang aman untuk publik yang ikut artefak Pages; tes otomatis bukan pengganti pemeriksaan manual.
+4. **Jika terlanjur terpublikasi:** hentikan publikasi lanjutan, cabut atau rotasi kredensial terkait, ganti aset/data yang terpapar, dan koordinasikan pembersihan riwayat repo serta cache dengan pemilik layanan. Jangan salin nilai sensitif ke laporan insiden publik.
